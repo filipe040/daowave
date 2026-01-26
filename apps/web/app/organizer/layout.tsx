@@ -1,0 +1,98 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import OrganizerSidebar from "./components/sidebar";
+import OrganizerHeader from "./components/header";
+import { Providers } from "../providers";
+
+export default async function OrganizerLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/auth/signin?from=/organizer");
+  }
+
+  // Check if user is organizer or admin
+  if (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN") {
+    redirect("/");
+  }
+
+  // Get organizer profile
+  const organizerProfile = await prisma.organizerProfile.findUnique({
+    where: { userId: session.user.id },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // If no profile exists, create one (for admin users accessing organizer area)
+  if (!organizerProfile && session.user.role === "ADMIN") {
+    // Admin can access but won't have a profile - handle in UI
+  }
+
+  // If organizer but no profile or not approved
+  if (session.user.role === "ORGANIZER" && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
+        <div className="flex min-h-screen items-center justify-center px-4">
+          <div className="w-full max-w-md text-center">
+            <div className="mb-6 text-6xl opacity-50">
+              {!organizerProfile ? "📝" : organizerProfile.status === "PENDING" ? "⏳" : "❌"}
+            </div>
+            <h2 className="mb-2 text-2xl font-bold">
+              {!organizerProfile
+                ? "Perfil de Promotor Não Criado"
+                : organizerProfile.status === "PENDING"
+                ? "Aguardando Aprovação"
+                : "Acesso Negado"}
+            </h2>
+            <p className="mb-6 text-zinc-400">
+              {!organizerProfile
+                ? "O seu perfil de promotor ainda não foi criado. Contacte o administrador."
+                : organizerProfile.status === "PENDING"
+                ? "O seu perfil está a aguardar aprovação. Será notificado quando for aprovado."
+                : "O seu perfil foi rejeitado. Contacte o administrador para mais informações."}
+            </p>
+            <Link
+              href="/"
+              className="inline-block rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+            >
+              Voltar ao Início
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Providers>
+      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
+        <div className="flex">
+          <OrganizerSidebar />
+          <div className="flex-1 flex flex-col">
+            <OrganizerHeader 
+              organizerName={organizerProfile?.brandName || session.user.name || "Promotor"}
+              userEmail={session.user.email || ""}
+            />
+            <main className="flex-1 p-6 md:p-8 lg:p-10">
+              {children}
+            </main>
+          </div>
+        </div>
+      </div>
+    </Providers>
+  );
+}
+

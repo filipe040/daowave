@@ -1,0 +1,142 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const CouponSchema = z.object({
+  eventId: z.string().uuid(),
+  code: z.string().min(1).max(20).regex(/^[A-Z0-9]+$/, "Apenas letras maiúsculas e números"),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]),
+  discountValue: z.number().positive(),
+  maxUses: z.number().positive().nullable(),
+  startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
+  endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
+}).refine((data) => {
+  if (data.discountType === "PERCENTAGE") {
+    return data.discountValue >= 1 && data.discountValue <= 100;
+  }
+  return true;
+}, {
+  message: "Percentagem deve estar entre 1% e 100%",
+  path: ["discountValue"],
+}).refine((data) => {
+  return new Date(data.endsAt) > new Date(data.startsAt);
+}, {
+  message: "Data de fim deve ser posterior à data de início",
+  path: ["endsAt"],
+});
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ORGANIZER") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const organizer = await prisma.organizerProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!organizer || organizer.status !== "APPROVED") {
+      return NextResponse.json(
+        { error: "Organizer not approved" },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+    const data = CouponSchema.parse(body);
+
+    // Verify event belongs to organizer
+    const event = await prisma.event.findFirst({
+      where: {
+        id: data.eventId,
+        organizerId: organizer.id,
+      },
+    });
+
+    if (!event) {
+      return NextResponse.json(
+        { error: "Event not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    // Check if code already exists
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: { code: data.code },
+    });
+
+    if (existingCoupon) {
+      return NextResponse.json(
+        { error: "Código já existe" },
+        { status: 400 }
+      );
+    }
+
+    const coupon = await prisma.coupon.create({
+      data: {
+        eventId: data.eventId,
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        maxUses: data.maxUses,
+        startsAt: new Date(data.startsAt),
+        endsAt: new Date(data.endsAt),
+      },
+    });
+
+    return NextResponse.json({ success: true, coupon });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    console.error("Error creating coupon:", error);
+    return NextResponse.json(
+      { error: "Failed to create coupon" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ORGANIZER") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const organizer = await prisma.organizerProfile.findUnique({
+    where: { userId: session.user.id },
+  });
+
+  if (!organizer) {
+    return NextResponse.json({ error: "Organizer not found" }, { status: 404 });
+  }
+
+  const coupons = await prisma.coupon.findMany({
+    where: {
+      event: {
+        organizerId: organizer.id,
+      },
+    },
+    include: {
+      event: {
+        select: {
+          title: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json({ coupons });
+}
+

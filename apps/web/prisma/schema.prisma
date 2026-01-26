@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                              String    @id @default(uuid())
+  name                            String?
+  email                           String    @unique
+  passwordHash                    String
+  role                            Role      @default(USER)
+  emailVerified                   Boolean   @default(false)
+  emailVerificationToken          String?   @unique
+  emailVerificationTokenExpiresAt DateTime?
+  createdAt                       DateTime  @default(now())
+  
+  orders       Order[]
+  tickets      Ticket[]
+  promoterProfile PromoterProfile?
+  
+  @@index([email])
+  @@index([emailVerificationToken])
+}
+
+model PromoterProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  companyName String
+  vat         String?
+  contactEmail String?
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events      Event[]
+  
+  @@index([userId])
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  promoterId  String
+  title       String
+  slug        String       @unique
+  description String
+  venue       String
+  city        String
+  startAt     DateTime
+  endAt       DateTime
+  coverImage  String?
+  status      EventStatus  @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  
+  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  ticketLots   TicketLot[]
+  orders      Order[]
+  tickets     Ticket[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([promoterId])
+}
+
+model TicketLot {
+  id            String   @id @default(uuid())
+  eventId       String
+  name          String
+  priceCents    Int
+  currency      String   @default("EUR")
+  quantityTotal Int
+  quantitySold  Int      @default(0)
+  saleStartAt   DateTime
+  saleEndAt     DateTime
+  createdAt     DateTime @default(now())
+  
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orderItems     OrderItem[]
+  tickets       Ticket[]
+  
+  @@index([eventId])
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  userId         String
+  eventId        String
+  totalCents      Int
+  currency        String      @default("EUR")
+  status          OrderStatus @default(PENDING)
+  paymentProvider String?
+  paymentRef      String?
+  createdAt       DateTime    @default(now())
+  
+  user            User        @relation(fields: [userId], references: [id])
+  event           Event       @relation(fields: [eventId], references: [id])
+  items           OrderItem[]
+  tickets         Ticket[]
+  
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+  @@index([paymentRef])
+}
+
+model OrderItem {
+  id          String    @id @default(uuid())
+  orderId     String
+  ticketLotId String
+  quantity    Int
+  unitPriceCents Int
+  
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketLot   TicketLot @relation(fields: [ticketLotId], references: [id])
+  
+  @@index([orderId])
+}
+
+model Ticket {
+  id          String   @id @default(uuid())
+  orderId     String
+  eventId     String
+  userId      String
+  ticketLotId String
+  code        String   @unique
+  qrPayload   String
+  checkedInAt DateTime?
+  checkedInByUserId String?
+  createdAt   DateTime @default(now())
+  
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event       Event    @relation(fields: [eventId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  ticketLot   TicketLot @relation(fields: [ticketLotId], references: [id])
+  
+  @@index([orderId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([ticketLotId])
+  @@index([code])
+}
+
+model EmailLog {
+  id                String    @id @default(uuid())
+  to                String
+  subject           String
+  template          String?
+  type              String?
+  status            String    @default("PENDING")
+  sentAt            DateTime?
+  error             String?
+  retryCount        Int       @default(0)
+  providerMessageId String?
+  relatedOrderId    String?
+  relatedTicketId   String?
+  relatedUserId     String?
+  meta              Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([to])
+  @@index([status])
+  @@index([createdAt])
+  @@index([type])
+  @@index([relatedOrderId])
+  @@index([relatedUserId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String?
+  metaJson    Json?
+  createdAt   DateTime @default(now())
+  
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+enum Role {
+  USER
+  PROMOTER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+}
