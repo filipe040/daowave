@@ -12,13 +12,13 @@ export default async function AdminDashboard() {
     totalOrders,
     totalRevenue,
   ] = await Promise.all([
-    prisma.organizerProfile.count({ where: { status: "PENDING" } }),
+    prisma.promoterProfile.count({ where: { status: "PENDING" } }),
     prisma.event.count({
       where: {
         status: "DRAFT",
-        organizer: {
+        promoter: {
           user: {
-            role: "ORGANIZER",
+            role: "PROMOTER",
           },
         },
       },
@@ -26,13 +26,13 @@ export default async function AdminDashboard() {
     prisma.event.count(),
     prisma.event.count({ where: { status: "PUBLISHED" } }),
     prisma.order.count({ where: { status: "PAID" } }),
-    prisma.order.aggregate({
-      where: { status: "PAID" },
-      _sum: { total: true },
-    }),
-  ]);
+     prisma.order.aggregate({
+       where: { status: "PAID" },
+       _sum: { totalCents: true },
+     }),
+   ]);
 
-  const revenue = totalRevenue._sum.total || 0;
+   const revenue = totalRevenue._sum.totalCents || 0;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">

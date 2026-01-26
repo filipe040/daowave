@@ -26,7 +26,7 @@ export async function POST(
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
-        organizerProfile: true,
+        promoterProfile: true,
       },
     });
 
@@ -35,7 +35,7 @@ export async function POST(
     }
 
     // Check if already organizer
-    if (user.role === "ORGANIZER") {
+    if (user.role === "PROMOTER") {
       return NextResponse.json(
         { error: "Usuário já é promotor" },
         { status: 400 }
@@ -50,23 +50,23 @@ export async function POST(
       );
     }
 
-    // Update user role to ORGANIZER
+    // Update user role to PROMOTER
     await prisma.user.update({
       where: { id },
-      data: { role: "ORGANIZER" },
+      data: { role: "PROMOTER" },
     });
 
     // Create or update organizer profile
-    if (user.organizerProfile) {
-      await prisma.organizerProfile.update({
-        where: { id: user.organizerProfile.id },
+    if (user.promoterProfile) {
+      await prisma.promoterProfile.update({
+        where: { id: user.promoterProfile.id },
         data: {
           brandName,
           status: "APPROVED", // Auto-approve when promoted by admin
         },
       });
     } else {
-      await prisma.organizerProfile.create({
+      await prisma.promoterProfile.create({
         data: {
           userId: id,
           brandName,

@@ -215,7 +215,7 @@ export default async function Home({
                     </div>
                     <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-zinc-800 gap-2">
                       <div className="text-xs sm:text-sm md:text-base text-zinc-500 truncate uppercase">
-                        {event.promoter?.companyName || "Promoter"}
+                        {event.promoter?.brandName || "Promoter"}
                       </div>
                       <span className="text-pink-400 font-semibold group-hover:text-pink-300 transition text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 uppercase">
                         View Details

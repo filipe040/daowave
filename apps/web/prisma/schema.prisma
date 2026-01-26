@@ -18,21 +18,31 @@ model User {
   emailVerificationTokenExpiresAt DateTime?
   createdAt                       DateTime  @default(now())
   
-  orders       Order[]
-  tickets      Ticket[]
-  promoterProfile PromoterProfile?
+  orders              Order[]
+  tickets             Ticket[]
+  promoterProfile      PromoterProfile?
+  validatorCheckins    CheckinLog[]      @relation("ValidatorCheckins")
+  transferFromUser     TransferLog[]      @relation("TransferFromUser")
+  transferToUser       TransferLog[]      @relation("TransferToUser")
   
   @@index([email])
   @@index([emailVerificationToken])
 }
 
+enum OrganizerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model PromoterProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  companyName String
-  vat         String?
+  id          String          @id @default(uuid())
+  userId      String          @unique
+  brandName   String
+  vatNumber   String?
+  status      OrganizerStatus @default(PENDING)
   contactEmail String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime        @default(now())
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   events      Event[]
@@ -58,6 +68,7 @@ model Event {
   ticketLots   TicketLot[]
   orders      Order[]
   tickets     Ticket[]
+  checkinLogs CheckinLog[]
   
   @@index([slug])
   @@index([status])
@@ -130,10 +141,13 @@ model Ticket {
   checkedInByUserId String?
   createdAt   DateTime @default(now())
   
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  event       Event    @relation(fields: [eventId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
-  ticketLot   TicketLot @relation(fields: [ticketLotId], references: [id])
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event         Event        @relation(fields: [eventId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  ticketLot     TicketLot    @relation(fields: [ticketLotId], references: [id])
+  checkinLogs   CheckinLog[]
+  transferFrom  TransferLog?  @relation("TransferFrom")
+  transferTo    TransferLog?  @relation("TransferTo")
   
   @@index([orderId])
   @@index([eventId])
@@ -197,4 +211,45 @@ enum OrderStatus {
   PENDING
   PAID
   CANCELED
+}
+
+model CheckinLog {
+  id              String   @id @default(uuid())
+  ticketId        String
+  eventId         String
+  validatorUserId String
+  deviceId        String?
+  result          String
+  scannedAt       DateTime @default(now())
+  rawPayloadHash  String
+  offline         Boolean  @default(false)
+  syncedAt        DateTime?
+  
+  ticket          Ticket   @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  validator       User     @relation("ValidatorCheckins", fields: [validatorUserId], references: [id], onDelete: Restrict)
+  
+  @@index([ticketId])
+  @@index([eventId])
+  @@index([scannedAt])
+  @@index([validatorUserId])
+  @@index([offline, syncedAt])
+}
+
+model TransferLog {
+  id           String   @id @default(uuid())
+  fromTicketId String   @unique
+  toTicketId   String   @unique
+  fromUserId   String
+  toUserId     String
+  toEmail      String
+  createdAt    DateTime @default(now())
+  
+  fromTicket   Ticket   @relation("TransferFrom", fields: [fromTicketId], references: [id], onDelete: Restrict)
+  toTicket     Ticket   @relation("TransferTo", fields: [toTicketId], references: [id], onDelete: Restrict)
+  fromUser     User     @relation("TransferFromUser", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUser       User     @relation("TransferToUser", fields: [toUserId], references: [id], onDelete: Restrict)
+  
+  @@index([fromUserId])
+  @@index([toUserId])
 }

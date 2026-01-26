@@ -16,11 +16,11 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN") {
+    if (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const organizerProfile = await prisma.organizerProfile.findUnique({
+    const organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -35,7 +35,7 @@ export async function PUT(req: Request) {
     const data = UpdateAccountSchema.parse(body);
 
     // Update organizer profile
-    await prisma.organizerProfile.update({
+    await prisma.promoterProfile.update({
       where: { id: organizerProfile.id },
       data: {
         brandName: data.brandName,

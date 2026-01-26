@@ -17,7 +17,7 @@ if (fs.existsSync(rootEnv)) {
 }
 
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function testAuth(email, password) {

@@ -9,7 +9,7 @@ interface PageProps {
 export default async function OrganizerDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  const organizer = await prisma.organizerProfile.findUnique({
+  const organizer = await prisma.promoterProfile.findUnique({
     where: { id },
     include: {
       user: {
@@ -128,7 +128,7 @@ export default async function OrganizerDetailPage({ params }: PageProps) {
         <div className="lg:col-span-1">
           <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-zinc-700/50 shadow-lg sticky top-4">
             <h2 className="text-xl md:text-2xl font-semibold mb-6">Ações</h2>
-            <ApproveRejectForm organizerId={id} currentStatus={organizer.status} />
+            <ApproveRejectForm promoterId={id} currentStatus={organizer.status} />
           </div>
         </div>
       </div>

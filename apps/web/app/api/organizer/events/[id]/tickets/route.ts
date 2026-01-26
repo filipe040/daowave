@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN")) {
+  if (!session || (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -17,8 +17,8 @@ export async function GET(
 
   // For admins, skip organizer profile check
   let organizerProfile = null;
-  if (session.user.role === "ORGANIZER") {
-    organizerProfile = await prisma.organizerProfile.findUnique({
+  if (session.user.role === "PROMOTER") {
+    organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -30,13 +30,8 @@ export async function GET(
   const event = await prisma.event.findUnique({
     where: { id },
     include: {
-      ticketTypes: {
-        include: {
-          lots: {
-            orderBy: { startsAt: "asc" },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+      ticketLots: {
+        orderBy: { saleStartAt: "asc" },
       },
     },
   });
@@ -46,10 +41,10 @@ export async function GET(
   }
 
   // Verify ownership (admins can access any event)
-  if (session.user.role !== "ADMIN" && organizerProfile && event.organizerId !== organizerProfile.id) {
+  if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  return NextResponse.json({ ticketTypes: event.ticketTypes });
+  return NextResponse.json({ ticketLots: event.ticketLots });
 }
 

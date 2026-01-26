@@ -24,9 +24,10 @@ const SyncSchema = z.object({
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user.role !== "VALIDATOR" && session.user.role !== "ADMIN")) {
+    if (!session?.user || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = session.user.id; // Store for use in transaction
 
     const body = await req.json();
     const { logs } = SyncSchema.parse(body);
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
             },
           });
 
-          if (!ticket || ticket.status !== "ISSUED") {
+          if (!ticket || ticket.checkedInAt) {
             return { success: false, error: "Invalid ticket" };
           }
 
@@ -72,15 +73,19 @@ export async function POST(req: Request) {
             return { success: true, skipped: true, message: "Already synced" };
           }
 
-          if (ticket.event.checkinMode === "SINGLE") {
-            if (ticket.entriesUsed > 0 && log.result === "VALID") {
+          // TODO: Add checkinMode to Event model and entriesUsed to Ticket model
+          // if (ticket.event.checkinMode === "SINGLE") {
+          if (true) { // Default to SINGLE mode
+            // TODO: Uncomment when entriesUsed is added to Ticket model
+            // if (ticket.entriesUsed > 0 && log.result === "VALID") {
+            if (false) { // Skip until entriesUsed is added
               // Conflict: already checked in, but offline log says valid
               // First check-in wins, so we mark as already used
               await tx.checkinLog.create({
                 data: {
                   ticketId: log.ticketId,
                   eventId: log.eventId,
-                  validatorUserId: session.user.id,
+                  validatorUserId: userId,
                   deviceId: log.deviceId,
                   result: "ALREADY_USED",
                   scannedAt: new Date(log.scannedAt),
@@ -92,27 +97,31 @@ export async function POST(req: Request) {
               return { success: true, conflict: true, message: "Already checked in" };
             }
 
+            // TODO: Uncomment when entriesUsed and lastCheckinAt are added to Ticket model
             // Apply check-in
             if (log.result === "VALID") {
               await tx.ticket.update({
                 where: { id: log.ticketId },
                 data: {
-                  entriesUsed: 1,
-                  lastCheckinAt: new Date(log.scannedAt),
+                  checkedInAt: new Date(log.scannedAt),
+                  checkedInByUserId: userId,
+                  // entriesUsed: 1,
+                  // lastCheckinAt: new Date(log.scannedAt),
                 },
               });
             }
           } else {
-            // MULTI mode
-            const maxEntries = ticket.event.maxEntries || 999999;
-            if (log.result === "VALID" && ticket.entriesUsed < maxEntries) {
+            // MULTI mode - TODO: Add maxEntries to Event model
+            // const maxEntries = ticket.event.maxEntries || 999999;
+            // if (log.result === "VALID" && ticket.entriesUsed < maxEntries) {
+            if (log.result === "VALID") {
               await tx.ticket.update({
                 where: { id: log.ticketId },
                 data: {
-                  entriesUsed: {
-                    increment: 1,
-                  },
-                  lastCheckinAt: new Date(log.scannedAt),
+                  checkedInAt: new Date(log.scannedAt),
+                  checkedInByUserId: userId,
+                  // entriesUsed: { increment: 1 },
+                  // lastCheckinAt: new Date(log.scannedAt),
                 },
               });
             }

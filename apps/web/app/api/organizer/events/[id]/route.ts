@@ -18,9 +18,7 @@ const UpdateEventSchema = z.object({
   timezone: z.string().optional(),
   
   // Check-in
-  checkinMode: z.enum(["SINGLE", "MULTI"]).optional(),
-  reentryAllowed: z.boolean().optional(),
-  maxEntries: z.number().int().positive().optional().nullable(),
+  // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
   entryWindowStartAt: z.string().datetime().optional().nullable(),
   entryWindowEndAt: z.string().datetime().optional().nullable(),
   
@@ -86,8 +84,8 @@ export async function GET(
 
     // For admins, skip organizer profile check
     let organizerProfile = null;
-    if (session.user.role === "ORGANIZER") {
-      organizerProfile = await prisma.organizerProfile.findUnique({
+    if (session.user.role === "PROMOTER") {
+      organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
 
@@ -102,14 +100,10 @@ export async function GET(
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        ticketTypes: {
-          include: {
-            lots: true,
-          },
-        },
+        ticketLots: true,
         _count: {
           select: {
-            tickets: { where: { status: "ISSUED" } },
+            tickets: true,
             orders: { where: { status: "PAID" } },
           },
         },
@@ -121,7 +115,7 @@ export async function GET(
     }
 
     // Verify ownership (admins can access any event)
-    if (session.user.role !== "ADMIN" && organizerProfile && event.organizerId !== organizerProfile.id) {
+    if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -150,8 +144,8 @@ export async function PUT(
 
     // For admins, skip organizer profile check
     let organizerProfile = null;
-    if (session.user.role === "ORGANIZER") {
-      organizerProfile = await prisma.organizerProfile.findUnique({
+    if (session.user.role === "PROMOTER") {
+      organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
 
@@ -173,7 +167,7 @@ export async function PUT(
     }
 
     // Admins can access any event
-    if (session.user.role !== "ADMIN" && organizerProfile && existingEvent.organizerId !== organizerProfile.id) {
+    if (session.user.role !== "ADMIN" && organizerProfile && existingEvent.promoterId !== organizerProfile.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -206,24 +200,7 @@ export async function PUT(
       }
     }
 
-    // Validate check-in mode rules
-    const checkinMode = data.checkinMode || existingEvent.checkinMode;
-    const reentryAllowed = data.reentryAllowed !== undefined ? data.reentryAllowed : existingEvent.reentryAllowed;
-    const maxEntries = data.maxEntries !== undefined ? data.maxEntries : existingEvent.maxEntries;
-
-    if (checkinMode === "MULTI" && !maxEntries) {
-      return NextResponse.json(
-        { error: "maxEntries é obrigatório para modo MULTI" },
-        { status: 400 }
-      );
-    }
-
-    if (!reentryAllowed && checkinMode === "MULTI") {
-      return NextResponse.json(
-        { error: "Modo MULTI requer reentryAllowed=true" },
-        { status: 400 }
-      );
-    }
+    // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
 
     // Check slug uniqueness if changed
     if (data.slug && data.slug !== existingEvent.slug) {
@@ -251,9 +228,7 @@ export async function PUT(
     if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);
     if (data.endAt !== undefined) updateData.endAt = new Date(data.endAt);
     if (data.timezone !== undefined) updateData.timezone = data.timezone;
-    if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
-    if (data.reentryAllowed !== undefined) updateData.reentryAllowed = data.reentryAllowed;
-    if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
+    // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
     if (data.entryWindowStartAt !== undefined) updateData.entryWindowStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
     if (data.entryWindowEndAt !== undefined) updateData.entryWindowEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
     if (data.capacityTotal !== undefined) updateData.capacityTotal = data.capacityTotal;

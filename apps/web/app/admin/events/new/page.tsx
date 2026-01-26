@@ -12,7 +12,7 @@ export default async function AdminNewEventPage() {
   }
 
   // Get or create admin organizer profile
-  let adminOrganizer = await prisma.organizerProfile.findFirst({
+  let adminOrganizer = await prisma.promoterProfile.findFirst({
     where: {
       user: {
         role: "ADMIN",
@@ -27,19 +27,17 @@ export default async function AdminNewEventPage() {
     });
 
     if (adminUser) {
-      adminOrganizer = await prisma.organizerProfile.create({
+      adminOrganizer = await prisma.promoterProfile.create({
         data: {
           userId: adminUser.id,
           brandName: "7even Tickets Admin",
-          status: "APPROVED",
         },
       });
     }
   }
 
   // Get all approved organizers for selection
-  const approvedOrganizers = await prisma.organizerProfile.findMany({
-    where: { status: "APPROVED" },
+  const approvedOrganizers = await prisma.promoterProfile.findMany({
     include: {
       user: {
         select: {

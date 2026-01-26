@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -35,41 +35,42 @@ export async function POST(req: Request) {
       );
     }
 
+    // TODO: Add passwordResetToken and passwordResetTokenExpiresAt fields to User model
     // Find user by token
-    const user = await prisma.user.findUnique({
-      where: { passwordResetToken: token },
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: { passwordResetToken: token },
+    // });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Token inválido ou expirado" },
-        { status: 400 }
-      );
-    }
+    // if (!user) {
+    //   return NextResponse.json(
+    //     { error: "Token inválido ou expirado" },
+    //     { status: 400 }
+    //   );
+    // }
 
-    if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
-      return NextResponse.json(
-        { error: "Token expirado" },
-        { status: 400 }
-      );
-    }
+    // if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
+    //   return NextResponse.json(
+    //     { error: "Token expirado" },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
     // Update password and invalidate token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        passwordResetToken: null,
-        passwordResetTokenExpiresAt: null,
-      },
-    });
+    // await prisma.user.update({
+    //   where: { id: user.id },
+    //   data: {
+    //     passwordHash: hashedPassword,
+    //     passwordResetToken: null,
+    //     passwordResetTokenExpiresAt: null,
+    //   },
+    // });
 
     return NextResponse.json(
-      { message: "Palavra-passe redefinida com sucesso" },
-      { status: 200 }
+      { error: "Funcionalidade de reset de password não disponível. Campos não existem no schema." },
+      { status: 501 }
     );
   } catch (error) {
     console.error("Error resetting password:", error);

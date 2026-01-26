@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { Role } from "@ticketing-platform/shared";
 import { config } from "./config";
 import { safeLog, getRequestMetadata } from "./security";

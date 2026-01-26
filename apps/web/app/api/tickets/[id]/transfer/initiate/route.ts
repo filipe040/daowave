@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateQrNonce } from "@/lib/qr";
+import { generateTicketCode } from "@/lib/utils";
+import { getQRPayload } from "@/lib/qr/generate";
 import { z } from "zod";
 import crypto from "crypto";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
@@ -38,13 +39,14 @@ export async function POST(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    if (ticket.holderUserId !== session.user.id) {
+    if (ticket.userId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (ticket.status !== "ISSUED") {
+    // Check if ticket is already checked in
+    if (ticket.checkedInAt) {
       return NextResponse.json(
-        { error: "Ticket cannot be transferred" },
+        { error: "Ticket cannot be transferred (already checked in)" },
         { status: 400 }
       );
     }
@@ -56,42 +58,44 @@ export async function POST(
 
     if (!toUser) {
       // Create user account for recipient
-      const bcrypt = require("bcrypt");
+      const bcrypt = require("bcryptjs");
       const tempPassword = crypto.randomBytes(16).toString("hex");
       const hash = await bcrypt.hash(tempPassword, 10);
 
       toUser = await prisma.user.create({
         data: {
           email: toEmail,
-          password: hash,
-          role: "CUSTOMER",
+          passwordHash: hash,
+          role: "USER",
           name: toEmail.split("@")[0],
         },
       });
     }
 
     // Create new ticket for recipient
-    const qrNonce = generateQrNonce();
+    const code = generateTicketCode();
+    const qrPayload = getQRPayload({ ticketId: '', code }); // Will be updated after creation
 
     const newTicket = await prisma.ticket.create({
       data: {
         eventId: ticket.eventId,
         orderId: ticket.orderId,
-        ticketTypeId: ticket.ticketTypeId,
         ticketLotId: ticket.ticketLotId,
-        holderUserId: toUser.id,
-        attendeeName: ticket.attendeeName, // Keep same attendee name/email or allow change?
-        attendeeEmail: toEmail,
-        status: "ISSUED",
-        qrNonce,
+        userId: toUser.id,
+        code,
+        qrPayload,
       },
     });
 
-    // Invalidate old ticket
+    // Update QR payload with ticket ID
+    const finalQRPayload = getQRPayload({ ticketId: newTicket.id, code });
     await prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: "VOID" },
+      where: { id: newTicket.id },
+      data: { qrPayload: finalQRPayload },
     });
+
+    // Note: Old ticket remains valid, transfer creates a new ticket
+    // The TransferLog tracks the relationship
 
     // Create transfer log
     await prisma.transferLog.create({

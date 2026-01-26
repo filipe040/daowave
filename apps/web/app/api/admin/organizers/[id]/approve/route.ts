@@ -16,7 +16,7 @@ export async function POST(
   const { id } = await params;
 
   try {
-    const organizer = await prisma.organizerProfile.update({
+    const organizer = await prisma.promoterProfile.update({
       where: { id },
       data: {
         status: "APPROVED",
@@ -25,7 +25,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, organizer });
   } catch (error) {
-    console.error("Error approving organizer:", error);
+    console.error("Error approving promoter:", error);
     return NextResponse.json(
       { error: "Failed to approve organizer" },
       { status: 500 }

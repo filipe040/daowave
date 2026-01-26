@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sendTemplate } from "@/lib/email-service";
 import { isDisposableEmail } from "@/lib/disposable-email";
 import { checkRegisterRateLimit } from "@/lib/rate-limit-email";

@@ -8,7 +8,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import AppleProvider from 'next-auth/providers/apple';
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -67,6 +67,7 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
+    // TODO: Fix AppleProvider clientSecret type
     ...(process.env.APPLE_ID && process.env.APPLE_SECRET && process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID
       ? [
           AppleProvider({
@@ -76,7 +77,7 @@ export const authOptions: NextAuthOptions = {
               teamId: process.env.APPLE_TEAM_ID,
               keyId: process.env.APPLE_KEY_ID,
               privateKey: process.env.APPLE_SECRET.replace(/\\n/g, '\n'),
-            },
+            } as any, // Type assertion until NextAuth types are updated
           }),
         ]
       : []),

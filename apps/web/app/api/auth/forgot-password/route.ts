@@ -51,35 +51,36 @@ export async function POST(req: Request) {
       );
     }
 
+    // TODO: Add passwordResetToken and passwordResetTokenExpiresAt fields to User model
     // Generate reset token and save to DB
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordResetToken: resetToken,
-        passwordResetTokenExpiresAt: expiresAt,
-      },
-    });
+    // const resetToken = crypto.randomBytes(32).toString("hex");
+    // const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
+    // await prisma.user.update({
+    //   where: { id: user.id },
+    //   data: {
+    //     passwordResetToken: resetToken,
+    //     passwordResetTokenExpiresAt: expiresAt,
+    //   },
+    // });
 
     // Generate reset URL
-    const emailConfig = getEmailConfig();
-    const resetUrl = `${emailConfig.appUrl}/auth/reset-password?token=${resetToken}`;
+    // const emailConfig = getEmailConfig();
+    // const resetUrl = `${emailConfig.appUrl}/auth/reset-password?token=${resetToken}`;
 
+    // TODO: Uncomment when password reset fields are added to User model
     // Send email using EmailService
-    EmailService.sendTemplate({
-      to: user.email,
-      templateId: "reset-password",
-      variables: {
-        name: user.name || "Utilizador",
-        resetUrl,
-        expiresIn: "1 hora",
-      },
-      idempotencyKey: `reset-${user.id}-${Date.now()}`,
-    }).catch((error) => {
-      safeLog.error("Error sending password reset email", error);
-    });
+    // EmailService.sendTemplate({
+    //   to: user.email,
+    //   templateId: "reset-password",
+    //   variables: {
+    //     name: user.name || "Utilizador",
+    //     resetUrl,
+    //     expiresIn: "1 hora",
+    //   },
+    //   idempotencyKey: `reset-${user.id}-${Date.now()}`,
+    // }).catch((error) => {
+    //   safeLog.error("Error sending password reset email", error);
+    // });
 
     // Audit log (only if user exists)
     await createAuditLog({

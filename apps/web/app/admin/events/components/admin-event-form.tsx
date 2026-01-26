@@ -45,7 +45,7 @@ export default function AdminEventForm({ defaultOrganizerId, availableOrganizers
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
-    organizerId: defaultOrganizerId || "",
+    promoterId: defaultOrganizerId || "",
     title: "",
     slug: "",
     description: "",
@@ -161,8 +161,8 @@ export default function AdminEventForm({ defaultOrganizerId, availableOrganizers
       <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6">
         <h2 className="text-xl font-semibold mb-4">Promotor Responsável</h2>
         <select
-          value={formData.organizerId}
-          onChange={(e) => setFormData((prev) => ({ ...prev, organizerId: e.target.value }))}
+          value={formData.promoterId}
+          onChange={(e) => setFormData((prev) => ({ ...prev, promoterId: e.target.value }))}
           required
           className="w-full rounded-xl border border-zinc-700/50 bg-zinc-900/50 px-4 py-3 text-white transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
         >
@@ -173,8 +173,8 @@ export default function AdminEventForm({ defaultOrganizerId, availableOrganizers
             </option>
           ))}
         </select>
-        {errors.organizerId && (
-          <p className="mt-2 text-sm text-red-400">{errors.organizerId}</p>
+        {errors.promoterId && (
+          <p className="mt-2 text-sm text-red-400">{errors.promoterId}</p>
         )}
       </div>
 

@@ -38,7 +38,6 @@ export async function POST(req: Request) {
     const lotIds = items.map((item) => item.ticketLotId);
     const lots = await prisma.ticketLot.findMany({
       where: { id: { in: lotIds } },
-      include: { ticketType: true },
     });
 
     let total = 0;
@@ -54,7 +53,7 @@ export async function POST(req: Request) {
       }
 
       // Check if lot belongs to event
-      if (lot.ticketType.eventId !== eventId) {
+      if (lot.eventId !== eventId) {
         return NextResponse.json(
           { error: "Invalid ticket lot for event" },
           { status: 400 }
@@ -62,7 +61,7 @@ export async function POST(req: Request) {
       }
 
       // Check stock availability (with optimistic lock)
-      const available = lot.stockTotal - lot.stockSold;
+      const available = lot.quantityTotal - lot.quantitySold;
       if (available < item.quantity) {
         return NextResponse.json(
           { error: `Insufficient stock for ${lot.name}` },
@@ -70,11 +69,11 @@ export async function POST(req: Request) {
         );
       }
 
-      total += lot.price * item.quantity;
+      total += lot.priceCents * item.quantity;
       verifiedItems.push({
-        lot,
+        ticketLotId: lot.id,
         quantity: item.quantity,
-        unitPrice: lot.price,
+        unitPriceCents: lot.priceCents,
       });
     }
 
@@ -85,14 +84,14 @@ export async function POST(req: Request) {
         data: {
           userId: session.user.id,
           eventId,
-          total,
+          totalCents: total,
           currency: "EUR",
           status: "PENDING",
           items: {
             create: verifiedItems.map((item) => ({
-              ticketLotId: item.lot.id,
-              qty: item.quantity,
-              unitPrice: item.unitPrice,
+              ticketLotId: item.ticketLotId,
+              quantity: item.quantity,
+              unitPriceCents: item.unitPriceCents,
             })),
           },
         },

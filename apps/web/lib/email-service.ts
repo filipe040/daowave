@@ -157,7 +157,7 @@ async function createEmailLog(
         relatedOrderId: relatedOrderId || null,
         relatedTicketId: relatedTicketId || null,
         relatedUserId: relatedUserId || null,
-        meta: idempotencyKey ? { idempotencyKey } : null,
+        meta: idempotencyKey ? { idempotencyKey } : undefined,
       },
     });
   } catch (error: any) {
@@ -422,7 +422,7 @@ export async function sendHtml(options: SendHtmlOptions): Promise<SendEmailResul
     const existing = await prisma.emailLog.findFirst({
       where: {
         meta: {
-          path: ["idempotencyKey"],
+          path: "idempotencyKey",
           equals: options.idempotencyKey,
         },
         status: "SENT",

@@ -53,7 +53,7 @@ export async function POST(
     const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const paymentResponse = await paymentProvider.createPayment({
       orderId: order.id,
-      amount: order.total,
+      amount: order.totalCents,
       currency: order.currency,
       returnUrl: `${baseUrl}/orders/${order.id}/success`,
       cancelUrl: `${baseUrl}/orders/${order.id}/cancel`,

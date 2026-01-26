@@ -44,7 +44,7 @@ export async function createAuditLog(data: AuditLogData): Promise<void> {
         action: data.action,
         entityType: entityType,
         entityId: entityId || null,
-        metaJson: Object.keys(metaJson).length > 0 ? metaJson : null,
+        metaJson: Object.keys(metaJson).length > 0 ? metaJson : undefined,
       },
     });
   } catch (error) {

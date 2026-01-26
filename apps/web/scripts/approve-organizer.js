@@ -53,7 +53,7 @@ async function main() {
       process.exit(0);
     }
 
-    await prisma.organizerProfile.update({
+    await prisma.promoterProfile.update({
       where: { id: user.organizerProfile.id },
       data: {
         status: "APPROVED",

@@ -24,7 +24,7 @@ export async function POST(
     const body = await req.json();
     const { reason } = RejectSchema.parse(body);
 
-    const organizer = await prisma.organizerProfile.update({
+    const organizer = await prisma.promoterProfile.update({
       where: { id },
       data: {
         status: "REJECTED",
@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    console.error("Error rejecting organizer:", error);
+    console.error("Error rejecting promoter:", error);
     return NextResponse.json(
       { error: "Failed to reject organizer" },
       { status: 500 }

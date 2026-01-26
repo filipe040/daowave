@@ -25,11 +25,7 @@ export async function POST(req: Request) {
       include: {
         items: {
           include: {
-            ticketLot: {
-              include: {
-                ticketType: true,
-              },
-            },
+              ticketLot: true,
           },
         },
       },
@@ -89,7 +85,7 @@ export async function POST(req: Request) {
         await tx.ticketLot.update({
           where: { id: item.ticketLotId },
           data: {
-            stockSold: {
+            quantitySold: {
               increment: item.qty,
             },
           },

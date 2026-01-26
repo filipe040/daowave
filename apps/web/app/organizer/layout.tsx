@@ -19,12 +19,12 @@ export default async function OrganizerLayout({
   }
 
   // Check if user is organizer or admin
-  if (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN") {
+  if (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN") {
     redirect("/");
   }
 
   // Get organizer profile
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
     include: {
       user: {
@@ -42,7 +42,7 @@ export default async function OrganizerLayout({
   }
 
   // If organizer but no profile or not approved
-  if (session.user.role === "ORGANIZER" && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
+  if (session.user.role === "PROMOTER" && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
         <div className="flex min-h-screen items-center justify-center px-4">

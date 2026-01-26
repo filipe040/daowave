@@ -1,13 +1,13 @@
-export type Role = "USER" | "ORGANIZER" | "ADMIN" | "VALIDATOR";
+export type Role = "USER" | "PROMOTER" | "ADMIN";
 
 export function canAccessAdmin(role: Role) {
   return role === "ADMIN";
 }
 
 export function canAccessOrganizer(role: Role) {
-  return role === "ORGANIZER" || role === "ADMIN";
+  return role === "PROMOTER" || role === "ADMIN";
 }
 
 export function canAccessValidator(role: Role) {
-  return role === "VALIDATOR" || role === "ADMIN";
+  return role === "ADMIN"; // Validators removed, only ADMIN can validate
 }

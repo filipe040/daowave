@@ -8,7 +8,7 @@ import crypto from "crypto";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user.role !== "VALIDATOR" && session.user.role !== "ADMIN")) {
+    if (!session?.user || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (ticket.status !== "ISSUED") {
+    if (ticket.checkedInAt) {
       await prisma.checkinLog.create({
         data: {
           ticketId: ticket.id,
@@ -73,23 +73,24 @@ export async function POST(req: Request) {
       });
     }
 
+    // TODO: Add checkinStartAt and checkinEndAt to Event model
     // Check validation window
-    const now = new Date();
-    if (ticket.event.checkinStartAt && now < ticket.event.checkinStartAt) {
-      return NextResponse.json({
-        valid: false,
-        result: "not_in_window",
-        message: "Check-in ainda não está disponível",
-      });
-    }
+    // const now = new Date();
+    // if (ticket.event.checkinStartAt && now < ticket.event.checkinStartAt) {
+    //   return NextResponse.json({
+    //     valid: false,
+    //     result: "not_in_window",
+    //     message: "Check-in ainda não está disponível",
+    //   });
+    // }
 
-    if (ticket.event.checkinEndAt && now > ticket.event.checkinEndAt) {
-      return NextResponse.json({
-        valid: false,
-        result: "not_in_window",
-        message: "Período de check-in expirou",
-      });
-    }
+    // if (ticket.event.checkinEndAt && now > ticket.event.checkinEndAt) {
+    //   return NextResponse.json({
+    //     valid: false,
+    //     result: "not_in_window",
+    //     message: "Período de check-in expirou",
+    //   });
+    // }
 
     // Atomic check-in based on mode
     const result = await prisma.$transaction(async (tx) => {
@@ -101,9 +102,10 @@ export async function POST(req: Request) {
         return { valid: false, result: "invalid", message: "Bilhete não encontrado" };
       }
 
-      if (ticket.event.checkinMode === "SINGLE") {
-        // Single entry: check if already used
-        if (current.entriesUsed > 0) {
+      // TODO: Add checkinMode to Event model and entriesUsed/lastCheckinAt to Ticket model
+      // For now, use SINGLE mode (check if already checked in)
+      // Single entry: check if already used
+      if (current.checkedInAt) { // Use checkedInAt instead of entriesUsed
           await tx.checkinLog.create({
             data: {
               ticketId: current.id,
@@ -119,7 +121,7 @@ export async function POST(req: Request) {
             valid: false,
             result: "already_used",
             message: "Bilhete já utilizado",
-            lastCheckinAt: current.lastCheckinAt,
+            // lastCheckinAt: current.lastCheckinAt,
           };
         }
 
@@ -128,8 +130,10 @@ export async function POST(req: Request) {
         await tx.ticket.update({
           where: { id: current.id },
           data: {
-            entriesUsed: 1,
-            lastCheckinAt: checkinAt,
+            checkedInAt: checkinAt,
+            checkedInByUserId: session.user.id,
+            // entriesUsed: 1,
+            // lastCheckinAt: checkinAt,
           },
         });
 
@@ -150,67 +154,9 @@ export async function POST(req: Request) {
           result: "valid",
           message: "Check-in realizado com sucesso",
           ticketId: current.id,
-          entriesUsed: 1,
-          maxEntries: 1,
+          // entriesUsed: 1,
+          // maxEntries: 1,
         };
-      } else {
-        // MULTI entry mode
-        const maxEntries = ticket.event.maxEntries || 999999;
-        
-        if (current.entriesUsed >= maxEntries) {
-          await tx.checkinLog.create({
-            data: {
-              ticketId: current.id,
-              eventId: current.eventId,
-              validatorUserId: session.user.id,
-              deviceId,
-              result: "MAX_ENTRIES_REACHED",
-              offline: false,
-              rawPayloadHash: rawHash,
-            },
-          });
-          return {
-            valid: false,
-            result: "already_used",
-            message: `Limite de entradas atingido (${maxEntries})`,
-            entriesUsed: current.entriesUsed,
-            maxEntries,
-          };
-        }
-
-        // Increment entry count
-        const checkinAt = new Date();
-        await tx.ticket.update({
-          where: { id: current.id },
-          data: {
-            entriesUsed: {
-              increment: 1,
-            },
-            lastCheckinAt: checkinAt,
-          },
-        });
-
-        await tx.checkinLog.create({
-          data: {
-            ticketId: current.id,
-            eventId: current.eventId,
-            validatorUserId: session.user.id,
-            deviceId,
-            result: "VALID",
-            offline: false,
-            rawPayloadHash: rawHash,
-          },
-        });
-
-        return {
-          valid: true,
-          result: "valid",
-          message: "Check-in realizado com sucesso",
-          ticketId: current.id,
-          entriesUsed: current.entriesUsed + 1,
-          maxEntries,
-        };
-      }
     });
 
     return NextResponse.json(result);

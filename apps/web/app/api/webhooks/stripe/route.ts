@@ -48,9 +48,7 @@ export async function POST(req: Request) {
       include: {
         items: {
           include: {
-            ticketLot: {
-              include: { ticketType: true },
-            },
+            ticketLot: true,
           },
         },
         event: true,
@@ -76,7 +74,7 @@ export async function POST(req: Request) {
           data: {
             eventId: order.eventId,
             orderId: order.id,
-            ticketTypeId: item.ticketLot.ticketTypeId,
+            // ticketTypeId removed - not in schema
             ticketLotId: item.ticketLotId,
             holderUserId: order.userId,
             attendeeName: buyerName,
@@ -92,7 +90,7 @@ export async function POST(req: Request) {
       await prisma.ticketLot.update({
         where: { id: item.ticketLotId },
         data: {
-          stockSold: {
+          quantitySold: {
             increment: item.qty,
           },
         },
@@ -109,7 +107,7 @@ export async function POST(req: Request) {
         name: order.user.name || "Utilizador",
         orderId: order.id,
         eventTitle: order.event.title,
-        total: (order.total / 100).toFixed(2),
+        total: (order.totalCents / 100).toFixed(2),
         currency: order.currency,
       },
       idempotencyKey: `order-confirmed-${order.id}`,
@@ -143,7 +141,7 @@ export async function POST(req: Request) {
     if (orderId) {
       await prisma.order.update({
         where: { id: orderId },
-        data: { status: "FAILED" },
+        data: { status: "CANCELED" }, // OrderStatus doesn't have FAILED
       });
     }
   }

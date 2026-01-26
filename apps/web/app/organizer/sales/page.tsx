@@ -15,7 +15,7 @@ export default async function OrganizerSalesPage() {
     redirect("/auth/signin?from=/organizer/sales");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -27,7 +27,7 @@ export default async function OrganizerSalesPage() {
   const orders = await prisma.order.findMany({
     where: {
       event: {
-        organizerId: organizerProfile.id,
+        promoterId: organizerProfile.id,
       },
       status: "PAID",
     },
@@ -41,21 +41,13 @@ export default async function OrganizerSalesPage() {
       },
       items: {
         include: {
-          ticketLot: {
-            include: {
-              ticketType: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
+          ticketLot: true,
         },
       },
       tickets: {
         select: {
           id: true,
-          status: true,
+          // status removed - not in schema
         },
       },
       user: {
@@ -66,12 +58,12 @@ export default async function OrganizerSalesPage() {
       },
     },
     orderBy: {
-      paidAt: "desc",
+      createdAt: "desc", // paidAt not in schema, use createdAt
     },
   });
 
   // Calculate statistics
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + order.totalCents, 0);
   const totalTickets = orders.reduce((sum, order) => sum + order.tickets.length, 0);
   const totalOrders = orders.length;
 
@@ -87,7 +79,7 @@ export default async function OrganizerSalesPage() {
       };
     }
     acc[eventId].orders.push(order);
-    acc[eventId].revenue += order.total;
+    acc[eventId].revenue += order.totalCents;
     acc[eventId].tickets += order.tickets.length;
     return acc;
   }, {} as Record<string, any>);
@@ -188,8 +180,8 @@ export default async function OrganizerSalesPage() {
                     className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors"
                   >
                     <td className="py-3 px-4 text-sm">
-                      {order.paidAt
-                        ? format(new Date(order.paidAt as Date), "dd MMM yyyy, HH:mm", { locale: pt })
+                      {order.createdAt
+                        ? format(new Date(order.createdAt as Date), "dd MMM yyyy, HH:mm", { locale: pt })
                         : "-"}
                     </td>
                     <td className="py-3 px-4">
@@ -203,7 +195,7 @@ export default async function OrganizerSalesPage() {
                     </td>
                     <td className="py-3 px-4 text-sm">{order.tickets.length}</td>
                     <td className="py-3 px-4 text-right font-semibold">
-                      {(order.total / 100).toFixed(2)} €
+                      {(order.totalCents / 100).toFixed(2)} €
                     </td>
                   </tr>
                 ))}

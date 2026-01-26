@@ -17,7 +17,7 @@ if (fs.existsSync(rootEnv)) {
 }
 
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function recreateAdminUser(email, password) {
@@ -39,7 +39,7 @@ async function recreateAdminUser(email, password) {
       
       // Verificar se tem relacionamentos que precisam ser tratados
       const hasOrders = await prisma.order.count({ where: { userId: existingUser.id } });
-      const hasOrganizerProfile = await prisma.organizerProfile.findUnique({ where: { userId: existingUser.id } });
+      const hasOrganizerProfile = await prisma.promoterProfile.findUnique({ where: { userId: existingUser.id } });
       
       if (hasOrders > 0) {
         console.log(`\n⚠️  ATENÇÃO: Este usuário tem ${hasOrders} pedido(s) associado(s).`);
@@ -51,7 +51,7 @@ async function recreateAdminUser(email, password) {
         console.log(`   O perfil de promotor será removido.`);
         
         // Remover perfil de promotor primeiro
-        await prisma.organizerProfile.delete({
+        await prisma.promoterProfile.delete({
           where: { userId: existingUser.id }
         });
         console.log(`   ✅ Perfil de promotor removido`);

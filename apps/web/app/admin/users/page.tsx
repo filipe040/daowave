@@ -25,7 +25,7 @@ export default async function AdminUsersPage({
   const users = await prisma.user.findMany({
     where: whereClause,
     include: {
-      organizerProfile: {
+      promoterProfile: {
         select: {
           id: true,
           brandName: true,
@@ -40,10 +40,10 @@ export default async function AdminUsersPage({
 
   const stats = {
     total: users.length,
-    customers: users.filter((u) => u.role === "CUSTOMER").length,
-    organizers: users.filter((u) => u.role === "ORGANIZER").length,
+    customers: users.filter((u) => u.role === "USER").length,
+    organizers: users.filter((u) => u.role === "PROMOTER").length,
     admins: users.filter((u) => u.role === "ADMIN").length,
-    validators: users.filter((u) => u.role === "VALIDATOR").length,
+    validators: 0, // VALIDATOR role removed
   };
 
   return (
@@ -125,34 +125,30 @@ export default async function AdminUsersPage({
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           user.role === "ADMIN"
                             ? "bg-yellow-500/20 text-yellow-400"
-                            : user.role === "ORGANIZER"
+                            : user.role === "PROMOTER"
                             ? "bg-purple-500/20 text-purple-400"
-                            : user.role === "VALIDATOR"
-                            ? "bg-blue-500/20 text-blue-400"
                             : "bg-green-500/20 text-green-400"
                         }`}
                       >
                         {user.role === "ADMIN"
                           ? "Administrador"
-                          : user.role === "ORGANIZER"
+                          : user.role === "PROMOTER"
                           ? "Promotor"
-                          : user.role === "VALIDATOR"
-                          ? "Validador"
                           : "Cliente"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {user.organizerProfile ? (
+                      {user.promoterProfile ? (
                         <div>
-                          <div className="font-semibold">{user.organizerProfile.brandName}</div>
+                          <div className="font-semibold">{user.promoterProfile.brandName}</div>
                           <span
                             className={`text-xs px-2 py-1 rounded ${
-                              user.organizerProfile.status === "APPROVED"
+                              user.promoterProfile.status === "APPROVED"
                                 ? "bg-green-500/20 text-green-400"
                                 : "bg-yellow-500/20 text-yellow-400"
                             }`}
                           >
-                            {user.organizerProfile.status === "APPROVED" ? "Aprovado" : "Pendente"}
+                            {user.promoterProfile.status === "APPROVED" ? "Aprovado" : "Pendente"}
                           </span>
                         </div>
                       ) : (
@@ -164,12 +160,12 @@ export default async function AdminUsersPage({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        {user.role !== "ORGANIZER" && user.role !== "ADMIN" && (
+                        {user.role !== "PROMOTER" && user.role !== "ADMIN" && (
                           <PromoteToOrganizerButton userId={user.id} userEmail={user.email} />
                         )}
-                        {user.organizerProfile && user.organizerProfile.status === "PENDING" && (
+                        {user.promoterProfile && user.promoterProfile.status === "PENDING" && (
                           <Link
-                            href={`/admin/organizers/${user.organizerProfile.id}`}
+                            href={`/admin/organizers/${user.promoterProfile.id}`}
                             className="px-3 py-1 rounded-lg bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/30 text-sm transition-colors"
                           >
                             Aprovar

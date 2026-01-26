@@ -15,7 +15,7 @@ export default async function AdminOrganizersPage({
   const params = await searchParams;
   const statusFilter = params.status as OrganizerStatus | undefined;
 
-  const organizers = await prisma.organizerProfile.findMany({
+  const organizers = await prisma.promoterProfile.findMany({
     where: statusFilter ? { status: statusFilter } : undefined,
     include: {
       user: {
@@ -38,9 +38,9 @@ export default async function AdminOrganizersPage({
   });
 
   const statusCounts = await Promise.all([
-    prisma.organizerProfile.count({ where: { status: "PENDING" } }),
-    prisma.organizerProfile.count({ where: { status: "APPROVED" } }),
-    prisma.organizerProfile.count({ where: { status: "REJECTED" } }),
+    prisma.promoterProfile.count({ where: { status: "PENDING" } }),
+    prisma.promoterProfile.count({ where: { status: "APPROVED" } }),
+    prisma.promoterProfile.count({ where: { status: "REJECTED" } }),
   ]);
 
   const [pending, approved, rejected] = statusCounts;

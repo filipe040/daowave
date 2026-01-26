@@ -186,7 +186,7 @@ export default function ValidatorPage() {
     );
   }
 
-  if (!session || (session.user.role !== "VALIDATOR" && session.user.role !== "ADMIN")) {
+  if (!session || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <div className="w-full max-w-md text-center">

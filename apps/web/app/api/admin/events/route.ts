@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const CreateEventSchema = z.object({
-  organizerId: z.string().min(1, "Organizador é obrigatório"),
+  promoterId: z.string().min(1, "Organizador é obrigatório"),
   title: z.string().min(1, "Título é obrigatório"),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug inválido"),
   description: z.string().min(1, "Descrição é obrigatória"),
@@ -72,8 +72,8 @@ export async function POST(req: Request) {
     }
 
     // Verify organizer exists and is approved
-    const organizer = await prisma.organizerProfile.findUnique({
-      where: { id: data.organizerId },
+    const organizer = await prisma.promoterProfile.findUnique({
+      where: { id: data.promoterId },
     });
 
     if (!organizer || organizer.status !== "APPROVED") {
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     // Create event with PUBLISHED status (admin creates published events)
     const event = await prisma.event.create({
       data: {
-        organizerId: data.organizerId,
+        promoterId: data.promoterId,
         title: data.title,
         slug: data.slug,
         description: data.description,

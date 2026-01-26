@@ -23,7 +23,7 @@ export async function GET(req: Request) {
     let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       include: {
-        organizerProfile: {
+        promoterProfile: {
           select: {
             id: true,
             brandName: true,
@@ -39,11 +39,10 @@ export async function GET(req: Request) {
         where: {
           email: {
             contains: normalizedEmail,
-            mode: "insensitive",
           },
         },
         include: {
-          organizerProfile: {
+          promoterProfile: {
             select: {
               id: true,
               brandName: true,
@@ -67,7 +66,7 @@ export async function GET(req: Request) {
         email: user.email,
         name: user.name,
         role: user.role,
-        organizerProfile: user.organizerProfile,
+          promoterProfile: user.promoterProfile,
       },
     });
   } catch (error) {

@@ -8,7 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { prisma } from '@/lib/prisma';
 import { getPaymentProvider } from '@/lib/payment';
-import { generateTicketCode, getQRPayload } from '@/lib/qr/generate';
+import { generateTicketCode } from '@/lib/utils';
+import { getQRPayload } from '@/lib/qr/generate';
 
 export const dynamic = 'force-dynamic';
 

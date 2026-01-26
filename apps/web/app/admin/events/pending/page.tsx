@@ -9,14 +9,14 @@ export default async function AdminPendingEventsPage() {
   const pendingEvents = await prisma.event.findMany({
     where: {
       status: "DRAFT",
-      organizer: {
+      promoter: {
         user: {
-          role: "ORGANIZER", // Only organizer events need approval
+          role: "PROMOTER", // Only promoter events need approval
         },
       },
     },
     include: {
-      organizer: {
+      promoter: {
         include: {
           user: {
             select: {
@@ -75,13 +75,13 @@ export default async function AdminPendingEventsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-zinc-500">Promotor:</span>{" "}
-                        <span className="font-semibold">{event.organizer.brandName}</span>
-                        <div className="text-zinc-400 text-xs">{event.organizer.user.email}</div>
+                        <span className="font-semibold">{event.promoter.brandName}</span>
+                        <div className="text-zinc-400 text-xs">{event.promoter.user.email}</div>
                       </div>
                       <div>
                         <span className="text-zinc-500">Local:</span>{" "}
-                        <span className="font-semibold">{event.venueName}</span>
-                        <div className="text-zinc-400 text-xs">{event.address}, {event.city}</div>
+                        <span className="font-semibold">{event.venue}</span>
+                        <div className="text-zinc-400 text-xs">{event.city}</div>
                       </div>
                       <div>
                         <span className="text-zinc-500">Data de Início:</span>{" "}
@@ -101,12 +101,6 @@ export default async function AdminPendingEventsPage() {
                           {new Date(event.createdAt).toLocaleString("pt-PT")}
                         </span>
                       </div>
-                      {event.category && (
-                        <div>
-                          <span className="text-zinc-500">Categoria:</span>{" "}
-                          <span className="font-semibold">{event.category}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="ml-6">

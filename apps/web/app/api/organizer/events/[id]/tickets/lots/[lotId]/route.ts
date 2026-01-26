@@ -23,7 +23,7 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN")) {
+  if (!session || (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -32,8 +32,8 @@ export async function PUT(
   try {
     // For admins, skip organizer profile check
     let organizerProfile = null;
-    if (session.user.role === "ORGANIZER") {
-      organizerProfile = await prisma.organizerProfile.findUnique({
+    if (session.user.role === "PROMOTER") {
+      organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
 
@@ -54,7 +54,7 @@ export async function PUT(
     }
 
     // Verify ownership (admins can access any event)
-    if (session.user.role !== "ADMIN" && organizerProfile && event.organizerId !== organizerProfile.id) {
+    if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -62,9 +62,7 @@ export async function PUT(
     const currentLot = await prisma.ticketLot.findFirst({
       where: {
         id: lotId,
-        ticketType: {
-          eventId: eventId,
-        },
+        eventId: eventId,
       },
     });
 
@@ -80,15 +78,15 @@ export async function PUT(
       where: { id: lotId },
       data: {
         ...(data.name && { name: data.name }),
-        ...(data.price !== undefined && { price: data.price }),
+        ...(data.price !== undefined && { priceCents: data.price }),
         ...(data.startsAt && { startsAt: new Date(data.startsAt) }),
         ...(data.endsAt && { endsAt: new Date(data.endsAt) }),
-        ...(data.stockTotal !== undefined && { stockTotal: data.stockTotal }),
+        ...(data.stockTotal !== undefined && { quantityTotal: data.stockTotal }),
       },
     });
 
     // Audit log if price changed
-    if (data.price !== undefined && data.price !== currentLot.price) {
+    if (data.price !== undefined && data.price !== currentLot.priceCents) {
       const metadata = getRequestMetadata(req);
       await createAuditLog({
         userId: session.user.id,
@@ -98,7 +96,7 @@ export async function PUT(
         details: {
           eventId: eventId,
           lotName: currentLot.name,
-          previousPrice: currentLot.price,
+          previousPrice: currentLot.priceCents,
           newPrice: data.price,
         },
         ...metadata,
@@ -106,7 +104,7 @@ export async function PUT(
 
       safeLog.info(`Ticket lot price changed: ${lotId}`, {
         lotId,
-        previousPrice: currentLot.price,
+        previousPrice: currentLot.priceCents,
         newPrice: data.price,
       });
     }

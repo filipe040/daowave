@@ -11,23 +11,25 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user.role !== "VALIDATOR" && session.user.role !== "ADMIN")) {
+    if (!session?.user || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id: eventId } = await params;
 
+    // TODO: Add ValidatorAssignment model to Prisma schema
     // Verify validator has access to this event
-    const assignment = await (prisma as any).validatorAssignment.findUnique({
-      where: {
-        eventId_validatorUserId: {
-          eventId,
-          validatorUserId: session.user.id,
-        },
-      },
-    });
+    // const assignment = await prisma.validatorAssignment.findUnique({
+    //   where: {
+    //     eventId_validatorUserId: {
+    //       eventId,
+    //       validatorUserId: session.user.id,
+    //     },
+    //   },
+    // });
 
-    if (!assignment && session.user.role !== "ADMIN") {
+    // For now, allow ADMIN only until ValidatorAssignment model is added
+    if (session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -50,7 +52,7 @@ export async function GET(
     const tickets = await (prisma.ticket.findMany({
       where: {
         eventId,
-        status: "ISSUED",
+        checkedInAt: null, // Only get tickets that haven't been checked in
       },
     }) as any) as Array<{
       id: string;

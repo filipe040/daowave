@@ -75,7 +75,7 @@ async function main() {
       // Update brand name if different
       if (user.organizerProfile.brandName !== brandName) {
         console.log(`\n🔄 Atualizando nome da marca...`);
-        await prisma.organizerProfile.update({
+        await prisma.promoterProfile.update({
           where: { id: user.organizerProfile.id },
           data: { brandName },
         });
@@ -83,7 +83,7 @@ async function main() {
       }
     } else {
       console.log(`\n🔄 Criando perfil de organizador...`);
-      const organizerProfile = await prisma.organizerProfile.create({
+      const organizerProfile = await prisma.promoterProfile.create({
         data: {
           userId: user.id,
           brandName,

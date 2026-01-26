@@ -95,7 +95,7 @@ async function main() {
     const brandName = user.name || "Meu Negócio";
     if (!user.organizerProfile) {
       console.log(`\n🔄 Criando perfil de organizador...`);
-      await prisma.organizerProfile.create({
+      await prisma.promoterProfile.create({
         data: {
           userId: user.id,
           brandName,
@@ -106,7 +106,7 @@ async function main() {
     } else {
       if (user.organizerProfile.status !== "APPROVED") {
         console.log(`\n🔄 Aprovando perfil de organizador...`);
-        await prisma.organizerProfile.update({
+        await prisma.promoterProfile.update({
           where: { id: user.organizerProfile.id },
           data: { status: "APPROVED" },
         });

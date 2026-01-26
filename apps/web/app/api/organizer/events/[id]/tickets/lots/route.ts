@@ -6,7 +6,6 @@ import { z } from "zod";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
 
 const TicketLotSchema = z.object({
-  ticketTypeId: z.string().uuid(),
   name: z.string().min(1, "Nome é obrigatório"),
   price: z.number().int().positive("Preço deve ser positivo"),
   startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
@@ -25,7 +24,7 @@ export async function POST(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN")) {
+  if (!session || (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -34,8 +33,8 @@ export async function POST(
   try {
     // For admins, skip organizer profile check
     let organizerProfile = null;
-    if (session.user.role === "ORGANIZER") {
-      organizerProfile = await prisma.organizerProfile.findUnique({
+    if (session.user.role === "PROMOTER") {
+      organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
 
@@ -56,37 +55,23 @@ export async function POST(
     }
 
     // Verify ownership (admins can access any event)
-    if (session.user.role !== "ADMIN" && organizerProfile && event.organizerId !== organizerProfile.id) {
+    if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const body = await req.json();
     const data = TicketLotSchema.parse(body);
 
-    // Verify ticket type belongs to event
-    const ticketType = await prisma.ticketType.findFirst({
-      where: {
-        id: data.ticketTypeId,
-        eventId: id,
-      },
-    });
-
-    if (!ticketType) {
-      return NextResponse.json(
-        { error: "Ticket type not found or does not belong to this event" },
-        { status: 404 }
-      );
-    }
-
+    // ticketType model doesn't exist in schema
     const ticketLot = await prisma.ticketLot.create({
       data: {
-        ticketTypeId: data.ticketTypeId,
+        eventId: id,
         name: data.name,
-        price: data.price,
-        startsAt: new Date(data.startsAt),
-        endsAt: new Date(data.endsAt),
-        stockTotal: data.stockTotal,
-        stockSold: 0,
+        priceCents: data.price,
+        saleStartAt: new Date(data.startsAt),
+        saleEndAt: new Date(data.endsAt),
+        quantityTotal: data.stockTotal,
+        quantitySold: 0,
       },
     });
 
@@ -99,7 +84,6 @@ export async function POST(
       resourceId: ticketLot.id,
       details: {
         eventId: id,
-        ticketTypeId: data.ticketTypeId,
         name: data.name,
         price: data.price,
         stockTotal: data.stockTotal,

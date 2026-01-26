@@ -83,7 +83,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.12.12",
     "@types/pdfkit": "^0.13.4",

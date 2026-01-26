@@ -9,11 +9,11 @@ export const dynamic = "force-dynamic";
 export default async function CouponsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ORGANIZER") {
+  if (!session || session.user.role !== "PROMOTER") {
     redirect("/auth/signin");
   }
 
-  const organizer = await prisma.organizerProfile.findUnique({
+  const organizer = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -22,7 +22,7 @@ export default async function CouponsPage() {
   }
 
   const events = await prisma.event.findMany({
-    where: { organizerId: organizer.id },
+    where: { promoterId: organizer.id },
     select: {
       id: true,
       title: true,
@@ -32,22 +32,24 @@ export default async function CouponsPage() {
     orderBy: { startAt: "desc" },
   });
 
-  const coupons = await prisma.coupon.findMany({
-    where: {
-      event: {
-        organizerId: organizer.id,
-      },
-    },
-    include: {
-      event: {
-        select: {
-          title: true,
-          slug: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  // TODO: Add Coupon model to Prisma schema
+  // const coupons = await prisma.coupon.findMany({
+  //   where: {
+  //     event: {
+  //       promoterId: organizer.id,
+  //     },
+  //   },
+  //   include: {
+  //     event: {
+  //       select: {
+  //         title: true,
+  //         slug: true,
+  //       },
+  //     },
+  //   },
+  //   orderBy: { createdAt: "desc" },
+  // });
+  const coupons: any[] = []; // Empty array until Coupon model is added to schema
 
   return (
     <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto">

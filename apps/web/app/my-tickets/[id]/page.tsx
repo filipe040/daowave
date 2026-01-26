@@ -12,9 +12,11 @@ async function getTicket(ticketId: string, userId: string) {
     where: { id: ticketId },
     include: {
       event: true,
-      ticketLot: {
-        include: {
-          ticketType: true,
+      ticketLot: true,
+      user: {
+        select: {
+          email: true,
+          name: true,
         },
       },
       order: {
@@ -30,7 +32,7 @@ async function getTicket(ticketId: string, userId: string) {
     },
   });
 
-  if (!ticket || (ticket.holderUserId !== userId && ticket.order.userId !== userId)) {
+  if (!ticket || ticket.userId !== userId) {
     return null;
   }
 
@@ -49,8 +51,11 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
     return notFound();
   }
 
-  const qrToken = generateQrToken(ticket.id, ticket.event.id, ticket.qrNonce);
-  const qrDataUrl = await generateQrCodeDataUrl(ticket.id, ticket.event.id, ticket.qrNonce);
+  // TODO: Add qrNonce to Ticket model or use qrPayload
+  // const qrToken = generateQrToken(ticket.id, ticket.event.id, ticket.qrNonce);
+  // const qrDataUrl = await generateQrCodeDataUrl(ticket.id, ticket.event.id, ticket.qrNonce);
+  const qrToken = ""; // Placeholder until qrNonce is added
+  const qrDataUrl = ""; // Placeholder until qrNonce is added
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 sm:px-0 animate-fade-in">
@@ -71,7 +76,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <div className="space-y-4">
             <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Tipo</span>
-              <p className="mt-1 text-lg font-semibold">{ticket.ticketLot.ticketType.name}</p>
+              <p className="mt-1 text-lg font-semibold">{ticket.ticketLot.name}</p>
             </div>
             <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Lote</span>
@@ -79,31 +84,31 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             </div>
             <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Participante</span>
-              <p className="mt-1 text-lg font-semibold">{ticket.attendeeName}</p>
-              <p className="mt-1 text-sm text-zinc-500">{ticket.attendeeEmail}</p>
+              <p className="mt-1 text-lg font-semibold">{ticket.user.name || "N/A"}</p>
+              <p className="mt-1 text-sm text-zinc-500">{ticket.user.email}</p>
             </div>
             <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Status</span>
               <div className="mt-2">
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    ticket.status === "ISSUED"
+                    !ticket.checkedInAt
                       ? "bg-green-500/20 text-green-400 border border-green-500/30"
                       : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                   }`}
                 >
-                  {ticket.status === "ISSUED" ? "✓ Válido" : ticket.status}
+                  {!ticket.checkedInAt ? "✓ Válido" : "Utilizado"}
                 </span>
               </div>
             </div>
-            {ticket.entriesUsed > 0 && ticket.lastCheckinAt && (
+            {ticket.checkedInAt && (
               <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4">
                 <span className="text-xs font-medium text-green-400 uppercase tracking-wide">Check-in</span>
                 <p className="mt-1 text-lg font-semibold text-green-400">
-                  {ticket.entriesUsed} entrada{ticket.entriesUsed > 1 ? "s" : ""} utilizada{ticket.entriesUsed > 1 ? "s" : ""}
+                  Check-in realizado
                 </p>
                 <p className="mt-1 text-sm text-green-400/70">
-                  Último: {format(new Date(ticket.lastCheckinAt), "dd MMM yyyy 'às' HH:mm", { locale: pt })}
+                  {ticket.checkedInAt && format(new Date(ticket.checkedInAt), "dd MMM yyyy 'às' HH:mm", { locale: pt })}
                 </p>
               </div>
             )}
@@ -144,12 +149,12 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </div>
           <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
             <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Local</span>
-            <p className="mt-1 text-base font-semibold">{ticket.event.venueName}</p>
+            <p className="mt-1 text-base font-semibold">{ticket.event.venue}</p>
           </div>
           <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 sm:col-span-2">
             <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Endereço</span>
             <p className="mt-1 text-base font-semibold">
-              {ticket.event.address}, {ticket.event.city}
+              {ticket.event.city}
             </p>
           </div>
         </div>

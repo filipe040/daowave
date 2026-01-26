@@ -17,7 +17,7 @@ export async function POST(
 
     const { id } = await params;
 
-    const organizerProfile = await prisma.organizerProfile.findUnique({
+    const organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -37,12 +37,12 @@ export async function POST(
     }
 
     // Verify ownership
-    if (event.organizerId !== organizerProfile.id && session.user.role !== "ADMIN") {
+    if (event.promoterId !== organizerProfile.id && session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Organizers cannot publish directly - events need admin approval
-    if (session.user.role === "ORGANIZER") {
+    if (session.user.role === "PROMOTER") {
       return NextResponse.json(
         { 
           error: "Os eventos criados por promotores precisam de aprovação de um administrador antes de serem publicados. O seu evento foi enviado para revisão.",
@@ -57,12 +57,11 @@ export async function POST(
 
     if (!event.title) errors.push("Título é obrigatório");
     if (!event.description) errors.push("Descrição é obrigatória");
-    if (!event.venueName) errors.push("Nome do local é obrigatório");
-    if (!event.address) errors.push("Endereço é obrigatório");
+    if (!event.venue) errors.push("Nome do local é obrigatório");
     if (!event.city) errors.push("Cidade é obrigatória");
-    if (!event.contactEmail) errors.push("Email de contacto é obrigatório");
-    if (!event.bannerUrl) errors.push("Imagem de banner é obrigatória para publicar");
-    if (!event.consentRGPD) errors.push("Consentimento RGPD é obrigatório");
+    // contactEmail field doesn't exist in Event model
+    if (!event.coverImage) errors.push("Imagem de banner é obrigatória para publicar");
+    // consentRGPD field doesn't exist in Event model
 
     // Validate dates
     if (event.endAt <= event.startAt) {
@@ -73,14 +72,9 @@ export async function POST(
       errors.push("Data de início não pode estar no passado");
     }
 
-    // Validate check-in configuration
-    if (event.checkinMode === "MULTI" && !event.maxEntries) {
-      errors.push("maxEntries é obrigatório para modo MULTI");
-    }
+    // checkinMode and maxEntries fields don't exist in Event model
 
-    if (!event.reentryAllowed && event.checkinMode === "MULTI") {
-      errors.push("Modo MULTI requer reentryAllowed=true");
-    }
+    // reentryAllowed and checkinMode fields don't exist in Event model
 
     if (errors.length > 0) {
       return NextResponse.json(
@@ -109,13 +103,13 @@ export async function POST(
         eventTitle: event.title,
         previousStatus,
         newStatus: "PUBLISHED",
-        organizerId: event.organizerId,
+        promoterId: event.promoterId,
         note: "Requires admin approval",
       },
       ...metadata,
     });
 
-    safeLog.info(`Event publish requested: ${id}`, { eventId: id, organizerId: event.organizerId });
+    safeLog.info(`Event publish requested: ${id}`, { eventId: id, promoterId: event.promoterId });
 
     return NextResponse.json(updatedEvent);
   } catch (error) {

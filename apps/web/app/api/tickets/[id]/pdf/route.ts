@@ -28,11 +28,7 @@ export async function GET(
       where: { id: ticketId },
       include: {
         event: true,
-        ticketLot: {
-          include: {
-            ticketType: true,
-          },
-        },
+        ticketLot: true,
       },
     });
 
@@ -41,9 +37,9 @@ export async function GET(
     }
 
     // Verify ownership (holder or admin/organizer)
-    const isOwner = ticket.holderUserId === session.user.id;
+    const isOwner = ticket.userId === session.user.id;
     const isAdmin = session.user.role === "ADMIN";
-    const isOrganizer = session.user.role === "ORGANIZER";
+    const isOrganizer = session.user.role === "PROMOTER";
 
     if (!isOwner && !isAdmin && !isOrganizer) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -105,11 +101,7 @@ export async function POST(
       where: { id: ticketId },
       include: {
         event: true,
-        ticketLot: {
-          include: {
-            ticketType: true,
-          },
-        },
+        ticketLot: true,
       },
     });
 

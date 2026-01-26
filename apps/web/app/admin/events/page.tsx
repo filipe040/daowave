@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminEventsPage() {
   const events = await prisma.event.findMany({
     include: {
-      organizer: {
+      promoter: {
         include: {
           user: {
             select: {
@@ -31,7 +31,7 @@ export default async function AdminEventsPage() {
     total: events.length,
     published: events.filter((e) => e.status === "PUBLISHED").length,
     draft: events.filter((e) => e.status === "DRAFT").length,
-    cancelled: events.filter((e) => e.status === "CANCELLED").length,
+    cancelled: 0, // EventStatus enum doesn't include CANCELED
   };
 
   return (
@@ -106,11 +106,11 @@ export default async function AdminEventsPage() {
                   <tr key={event.id} className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold">{event.title}</div>
-                      <div className="text-sm text-zinc-400">{event.venueName}</div>
+                      <div className="text-sm text-zinc-400">{event.venue}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div>{event.organizer.user.name || "N/A"}</div>
-                      <div className="text-sm text-zinc-400">{event.organizer.user.email}</div>
+                      <div>{event.promoter.user.name || "N/A"}</div>
+                      <div className="text-sm text-zinc-400">{event.promoter.user.email}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div>{new Date(event.startAt).toLocaleDateString("pt-PT")}</div>

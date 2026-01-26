@@ -14,7 +14,7 @@ export default async function OrganizerTemplatesPage() {
     redirect("/auth/signin?from=/organizer/templates");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -25,7 +25,7 @@ export default async function OrganizerTemplatesPage() {
   // Get published events to use as templates
   const publishedEvents = await prisma.event.findMany({
     where: {
-      organizerId: organizerProfile.id,
+      promoterId: organizerProfile.id,
       status: "PUBLISHED",
     },
     select: {

@@ -16,7 +16,7 @@ export default async function EditEventPage({
     redirect(`/auth/signin?from=/organizer/events/${id}/edit`);
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -33,7 +33,7 @@ export default async function EditEventPage({
   }
 
   // Verify ownership
-  if (event.organizerId !== organizerProfile.id && session.user.role !== "ADMIN") {
+  if (event.promoterId !== organizerProfile.id && session.user.role !== "ADMIN") {
     redirect("/organizer/events");
   }
 

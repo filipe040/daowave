@@ -20,7 +20,7 @@ export async function POST(
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        organizer: {
+        promoter: {
           include: {
             user: true,
           },
@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    if (event.organizer.user.role !== "ORGANIZER") {
+    if (event.promoter.user.role !== "PROMOTER") {
       return NextResponse.json(
         { error: "Apenas eventos de promotores precisam de aprovação" },
         { status: 400 }
@@ -64,7 +64,7 @@ export async function POST(
       resourceId: id,
       details: {
         eventTitle: event.title,
-        organizerId: event.organizerId,
+        promoterId: event.promoterId,
         previousStatus: "DRAFT",
         newStatus: "PUBLISHED",
       },

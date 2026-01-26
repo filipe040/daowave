@@ -16,7 +16,7 @@ export default async function OrganizerAccountPage() {
     redirect("/auth/signin?from=/organizer/account");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
     include: {
       user: {
@@ -47,27 +47,27 @@ export default async function OrganizerAccountPage() {
 
   const stats = {
     totalEvents: await prisma.event.count({
-      where: { organizerId: organizerProfile.id },
+      where: { promoterId: organizerProfile.id },
     }),
     publishedEvents: await prisma.event.count({
-      where: { organizerId: organizerProfile.id, status: "PUBLISHED" },
+      where: { promoterId: organizerProfile.id, status: "PUBLISHED" },
     }),
     totalTickets: await prisma.ticket.count({
       where: {
         event: {
-          organizerId: organizerProfile.id,
+          promoterId: organizerProfile.id,
         },
       },
     }),
     totalRevenue: await prisma.order.aggregate({
       where: {
         event: {
-          organizerId: organizerProfile.id,
+          promoterId: organizerProfile.id,
         },
         status: "PAID",
       },
       _sum: {
-        total: true,
+        totalCents: true,
       },
     }),
   };
@@ -115,7 +115,7 @@ export default async function OrganizerAccountPage() {
             <span className="text-2xl">💰</span>
           </div>
           <p className="text-2xl font-bold text-white">
-            {((stats.totalRevenue._sum.total || 0) / 100).toFixed(2)} €
+            {((stats.totalRevenue._sum.totalCents || 0) / 100).toFixed(2)} €
           </p>
         </div>
 

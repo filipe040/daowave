@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const RegisterSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -39,14 +39,14 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Create user and organizer profile
+    // Create user and promoter profile
     const user = await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
-        password: hashedPassword,
-        role: "ORGANIZER",
-        organizerProfile: {
+        passwordHash: hashedPassword,
+        role: "PROMOTER",
+        promoterProfile: {
           create: {
             brandName: data.brandName,
             vatNumber: data.vatNumber || null,
@@ -55,13 +55,13 @@ export async function POST(req: Request) {
         },
       },
       include: {
-        organizerProfile: true,
+        promoterProfile: true,
       },
     });
 
     return NextResponse.json({
       success: true,
-      organizer: user.organizerProfile,
+      promoter: user.promoterProfile,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -71,9 +71,9 @@ export async function POST(req: Request) {
       );
     }
 
-    console.error("Error registering organizer:", error);
+    console.error("Error registering promoter:", error);
     return NextResponse.json(
-      { error: "Failed to register organizer" },
+      { error: "Failed to register promoter" },
       { status: 500 }
     );
   }

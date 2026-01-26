@@ -35,7 +35,7 @@ export function SearchAndPromoteUser() {
 
       if (data.user) {
         setUserFound(data.user);
-        if (data.user.role === "ORGANIZER") {
+        if (data.user.role === "PROMOTER") {
           setError("Este usuário já é promotor");
         }
       } else {
@@ -109,7 +109,7 @@ export function SearchAndPromoteUser() {
         </button>
       </div>
 
-      {userFound && userFound.role !== "ORGANIZER" && (
+      {userFound && userFound.role !== "PROMOTER" && (
         <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-700/50">
           <div className="mb-3">
             <p className="text-sm text-zinc-400">Usuário encontrado:</p>

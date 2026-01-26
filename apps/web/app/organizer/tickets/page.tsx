@@ -16,7 +16,7 @@ export default async function OrganizerTicketsPage() {
     redirect("/auth/signin?from=/organizer/tickets");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -28,7 +28,7 @@ export default async function OrganizerTicketsPage() {
   const tickets = await prisma.ticket.findMany({
     where: {
       event: {
-        organizerId: organizerProfile.id,
+        promoterId: organizerProfile.id,
       },
     },
     include: {
@@ -40,19 +40,11 @@ export default async function OrganizerTicketsPage() {
           startAt: true,
         },
       },
-      ticketLot: {
-        include: {
-          ticketType: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
+      ticketLot: true,
       order: {
         select: {
           id: true,
-          paidAt: true,
+          // paidAt removed - not in schema
           user: {
             select: {
               name: true,
@@ -69,9 +61,12 @@ export default async function OrganizerTicketsPage() {
 
   // Statistics
   const totalTickets = tickets.length;
-  const issuedTickets = tickets.filter((t) => t.status === "ISSUED").length;
-  const checkedInTickets = tickets.filter((t) => (t.entriesUsed as number) > 0).length;
-  const cancelledTickets = tickets.filter((t) => t.status === "CANCELLED").length;
+  // TODO: Add status field to Ticket model or use checkedInAt
+  const issuedTickets = tickets.filter((t) => !t.checkedInAt).length;
+  // TODO: Add entriesUsed to Ticket model or use checkedInAt
+  const checkedInTickets = tickets.filter((t) => t.checkedInAt !== null).length;
+  // TODO: Add status field to Ticket model
+  const cancelledTickets = 0; // tickets.filter((t) => t.status === "CANCELED").length;
 
   // Group by event
   const ticketsByEvent = tickets.reduce((acc, ticket) => {
@@ -133,7 +128,7 @@ export default async function OrganizerTicketsPage() {
         <div className="space-y-6">
           {Object.values(ticketsByEvent).map((group: any) => {
             const eventTickets = group.tickets;
-            const eventIssued = eventTickets.filter((t: any) => t.status === "ISSUED").length;
+            const eventIssued = eventTickets.filter((t: any) => !t.checkedInAt).length;
             const eventCheckedIn = eventTickets.filter((t: any) => (t.entriesUsed as number) > 0).length;
 
             return (
@@ -180,7 +175,7 @@ export default async function OrganizerTicketsPage() {
                             {ticket.id.substring(0, 8)}...
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            {ticket.ticketLot.ticketType.name}
+                            {ticket.ticketLot.name}
                           </td>
                           <td className="py-3 px-4">
                             <div className="text-sm font-medium">{ticket.attendeeName}</div>
@@ -189,18 +184,14 @@ export default async function OrganizerTicketsPage() {
                           <td className="py-3 px-4">
                             <span
                               className={`text-xs px-2 py-1 rounded ${
-                                ticket.status === "ISSUED"
+                                !ticket.checkedInAt
                                   ? "bg-green-500/20 text-green-400"
-                                  : ticket.status === "CANCELLED"
-                                  ? "bg-red-500/20 text-red-400"
                                   : "bg-yellow-500/20 text-yellow-400"
                               }`}
                             >
-                              {ticket.status === "ISSUED"
+                              {!ticket.checkedInAt
                                 ? "Emitido"
-                                : ticket.status === "CANCELLED"
-                                ? "Cancelado"
-                                : ticket.status}
+                                : "Utilizado"}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-sm">

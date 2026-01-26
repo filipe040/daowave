@@ -33,10 +33,10 @@ export default async function AdminPaymentsPage() {
     total: orders.length,
     paid: orders.filter((o) => o.status === "PAID").length,
     pending: orders.filter((o) => o.status === "PENDING").length,
-    failed: orders.filter((o) => o.status === "FAILED").length,
+    failed: 0, // OrderStatus enum doesn't include FAILED
     totalRevenue: orders
       .filter((o) => o.status === "PAID")
-      .reduce((sum, o) => sum + o.total, 0),
+      .reduce((sum, o) => sum + o.totalCents, 0),
   };
 
   return (
@@ -108,7 +108,7 @@ export default async function AdminPaymentsPage() {
                       <div className="font-semibold">{order._count.tickets}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-semibold">{(order.total / 100).toFixed(2)} €</div>
+                      <div className="font-semibold">{(order.totalCents / 100).toFixed(2)} €</div>
                     </td>
                     <td className="px-6 py-4">
                       <span

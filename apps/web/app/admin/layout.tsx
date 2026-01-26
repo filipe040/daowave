@@ -16,9 +16,9 @@ export default async function AdminLayout({
 
   if (session.user.role !== "ADMIN") {
     // Redirect based on actual role
-    if (session.user.role === "ORGANIZER") {
+    if (session.user.role === "PROMOTER") {
       redirect("/organizer");
-    } else if (session.user.role === "VALIDATOR") {
+    } else if (session.user.role === "USER") {
       redirect("/validator");
     } else {
       redirect("/");

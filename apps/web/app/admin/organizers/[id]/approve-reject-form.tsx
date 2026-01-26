@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { OrganizerStatus } from "@prisma/client";
 
 interface Props {
-  organizerId: string;
+  promoterId: string;
   currentStatus: OrganizerStatus;
 }
 
-export function ApproveRejectForm({ organizerId, currentStatus }: Props) {
+export function ApproveRejectForm({ promoterId, currentStatus }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -19,7 +19,7 @@ export function ApproveRejectForm({ organizerId, currentStatus }: Props) {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/organizers/${organizerId}/approve`, {
+      const res = await fetch(`/api/admin/organizers/${promoterId}/approve`, {
         method: "POST",
       });
 
@@ -43,7 +43,7 @@ export function ApproveRejectForm({ organizerId, currentStatus }: Props) {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/organizers/${organizerId}/reject`, {
+      const res = await fetch(`/api/admin/organizers/${promoterId}/reject`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: rejectionReason }),

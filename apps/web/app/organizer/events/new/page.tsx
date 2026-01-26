@@ -17,7 +17,7 @@ export default async function NewEventPage({
     redirect("/auth/signin?from=/organizer/events/new");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -31,7 +31,7 @@ export default async function NewEventPage({
     const templateEvent = await prisma.event.findUnique({
       where: {
         id: templateId,
-        organizerId: organizerProfile.id,
+        promoterId: organizerProfile.id,
       },
     });
 

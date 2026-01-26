@@ -22,7 +22,7 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN")) {
+  if (!session || (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -31,8 +31,8 @@ export async function PUT(
   try {
     // For admins, skip organizer profile check
     let organizerProfile = null;
-    if (session.user.role === "ORGANIZER") {
-      organizerProfile = await prisma.organizerProfile.findUnique({
+    if (session.user.role === "PROMOTER") {
+      organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
 
@@ -53,62 +53,41 @@ export async function PUT(
     }
 
     // Verify ownership (admins can access any event)
-    if (session.user.role !== "ADMIN" && organizerProfile && event.organizerId !== organizerProfile.id) {
+    if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    // TODO: Add TicketType model to Prisma schema
     // Get current ticket type
-    const currentType = await prisma.ticketType.findFirst({
-      where: {
-        id: typeId,
-        eventId: eventId,
-      },
-    });
+    // const currentType = await prisma.ticketType.findFirst({
+    //   where: {
+    //     id: typeId,
+    //     eventId: eventId,
+    //   },
+    // });
 
-    if (!currentType) {
-      return NextResponse.json({ error: "Ticket type not found" }, { status: 404 });
-    }
+    // if (!currentType) {
+    //   return NextResponse.json({ error: "Ticket type not found" }, { status: 404 });
+    // }
 
-    const body = await req.json();
-    const data = UpdateTicketTypeSchema.parse(body);
+    // const body = await req.json();
+    // const data = UpdateTicketTypeSchema.parse(body);
 
     // Update ticket type
-    const updatedType = await prisma.ticketType.update({
-      where: { id: typeId },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.basePrice !== undefined && { basePrice: data.basePrice }),
-        ...(data.currency && { currency: data.currency }),
-      },
-    });
+    // const updatedType = await prisma.ticketType.update({
+    //   where: { id: typeId },
+    //   data: {
+    //     ...(data.name && { name: data.name }),
+    //     ...(data.description !== undefined && { description: data.description }),
+    //     ...(data.basePrice !== undefined && { basePrice: data.basePrice }),
+    //     ...(data.currency && { currency: data.currency }),
+    //   },
+    // });
 
-    // Audit log if price changed
-    if (data.basePrice !== undefined && data.basePrice !== currentType.basePrice) {
-      const metadata = getRequestMetadata(req);
-      await createAuditLog({
-        userId: session.user.id,
-        action: "TICKET_TYPE_PRICE_CHANGED",
-        resourceType: "ticketType",
-        resourceId: typeId,
-        details: {
-          eventId: eventId,
-          ticketTypeName: currentType.name,
-          previousPrice: currentType.basePrice,
-          newPrice: data.basePrice,
-          currency: data.currency || currentType.currency,
-        },
-        ...metadata,
-      });
-
-      safeLog.info(`Ticket type price changed: ${typeId}`, {
-        ticketTypeId: typeId,
-        previousPrice: currentType.basePrice,
-        newPrice: data.basePrice,
-      });
-    }
-
-    return NextResponse.json({ ticketType: updatedType });
+    return NextResponse.json(
+      { error: "TicketType functionality not available. Model not in schema." },
+      { status: 501 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -14,7 +14,7 @@ export default async function OrganizerDashboard() {
   }
 
   // Get organizer profile
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -25,27 +25,28 @@ export default async function OrganizerDashboard() {
 
   // Get events stats
   const [totalEvents, publishedEvents, draftEvents, totalTicketsSold, totalRevenue] = await Promise.all([
-    prisma.event.count({ where: { organizerId: organizerProfile.id } }),
-    prisma.event.count({ where: { organizerId: organizerProfile.id, status: "PUBLISHED" } }),
-    prisma.event.count({ where: { organizerId: organizerProfile.id, status: "DRAFT" } }),
+    prisma.event.count({ where: { promoterId: organizerProfile.id } }),
+    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "PUBLISHED" } }),
+    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "DRAFT" } }),
     prisma.ticket.count({
       where: {
-        event: { organizerId: organizerProfile.id },
-        status: "ISSUED",
+        event: { promoterId: organizerProfile.id },
+        // TODO: Add status field to Ticket model or filter by checkedInAt
+        // status: "ISSUED",
       },
     }),
     prisma.order.aggregate({
       where: {
-        event: { organizerId: organizerProfile.id },
+        event: { promoterId: organizerProfile.id },
         status: "PAID",
       },
-      _sum: { total: true },
+      _sum: { totalCents: true },
     }),
   ]);
 
   // Get recent events
   const recentEvents = await prisma.event.findMany({
-    where: { organizerId: organizerProfile.id },
+    where: { promoterId: organizerProfile.id },
     orderBy: { createdAt: "desc" },
     take: 5,
     select: {
@@ -96,7 +97,7 @@ export default async function OrganizerDashboard() {
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="text-4xl md:text-5xl mb-3">💰</div>
           <div className="text-4xl md:text-5xl font-bold mb-2">
-            {totalRevenue._sum.total ? (totalRevenue._sum.total / 100).toFixed(2) : "0.00"}€
+            {totalRevenue._sum.totalCents ? (totalRevenue._sum.totalCents / 100).toFixed(2) : "0.00"}€
           </div>
           <div className="text-sm md:text-base text-zinc-400">Receita Total</div>
         </div>

@@ -20,7 +20,7 @@ export default async function EventTicketsPage({
     redirect(`/auth/signin?from=/organizer/events/${id}/tickets`);
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -31,13 +31,8 @@ export default async function EventTicketsPage({
   const event = await prisma.event.findUnique({
     where: { id },
     include: {
-      ticketTypes: {
-        include: {
-          lots: {
-            orderBy: { startsAt: "asc" },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+      ticketLots: {
+        orderBy: { saleStartAt: "asc" },
       },
     },
   });
@@ -47,7 +42,7 @@ export default async function EventTicketsPage({
   }
 
   // Verify ownership
-  if (event.organizerId !== organizerProfile.id && session.user.role !== "ADMIN") {
+  if (event.promoterId !== organizerProfile.id && session.user.role !== "ADMIN") {
     redirect("/organizer/events");
   }
 

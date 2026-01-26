@@ -4,7 +4,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -43,12 +43,12 @@ async function main() {
     update: {},
     create: {
       userId: promoterUser.id,
-      companyName: 'Eventos PT Lda',
-      vat: 'PT123456789',
+      brandName: 'Eventos PT Lda',
+      vatNumber: 'PT123456789',
       contactEmail: 'promoter@example.com',
     },
   });
-  console.log('✅ Created promoter:', promoter.companyName);
+  console.log('✅ Created promoter:', promoter.brandName);
 
   // Create Regular User
   const userPassword = await bcrypt.hash('user123', 10);

@@ -33,9 +33,9 @@ export async function GET() {
       select: {
         id: true,
         action: true,
-        details: true,
+        metaJson: true,
         createdAt: true,
-        userId: true,
+        actorUserId: true,
       },
     });
 
@@ -68,7 +68,7 @@ export async function GET() {
         message: err.action,
         level: "error",
         timestamp: err.createdAt.toISOString(),
-        context: err.details,
+        context: err.metaJson,
       })),
       ...failedEmails.map((email) => ({
         id: email.id,

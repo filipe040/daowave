@@ -47,7 +47,7 @@ export async function POST(
     }
 
     // Verify ownership
-    const isOwner = ticket.holderUserId === session.user.id;
+    const isOwner = ticket.userId === session.user.id;
     const isOrderOwner = ticket.order.userId === session.user.id;
     const isAdmin = session.user.role === "ADMIN";
 

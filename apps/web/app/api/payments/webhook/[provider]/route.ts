@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPaymentProvider } from "@/lib/payments/provider";
-import { generateQrNonce, generateQrToken } from "@/lib/qr";
+import { generateTicketCode } from "@/lib/utils";
+import { getQRPayload } from "@/lib/qr/generate";
 import { sendTicketsEmail } from "@/lib/email-service";
 
 export async function POST(
@@ -44,11 +45,7 @@ export async function POST(
       include: {
         items: {
           include: {
-            ticketLot: {
-              include: {
-                ticketType: true,
-              },
-            },
+              ticketLot: true,
           },
         },
         event: true,
@@ -65,10 +62,10 @@ export async function POST(
       userId: string;
       eventId: string;
       items: Array<{
-        qty: number;
+        quantity: number;
         ticketLotId: string;
         ticketLot: {
-          ticketTypeId: string;
+          id: string;
         };
       }>;
       user: {
@@ -86,32 +83,36 @@ export async function POST(
     for (const item of order.items) {
       // In production, retrieve attendees from OrderItemAttendee table or similar
       // For now, creating tickets with buyer as attendee (simplified)
-      const qty = item.qty;
+      const qty = item.quantity;
       
       for (let i = 0; i < qty; i++) {
-        const qrNonce = generateQrNonce();
+        const code = generateTicketCode();
+        const qrPayload = getQRPayload({ ticketId: '', code }); // Will be updated after creation
         
-        await prisma.ticket.create({
+        const ticket = await prisma.ticket.create({
           data: {
             eventId: order.eventId,
             orderId: order.id,
-            ticketTypeId: item.ticketLot.ticketTypeId,
             ticketLotId: item.ticketLotId,
-            holderUserId: order.userId,
-            // Use buyer info if available, otherwise use order user info
-            attendeeName: (order as any).buyerName || order.user.name || `Attendee ${i + 1}`,
-            attendeeEmail: (order as any).buyerEmail || order.user.email,
-            status: "ISSUED",
-            qrNonce,
-          } as any, // Type assertion until Prisma Client is regenerated
+            userId: order.userId,
+            code,
+            qrPayload,
+          },
+        });
+        
+        // Update QR payload with ticket ID
+        const finalQRPayload = getQRPayload({ ticketId: ticket.id, code });
+        await prisma.ticket.update({
+          where: { id: ticket.id },
+          data: { qrPayload: finalQRPayload },
         });
       }
 
-      // Update stock sold
+      // Update quantity sold
       await prisma.ticketLot.update({
         where: { id: item.ticketLotId },
         data: {
-          stockSold: {
+          quantitySold: {
             increment: qty,
           },
         },

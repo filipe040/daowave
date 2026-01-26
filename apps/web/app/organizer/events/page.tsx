@@ -16,7 +16,7 @@ export default async function OrganizerEventsPage() {
     redirect("/auth/signin?from=/organizer/events");
   }
 
-  const organizerProfile = await prisma.organizerProfile.findUnique({
+  const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
@@ -25,13 +25,14 @@ export default async function OrganizerEventsPage() {
   }
 
   const events = await prisma.event.findMany({
-    where: { organizerId: organizerProfile.id },
+    where: { promoterId: organizerProfile.id },
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
         select: {
           tickets: {
-            where: { status: "ISSUED" },
+            // TODO: Add status field to Ticket model or filter by checkedInAt
+            // where: { status: "ISSUED" },
           },
           orders: {
             where: { status: "PAID" },
@@ -101,7 +102,7 @@ export default async function OrganizerEventsPage() {
                   <div className="grid sm:grid-cols-2 gap-4 mt-4 text-sm">
                     <div>
                       <span className="text-zinc-500">📍</span>
-                      <span className="ml-2 text-zinc-400">{event.venueName}, {event.city}</span>
+                      <span className="ml-2 text-zinc-400">{event.venue}, {event.city}</span>
                     </div>
                     <div>
                       <span className="text-zinc-500">📅</span>

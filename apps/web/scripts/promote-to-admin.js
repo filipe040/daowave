@@ -31,7 +31,7 @@ async function promoteToAdmin(email) {
 
     if (!user) {
       console.log(`⚠️  Usuário não encontrado. Criando novo usuário como administrador...`);
-      const bcrypt = require('bcrypt');
+      const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash('admin123', 10); // Senha padrão temporária
       
       user = await prisma.user.create({

@@ -15,11 +15,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN") {
+    if (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const organizerProfile = await prisma.organizerProfile.findUnique({
+    const organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
     const events = selectAll
       ? await prisma.event.findMany({
-          where: { organizerId: organizerProfile.id },
+          where: { promoterId: organizerProfile.id },
           orderBy: { createdAt: "desc" },
           select: {
             id: true,
@@ -43,12 +43,12 @@ export async function GET(req: Request) {
           },
         })
       : await prisma.event.findMany({
-          where: { organizerId: organizerProfile.id },
+          where: { promoterId: organizerProfile.id },
           orderBy: { createdAt: "desc" },
           include: {
             _count: {
               select: {
-                tickets: { where: { status: "ISSUED" } },
+                tickets: true,
                 orders: { where: { status: "PAID" } },
               },
             },
@@ -146,11 +146,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "ORGANIZER" && session.user.role !== "ADMIN") {
+    if (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const organizerProfile = await prisma.organizerProfile.findUnique({
+    const organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
@@ -205,7 +205,7 @@ export async function POST(req: Request) {
     // Create event
     const event = await prisma.event.create({
       data: {
-        organizerId: organizerProfile.id,
+        promoterId: organizerProfile.id,
         title: data.title,
         slug: data.slug,
         description: data.description,

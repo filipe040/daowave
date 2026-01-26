@@ -48,7 +48,7 @@ async function main() {
       // Remove organizer profile if exists (admins don't need it)
       if (adminUser.organizerProfile) {
         console.log(`🗑️  Removendo perfil de organizador de ${adminEmail}...`);
-        await prisma.organizerProfile.delete({
+        await prisma.promoterProfile.delete({
           where: { id: adminUser.organizerProfile.id },
         });
         console.log(`   ✅ Perfil removido`);
@@ -79,7 +79,7 @@ async function main() {
       // Create organizer profile if doesn't exist
       if (!organizerUser.organizerProfile) {
         console.log(`🔄 Criando perfil de organizador para ${organizerEmail}...`);
-        const profile = await prisma.organizerProfile.create({
+        const profile = await prisma.promoterProfile.create({
           data: {
             userId: organizerUser.id,
             brandName: organizerUser.name || "Meu Negócio",
@@ -89,7 +89,7 @@ async function main() {
         console.log(`   ✅ Perfil criado e aprovado`);
       } else if (organizerUser.organizerProfile.status !== "APPROVED") {
         console.log(`🔄 Aprovando perfil de organizador...`);
-        await prisma.organizerProfile.update({
+        await prisma.promoterProfile.update({
           where: { id: organizerUser.organizerProfile.id },
           data: { status: "APPROVED" },
         });

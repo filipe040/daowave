@@ -88,7 +88,7 @@ describe("Ticket Transfer", () => {
     it("should prevent transfer of cancelled ticket", () => {
       const ticket = {
         id: "ticket-123",
-        status: "CANCELLED",
+        status: "CANCELED",
       };
 
       const canTransfer = ticket.status === "ISSUED";

@@ -28,7 +28,7 @@ interface TicketType {
 interface Event {
   id: string;
   title: string;
-  ticketTypes: TicketType[];
+  ticketLots: any[]; // Use ticketLots instead of ticketTypes
 }
 
 interface TicketManagementProps {
@@ -37,7 +37,8 @@ interface TicketManagementProps {
 }
 
 export default function TicketManagement({ eventId, event }: TicketManagementProps) {
-  const [ticketTypes, setTicketTypes] = useState(event.ticketTypes);
+  // TODO: Adapt to use ticketLots directly instead of ticketTypes
+  const [ticketTypes, setTicketTypes] = useState<any[]>([]); // Empty until adapted
   const [showTypeForm, setShowTypeForm] = useState(false);
   const [showLotForm, setShowLotForm] = useState(false);
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -45,8 +46,11 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
   const refreshData = async () => {
     const res = await fetch(`/api/organizer/events/${eventId}/tickets`);
     const data = await res.json();
+    // TODO: Adapt API to return ticketLots structure
     if (data.ticketTypes) {
       setTicketTypes(data.ticketTypes);
+    } else if (data.ticketLots) {
+      setTicketTypes(data.ticketLots);
     }
   };
 
@@ -96,7 +100,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
         </div>
       ) : (
         <div className="space-y-6">
-          {ticketTypes.map((type) => (
+          {ticketTypes.map((type: any) => (
             <div
               key={type.id}
               className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm"
@@ -110,7 +114,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
                   <div className="flex items-center gap-4 text-sm text-zinc-500">
                     <span>Preço base: {(type.basePrice / 100).toFixed(2)} {type.currency}</span>
                     <span>•</span>
-                    <span>{type.lots.length} lote(s)</span>
+                    <span>{(type.lots || []).length} lote(s)</span>
                   </div>
                 </div>
                 <button
@@ -125,7 +129,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
               </div>
 
               {/* Lots List */}
-              {type.lots.length === 0 ? (
+              {(type.lots || []).length === 0 ? (
                 <div className="mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-center">
                   <p className="text-sm text-zinc-500 mb-3">Nenhum lote criado ainda</p>
                   <button
@@ -140,7 +144,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {type.lots.map((lot) => {
+                  {(type.lots || []).map((lot: any) => {
                     const available = lot.stockTotal - lot.stockSold;
                     const isActive =
                       new Date(lot.startsAt) <= new Date() &&
