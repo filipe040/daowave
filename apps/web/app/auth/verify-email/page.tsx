@@ -54,9 +54,6 @@ function VerifyEmailContent() {
           if (verified === 'true') {
             setStatus('success');
             setMessage('Email verificado com sucesso!');
-            setTimeout(() => {
-              router.push('/auth/signin?verified=true');
-            }, 2000);
           } else if (error === 'expired_token') {
             setStatus('expired');
             setMessage('O link de verificação expirou. Por favor, solicite um novo.');
@@ -77,9 +74,6 @@ function VerifyEmailContent() {
       } else if (res.ok) {
         setStatus('success');
         setMessage('Email verificado com sucesso!');
-        setTimeout(() => {
-          router.push('/auth/signin?verified=true');
-        }, 2000);
       } else {
         setStatus('error');
         setMessage(`Erro ao verificar email (${res.status}). Tente novamente.`);
@@ -117,7 +111,12 @@ function VerifyEmailContent() {
                 Email verificado!
               </h1>
               <p className="text-zinc-300 mb-6">{message}</p>
-              <p className="text-sm text-zinc-400">A redirecionar para o login...</p>
+              <Link
+                href="/auth/signin"
+                className="inline-block text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+              >
+                Ir para login
+              </Link>
             </>
           )}
 
