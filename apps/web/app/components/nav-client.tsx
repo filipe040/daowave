@@ -80,12 +80,18 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-                  <button
-                    onClick={handleSignOut}
-                    className="bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
-                  >
-                    LOG OUT
-                  </button>
+                  {/* User profile chip + logout */}
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white text-black px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wide max-w-xs truncate">
+                      {session.user.name || session.user.email}
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="bg-zinc-900 text-white font-bold text-sm uppercase tracking-wide px-4 py-2.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
+                    >
+                      LOG OUT
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Mobile menu button when logged in */}
