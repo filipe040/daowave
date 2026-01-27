@@ -51,19 +51,17 @@ export function getEmailConfig(): EmailConfig {
     console.warn(`⚠️  RESEND_API_KEY não começa com "re_". Valor: ${resendApiKey.substring(0, 10)}...`);
   }
 
-  // In production, require APP_URL or NEXTAUTH_URL
-  // CRITICAL: Never use localhost in production
-  const appUrl = env.APP_URL || env.NEXTAUTH_URL || (
-    process.env.NODE_ENV === 'development' 
-      ? "http://localhost:3000" 
-      : (() => {
-          console.error("⚠️  APP_URL or NEXTAUTH_URL must be set in production");
-          // Don't throw during build - return a safe fallback
-          return process.env.VERCEL_URL 
-            ? `https://${process.env.VERCEL_URL}`
-            : "https://daowave-beta.vercel.app"; // Fallback for Vercel
-        })()
-  );
+  // Resolve application base URL for links in emails
+  const baseUrl =
+    process.env.APP_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.NEXTAUTH_URL;
+
+  if (!baseUrl) {
+    throw new Error("APP_URL is not defined");
+  }
+
+  const appUrl = baseUrl;
 
   try {
     // Clean API key: remove quotes and trim whitespace

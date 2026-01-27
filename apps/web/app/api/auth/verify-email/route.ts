@@ -5,8 +5,14 @@ import { safeLog } from "@/lib/security";
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-  const requestUrl = new URL(req.url);
-  const baseUrl = requestUrl.origin;
+  const baseUrl =
+    process.env.APP_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.NEXTAUTH_URL;
+
+  if (!baseUrl) {
+    throw new Error("APP_URL is not defined");
+  }
   
   try {
     const { searchParams } = new URL(req.url);

@@ -88,8 +88,13 @@ const envSchema = z.object({
   // Security
   RATE_LIMIT_REQUESTS_PER_MINUTE: z.string().transform(Number).default("60"),
   CORS_ORIGINS: z.string().default(
-    process.env.NODE_ENV === "production" 
-      ? (process.env.NEXTAUTH_URL || "https://daowave-beta.vercel.app")
+    process.env.NODE_ENV === "production"
+      ? (
+          process.env.APP_URL ??
+          process.env.NEXT_PUBLIC_APP_URL ??
+          process.env.NEXTAUTH_URL ??
+          ""
+        )
       : "http://localhost:3000"
   ),
 

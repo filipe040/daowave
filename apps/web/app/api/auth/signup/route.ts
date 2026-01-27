@@ -140,14 +140,17 @@ export async function POST(req: Request) {
           email: user.email,
         });
       } else {
-        // Use request URL for verification link (works in dev and production)
-        const requestUrl = new URL(req.url);
-        const baseUrl = requestUrl.origin;
-        // In development, prefer localhost, otherwise use APP_URL
-        const verificationBaseUrl = process.env.NODE_ENV === 'development' 
-          ? (baseUrl.includes('localhost') ? baseUrl : 'http://localhost:3000')
-          : emailConfig.appUrl;
-        const verificationUrl = `${verificationBaseUrl}/auth/verify-email?token=${verificationToken}`;
+        // Resolve base URL for verification link from environment
+        const baseUrl =
+          process.env.APP_URL ??
+          process.env.NEXT_PUBLIC_APP_URL ??
+          process.env.NEXTAUTH_URL;
+
+        if (!baseUrl) {
+          throw new Error("APP_URL is not defined");
+        }
+
+        const verificationUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
 
         safeLog.info("Sending verification email", {
           userId: user.id,

@@ -49,8 +49,15 @@ export async function POST(
 
     // Get payment provider
     const paymentProvider = getPaymentProvider(provider.toUpperCase() as "MBWAY" | "MULTIBANCO" | "PAYPAL");
-    
-    const baseUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+    const baseUrl =
+      process.env.APP_URL ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.NEXTAUTH_URL;
+
+    if (!baseUrl) {
+      throw new Error("APP_URL is not defined");
+    }
     const paymentResponse = await paymentProvider.createPayment({
       orderId: order.id,
       amount: order.totalCents,
