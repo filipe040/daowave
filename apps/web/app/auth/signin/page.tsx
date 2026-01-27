@@ -4,10 +4,12 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, Suspense } from "react";
+import { useSession } from "next-auth/react";
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { update: updateSession } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +46,9 @@ function SignInContent() {
         }
         setLoading(false);
       } else {
+        // Force session update
+        await updateSession();
+        
         // Send login notification (async, don't block)
         fetch("/api/auth/login-notification", {
           method: "POST",
@@ -53,7 +58,7 @@ function SignInContent() {
         });
 
         // Wait a moment for session to be established
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // Get user role from session to redirect appropriately
         try {
@@ -72,9 +77,12 @@ function SignInContent() {
             }
           }
 
-          window.location.href = redirectUrl;
+          // Use router.push instead of window.location.href to preserve session
+          router.push(redirectUrl);
+          router.refresh(); // Force refresh to update session
         } catch (err) {
-          window.location.href = "/";
+          router.push("/");
+          router.refresh();
         }
       }
     } catch (err) {

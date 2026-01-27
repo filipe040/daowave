@@ -128,6 +128,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.email = user.email;
+        token.name = user.name;
       }
       
       // For OAuth, fetch user from database
@@ -139,6 +141,8 @@ export const authOptions: NextAuthOptions = {
           if (dbUser) {
             token.id = dbUser.id;
             token.role = dbUser.role;
+            token.email = dbUser.email;
+            token.name = dbUser.name;
           }
         }
       }
@@ -149,6 +153,8 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string | null;
       }
       return session;
     },
