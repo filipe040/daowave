@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import PromoterSidebar from "../../../../components/promoter-sidebar";
 import NewCategoryModal from "./new-category-modal";
+import BadgeDesignerModal from "./badge-designer-modal";
 
 interface Event {
   id: string;
@@ -19,13 +20,20 @@ interface Stats {
   totalAudience: number;
 }
 
+interface BadgeDesign {
+  templateImageUrl: string | null;
+  prefix: string | null;
+}
+
 interface TicketingCenterContentProps {
   event: Event;
   stats: Stats;
+  badgeDesign?: BadgeDesign;
 }
 
-export default function TicketingCenterContent({ event, stats }: TicketingCenterContentProps) {
+export default function TicketingCenterContent({ event, stats, badgeDesign }: TicketingCenterContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBadgeDesignerOpen, setIsBadgeDesignerOpen] = useState(false);
   const revenueInEuros = (stats.validatedRevenue / 100).toFixed(2);
 
   return (
@@ -58,12 +66,23 @@ export default function TicketingCenterContent({ event, stats }: TicketingCenter
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-green-500 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase hover:bg-green-600 transition-colors whitespace-nowrap self-start sm:self-auto"
-              >
-                + NOVA CATEGORIA
-              </button>
+              <div className="flex gap-2 self-start sm:self-auto">
+                <button
+                  onClick={() => setIsBadgeDesignerOpen(true)}
+                  className="bg-blue-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase hover:bg-blue-700 transition-colors whitespace-nowrap flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                  Badge Designer
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-green-500 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm uppercase hover:bg-green-600 transition-colors whitespace-nowrap"
+                >
+                  + NOVA CATEGORIA
+                </button>
+              </div>
             </div>
           </div>
 
@@ -344,6 +363,22 @@ export default function TicketingCenterContent({ event, stats }: TicketingCenter
       {/* New Category Modal */}
       <NewCategoryModal
         isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        eventId={event.id}
+      />
+      
+      {/* Badge Designer Modal */}
+      {isBadgeDesignerOpen && (
+        <BadgeDesignerModal
+          eventId={event.id}
+          eventTitle={event.title}
+          currentDesign={badgeDesign}
+          onClose={() => setIsBadgeDesignerOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
         onClose={() => setIsModalOpen(false)}
         eventId={event.id}
       />

@@ -299,6 +299,9 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
         address: string;
         ticketCount: number;
         downloadLink?: string;
+        branding?: { primaryColor?: string; secondaryColor?: string; bannerUrl?: string; headerTitle?: string };
+        ticketCode?: string;
+        qrCodeImageUrl?: string;
       }));
       break;
     case "ticket-transfer":

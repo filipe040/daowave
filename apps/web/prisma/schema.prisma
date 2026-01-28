@@ -24,6 +24,7 @@ model User {
   validatorCheckins    CheckinLog[]      @relation("ValidatorCheckins")
   transferFromUser     TransferLog[]      @relation("TransferFromUser")
   transferToUser       TransferLog[]      @relation("TransferToUser")
+  eventTeamMembers     EventTeamMember[]
   
   @@index([email])
   @@index([emailVerificationToken])
@@ -63,12 +64,25 @@ model Event {
   coverImage  String?
   status      EventStatus  @default(DRAFT)
   createdAt   DateTime     @default(now())
-  
+  // Branding & Visual Protocol (Editor de Marca)
+  primaryColor        String?  // Cor primária da marca do evento
+  secondaryColor      String?  // Cor secundária da marca do evento
+  logoUrl             String?  // URL do logo do evento
+  bannerUrl           String?  // URL do banner/header do evento
+  fontFamily          String?  // Fonte personalizada (ex: "Inter", "Roboto")
+  // Landing Page customizada
+  landingPageContent  String?  @db.Text // HTML/JSON do conteúdo da landing page customizada
+  useCustomLandingPage Boolean @default(false) // Se deve usar landing page customizada
+  // Badge Designer (Template PDF do bilhete)
+  badgeTemplateImageUrl String? // URL da imagem template do badge/bilhete PDF
+  badgePrefix           String? @default("BADGE") // Prefixo para IDs dos badges gerados
+
   promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
   ticketLots   TicketLot[]
   orders      Order[]
   tickets     Ticket[]
   checkinLogs CheckinLog[]
+  teamMembers EventTeamMember[]
   
   @@index([slug])
   @@index([status])
@@ -213,6 +227,22 @@ enum OrderStatus {
   CANCELED
 }
 
+enum EventTeamRole {
+  ADMIN      // Acesso total ao evento
+  ORGANIZER  // Organizador principal
+  MANAGER    // Gestor operacional
+  STAFF      // Staff operacional
+  VIEWER     // Apenas visualização
+}
+
+enum EventTeamPermission {
+  CREATE_EVENTS     // Criar eventos
+  SELL_TICKETS      // Vender bilhetes
+  VALIDATE_ENTRIES  // Validar entradas
+  VIEW_REPORTS      // Ver relatórios
+  MANAGE_TEAMS      // Gerir equipas
+}
+
 model CheckinLog {
   id              String   @id @default(uuid())
   ticketId        String
@@ -252,4 +282,39 @@ model TransferLog {
   
   @@index([fromUserId])
   @@index([toUserId])
+}
+
+model EventTeamMember {
+  id          String            @id @default(uuid())
+  eventId     String
+  userId      String
+  role        EventTeamRole     @default(STAFF)
+  isActive    Boolean           @default(true)
+  isVolunteer Boolean           @default(false)
+  notes       String?           @db.Text
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now()) @updatedAt
+  lastAccessAt DateTime?
+  
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissions EventTeamMemberPermission[]
+  
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([role])
+  @@index([isActive])
+}
+
+model EventTeamMemberPermission {
+  id          String              @id @default(uuid())
+  memberId    String
+  permission  EventTeamPermission
+  
+  member      EventTeamMember     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  @@unique([memberId, permission])
+  @@index([memberId])
+  @@index([permission])
 }

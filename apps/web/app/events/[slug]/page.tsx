@@ -14,7 +14,26 @@ export const dynamic = 'force-dynamic';
 async function getEvent(slug: string) {
   return await prisma.event.findUnique({
     where: { slug },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      description: true,
+      venue: true,
+      city: true,
+      startAt: true,
+      endAt: true,
+      coverImage: true,
+      status: true,
+      // Branding
+      primaryColor: true,
+      secondaryColor: true,
+      logoUrl: true,
+      bannerUrl: true,
+      fontFamily: true,
+      // Landing Page
+      landingPageContent: true,
+      useCustomLandingPage: true,
       promoter: {
         include: {
           user: {
@@ -51,11 +70,59 @@ export default async function EventPage({
     notFound();
   }
 
+  // Se landing page customizada está ativa e tem conteúdo, renderizar HTML customizado
+  if (event.useCustomLandingPage && event.landingPageContent) {
+    const customHtml = event.landingPageContent
+      .replace(/\{eventTitle\}/g, event.title)
+      .replace(/\{eventDescription\}/g, event.description)
+      .replace(/\{eventDate\}/g, formatDate(event.startAt))
+      .replace(/\{venue\}/g, event.venue)
+      .replace(/\{city\}/g, event.city);
+    
+    return (
+      <div 
+        className="min-h-screen"
+        style={{
+          fontFamily: event.fontFamily || undefined,
+        } as React.CSSProperties}
+        dangerouslySetInnerHTML={{ __html: customHtml }}
+      />
+    );
+  }
+
+  // Landing page padrão com branding aplicado
+  const primaryColor = event.primaryColor || '#6C2BD9';
+  const secondaryColor = event.secondaryColor || '#06B6D4';
+  const fontFamily = event.fontFamily || undefined;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100"
+      style={{ fontFamily }}
+    >
+      <style jsx>{`
+        :root {
+          --event-primary: ${primaryColor};
+          --event-secondary: ${secondaryColor};
+        }
+        .event-primary { color: ${primaryColor}; }
+        .event-secondary { color: ${secondaryColor}; }
+        .bg-event-primary { background-color: ${primaryColor}; }
+        .bg-event-secondary { background-color: ${secondaryColor}; }
+        .border-event-primary { border-color: ${primaryColor}; }
+      `}</style>
       <div className="container mx-auto px-4 py-12">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {event.coverImage && (
+          {/* Banner customizado ou cover image */}
+          {event.bannerUrl ? (
+            <div className="relative h-96 w-full">
+              <img
+                src={event.bannerUrl}
+                alt={event.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : event.coverImage ? (
             <div className="relative h-96 w-full">
               <Image
                 src={event.coverImage}
@@ -64,10 +131,20 @@ export default async function EventPage({
                 className="object-cover"
               />
             </div>
-          )}
+          ) : null}
           
           <div className="p-8">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            {/* Logo se disponível */}
+            {event.logoUrl && (
+              <div className="mb-4">
+                <img src={event.logoUrl} alt={`${event.title} logo`} className="h-16 w-auto object-contain" />
+              </div>
+            )}
+            
+            <h1 
+              className="text-4xl font-bold mb-4"
+              style={{ color: primaryColor }}
+            >
               {event.title}
             </h1>
             

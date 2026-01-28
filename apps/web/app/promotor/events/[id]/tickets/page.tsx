@@ -20,7 +20,12 @@ async function getEventData(eventId: string, userId: string) {
       id: eventId,
       promoterId: promoter.id,
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      badgeTemplateImageUrl: true,
+      badgePrefix: true,
       ticketLots: {
         include: {
           _count: {
@@ -119,5 +124,18 @@ export default async function EventTicketsPage({
     );
   }
 
-  return <TicketingCenterContent event={data.event} stats={data.stats} />;
+  return (
+    <TicketingCenterContent
+      event={{
+        id: data.event.id,
+        title: data.event.title,
+        slug: data.event.slug,
+      }}
+      stats={data.stats}
+      badgeDesign={{
+        templateImageUrl: data.event.badgeTemplateImageUrl,
+        prefix: data.event.badgePrefix,
+      }}
+    />
+  );
 }

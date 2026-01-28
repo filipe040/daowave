@@ -190,8 +190,17 @@ export function getOrderConfirmationEmailTemplate(variables: {
   };
 }
 
+/** Branding for ticket email (Protocolo Visual) */
+export type TicketEmailBranding = {
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  bannerUrl?: string | null;
+  headerTitle?: string | null;
+};
+
 /**
  * Ticket Delivery Template
+ * Uses event branding (primary color, banner URL) when provided for the email ticket design.
  */
 export function getTicketEmailTemplate(variables: {
   name: string;
@@ -201,22 +210,40 @@ export function getTicketEmailTemplate(variables: {
   address: string;
   ticketCount: number;
   downloadLink?: string;
+  branding?: TicketEmailBranding | null;
+  ticketCode?: string | null;
+  qrCodeImageUrl?: string | null;
 }): { subject: string; html: string; text: string } {
+  const primaryColor = variables.branding?.primaryColor || "#6C2BD9";
+  const headerTitle = variables.branding?.headerTitle?.trim() || "O teu bilhete";
+  const bannerUrl = variables.branding?.bannerUrl?.trim();
+
   const downloadSection = variables.downloadLink
     ? `
     <div style="background: #f0f0f0; padding: 20px; margin: 20px 0; border-radius: 8px;">
       <p><strong>Descarregar bilhetes:</strong></p>
       <p style="text-align: center;">
-        <a href="${variables.downloadLink}" class="button">Descarregar PDF</a>
+        <a href="${variables.downloadLink}" style="display: inline-block; background: ${primaryColor}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Descarregar PDF</a>
       </p>
     </div>
   `
     : "";
 
-  const content = `
-    <p>Olá <strong>${variables.name}</strong>,</p>
+  const qrSection =
+    variables.qrCodeImageUrl || variables.ticketCode
+      ? `
+    <p style="font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;"><strong>MOSTRE ESTE CÓDIGO QR NA ENTRADA:</strong></p>
+    ${variables.qrCodeImageUrl ? `<p style="text-align: center; margin: 16px 0;"><img src="${variables.qrCodeImageUrl}" alt="QR Code" width="180" height="180" style="max-width: 180px; height: auto;" /></p>` : ""}
+    ${variables.ticketCode ? `<p style="text-align: center; font-family: monospace; font-size: 16px; font-weight: bold; color: #333; margin: 8px 0;">${variables.ticketCode}</p>` : ""}
+    <p style="font-size: 11px; color: #666; margin-top: 12px;">Se o QR code não aparecer, use o código acima.</p>
+  `
+      : "";
+
+  const bodyContent = `
+    <p>Olá <strong>${variables.name}</strong>, aqui está o teu acesso.</p>
+    ${qrSection}
     <p>Os seus bilhetes para <strong>${variables.eventTitle}</strong> estão prontos!</p>
-    <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea;">
+    <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid ${primaryColor};">
       <h3 style="margin-top: 0;">Detalhes do Evento</h3>
       <p><strong>Evento:</strong> ${variables.eventTitle}</p>
       <p><strong>Data:</strong> ${variables.eventDate}</p>
@@ -234,10 +261,49 @@ export function getTicketEmailTemplate(variables: {
     </ul>
   `;
 
+  const betaBanner = getConfig().mode === "public_beta"
+    ? `<div style="background: #ffc107; color: #000; padding: 15px; margin-bottom: 20px; border-radius: 5px; text-align: center; font-weight: bold;">⚠️ AMBIENTE BETA</div>`
+    : "";
+
+  const ticketHeader = bannerUrl
+    ? `<div style="width: 100%; max-height: 120px; overflow: hidden; text-align: center;"><img src="${bannerUrl}" alt="" style="max-width: 100%; height: auto; max-height: 120px; object-fit: cover;" /></div><div style="background: ${primaryColor}; color: white; padding: 16px 24px; text-align: center;"><h1 style="margin: 0; font-size: 22px; font-weight: 600;">${headerTitle}</h1></div>`
+    : `<div style="background: ${primaryColor}; color: white; padding: 24px 30px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px;"><span style="font-size: 20px;">🎫</span><h1 style="margin: 0; font-size: 22px; font-weight: 600;">${headerTitle}</h1></div>`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; margin: 0; padding: 0; }
+          .email-container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+          .content { padding: 30px; background: #ffffff; }
+          .footer { background: #f9f9f9; padding: 20px 30px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #e0e0e0; }
+        </style>
+      </head>
+      <body>
+        <div style="padding: 20px;">
+          <div class="email-container">
+            ${ticketHeader}
+            <div class="content">
+              ${betaBanner}
+              ${bodyContent}
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} DãoWave. Todos os direitos reservados.</p>
+              <p>Se não solicitou este email, pode ignorá-lo com segurança.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
   return {
     subject: `Os seus bilhetes para ${variables.eventTitle}`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nBilhetes para ${variables.eventTitle}\nData: ${variables.eventDate}\nLocal: ${variables.venueName}`,
+    html,
+    text: `Olá ${variables.name},\n\nBilhetes para ${variables.eventTitle}\nData: ${variables.eventDate}\nLocal: ${variables.venueName}${variables.ticketCode ? `\nCódigo: ${variables.ticketCode}` : ""}`,
   };
 }
 
