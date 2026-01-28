@@ -379,9 +379,3 @@ export default function TicketingCenterContent({ event, stats, badgeDesign }: Ti
     </div>
   );
 }
-        onClose={() => setIsModalOpen(false)}
-        eventId={event.id}
-      />
-    </div>
-  );
-}

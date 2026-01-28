@@ -98,9 +98,9 @@ export default async function EventPage({
   return (
     <div 
       className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100"
-      style={{ fontFamily }}
+      style={{ fontFamily } as React.CSSProperties}
     >
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         :root {
           --event-primary: ${primaryColor};
           --event-secondary: ${secondaryColor};
@@ -110,7 +110,7 @@ export default async function EventPage({
         .bg-event-primary { background-color: ${primaryColor}; }
         .bg-event-secondary { background-color: ${secondaryColor}; }
         .border-event-primary { border-color: ${primaryColor}; }
-      `}</style>
+      ` }} />
       <div className="container mx-auto px-4 py-12">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Banner customizado ou cover image */}
