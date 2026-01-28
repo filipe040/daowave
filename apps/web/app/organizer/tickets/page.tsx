@@ -9,6 +9,39 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+type TicketRow = {
+  id: string;
+  eventId: string;
+  checkedInAt: Date | null;
+  createdAt: Date;
+  // New fields (optional when DB not migrated)
+  entriesUsed?: number;
+  lastCheckinAt?: Date | null;
+  ticketLot: { name: string };
+  event: {
+    id: string;
+    title: string;
+    slug: string;
+    startAt: Date;
+    // New fields (optional when DB not migrated)
+    checkinMode?: string | null;
+    maxEntries?: number | null;
+  };
+  // Legacy/unknown fields used by UI (may be absent)
+  attendeeName?: string | null;
+  attendeeEmail?: string | null;
+};
+
+function getEntriesUsed(ticket: TicketRow) {
+  if (typeof ticket.entriesUsed === "number") return ticket.entriesUsed;
+  return ticket.checkedInAt ? 1 : 0;
+}
+
+function getMaxEntries(ticket: TicketRow) {
+  if (ticket.event?.checkinMode === "MULTI") return ticket.event.maxEntries ?? Infinity;
+  return 1;
+}
+
 export default async function OrganizerTicketsPage() {
   const session = await getServerSession(authOptions);
 
@@ -25,39 +58,67 @@ export default async function OrganizerTicketsPage() {
   }
 
   // Get all tickets for this organizer's events
-  const tickets = await prisma.ticket.findMany({
-    where: {
-      event: {
-        promoterId: organizerProfile.id,
-      },
-    },
-    include: {
-      event: {
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          startAt: true,
+  let tickets: TicketRow[] = [];
+  try {
+    // Prefer the "new schema" selection (will fail if DB is not migrated yet)
+    tickets = await prisma.ticket.findMany({
+      where: {
+        event: {
+          promoterId: organizerProfile.id,
         },
       },
-      ticketLot: true,
-      order: {
-        select: {
-          id: true,
-          // paidAt removed - not in schema
-          user: {
-            select: {
-              name: true,
-              email: true,
-            },
+      select: {
+        id: true,
+        eventId: true,
+        checkedInAt: true,
+        createdAt: true,
+        entriesUsed: true,
+        lastCheckinAt: true,
+        ticketLot: { select: { name: true } },
+        event: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            startAt: true,
+            checkinMode: true,
+            maxEntries: true,
           },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error: any) {
+    // Fallback: DB not migrated (missing columns) → fetch only "old schema" fields
+    const msg = String(error?.message || "");
+    if (error?.code === "P2021" || msg.includes("Unknown column") || msg.includes("does not exist")) {
+      tickets = await prisma.ticket.findMany({
+        where: {
+          event: {
+            promoterId: organizerProfile.id,
+          },
+        },
+        select: {
+          id: true,
+          eventId: true,
+          checkedInAt: true,
+          createdAt: true,
+          ticketLot: { select: { name: true } },
+          event: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              startAt: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } else {
+      throw error;
+    }
+  }
 
   // Statistics
   const totalTickets = tickets.length;
@@ -129,7 +190,10 @@ export default async function OrganizerTicketsPage() {
           {Object.values(ticketsByEvent).map((group: any) => {
             const eventTickets = group.tickets;
             const eventIssued = eventTickets.filter((t: any) => !t.checkedInAt).length;
-            const eventCheckedIn = eventTickets.filter((t: any) => (t.entriesUsed as number) > 0).length;
+            const eventCheckedIn = eventTickets.filter((t: any) => {
+              const tu = getEntriesUsed(t as TicketRow);
+              return tu > 0;
+            }).length;
 
             return (
               <div
@@ -195,12 +259,17 @@ export default async function OrganizerTicketsPage() {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            {(ticket.entriesUsed as number) || 0} /{" "}
-                            {ticket.event.checkinMode === "MULTI" ? ticket.event.maxEntries || "∞" : "1"}
+                            {getEntriesUsed(ticket as TicketRow)} /{" "}
+                            {(() => {
+                              const max = getMaxEntries(ticket as TicketRow);
+                              return max === Infinity ? "∞" : String(max);
+                            })()}
                           </td>
                           <td className="py-3 px-4 text-sm text-zinc-400">
-                            {ticket.lastCheckinAt
-                              ? format(new Date(ticket.lastCheckinAt as Date), "dd MMM, HH:mm", { locale: pt })
+                            {(ticket as TicketRow).lastCheckinAt || ticket.checkedInAt
+                              ? format(new Date(((ticket as TicketRow).lastCheckinAt || ticket.checkedInAt) as Date), "dd MMM, HH:mm", {
+                                  locale: pt,
+                                })
                               : "-"}
                           </td>
                         </tr>
