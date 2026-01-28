@@ -8,12 +8,23 @@ export async function GET(req: Request) {
   const baseUrl =
     process.env.APP_URL ??
     process.env.NEXT_PUBLIC_APP_URL ??
-    process.env.NEXTAUTH_URL;
+    process.env.NEXTAUTH_URL ??
+    (() => {
+      try {
+        const u = new URL(req.url);
+        return `${u.origin}`;
+      } catch {
+        return null;
+      }
+    })();
 
   if (!baseUrl) {
-    throw new Error("APP_URL is not defined");
+    return NextResponse.json(
+      { error: "Configuração do servidor incompleta (APP_URL). Tente mais tarde." },
+      { status: 503 }
+    );
   }
-  
+
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
@@ -58,7 +69,7 @@ export async function GET(req: Request) {
     // Check if already verified
     if (user.emailVerified) {
       safeLog.info("Email already verified", { userId: user.id });
-      return NextResponse.redirect(`${baseUrl}/auth/signin?verified=true`);
+      return NextResponse.redirect(`${baseUrl}/auth/verify-email?verified=true`);
     }
 
     // Check expiration
@@ -96,7 +107,7 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=verification_failed`);
     }
 
-    return NextResponse.redirect(`${baseUrl}/auth/signin?verified=true`);
+    return NextResponse.redirect(`${baseUrl}/auth/verify-email?verified=true`);
   } catch (error: any) {
     safeLog.error("Unexpected error verifying email", { 
       error: error.message,

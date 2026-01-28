@@ -16,9 +16,9 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="pt" suppressHydrationWarning>
-      <body>
+      <body className="bg-background text-foreground">
         <Providers>
-          <div className="min-h-screen bg-black text-white">
+          <div className="min-h-screen">
             <BetaBanner />
             <ConditionalNav />
             <main className="min-h-screen">{children}</main>

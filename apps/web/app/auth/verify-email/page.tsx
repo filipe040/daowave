@@ -6,7 +6,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 
 function VerifyEmailContent() {
@@ -15,9 +15,18 @@ function VerifyEmailContent() {
   const token = searchParams.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
   const [message, setMessage] = useState('');
+  const verificationStarted = useRef(false);
 
   useEffect(() => {
     const error = searchParams.get('error');
+    const verified = searchParams.get('verified');
+
+    if (verified === 'true') {
+      setStatus('success');
+      setMessage('Email verificado com sucesso!');
+      return;
+    }
+
     if (error) {
       if (error === 'expired_token') {
         setStatus('expired');
@@ -29,19 +38,23 @@ function VerifyEmailContent() {
       return;
     }
 
-    if (token) {
-      verifyEmail(token);
-    } else {
+    if (!token) {
       setStatus('error');
       setMessage('Token de verificação não encontrado');
+      return;
     }
+
+    if (verificationStarted.current) return;
+    verificationStarted.current = true;
+    verifyEmail(token);
   }, [token, searchParams]);
 
   const verifyEmail = async (verificationToken: string) => {
     try {
-      const res = await fetch(`/api/auth/verify-email?token=${verificationToken}`, {
-        redirect: 'manual', // Don't follow redirects automatically
-      });
+      const res = await fetch(
+        `/api/auth/verify-email?token=${encodeURIComponent(verificationToken)}`,
+        { redirect: 'manual' }
+      );
       
       // Check if response is a redirect
       if (res.status >= 300 && res.status < 400) {
@@ -75,8 +88,13 @@ function VerifyEmailContent() {
         setStatus('success');
         setMessage('Email verificado com sucesso!');
       } else {
+        let errMsg = `Erro ao verificar email (${res.status}). Tente novamente.`;
+        try {
+          const data = await res.json();
+          if (data?.error && typeof data.error === 'string') errMsg = data.error;
+        } catch (_) {}
         setStatus('error');
-        setMessage(`Erro ao verificar email (${res.status}). Tente novamente.`);
+        setMessage(errMsg);
       }
     } catch (error: any) {
       console.error('Error verifying email:', error);

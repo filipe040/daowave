@@ -150,7 +150,8 @@ export async function POST(req: Request) {
           throw new Error("APP_URL is not defined");
         }
 
-        const verificationUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
+        // Link goes to API so the browser is redirected by the server (no client fetch)
+        const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`;
 
         safeLog.info("Sending verification email", {
           userId: user.id,

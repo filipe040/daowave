@@ -1,10 +1,13 @@
-"use client";
+ "use client";
 
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function SignInContent() {
   const router = useRouter();
@@ -46,10 +49,10 @@ function SignInContent() {
         }
         setLoading(false);
       } else {
-        // Force session update
+        // Atualizar sessão
         await updateSession();
-        
-        // Send login notification (async, don't block)
+
+        // Notificação de login (assíncrona)
         fetch("/api/auth/login-notification", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -57,10 +60,10 @@ function SignInContent() {
           console.error("Error sending login notification:", err);
         });
 
-        // Wait a moment for session to be established
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Get user role from session to redirect appropriately
+        // Pequeno delay para garantir que a sessão está propagada
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Obter role do utilizador para redireciono adequado
         try {
           const sessionRes = await fetch("/api/auth/session");
           const sessionData = await sessionRes.json();
@@ -77,104 +80,97 @@ function SignInContent() {
             }
           }
 
-          // Use router.push instead of window.location.href to preserve session
           router.push(redirectUrl);
-          router.refresh(); // Force refresh to update session
-        } catch (err) {
+          router.refresh();
+        } catch {
           router.push("/");
           router.refresh();
         }
       }
-    } catch (err) {
+    } catch {
       setError("Erro ao fazer login");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      {/* Login Card */}
-      <div className="w-full max-w-md">
-        <div className="bg-zinc-900 rounded-2xl p-8 md:p-10 border border-purple-500/30 shadow-2xl shadow-purple-500/10">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-white uppercase mb-2">
-              WELCOME BACK
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
+      <div className="mx-auto max-w-md">
+        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl">
+          <div className="mb-8 md:mb-10 text-center space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Entrar
             </h1>
-            <p className="text-sm md:text-base text-white uppercase tracking-wide">
-              ENTER YOUR DETAILS TO ACCESS YOUR ACCOUNT
+            <p className="text-base md:text-lg text-zinc-400">
+              Aceda à sua conta para gerir bilhetes e eventos.
             </p>
           </div>
 
-          {/* Success/Error Messages */}
           {verified && (
-            <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-4 text-sm text-green-400">
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
               ✅ Email verificado com sucesso! Por favor, faça login.
             </div>
           )}
 
           {emailNotVerified && (
-            <div className="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">
+            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm md:text-base text-red-400">
               ❌ O seu email ainda não foi verificado. Por favor, verifique a sua caixa de entrada.
             </div>
           )}
 
           {registered && (
-            <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-4 text-sm text-green-400">
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
               ✅ Conta criada com sucesso! Verifique o seu email para ativar a conta.
             </div>
           )}
 
           {passwordReset && (
-            <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-4 text-sm text-green-400">
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
               ✅ Palavra-passe redefinida com sucesso! Por favor, faça login.
             </div>
           )}
 
           {error && (
-            <div className="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">
+            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm md:text-base text-red-400">
               {error}
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-white text-sm uppercase tracking-wide mb-2">
-                EMAIL ADDRESS
-              </label>
-              <input
+          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-base md:text-sm font-semibold text-zinc-300">
+                Email
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="w-full rounded-lg border border-purple-500/50 bg-blue-900/20 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                 placeholder="name@example.com"
+                className="h-11 md:h-12 text-base md:text-sm"
               />
             </div>
 
-            {/* Password Field */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-white text-sm uppercase tracking-wide">
-                  PASSWORD
-                </label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-base md:text-sm font-semibold text-zinc-300">
+                  Palavra-passe
+                </Label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-purple-400 hover:text-purple-300 text-sm uppercase tracking-wide transition-colors"
+                  className="text-sm md:text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors"
                 >
-                  FORGOT?
+                  Esqueceu-se?
                 </Link>
               </div>
               <div className="relative">
-                <input
+                <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="w-full rounded-lg border border-purple-500/50 bg-blue-900/20 px-4 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   placeholder="••••••••"
+                  className="pr-12 h-11 md:h-12 text-base md:text-sm"
                 />
                 <button
                   type="button"
@@ -184,59 +180,71 @@ function SignInContent() {
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18"
+                      />
                     </svg>
                   ) : (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Login Button */}
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-11 md:h-12 text-sm md:text-base font-bold uppercase tracking-wide flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
-                  LOGGING IN...
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  A entrar...
                 </span>
               ) : (
                 <>
-                  LOGIN
+                  Entrar
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
-          {/* Separator */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-700"></div>
+              <div className="w-full border-t border-zinc-700" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 bg-zinc-900 text-white text-sm uppercase tracking-wide">
-                OR CONTINUE WITH
+              <span className="px-4 bg-zinc-800/60 text-zinc-400 text-xs md:text-sm tracking-wide uppercase">
+                Ou continue com
               </span>
             </div>
           </div>
 
-          {/* Social Login Buttons */}
           <div className="space-y-3">
-            {/* Google Button */}
-            <button
+            <Button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: from })}
-              className="w-full bg-white text-black font-medium text-sm rounded-lg px-6 py-3 hover:bg-zinc-100 transition-colors flex items-center justify-center gap-3"
+              variant="outline"
+              className="w-full bg-white text-black hover:bg-zinc-100 flex items-center justify-center gap-3"
+              onClick={() => signIn("google", { callbackUrl: from })}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -256,29 +264,31 @@ function SignInContent() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span>SIGN IN WITH GOOGLE</span>
-            </button>
+              <span className="text-sm md:text-base font-medium">Entrar com Google</span>
+            </Button>
 
-            {/* Apple Button */}
-            <button
+            <Button
               type="button"
-              onClick={() => signIn('apple', { callbackUrl: from })}
-              className="w-full bg-black text-white font-medium text-sm rounded-lg px-6 py-3 hover:bg-zinc-900 transition-colors flex items-center justify-center gap-3 border border-zinc-800"
+              variant="outline"
+              className="w-full bg-black text-white border-zinc-800 hover:bg-zinc-900 flex items-center justify-center gap-3"
+              onClick={() => signIn("apple", { callbackUrl: from })}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l-.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29-2.58-2.34-4.5-3.74-4.25z" />
               </svg>
-              <span>SIGN IN WITH APPLE</span>
-            </button>
+              <span className="text-sm md:text-base font-medium">Entrar com Apple</span>
+            </Button>
           </div>
         </div>
 
-        {/* Footer Link */}
         <div className="mt-8 text-center">
-          <p className="text-white text-sm">
-            DON'T HAVE AN ACCOUNT?{" "}
-            <Link href="/auth/signup" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
-              JOIN 5IVE TICKETS
+          <p className="text-zinc-300 text-sm md:text-base">
+            Ainda não tem conta?{" "}
+            <Link
+              href="/auth/signup"
+              className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+            >
+              Criar conta
             </Link>
           </p>
         </div>
@@ -289,20 +299,20 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="bg-zinc-900 rounded-2xl p-8 md:p-10 border border-purple-500/30">
-            <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-white uppercase mb-2">
-                WELCOME BACK
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
+          <div className="mx-auto max-w-md">
+            <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
+                Entrar
               </h1>
-              <p className="text-sm text-white uppercase">A carregar...</p>
+              <p className="text-sm md:text-base text-zinc-400">A carregar...</p>
             </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SignInContent />
     </Suspense>
   );
