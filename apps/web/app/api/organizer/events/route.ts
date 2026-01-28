@@ -196,23 +196,38 @@ export async function POST(req: Request) {
     }
 
     // Create event
+    const eventData: any = {
+      promoterId: organizerProfile.id,
+      title: data.title,
+      slug: data.slug,
+      description: data.description,
+      category: data.category || null,
+      venueName: data.venueName,
+      address: data.address,
+      city: data.city,
+      startAt,
+      endAt,
+      timezone: data.timezone,
+    };
+
+    // Add check-in fields only if they exist (migration applied)
+    try {
+      // Test if fields exist by trying to query them
+      await prisma.$queryRaw`SELECT checkinMode FROM Event LIMIT 1`.catch(() => {
+        throw new Error("Fields don't exist");
+      });
+      // Fields exist, add them
+      eventData.checkinMode = data.checkinMode;
+      eventData.maxEntries = data.maxEntries || null;
+      eventData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
+      eventData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
+    } catch {
+      // Fields don't exist, skip them
+    }
+
     const event = await prisma.event.create({
       data: {
-        promoterId: organizerProfile.id,
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        category: data.category || null,
-        venueName: data.venueName,
-        address: data.address,
-        city: data.city,
-        startAt,
-        endAt,
-        timezone: data.timezone,
-        checkinMode: data.checkinMode,
-        maxEntries: data.maxEntries || null,
-        checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
-        checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
+        ...eventData,
         capacityTotal: data.capacityTotal || null,
         ageRestriction: data.ageRestriction || null,
         refundPolicy: data.refundPolicy || null,

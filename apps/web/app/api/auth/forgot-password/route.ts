@@ -52,15 +52,27 @@ export async function POST(req: Request) {
     }
 
     // Generate reset token and save to DB
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordResetToken: resetToken,
-        passwordResetTokenExpiresAt: expiresAt,
-      },
-    });
+    try {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordResetToken: resetToken,
+          passwordResetTokenExpiresAt: expiresAt,
+        },
+      });
+    } catch (error: any) {
+      // If fields don't exist (migration not applied)
+      if (error?.code === "P2025" || error?.message?.includes("Unknown field")) {
+        safeLog.warn("Password reset fields not found. Please run Prisma migration.");
+        return NextResponse.json(
+          { message: "Funcionalidade temporariamente indisponível. Por favor, contacte o suporte." },
+          { status: 503 }
+        );
+      }
+      throw error;
+    }
 
     // Generate reset URL
     const emailConfig = getEmailConfig();

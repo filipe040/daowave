@@ -64,31 +64,43 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if code already exists
-    const existingCoupon = await prisma.coupon.findUnique({
-      where: { code: data.code },
-    });
+    // Check if Coupon table exists (migration applied)
+    try {
+      // Check if code already exists
+      const existingCoupon = await prisma.coupon.findUnique({
+        where: { code: data.code },
+      });
 
-    if (existingCoupon) {
-      return NextResponse.json(
-        { error: "Código já existe" },
-        { status: 400 }
-      );
+      if (existingCoupon) {
+        return NextResponse.json(
+          { error: "Código já existe" },
+          { status: 400 }
+        );
+      }
+
+      const coupon = await prisma.coupon.create({
+        data: {
+          eventId: data.eventId,
+          code: data.code,
+          discountType: data.discountType,
+          discountValue: data.discountValue,
+          maxUses: data.maxUses,
+          startsAt: new Date(data.startsAt),
+          endsAt: new Date(data.endsAt),
+        },
+      });
+
+      return NextResponse.json({ coupon }, { status: 201 });
+    } catch (error: any) {
+      // If table doesn't exist (migration not applied)
+      if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
+        return NextResponse.json(
+          { error: "Funcionalidade de cupões não disponível. Por favor, execute a migração do Prisma." },
+          { status: 503 }
+        );
+      }
+      throw error;
     }
-
-    const coupon = await prisma.coupon.create({
-      data: {
-        eventId: data.eventId,
-        code: data.code,
-        discountType: data.discountType,
-        discountValue: data.discountValue,
-        maxUses: data.maxUses,
-        startsAt: new Date(data.startsAt),
-        endsAt: new Date(data.endsAt),
-      },
-    });
-
-    return NextResponse.json({ coupon }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -120,22 +132,35 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Organizer not found" }, { status: 404 });
   }
 
-  const coupons = await prisma.coupon.findMany({
-    where: {
-      event: {
-        promoterId: organizer.id,
-      },
-    },
-    include: {
-      event: {
-        select: {
-          title: true,
-          slug: true,
+  // Try to fetch coupons, but handle case where table doesn't exist yet (migration not applied)
+  let coupons = [];
+  try {
+    coupons = await prisma.coupon.findMany({
+      where: {
+        event: {
+          promoterId: organizer.id,
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      include: {
+        event: {
+          select: {
+            title: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error: any) {
+    // If table doesn't exist (migration not applied), return empty array
+    if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
+      console.warn("Coupon table not found. Please run Prisma migration.");
+      coupons = [];
+    } else {
+      // Re-throw other errors
+      throw error;
+    }
+  }
 
   return NextResponse.json({ coupons });
 }

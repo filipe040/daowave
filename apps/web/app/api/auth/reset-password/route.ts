@@ -35,39 +35,50 @@ export async function POST(req: Request) {
       );
     }
 
-    // Find user by token
-    const user = await prisma.user.findUnique({
-      where: { passwordResetToken: token },
-    });
+    try {
+      // Find user by token
+      const user = await prisma.user.findUnique({
+        where: { passwordResetToken: token },
+      });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Token inválido ou expirado" },
-        { status: 400 }
-      );
+      if (!user) {
+        return NextResponse.json(
+          { error: "Token inválido ou expirado" },
+          { status: 400 }
+        );
+      }
+
+      if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
+        return NextResponse.json(
+          { error: "Token expirado" },
+          { status: 400 }
+        );
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update password and invalidate token
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordHash: hashedPassword,
+          passwordResetToken: null,
+          passwordResetTokenExpiresAt: null,
+        },
+      });
+
+      return NextResponse.json({ message: "Palavra-passe redefinida com sucesso" });
+    } catch (error: any) {
+      // If fields don't exist (migration not applied)
+      if (error?.code === "P2025" || error?.message?.includes("Unknown field")) {
+        return NextResponse.json(
+          { error: "Funcionalidade temporariamente indisponível. Por favor, contacte o suporte." },
+          { status: 503 }
+        );
+      }
+      throw error;
     }
-
-    if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
-      return NextResponse.json(
-        { error: "Token expirado" },
-        { status: 400 }
-      );
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Update password and invalidate token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordHash: hashedPassword,
-        passwordResetToken: null,
-        passwordResetTokenExpiresAt: null,
-      },
-    });
-
-    return NextResponse.json({ message: "Palavra-passe redefinida com sucesso" });
   } catch (error) {
     console.error("Error resetting password:", error);
     return NextResponse.json(

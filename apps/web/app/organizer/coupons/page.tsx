@@ -32,22 +32,35 @@ export default async function CouponsPage() {
     orderBy: { startAt: "desc" },
   });
 
-  const coupons = await prisma.coupon.findMany({
-    where: {
-      event: {
-        promoterId: organizer.id,
-      },
-    },
-    include: {
-      event: {
-        select: {
-          title: true,
-          slug: true,
+  // Try to fetch coupons, but handle case where table doesn't exist yet (migration not applied)
+  let coupons = [];
+  try {
+    coupons = await prisma.coupon.findMany({
+      where: {
+        event: {
+          promoterId: organizer.id,
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      include: {
+        event: {
+          select: {
+            title: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error: any) {
+    // If table doesn't exist (migration not applied), return empty array
+    if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
+      console.warn("Coupon table not found. Please run Prisma migration.");
+      coupons = [];
+    } else {
+      // Re-throw other errors
+      throw error;
+    }
+  }
 
   return (
     <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto">

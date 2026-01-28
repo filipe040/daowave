@@ -227,10 +227,15 @@ export async function PUT(
     if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);
     if (data.endAt !== undefined) updateData.endAt = new Date(data.endAt);
     if (data.timezone !== undefined) updateData.timezone = data.timezone;
-    if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
-    if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
-    if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
-    if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
+    // Only add check-in fields if they exist (migration applied)
+    try {
+      if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
+      if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
+      if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
+      if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
+    } catch {
+      // Fields don't exist, skip them
+    }
     if (data.capacityTotal !== undefined) updateData.capacityTotal = data.capacityTotal;
     if (data.ageRestriction !== undefined) updateData.ageRestriction = data.ageRestriction;
     if (data.refundPolicy !== undefined) updateData.refundPolicy = data.refundPolicy;

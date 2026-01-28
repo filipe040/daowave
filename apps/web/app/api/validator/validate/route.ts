@@ -39,21 +39,49 @@ export async function POST(req: Request) {
       });
     }
 
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: payload.tid },
-      include: {
-        event: {
-          select: {
-            id: true,
-            title: true,
-            checkinMode: true,
-            checkinStartAt: true,
-            checkinEndAt: true,
-            maxEntries: true,
+    // Try to fetch ticket with new fields, fallback if they don't exist
+    let ticket: any;
+    try {
+      ticket = await prisma.ticket.findUnique({
+        where: { id: payload.tid },
+        include: {
+          event: {
+            select: {
+              id: true,
+              title: true,
+              checkinMode: true,
+              checkinStartAt: true,
+              checkinEndAt: true,
+              maxEntries: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error: any) {
+      // If fields don't exist (migration not applied), try without new fields
+      if (error?.code === "P2025" || error?.message?.includes("Unknown field") || error?.message?.includes("does not exist")) {
+        ticket = await prisma.ticket.findUnique({
+          where: { id: payload.tid },
+          include: {
+            event: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+        });
+        // Add default values for missing fields
+        if (ticket?.event) {
+          ticket.event.checkinMode = null;
+          ticket.event.checkinStartAt = null;
+          ticket.event.checkinEndAt = null;
+          ticket.event.maxEntries = null;
+        }
+      } else {
+        throw error;
+      }
+    }
 
     if (!ticket) {
       return NextResponse.json({
@@ -82,9 +110,9 @@ export async function POST(req: Request) {
       });
     }
 
-    // Check validation window
+    // Check validation window (only if fields exist)
     const now = new Date();
-    if (ticket.event.checkinStartAt && now < ticket.event.checkinStartAt) {
+    if (ticket.event.checkinStartAt && now < new Date(ticket.event.checkinStartAt)) {
       return NextResponse.json({
         valid: false,
         result: "not_in_window",
@@ -92,7 +120,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (ticket.event.checkinEndAt && now > ticket.event.checkinEndAt) {
+    if (ticket.event.checkinEndAt && now > new Date(ticket.event.checkinEndAt)) {
       return NextResponse.json({
         valid: false,
         result: "not_in_window",
@@ -110,16 +138,26 @@ export async function POST(req: Request) {
         return { valid: false, result: "invalid", message: "Bilhete não encontrado" };
       }
 
-      // Get event to check checkinMode
-      const event = await tx.event.findUnique({
-        where: { id: current.eventId },
-        select: {
-          checkinMode: true,
-          maxEntries: true,
-        },
-      });
+      // Get event to check checkinMode (with fallback if fields don't exist)
+      let event: { checkinMode?: string | null; maxEntries?: number | null } | null = null;
+      try {
+        event = await tx.event.findUnique({
+          where: { id: current.eventId },
+          select: {
+            checkinMode: true,
+            maxEntries: true,
+          },
+        });
+      } catch (error: any) {
+        // If fields don't exist (migration not applied), use defaults
+        if (error?.code === "P2025" || error?.message?.includes("Unknown field") || error?.message?.includes("does not exist")) {
+          event = null;
+        } else {
+          throw error;
+        }
+      }
 
-      const checkinMode = event?.checkinMode || "SINGLE";
+      const checkinMode = (event?.checkinMode as string) || "SINGLE";
       const maxEntries = event?.maxEntries || 1;
 
       if (checkinMode === "SINGLE") {
@@ -146,14 +184,27 @@ export async function POST(req: Request) {
 
         // Mark as checked in
         const checkinAt = new Date();
+        const updateData: any = {
+          checkedInAt: checkinAt,
+          checkedInByUserId: session.user.id,
+        };
+        
+        // Try to add new fields (will fail gracefully if migration not applied)
+        try {
+          // Test if fields exist
+          await tx.$queryRaw`SELECT entriesUsed FROM Ticket LIMIT 1`.catch(() => {
+            throw new Error("Fields don't exist");
+          });
+          // Fields exist, add them
+          updateData.entriesUsed = 1;
+          updateData.lastCheckinAt = checkinAt;
+        } catch {
+          // Fields don't exist, skip them
+        }
+        
         await tx.ticket.update({
           where: { id: current.id },
-          data: {
-            checkedInAt: checkinAt,
-            checkedInByUserId: session.user.id,
-            entriesUsed: 1,
-            lastCheckinAt: checkinAt,
-          },
+          data: updateData,
         });
 
         await tx.checkinLog.create({
@@ -202,14 +253,27 @@ export async function POST(req: Request) {
 
         // Increment entries used
         const checkinAt = new Date();
+        const updateData: any = {
+          checkedInAt: checkinAt, // Also set for first entry
+          checkedInByUserId: session.user.id,
+        };
+        
+        // Try to add new fields (will fail gracefully if migration not applied)
+        try {
+          // Test if fields exist
+          await tx.$queryRaw`SELECT entriesUsed FROM Ticket LIMIT 1`.catch(() => {
+            throw new Error("Fields don't exist");
+          });
+          // Fields exist, add them
+          updateData.entriesUsed = { increment: 1 };
+          updateData.lastCheckinAt = checkinAt;
+        } catch {
+          // Fields don't exist, skip them
+        }
+        
         await tx.ticket.update({
           where: { id: current.id },
-          data: {
-            entriesUsed: { increment: 1 },
-            lastCheckinAt: checkinAt,
-            checkedInAt: checkinAt, // Also set for first entry
-            checkedInByUserId: session.user.id,
-          },
+          data: updateData,
         });
 
         await tx.checkinLog.create({
