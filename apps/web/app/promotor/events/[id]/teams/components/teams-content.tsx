@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import PromoterSidebar from "../../../../components/promoter-sidebar";
+import Breadcrumbs from "@/app/components/breadcrumbs";
 import RBACMatrix from "./rbac-matrix";
 import MemberFormModal from "./member-form-modal";
 
@@ -73,8 +74,16 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
 
       <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8">
+          {/* Breadcrumbs */}
+          <Breadcrumbs
+            items={[
+              { label: "ESTÚDIO", href: `/promotor/events/${event.id}` },
+              { label: "EQUIPAS", active: true },
+            ]}
+          />
+
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 mt-4">
             <div className="flex items-start gap-3 mb-2">
               <div className="w-10 h-10 border-2 border-white/30 flex items-center justify-center rounded-lg flex-shrink-0">
                 <span className="text-xs text-white/70 uppercase">HCM</span>

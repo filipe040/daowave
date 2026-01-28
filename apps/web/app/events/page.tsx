@@ -13,6 +13,7 @@ async function getEvents() {
     const events = await prisma.event.findMany({
       where: { 
         status: "PUBLISHED",
+        archivedAt: null, // Only show non-archived events
         // Show events that haven't ended yet (endAt >= today)
         endAt: { 
           gte: now, // Event hasn't ended yet

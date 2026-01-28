@@ -15,34 +15,106 @@ async function getEventData(eventId: string, userId: string) {
     return null;
   }
 
-  const event = await prisma.event.findFirst({
-    where: {
-      id: eventId,
-      promoterId: promoter.id,
-    },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      badgeTemplateImageUrl: true,
-      badgePrefix: true,
-      ticketLots: {
-        include: {
-          _count: {
-            select: {
-              tickets: true,
+  // Try to fetch with new badge fields; if they don't exist (DB not migrated), fall back gracefully
+  try {
+    const event = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+        promoterId: promoter.id,
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        badgeTemplateImageUrl: true,
+        badgePrefix: true,
+        ticketLots: {
+          include: {
+            _count: {
+              select: {
+                tickets: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!event) {
-    return null;
+    if (!event) {
+      return null;
+    }
+
+    return event;
+  } catch (error: any) {
+    const msg = String(error?.message || "");
+    if (error?.code === "P2021" || msg.includes("Unknown column") || msg.includes("does not exist")) {
+      // Fallback without badge-specific fields
+      const event = await prisma.event.findFirst({
+        where: {
+          id: eventId,
+          promoterId: promoter.id,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          ticketLots: {
+            include: {
+              _count: {
+                select: {
+                  tickets: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!event) return null;
+
+      return {
+        ...event,
+        badgeTemplateImageUrl: null as string | null,
+        badgePrefix: null as string | null,
+      };
+    }
+
+    throw error;
+  }
+}
+
+export default async function EventTicketsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    redirect("/promotor/login");
   }
 
-  // Calculate statistics
+  const userRole = (session.user as any).role;
+  if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <p>Acesso restrito a promotores.</p>
+      </div>
+    );
+  }
+
+  const event = await getEventData(id, session.user.id);
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <p>Evento não encontrado.</p>
+      </div>
+    );
+  }
+
+  // Calculate statistics (kept here so we can work with fallback event shape)
   const totalTickets = await prisma.ticket.count({
     where: { eventId: event.id },
   });
@@ -78,63 +150,25 @@ async function getEventData(eventId: string, userId: string) {
   });
 
   const conversionRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
-
   const expectedCheckIns = confirmedTickets;
-
-  return {
-    event,
-    stats: {
-      ticketsIssued: totalTickets,
-      confirmedSales: confirmedTickets,
-      validatedRevenue: totalRevenue._sum.totalCents || 0,
-      conversionRate,
-      totalAudience: expectedCheckIns,
-    },
-  };
-}
-
-export default async function EventTicketsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/promotor/login");
-  }
-
-  const userRole = (session.user as any).role;
-  if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <p>Acesso restrito a promotores.</p>
-      </div>
-    );
-  }
-
-  const data = await getEventData(id, session.user.id);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <p>Evento não encontrado.</p>
-      </div>
-    );
-  }
 
   return (
     <TicketingCenterContent
       event={{
-        id: data.event.id,
-        title: data.event.title,
-        slug: data.event.slug,
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
       }}
-      stats={data.stats}
+      stats={{
+        ticketsIssued: totalTickets,
+        confirmedSales: confirmedTickets,
+        validatedRevenue: totalRevenue._sum.totalCents || 0,
+        conversionRate,
+        totalAudience: expectedCheckIns,
+      }}
       badgeDesign={{
-        templateImageUrl: data.event.badgeTemplateImageUrl,
-        prefix: data.event.badgePrefix,
+        templateImageUrl: (event as any).badgeTemplateImageUrl ?? null,
+        prefix: (event as any).badgePrefix ?? null,
       }}
     />
   );

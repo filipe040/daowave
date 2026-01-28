@@ -13,6 +13,7 @@ async function getEvents() {
   return await prisma.event.findMany({
     where: {
       status: 'PUBLISHED',
+      archivedAt: null, // Only show non-archived events
       endAt: { gte: new Date() },
     },
     include: {

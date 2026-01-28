@@ -41,7 +41,7 @@ export async function GET(
       },
     });
 
-    if (!event || event.status !== 'PUBLISHED') {
+    if (!event || event.status !== 'PUBLISHED' || event.archivedAt !== null) {
       return NextResponse.json(
         { error: 'Event not found' },
         { status: 404 }

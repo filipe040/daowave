@@ -25,6 +25,7 @@ async function getEvent(slug: string) {
       endAt: true,
       coverImage: true,
       status: true,
+      archivedAt: true,
       // Branding
       primaryColor: true,
       secondaryColor: true,
@@ -66,7 +67,7 @@ export default async function EventPage({
   const { slug } = await params;
   const event = await getEvent(slug);
 
-  if (!event || event.status !== 'PUBLISHED') {
+  if (!event || event.status !== 'PUBLISHED' || (event as any).archivedAt !== null) {
     notFound();
   }
 

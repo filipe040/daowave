@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
-import EventDashboardContent from "./components/event-dashboard-content";
+import AssetsContent from "./components/assets-content";
 
 export const dynamic = "force-dynamic";
 
@@ -24,27 +24,6 @@ async function getEventData(eventId: string, userId: string) {
       id: true,
       title: true,
       slug: true,
-      status: true,
-      startAt: true,
-      endAt: true,
-      city: true,
-      venue: true,
-      archivedAt: true,
-      _count: {
-        select: {
-          tickets: true,
-          orders: true,
-        },
-      },
-      ticketLots: {
-        include: {
-          _count: {
-            select: {
-              tickets: true,
-            },
-          },
-        },
-      },
     },
   });
 
@@ -52,40 +31,34 @@ async function getEventData(eventId: string, userId: string) {
     return null;
   }
 
-  // Get stats
-  const totalTickets = await prisma.ticket.count({
-    where: { eventId: event.id },
-  });
+  // Try to fetch assets (will fail gracefully if table doesn't exist)
+  let assets: Array<{
+    id: string;
+    filename: string;
+    url: string;
+    mimeType: string;
+    size: number;
+    createdAt: Date;
+  }> = [];
 
-  const checkedInTickets = await prisma.ticket.count({
-    where: {
-      eventId: event.id,
-      checkedInAt: { not: null },
-    },
-  });
+  try {
+    assets = await prisma.eventAsset.findMany({
+      where: { eventId },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error: any) {
+    // Table doesn't exist yet (migration not applied)
+    if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
+      assets = [];
+    } else {
+      throw error;
+    }
+  }
 
-  const totalSales = await prisma.order.aggregate({
-    where: {
-      eventId: event.id,
-      status: "PAID",
-    },
-    _sum: {
-      totalCents: true,
-    },
-  });
-
-  return {
-    event,
-    stats: {
-      totalTickets,
-      checkedInTickets,
-      totalSales: totalSales._sum.totalCents || 0,
-      totalOrders: event._count.orders,
-    },
-  };
+  return { event, assets };
 }
 
-export default async function EventDashboardPage({
+export default async function EventAssetsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -116,13 +89,5 @@ export default async function EventDashboardPage({
     );
   }
 
-  return (
-    <EventDashboardContent
-      event={{
-        ...data.event,
-        archivedAt: (data.event as any).archivedAt || null,
-      }}
-      stats={data.stats}
-    />
-  );
+  return <AssetsContent event={data.event} initialAssets={data.assets} />;
 }

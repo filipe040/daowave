@@ -49,8 +49,11 @@ export default function OrganizerSidebar() {
       </nav>
       
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-800">
-        <div className="text-xs text-zinc-500 mb-2">
+        <div className="text-xs text-zinc-500 mb-1">
           Logado como:
+        </div>
+        <div className="text-xs uppercase tracking-wider text-zinc-400 mb-1">
+          {(session?.user as any)?.role || "USER"}
         </div>
         <div className="text-sm font-medium text-zinc-300 truncate">
           {session?.user?.email}

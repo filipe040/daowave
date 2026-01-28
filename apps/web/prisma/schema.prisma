@@ -66,6 +66,7 @@ model Event {
   endAt       DateTime
   coverImage  String?
   status      EventStatus  @default(DRAFT)
+  archivedAt  DateTime?    // Data de arquivamento (null = não arquivado)
   createdAt   DateTime     @default(now())
   // Branding & Visual Protocol (Editor de Marca)
   primaryColor        String?  // Cor primária da marca do evento
@@ -92,6 +93,7 @@ model Event {
   checkinLogs CheckinLog[]
   teamMembers EventTeamMember[]
   coupons     Coupon[]
+  assets      EventAsset[]
   
   @@index([slug])
   @@index([status])
@@ -321,6 +323,21 @@ model Coupon {
   @@index([code])
   @@index([isActive])
   @@index([endsAt])
+}
+
+model EventAsset {
+  id          String   @id @default(uuid())
+  eventId     String
+  filename    String
+  url         String   // URL pública do asset (ex: /uploads/events/{eventId}/{filename})
+  mimeType    String   // image/png, image/jpeg, etc.
+  size        Int      // Tamanho em bytes
+  createdAt   DateTime @default(now())
+  
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@index([eventId])
+  @@index([createdAt])
 }
 
 model EventTeamMember {

@@ -9,6 +9,7 @@ export const revalidate = 0;
 async function getEvents(searchParams: { search?: string; city?: string; category?: string }) {
   const where: any = {
     status: "PUBLISHED",
+    archivedAt: null, // Only show non-archived events
     endAt: { gte: new Date() },
   };
 

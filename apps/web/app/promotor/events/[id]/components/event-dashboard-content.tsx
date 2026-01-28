@@ -2,7 +2,65 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PromoterSidebar from "../../../components/promoter-sidebar";
+import Breadcrumbs from "@/app/components/breadcrumbs";
+
+function ArchiveButton({ eventId, eventStatus, archivedAt }: { eventId: string; eventStatus: string; archivedAt: Date | string | null }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const isArchived = archivedAt !== null;
+  const canArchive = eventStatus === "PUBLISHED";
+
+  const handleArchive = async () => {
+    if (!canArchive && !isArchived) {
+      alert("Apenas eventos publicados podem ser arquivados");
+      return;
+    }
+
+    if (!confirm(isArchived ? "Tem a certeza que deseja re-publicar este evento?" : "Tem a certeza que deseja arquivar este evento?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/promotor/events/${eventId}/archive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archive: !isArchived }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Erro ao arquivar evento");
+      }
+
+      router.refresh();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao arquivar evento");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!canArchive && !isArchived) {
+    return null; // Don't show button if event is not published and not archived
+  }
+
+  return (
+    <button
+      onClick={handleArchive}
+      disabled={loading}
+      className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs uppercase font-semibold whitespace-nowrap transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        isArchived
+          ? "bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30"
+          : "bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30"
+      }`}
+    >
+      {loading ? "..." : isArchived ? "RE-PUBLICAR" : "ARQUIVAR"}
+    </button>
+  );
+}
 
 interface Event {
   id: string;
@@ -13,6 +71,7 @@ interface Event {
   endAt: Date | string;
   city: string;
   venue: string;
+  archivedAt?: Date | string | null;
   _count: {
     tickets: number;
     orders: number;
@@ -60,14 +119,13 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-          {/* Header */}
-          <div className="mb-4 sm:mb-6">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">STUDIO</span>
-              <span className="text-white/30">/</span>
-              <span className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">DASHBOARD</span>
-            </div>
-          </div>
+          {/* Breadcrumbs */}
+          <Breadcrumbs
+            items={[
+              { label: "ESTÚDIO", href: `/promotor/events/${event.id}` },
+              { label: "DASHBOARD", active: true },
+            ]}
+          />
 
           {/* Event Header Card */}
           <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 lg:p-6">
@@ -97,12 +155,13 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                 </div>
               </div>
               <div className="flex gap-2 sm:gap-3 flex-shrink-0">
-                <button className="px-3 py-1.5 sm:px-4 sm:py-2 border border-white/20 rounded-lg text-white hover:border-white/40 transition-colors text-xs uppercase font-semibold whitespace-nowrap">
+                <Link
+                  href={`/promotor/events/${event.id}/settings`}
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 border border-white/20 rounded-lg text-white hover:border-white/40 transition-colors text-xs uppercase font-semibold whitespace-nowrap"
+                >
                   DEFINIÇÕES
-                </button>
-                <button className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors text-xs uppercase font-semibold whitespace-nowrap">
-                  ARQUIVAR
-                </button>
+                </Link>
+                <ArchiveButton eventId={event.id} eventStatus={event.status} archivedAt={null} />
               </div>
             </div>
           </div>
@@ -202,7 +261,10 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                   </div>
                 </div>
               </div>
-              <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105">
+              <Link
+                href={`/promotor/events/${event.id}/assets`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +273,7 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                   </div>
                   <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-blue-400 transition-colors">BIBLIOTECA ASSETS</h3>
                 </div>
-              </div>
+              </Link>
               <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">

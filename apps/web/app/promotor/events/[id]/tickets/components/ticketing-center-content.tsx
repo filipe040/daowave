@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import PromoterSidebar from "../../../../components/promoter-sidebar";
+import Breadcrumbs from "@/app/components/breadcrumbs";
 import NewCategoryModal from "./new-category-modal";
 import BadgeDesignerModal from "./badge-designer-modal";
 
@@ -44,8 +45,16 @@ export default function TicketingCenterContent({ event, stats, badgeDesign }: Ti
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8">
+          {/* Breadcrumbs */}
+          <Breadcrumbs
+            items={[
+              { label: "ESTÚDIO", href: `/promotor/events/${event.id}` },
+              { label: "BILHÉTICA & RECEITA", active: true },
+            ]}
+          />
+
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 mt-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 lg:w-7 lg:h-7 border-2 border-green-500 flex items-center justify-center flex-shrink-0">

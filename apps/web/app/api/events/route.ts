@@ -16,6 +16,7 @@ export async function GET(request: Request) {
 
     const where: any = {
       status: 'PUBLISHED',
+      archivedAt: null, // Only show non-archived events
       endAt: { gte: new Date() },
     };
 

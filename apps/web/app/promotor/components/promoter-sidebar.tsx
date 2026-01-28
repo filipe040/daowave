@@ -375,6 +375,9 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               <div className="text-xs text-white/70 truncate">
                 {session.user.email}
               </div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">
+                {(session.user as any).role || "USER"}
+              </div>
             </div>
           </div>
           <button
