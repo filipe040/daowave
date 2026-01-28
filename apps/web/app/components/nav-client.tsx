@@ -11,6 +11,21 @@ export default function NavClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
+  const getProfileHref = () => {
+    return "/account";
+  };
+
+  const displayName = session?.user?.name || session?.user?.email || "";
+  const initials = displayName
+    ? displayName
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "U";
+
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/", redirect: true });
   };
@@ -80,11 +95,26 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-                  {/* User profile chip + logout */}
+                  {/* User avatar + name + logout */}
                   <div className="flex items-center gap-3">
-                    <div className="bg-white text-black px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wide max-w-xs truncate">
-                      {session.user.name || session.user.email}
-                    </div>
+                    <button
+                      onClick={() => router.push(getProfileHref())}
+                      className="flex items-center gap-2 group"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-semibold text-sm">
+                        {initials}
+                      </div>
+                      <div className="flex flex-col items-start">
+                        {displayName && (
+                          <span className="text-xs text-white/80 truncate max-w-[140px]">
+                            {displayName}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-white/50 uppercase tracking-wide group-hover:text-white">
+                          Ver perfil
+                        </span>
+                      </div>
+                    </button>
                     <button
                       onClick={handleSignOut}
                       className="bg-zinc-900 text-white font-bold text-sm uppercase tracking-wide px-4 py-2.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
