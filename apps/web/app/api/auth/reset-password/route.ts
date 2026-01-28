@@ -35,43 +35,39 @@ export async function POST(req: Request) {
       );
     }
 
-    // TODO: Add passwordResetToken and passwordResetTokenExpiresAt fields to User model
     // Find user by token
-    // const user = await prisma.user.findUnique({
-    //   where: { passwordResetToken: token },
-    // });
+    const user = await prisma.user.findUnique({
+      where: { passwordResetToken: token },
+    });
 
-    // if (!user) {
-    //   return NextResponse.json(
-    //     { error: "Token inválido ou expirado" },
-    //     { status: 400 }
-    //   );
-    // }
+    if (!user) {
+      return NextResponse.json(
+        { error: "Token inválido ou expirado" },
+        { status: 400 }
+      );
+    }
 
-    // if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
-    //   return NextResponse.json(
-    //     { error: "Token expirado" },
-    //     { status: 400 }
-    //   );
-    // }
+    if (!user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
+      return NextResponse.json(
+        { error: "Token expirado" },
+        { status: 400 }
+      );
+    }
 
     // Hash new password
-    // const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Update password and invalidate token
-    // await prisma.user.update({
-    //   where: { id: user.id },
-    //   data: {
-    //     passwordHash: hashedPassword,
-    //     passwordResetToken: null,
-    //     passwordResetTokenExpiresAt: null,
-    //   },
-    // });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hashedPassword,
+        passwordResetToken: null,
+        passwordResetTokenExpiresAt: null,
+      },
+    });
 
-    return NextResponse.json(
-      { error: "Funcionalidade de reset de password não disponível. Campos não existem no schema." },
-      { status: 501 }
-    );
+    return NextResponse.json({ message: "Palavra-passe redefinida com sucesso" });
   } catch (error) {
     console.error("Error resetting password:", error);
     return NextResponse.json(

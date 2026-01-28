@@ -18,7 +18,8 @@ const UpdateEventSchema = z.object({
   timezone: z.string().optional(),
   
   // Check-in
-  // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
+  checkinMode: z.enum(["SINGLE", "MULTI"]).optional(),
+  maxEntries: z.number().int().positive().optional().nullable(),
   entryWindowStartAt: z.string().datetime().optional().nullable(),
   entryWindowEndAt: z.string().datetime().optional().nullable(),
   
@@ -200,8 +201,6 @@ export async function PUT(
       }
     }
 
-    // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
-
     // Check slug uniqueness if changed
     if (data.slug && data.slug !== existingEvent.slug) {
       const slugExists = await prisma.event.findUnique({
@@ -228,9 +227,10 @@ export async function PUT(
     if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);
     if (data.endAt !== undefined) updateData.endAt = new Date(data.endAt);
     if (data.timezone !== undefined) updateData.timezone = data.timezone;
-    // checkinMode, reentryAllowed, maxEntries fields don't exist in Event model
-    if (data.entryWindowStartAt !== undefined) updateData.entryWindowStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
-    if (data.entryWindowEndAt !== undefined) updateData.entryWindowEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
+    if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
+    if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
+    if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
+    if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
     if (data.capacityTotal !== undefined) updateData.capacityTotal = data.capacityTotal;
     if (data.ageRestriction !== undefined) updateData.ageRestriction = data.ageRestriction;
     if (data.refundPolicy !== undefined) updateData.refundPolicy = data.refundPolicy;

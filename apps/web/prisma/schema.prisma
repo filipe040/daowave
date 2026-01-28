@@ -17,6 +17,9 @@ model User {
   emailVerificationToken          String?   @unique
   emailVerificationTokenExpiresAt DateTime?
   createdAt                       DateTime  @default(now())
+  // Password reset
+  passwordResetToken              String?   @unique
+  passwordResetTokenExpiresAt     DateTime?
   
   orders              Order[]
   tickets             Ticket[]
@@ -76,6 +79,11 @@ model Event {
   // Badge Designer (Template PDF do bilhete)
   badgeTemplateImageUrl String? // URL da imagem template do badge/bilhete PDF
   badgePrefix           String? @default("BADGE") // Prefixo para IDs dos badges gerados
+  // Check-in configuration
+  checkinMode           String?  @default("SINGLE") // SINGLE, MULTI
+  checkinStartAt        DateTime? // Início da janela de check-in
+  checkinEndAt          DateTime? // Fim da janela de check-in
+  maxEntries            Int?     // Máximo de entradas por bilhete (MULTI mode)
 
   promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
   ticketLots   TicketLot[]
@@ -83,6 +91,7 @@ model Event {
   tickets     Ticket[]
   checkinLogs CheckinLog[]
   teamMembers EventTeamMember[]
+  coupons     Coupon[]
   
   @@index([slug])
   @@index([status])
@@ -154,6 +163,9 @@ model Ticket {
   checkedInAt DateTime?
   checkedInByUserId String?
   createdAt   DateTime @default(now())
+  // Check-in tracking (MULTI mode)
+  entriesUsed Int      @default(0) // Número de entradas já utilizadas
+  lastCheckinAt DateTime? // Última vez que foi usado
   
   order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   event         Event        @relation(fields: [eventId], references: [id])
@@ -282,6 +294,33 @@ model TransferLog {
   
   @@index([fromUserId])
   @@index([toUserId])
+}
+
+enum CouponDiscountType {
+  PERCENTAGE  // Desconto percentual (1-100)
+  FIXED       // Desconto fixo em cêntimos
+}
+
+model Coupon {
+  id            String              @id @default(uuid())
+  eventId       String
+  code          String              @unique
+  discountType  CouponDiscountType
+  discountValue Int                 // Percentagem (1-100) ou valor em cêntimos
+  maxUses       Int?                // Máximo de utilizações (null = ilimitado)
+  usedCount     Int                 @default(0)
+  isActive      Boolean             @default(true)
+  startsAt      DateTime
+  endsAt        DateTime
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @default(now()) @updatedAt
+  
+  event         Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@index([eventId])
+  @@index([code])
+  @@index([isActive])
+  @@index([endsAt])
 }
 
 model EventTeamMember {

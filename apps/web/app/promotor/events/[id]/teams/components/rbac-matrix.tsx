@@ -142,12 +142,13 @@ export default function RBACMatrix({ onClose }: RBACMatrixProps) {
             </button>
             <button
               onClick={() => {
-                // TODO: Save permissions
+                // RBAC Matrix is a reference view - permissions are set when creating/editing team members
+                // This is just for visualization of default permissions per role
                 onClose();
               }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
-              Guardar Alterações
+              Fechar
             </button>
           </div>
         </div>

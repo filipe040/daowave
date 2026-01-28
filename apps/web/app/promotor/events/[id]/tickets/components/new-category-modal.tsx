@@ -23,32 +23,40 @@ export default function NewCategoryModal({ isOpen, onClose, eventId }: NewCatego
     setLoading(true);
 
     try {
-      // TODO: Implement API call to create ticket lot/category
-      // const response = await fetch(`/api/promotor/events/${eventId}/ticket-lots`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     name: formData.title,
-      //     priceCents: Math.round(parseFloat(formData.nominalValue) * 100),
-      //     // ... other fields
-      //   }),
-      // });
+      const response = await fetch(`/api/promotor/events/${eventId}/ticket-lots`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          nominalValue: formData.nominalValue,
+          assetClass: formData.assetClass,
+          publicIssuance: formData.publicIssuance,
+          transferableAsset: formData.transferableAsset,
+          quantity: 100, // Default quantity
+        }),
+      });
 
-      // For now, just close the modal
-      setTimeout(() => {
-        setLoading(false);
-        onClose();
-        // Reset form
-        setFormData({
-          title: "",
-          assetClass: "GERAL",
-          nominalValue: "0",
-          publicIssuance: true,
-          transferableAsset: true,
-        });
-      }, 500);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Erro ao criar categoria");
+      }
+
+      // Reset form and close modal
+      setFormData({
+        title: "",
+        assetClass: "GERAL",
+        nominalValue: "0",
+        publicIssuance: true,
+        transferableAsset: true,
+      });
+      
+      onClose();
+      // Reload page to show new category
+      window.location.reload();
     } catch (error) {
       console.error("Error creating category:", error);
+      alert(error instanceof Error ? error.message : "Erro ao criar categoria");
+    } finally {
       setLoading(false);
     }
   };

@@ -32,24 +32,22 @@ export default async function CouponsPage() {
     orderBy: { startAt: "desc" },
   });
 
-  // TODO: Add Coupon model to Prisma schema
-  // const coupons = await prisma.coupon.findMany({
-  //   where: {
-  //     event: {
-  //       promoterId: organizer.id,
-  //     },
-  //   },
-  //   include: {
-  //     event: {
-  //       select: {
-  //         title: true,
-  //         slug: true,
-  //       },
-  //     },
-  //   },
-  //   orderBy: { createdAt: "desc" },
-  // });
-  const coupons: any[] = []; // Empty array until Coupon model is added to schema
+  const coupons = await prisma.coupon.findMany({
+    where: {
+      event: {
+        promoterId: organizer.id,
+      },
+    },
+    include: {
+      event: {
+        select: {
+          title: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto">

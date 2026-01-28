@@ -85,7 +85,6 @@ const CreateEventSchema = z.object({
   
   // Check-in
   checkinMode: z.enum(["SINGLE", "MULTI"]).default("SINGLE"),
-  reentryAllowed: z.boolean().default(false),
   maxEntries: z.number().int().positive().optional(),
   entryWindowStartAt: z.string().datetime().optional().nullable(),
   entryWindowEndAt: z.string().datetime().optional().nullable(),
@@ -183,12 +182,6 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!data.reentryAllowed && data.checkinMode === "MULTI") {
-      return NextResponse.json(
-        { error: "Modo MULTI requer reentryAllowed=true" },
-        { status: 400 }
-      );
-    }
 
     // Check slug uniqueness
     const existingEvent = await prisma.event.findUnique({
@@ -217,10 +210,9 @@ export async function POST(req: Request) {
         endAt,
         timezone: data.timezone,
         checkinMode: data.checkinMode,
-        reentryAllowed: data.reentryAllowed,
         maxEntries: data.maxEntries || null,
-        entryWindowStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
-        entryWindowEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
+        checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
+        checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
         capacityTotal: data.capacityTotal || null,
         ageRestriction: data.ageRestriction || null,
         refundPolicy: data.refundPolicy || null,

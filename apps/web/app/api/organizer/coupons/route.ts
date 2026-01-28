@@ -64,35 +64,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // TODO: Add Coupon model to Prisma schema
     // Check if code already exists
-    // const existingCoupon = await prisma.coupon.findUnique({
-    //   where: { code: data.code },
-    // });
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: { code: data.code },
+    });
 
-    // if (existingCoupon) {
-    //   return NextResponse.json(
-    //     { error: "Código já existe" },
-    //     { status: 400 }
-    //   );
-    // }
+    if (existingCoupon) {
+      return NextResponse.json(
+        { error: "Código já existe" },
+        { status: 400 }
+      );
+    }
 
-    // const coupon = await prisma.coupon.create({
-    //   data: {
-    //     eventId: data.eventId,
-    //     code: data.code,
-    //     discountType: data.discountType,
-    //     discountValue: data.discountValue,
-    //     maxUses: data.maxUses,
-    //     startsAt: new Date(data.startsAt),
-    //     endsAt: new Date(data.endsAt),
-    //   },
-    // });
+    const coupon = await prisma.coupon.create({
+      data: {
+        eventId: data.eventId,
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        maxUses: data.maxUses,
+        startsAt: new Date(data.startsAt),
+        endsAt: new Date(data.endsAt),
+      },
+    });
 
-    return NextResponse.json(
-      { error: "Coupon functionality not available. Model not in schema." },
-      { status: 501 }
-    );
+    return NextResponse.json({ coupon }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -124,24 +120,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Organizer not found" }, { status: 404 });
   }
 
-  // TODO: Add Coupon model to Prisma schema
-  // const coupons = await prisma.coupon.findMany({
-  //   where: {
-  //     event: {
-  //       promoterId: organizer.id,
-  //     },
-  //   },
-  //   include: {
-  //     event: {
-  //       select: {
-  //         title: true,
-  //         slug: true,
-  //       },
-  //     },
-  //   },
-  //   orderBy: { createdAt: "desc" },
-  // });
+  const coupons = await prisma.coupon.findMany({
+    where: {
+      event: {
+        promoterId: organizer.id,
+      },
+    },
+    include: {
+      event: {
+        select: {
+          title: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-  return NextResponse.json({ coupons: [] });
+  return NextResponse.json({ coupons });
 }
 

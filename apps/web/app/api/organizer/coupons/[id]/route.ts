@@ -46,24 +46,28 @@ export async function GET(
     return NextResponse.json({ error: "Organizer not found" }, { status: 404 });
   }
 
-  // TODO: Add Coupon model to Prisma schema
-  // const coupon = await prisma.coupon.findFirst({
-  //   where: {
-  //     id,
-  //     event: {
-  //       promoterId: organizer.id,
-  //     },
-  //   },
-  // });
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+      event: {
+        promoterId: organizer.id,
+      },
+    },
+    include: {
+      event: {
+        select: {
+          title: true,
+          slug: true,
+        },
+      },
+    },
+  });
 
-  // if (!coupon) {
-  //   return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
-  // }
+  if (!coupon) {
+    return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+  }
 
-  return NextResponse.json(
-    { error: "Coupon functionality not available. Model not in schema." },
-    { status: 501 }
-  );
+  return NextResponse.json({ coupon });
 }
 
 export async function PUT(
@@ -90,43 +94,39 @@ export async function PUT(
       );
     }
 
-    // TODO: Add Coupon model to Prisma schema
     // Verify coupon belongs to organizer
-    // const existingCoupon = await prisma.coupon.findFirst({
-    //   where: {
-    //     id,
-    //     event: {
-    //       promoterId: organizer.id,
-    //     },
-    //   },
-    // });
+    const existingCoupon = await prisma.coupon.findFirst({
+      where: {
+        id,
+        event: {
+          promoterId: organizer.id,
+        },
+      },
+    });
 
-    // if (!existingCoupon) {
-    //   return NextResponse.json(
-    //     { error: "Coupon not found or access denied" },
-    //     { status: 404 }
-    //   );
-    // }
+    if (!existingCoupon) {
+      return NextResponse.json(
+        { error: "Coupon not found or access denied" },
+        { status: 404 }
+      );
+    }
 
-    // const body = await req.json();
-    // const data = UpdateCouponSchema.parse(body);
+    const body = await req.json();
+    const data = UpdateCouponSchema.parse(body);
 
-    // const coupon = await prisma.coupon.update({
-    //   where: { id },
-    //   data: {
-    //     discountType: data.discountType,
-    //     discountValue: data.discountValue,
-    //     maxUses: data.maxUses,
-    //     startsAt: new Date(data.startsAt),
-    //     endsAt: new Date(data.endsAt),
-    //     isActive: data.isActive,
-    //   },
-    // });
+    const coupon = await prisma.coupon.update({
+      where: { id },
+      data: {
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        maxUses: data.maxUses,
+        startsAt: new Date(data.startsAt),
+        endsAt: new Date(data.endsAt),
+        isActive: data.isActive,
+      },
+    });
 
-    return NextResponse.json(
-      { error: "Coupon functionality not available. Model not in schema." },
-      { status: 501 }
-    );
+    return NextResponse.json({ coupon });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -164,32 +164,28 @@ export async function DELETE(
       return NextResponse.json({ error: "Organizer not found" }, { status: 404 });
     }
 
-    // TODO: Add Coupon model to Prisma schema
     // Verify coupon belongs to organizer
-    // const coupon = await prisma.coupon.findFirst({
-    //   where: {
-    //     id,
-    //     event: {
-    //       promoterId: organizer.id,
-    //     },
-    //   },
-    // });
+    const coupon = await prisma.coupon.findFirst({
+      where: {
+        id,
+        event: {
+          promoterId: organizer.id,
+        },
+      },
+    });
 
-    // if (!coupon) {
-    //   return NextResponse.json(
-    //     { error: "Coupon not found or access denied" },
-    //     { status: 404 }
-    //   );
-    // }
+    if (!coupon) {
+      return NextResponse.json(
+        { error: "Coupon not found or access denied" },
+        { status: 404 }
+      );
+    }
 
-    // await prisma.coupon.delete({
-    //   where: { id },
-    // });
+    await prisma.coupon.delete({
+      where: { id },
+    });
 
-    return NextResponse.json(
-      { error: "Coupon functionality not available. Model not in schema." },
-      { status: 501 }
-    );
+    return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Error deleting coupon:", error);
     return NextResponse.json(
