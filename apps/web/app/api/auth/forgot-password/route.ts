@@ -52,8 +52,9 @@ export async function POST(req: Request) {
     }
 
     // Generate reset token and save to DB
+    let resetToken: string;
     try {
-      const resetToken = crypto.randomBytes(32).toString("hex");
+      resetToken = crypto.randomBytes(32).toString("hex");
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h
       await prisma.user.update({
         where: { id: user.id },
@@ -61,6 +62,24 @@ export async function POST(req: Request) {
           passwordResetToken: resetToken,
           passwordResetTokenExpiresAt: expiresAt,
         },
+      });
+
+      // Generate reset URL
+      const emailConfig = getEmailConfig();
+      const resetUrl = `${emailConfig.appUrl}/auth/reset-password?token=${resetToken}`;
+
+      // Send email using EmailService
+      EmailService.sendTemplate({
+        to: user.email,
+        templateId: "reset-password",
+        variables: {
+          name: user.name || "Utilizador",
+          resetUrl,
+          expiresIn: "1 hora",
+        },
+        idempotencyKey: `reset-${user.id}-${Date.now()}`,
+      }).catch((error) => {
+        safeLog.error("Error sending password reset email", error);
       });
     } catch (error: any) {
       // If fields don't exist (migration not applied)
@@ -73,24 +92,6 @@ export async function POST(req: Request) {
       }
       throw error;
     }
-
-    // Generate reset URL
-    const emailConfig = getEmailConfig();
-    const resetUrl = `${emailConfig.appUrl}/auth/reset-password?token=${resetToken}`;
-
-    // Send email using EmailService
-    EmailService.sendTemplate({
-      to: user.email,
-      templateId: "reset-password",
-      variables: {
-        name: user.name || "Utilizador",
-        resetUrl,
-        expiresIn: "1 hora",
-      },
-      idempotencyKey: `reset-${user.id}-${Date.now()}`,
-    }).catch((error) => {
-      safeLog.error("Error sending password reset email", error);
-    });
 
     // Audit log (only if user exists)
     await createAuditLog({
