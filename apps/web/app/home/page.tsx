@@ -44,25 +44,28 @@ export default async function HomePage() {
   const events = await getEvents();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            Eventos Disponíveis
+    <div className="min-h-screen bg-slate-50">
+      <div className="container mx-auto px-4 py-10 sm:py-12">
+        <div className="mb-8 flex flex-col gap-2">
+          <p className="text-xs font-medium text-blue-700 uppercase tracking-[0.18em]">
+            DESTAQUES
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+            Eventos em destaque
           </h1>
-          <p className="text-slate-600">
-            Descubra os melhores eventos e adquira os seus bilhetes
+          <p className="text-sm sm:text-base text-slate-600 max-w-xl">
+            Uma seleção de eventos disponíveis para compra imediata de bilhetes.
           </p>
         </div>
 
         {events.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-slate-500 text-lg">
+          <div className="rounded-lg border border-slate-200 bg-white py-14 text-center">
+            <p className="text-slate-600 text-base">
               Nenhum evento disponível no momento.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {events.map((event) => {
               const minPrice = event.ticketLots[0]?.priceCents || 0;
               
@@ -70,26 +73,26 @@ export default async function HomePage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.slug}`}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden group"
+                  className="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-500/70 transition-all overflow-hidden group"
                 >
                   {event.coverImage && (
-                    <div className="relative h-48 w-full overflow-hidden">
+                    <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                       <Image
                         src={event.coverImage}
                         alt={event.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                       />
                     </div>
                   )}
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  <div className="p-5">
+                    <h2 className="text-lg font-semibold text-slate-900 mb-1.5 group-hover:text-blue-700 transition-colors line-clamp-2">
                       {event.title}
                     </h2>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">
                       {event.description}
                     </p>
-                    <div className="space-y-2 text-sm text-slate-500 mb-4">
+                    <div className="space-y-1.5 text-xs text-slate-500 mb-4">
                       <div className="flex items-center gap-2">
                         <span>📍</span>
                         <span>{event.venue}, {event.city}</span>
@@ -100,9 +103,9 @@ export default async function HomePage() {
                       </div>
                     </div>
                     {minPrice > 0 && (
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                        <span className="text-sm text-slate-500">A partir de</span>
-                        <span className="text-xl font-bold text-blue-600">
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                        <span className="text-xs text-slate-500">A partir de</span>
+                        <span className="text-lg font-bold text-blue-700">
                           {formatCurrency(minPrice)}
                         </span>
                       </div>

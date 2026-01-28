@@ -108,10 +108,10 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-4 lg:space-y-5">
-        {/* GESTÃO */}
+        {/* GESTÃO / ESTÚDIO */}
         <div>
           <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            GESTÃO
+            {eventId ? "ESTÚDIO DO EVENTO" : "PAINEL DO PROMOTOR"}
           </div>
           <div className="space-y-0.5">
             {eventId ? (
@@ -203,10 +203,10 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
           </div>
         </div>
 
-        {/* ORGANIZAÇÃO */}
+        {/* EXPERIÊNCIA & EQUIPA */}
         <div>
           <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            ORGANIZAÇÃO
+            EXPERIÊNCIA &amp; EQUIPA
           </div>
           <div className="space-y-0.5">
             {eventId ? (
@@ -232,25 +232,70 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               </div>
             )}
             {eventId ? (
-              <Link
-                href={`/promotor/events/${eventId}/branding`}
-                className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                  pathname?.includes("/branding")
-                    ? "text-white bg-white/10"
-                    : "text-white/70 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                <span>Branding</span>
-              </Link>
+              <>
+                <Link
+                  href={`/promotor/events/${eventId}/branding`}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
+                    pathname?.includes("/branding")
+                      ? "text-white bg-white/10"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                  <span>Branding &amp; landing page</span>
+                </Link>
+
+                <Link
+                  href={`/promotor/events/${eventId}/assets`}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
+                    pathname?.includes("/assets")
+                      ? "text-white bg-white/10"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Biblioteca de assets</span>
+                </Link>
+
+                <Link
+                  href={`/promotor/events/${eventId}/teams`}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
+                    pathname?.includes("/teams")
+                      ? "text-white bg-white/10"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>Equipas &amp; acessos</span>
+                </Link>
+
+                <Link
+                  href={`/promotor/events/${eventId}/settings`}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
+                    pathname?.includes("/settings")
+                      ? "text-white bg-white/10"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Definições do evento</span>
+                </Link>
+              </>
             ) : (
               <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
-                <span>Branding</span>
+                <span>Branding &amp; equipas</span>
               </div>
             )}
           </div>

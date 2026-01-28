@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import { canAccessAdminArea, isPromoter } from "@/lib/auth/permissions";
 
 export default async function AdminLayout({
   children,
@@ -10,19 +11,23 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user) {
     redirect("/auth/signin?callbackUrl=/admin");
   }
 
-  if (session.user.role !== "ADMIN") {
-    // Redirect based on actual role
-    if (session.user.role === "PROMOTER") {
+  const role = (session.user as any).role;
+
+  if (!canAccessAdminArea(role)) {
+    // Redirecionar com base no role real
+    if (isPromoter(role)) {
       redirect("/organizer");
-    } else if (session.user.role === "USER") {
-      redirect("/validator");
-    } else {
-      redirect("/");
     }
+
+    if (role === "USER") {
+      redirect("/validator");
+    }
+
+    redirect("/");
   }
 
   return (

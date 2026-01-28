@@ -40,56 +40,64 @@ export default async function EventsPage() {
   const events = await getEvents();
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
-      <div className="mb-8 md:mb-12 space-y-3">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-          Eventos
-        </h1>
-        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl">
-          Descubra os próximos eventos e garanta o seu lugar
-        </p>
-      </div>
-
-      {events.length === 0 ? (
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-12 md:p-16 lg:p-20 text-center shadow-lg">
-          <div className="mx-auto mb-6 text-6xl md:text-7xl opacity-50">📅</div>
-          <p className="text-xl md:text-2xl font-semibold text-zinc-300 mb-3">Nenhum evento disponível</p>
-          <p className="text-base md:text-lg text-zinc-500 max-w-md mx-auto">
-            Novos eventos serão adicionados em breve. Volte mais tarde para descobrir os próximos eventos!
+    <div className="min-h-screen bg-slate-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
+        <div className="mb-8 md:mb-10 flex flex-col gap-2">
+          <p className="text-xs font-medium text-blue-700 uppercase tracking-[0.18em]">
+            LISTAGEM DE EVENTOS
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
+            Todos os eventos disponíveis
+          </h1>
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl">
+            Escolhe o evento e segue para a compra dos teus bilhetes de forma rápida e segura.
           </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {events.map((event: any, index: number) => (
-            <Link
-              key={event.id}
-              href={`/events/${event.slug}`}
-              className="group relative overflow-hidden rounded-2xl border border-zinc-700/50 bg-zinc-800/60 backdrop-blur-sm p-6 md:p-8 transition-all duration-300 hover:border-purple-500/50 hover:bg-zinc-800/80 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
-              <div className="relative z-10 space-y-4">
-                <h2 className="text-xl md:text-2xl font-bold group-hover:text-purple-400 transition-colors line-clamp-2 leading-tight">
-                  {event.title}
-                </h2>
-                <div className="space-y-3 text-sm md:text-base">
-                  <div className="flex items-start gap-3 text-zinc-400">
-                    <span className="text-lg mt-0.5">📍</span>
-                    <span className="line-clamp-1">{event.city}</span>
-                  </div>
-                  <div className="flex items-start gap-3 text-zinc-400">
-                    <span className="text-lg mt-0.5">🕐</span>
-                    <span className="line-clamp-2">{format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}</span>
+
+        {events.length === 0 ? (
+          <div className="rounded-lg border border-slate-200 bg-white p-12 md:p-16 text-center">
+            <div className="mx-auto mb-4 text-5xl">📅</div>
+            <p className="text-lg md:text-xl font-semibold text-slate-800 mb-2">
+              Nenhum evento disponível neste momento.
+            </p>
+            <p className="text-sm md:text-base text-slate-600 max-w-md mx-auto">
+              Volta mais tarde para descobrir novos eventos na plataforma.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {events.map((event: any) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.slug}`}
+                className="group flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm hover:border-blue-500/70 hover:shadow-md transition-all"
+              >
+                <div className="space-y-3">
+                  <h2 className="text-lg md:text-xl font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+                    {event.title}
+                  </h2>
+                  <div className="space-y-2 text-sm md:text-base">
+                    <div className="flex items-start gap-2 text-slate-600">
+                      <span className="text-base mt-0.5">📍</span>
+                      <span className="line-clamp-1">{event.city}</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-slate-600">
+                      <span className="text-base mt-0.5">🕐</span>
+                      <span className="line-clamp-2">
+                        {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-zinc-700/50 flex items-center text-sm md:text-base font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">
+                <div className="mt-4 pt-3 border-t border-slate-200 flex items-center text-sm font-semibold text-blue-700 group-hover:text-blue-800 transition-colors">
                   Ver detalhes
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  <span className="ml-1.5 text-base">›</span>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

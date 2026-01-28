@@ -6,6 +6,7 @@ import Link from "next/link";
 import OrganizerSidebar from "./components/sidebar";
 import OrganizerHeader from "./components/header";
 import { Providers } from "../providers";
+import { canAccessOrganizerArea, isAdmin, isPromoter } from "@/lib/auth/permissions";
 
 export default async function OrganizerLayout({
   children,
@@ -18,8 +19,10 @@ export default async function OrganizerLayout({
     redirect("/auth/signin?from=/organizer");
   }
 
-  // Check if user is organizer or admin
-  if (session.user.role !== "PROMOTER" && session.user.role !== "ADMIN") {
+  const role = (session.user as any).role;
+
+  // Check if user is organizer (PROMOTER) or admin
+  if (!canAccessOrganizerArea(role)) {
     redirect("/");
   }
 
@@ -36,13 +39,13 @@ export default async function OrganizerLayout({
     },
   });
 
-  // If no profile exists, create one (for admin users accessing organizer area)
-  if (!organizerProfile && session.user.role === "ADMIN") {
+  // If no profile exists, allow ADMIN a read-only layout (sem perfil associado)
+  if (!organizerProfile && isAdmin(role)) {
     // Admin can access but won't have a profile - handle in UI
   }
 
   // If organizer but no profile or not approved
-  if (session.user.role === "PROMOTER" && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
+  if (isPromoter(role) && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
         <div className="flex min-h-screen items-center justify-center px-4">

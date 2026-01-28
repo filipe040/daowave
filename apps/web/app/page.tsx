@@ -78,135 +78,133 @@ export default async function Home({
   const cities = await getCities();
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section - 5ive Tickets Style */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 sm:py-16 md:py-20">
-        <div className="max-w-5xl mx-auto text-center space-y-6 sm:space-y-8 md:space-y-10">
-          {/* Main Heading */}
-          <div className="space-y-1 sm:space-y-2 md:space-y-3">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white uppercase tracking-tight">
-              THE BEST
-            </h1>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight">
-              <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
-                EXPERIENCES
-              </span>
-            </h2>
-            <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white uppercase tracking-tight">
-              NEAR YOU
-            </h3>
-          </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero Section - estilo bilheteira (claro, simples) */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+            <div className="space-y-3 md:space-y-4 max-w-xl">
+              <p className="text-xs sm:text-sm font-medium text-blue-700 uppercase tracking-[0.18em]">
+                PLATAFORMA DE BILHÉTICA ONLINE
+              </p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
+                Encontra e compra bilhetes para os melhores eventos.
+              </h1>
+              <p className="text-sm sm:text-base text-slate-600 max-w-lg">
+                Concertos, festivais, desporto, experiências e muito mais, com compra segura e gestão
+                de bilhetes digital.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                <Link
+                  href="/events"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Ver todos os eventos
+                </Link>
+                <Link
+                  href="/promotor/login"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-md border border-slate-300 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+                >
+                  Sou promotor
+                </Link>
+              </div>
+            </div>
 
-          {/* Tagline */}
-          <p className="text-xs sm:text-sm md:text-base text-white uppercase tracking-wide max-w-xl mx-auto px-4">
-            5IVE IS THE PREMIUM PLATFORM FOR THOSE WHO LIVE FOR THE NIGHT
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4">
-            <Link
-              href="/events"
-              className="bg-white text-black px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-xs sm:text-sm uppercase tracking-wide hover:bg-zinc-100 transition-colors w-full sm:w-auto text-center"
-            >
-              EXPLORE EVENTS
-            </Link>
-            <Link
-              href="/promotor/login"
-              className="text-white underline decoration-2 underline-offset-4 font-semibold text-xs sm:text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
-            >
-              SELL TICKETS
-            </Link>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-[10px] sm:text-xs text-white uppercase tracking-wider opacity-70">SCROLL TO EXPLORE</span>
-          <div className="w-px h-8 sm:h-12 bg-white/50 relative overflow-hidden">
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></div>
+            {/* Pequeno destaque / estatísticas (placeholder) */}
+            <div className="w-full md:w-80 lg:w-96">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 sm:px-5 sm:py-5">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-[0.18em] mb-3">
+                  PRÓXIMOS EVENTOS
+                </p>
+                <p className="text-sm text-slate-600 mb-1">
+                  Eventos ativos na plataforma:
+                </p>
+                <p className="text-3xl font-semibold text-blue-700">
+                  {events.length.toString().padStart(2, "0")}
+                </p>
+                <p className="mt-3 text-xs text-slate-500">
+                  Explora a listagem abaixo e filtra por cidade para encontrares o que procuras.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* UPCOMING EVENTS Section - 5ive Tickets Style */}
-      <section className="bg-black py-8 sm:py-12 md:py-16">
+      {/* Secção de busca + listagem de eventos */}
+      <section className="py-8 sm:py-10 md:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* DISCOVER MORE with pink line */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-10">
-            <div className="w-8 sm:w-10 md:w-12 h-px bg-pink-500"></div>
-            <span className="text-[10px] sm:text-xs md:text-sm text-white uppercase tracking-wider">
-              DISCOVER MORE
-            </span>
-          </div>
-
-          {/* UPCOMING EVENTS Heading */}
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10">
-            <div className="flex flex-col">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white uppercase tracking-tight leading-none">
-                UPCOMING
-              </h1>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-zinc-600 uppercase tracking-tight leading-none">
-                EVENTS
+          {/* Título + link para ver todos */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 sm:mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">
+                Próximos eventos
               </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Filtra por cidade ou pesquisa pelo nome do evento.
+              </p>
             </div>
             <Link
               href="/events"
-              className="text-white hover:text-zinc-300 transition-colors font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 sm:gap-2 group uppercase tracking-wide self-start sm:self-end"
+              className="text-sm font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1"
             >
-              VIEW ALL EVENTS
-              <span className="group-hover:translate-x-1 transition-transform text-sm sm:text-base">→</span>
+              Ver listagem completa
+              <span className="text-base">›</span>
             </Link>
           </div>
 
-          {/* Search and Filters */}
-          <Suspense fallback={<div className="h-16 bg-zinc-900 rounded-lg animate-pulse"></div>}>
-            <EventsSearch cities={cities} initialSearch={params.search} initialCity={params.city} />
-          </Suspense>
+          {/* Pesquisa e filtros */}
+          <div className="mb-6 sm:mb-8">
+            <Suspense fallback={<div className="h-16 rounded-md bg-slate-100 animate-pulse" />}>
+              <EventsSearch cities={cities} initialSearch={params.search} initialCity={params.city} />
+            </Suspense>
+          </div>
 
-          {/* Events List or Empty State */}
+          {/* Lista de eventos */}
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-20 text-center mt-8 sm:mt-10">
-              <div className="mb-4 sm:mb-6 text-5xl sm:text-6xl md:text-7xl opacity-50">📅</div>
-              <p className="text-base sm:text-lg md:text-xl font-semibold text-white mb-2 sm:mb-3 uppercase">
-                Sem eventos disponíveis
+            <div className="rounded-lg border border-slate-200 bg-white py-12 text-center">
+              <div className="mb-3 text-4xl">📅</div>
+              <p className="text-base font-semibold text-slate-800">
+                Não encontrámos eventos para os filtros selecionados.
               </p>
-              <p className="text-xs sm:text-sm md:text-base text-zinc-400 max-w-md mx-auto px-4">
-                De momento não existem eventos publicados. Volta mais tarde para descobrir os próximos eventos!
+              <p className="mt-1 text-sm text-slate-600 max-w-md mx-auto">
+                Ajusta a pesquisa ou volta mais tarde. Novos eventos são adicionados regularmente.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mt-8 sm:mt-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {events.map((event) => (
                 <Link
                   key={event.id}
                   href={`/events/${event.slug}`}
-                  className="group bg-zinc-900 rounded-lg sm:rounded-xl overflow-hidden border border-zinc-800 hover:border-pink-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/20 hover:-translate-y-1"
+                  className="group flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm hover:border-blue-500/70 hover:shadow-md transition-all"
                 >
                   {event.coverImage && (
-                    <div className="aspect-video bg-zinc-800 relative overflow-hidden">
+                    <div className="aspect-[16/9] bg-slate-100 relative overflow-hidden">
                       <img
                         src={event.coverImage}
                         alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
                     </div>
                   )}
-                  <div className="p-4 sm:p-5 md:p-6">
-                    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 group-hover:text-pink-400 transition-colors line-clamp-2 leading-tight text-white uppercase">
+                  <div className="flex flex-1 flex-col p-4 sm:p-5">
+                    <h3 className="mb-2 line-clamp-2 text-base sm:text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
                       {event.title}
                     </h3>
-                    <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm md:text-base text-zinc-400 mb-4 sm:mb-5 md:mb-6">
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <span className="mt-0.5 text-sm sm:text-base">📍</span>
-                        <span className="line-clamp-1">{event.venue}, {event.city}</span>
+                    <div className="mb-4 space-y-1.5 text-sm text-slate-600">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📍</span>
+                        <span className="line-clamp-1">
+                          {event.venue}, {event.city}
+                        </span>
                       </div>
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <span className="mt-0.5 text-sm sm:text-base">📅</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📅</span>
                         <span className="line-clamp-2">
                           {new Date(event.startAt).toLocaleDateString("pt-PT", {
-                            day: "numeric",
-                            month: "long",
+                            day: "2-digit",
+                            month: "2-digit",
                             year: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
@@ -214,13 +212,13 @@ export default async function Home({
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-zinc-800 gap-2">
-                      <div className="text-xs sm:text-sm md:text-base text-zinc-500 truncate uppercase">
-                        {event.promoter?.brandName || "Promoter"}
-                      </div>
-                      <span className="text-pink-400 font-semibold group-hover:text-pink-300 transition text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 uppercase">
-                        View Details
-                        <span className="group-hover:translate-x-1 transition-transform text-sm sm:text-base">→</span>
+                    <div className="mt-auto flex items-center justify-between border-t border-slate-200 pt-3">
+                      <span className="truncate text-xs text-slate-500">
+                        {event.promoter?.brandName || "Promotor"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 group-hover:text-blue-800">
+                        Ver detalhes
+                        <span className="text-sm">›</span>
                       </span>
                     </div>
                   </div>
@@ -231,34 +229,23 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Event Promoter CTA Section - 5ive Tickets Style */}
-      <section className="bg-zinc-900 py-12 sm:py-16 md:py-20 lg:py-24">
+      {/* Secção para promotores */}
+      <section className="border-t border-slate-200 bg-white py-10 sm:py-12 md:py-14">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 md:space-y-10">
-            {/* Main Heading */}
-            <div className="space-y-2 sm:space-y-3 md:space-y-4">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white uppercase tracking-tight">
-                ARE YOU AN
-              </h2>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight">
-                <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
-                  EVENT PROMOTER!
-                </span>
-              </h3>
-            </div>
-
-            {/* Description */}
-            <p className="text-xs sm:text-sm md:text-base text-white uppercase tracking-wide max-w-2xl mx-auto px-4">
-              JOIN 5IVE TICKETS AND START SELLING TICKETS. FAST, RELIABLE, AND SOCIAL.
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">
+              És promotor de eventos?
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-slate-600">
+              Cria o teu evento, configura bilhética e começa a vender bilhetes online com a nossa
+              plataforma.
             </p>
-
-            {/* CTA Button */}
-            <div className="pt-2 sm:pt-4">
+            <div className="mt-5 flex justify-center">
               <Link
                 href="/promotor/login"
-                className="inline-block bg-white text-black px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 rounded-lg font-bold text-xs sm:text-sm md:text-base uppercase tracking-wide hover:bg-zinc-100 transition-colors"
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
               >
-                GET STARTED NOW
+                Aceder ao painel de promotor
               </Link>
             </div>
           </div>
