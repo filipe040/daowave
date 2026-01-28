@@ -133,7 +133,24 @@ export async function GET(req: Request) {
   }
 
   // Try to fetch coupons, but handle case where table doesn't exist yet (migration not applied)
-  let coupons = [];
+  let coupons: Array<{
+    id: string;
+    eventId: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+    maxUses: number | null;
+    usedCount: number;
+    isActive: boolean;
+    startsAt: Date;
+    endsAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    event: {
+      title: string;
+      slug: string;
+    };
+  }> = [];
   try {
     coupons = await prisma.coupon.findMany({
       where: {

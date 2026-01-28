@@ -33,7 +33,26 @@ export default async function CouponsPage() {
   });
 
   // Try to fetch coupons, but handle case where table doesn't exist yet (migration not applied)
-  let coupons = [];
+  type CouponWithEvent = {
+    id: string;
+    eventId: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+    maxUses: number | null;
+    usedCount: number;
+    isActive: boolean;
+    startsAt: Date;
+    endsAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    event: {
+      title: string;
+      slug: string;
+    };
+  };
+  
+  let coupons: CouponWithEvent[] = [];
   try {
     coupons = await prisma.coupon.findMany({
       where: {
