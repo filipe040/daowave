@@ -124,10 +124,6 @@ export async function POST(req: Request) {
       primaryColor?: string | null;
       secondaryColor?: string | null;
       bannerUrl?: string | null;
-      // Legacy fields (backward compatibility)
-      ticketPrimaryColor?: string | null;
-      ticketSecondaryColor?: string | null;
-      ticketBannerUrl?: string | null;
     };
     await EmailService.sendTemplate({
       to: order.user.email,
@@ -139,12 +135,11 @@ export async function POST(req: Request) {
         venueName: ev.venue,
         address: `${ev.venue}, ${ev.city}`,
         ticketCount: tickets.length,
-        branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null || 
-                   ev.ticketPrimaryColor != null || ev.ticketSecondaryColor != null || ev.ticketBannerUrl != null)
+        branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null)
           ? {
-              primaryColor: ev.primaryColor ?? ev.ticketPrimaryColor ?? undefined,
-              secondaryColor: ev.secondaryColor ?? ev.ticketSecondaryColor ?? undefined,
-              bannerUrl: ev.bannerUrl ?? ev.ticketBannerUrl ?? undefined,
+              primaryColor: ev.primaryColor ?? undefined,
+              secondaryColor: ev.secondaryColor ?? undefined,
+              bannerUrl: ev.bannerUrl ?? undefined,
               headerTitle: "O teu bilhete",
             }
           : undefined,

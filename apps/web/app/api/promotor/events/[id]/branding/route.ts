@@ -69,11 +69,6 @@ export async function PATCH(
     const bannerUrl = typeof body.bannerUrl === "string" ? body.bannerUrl.trim() || null : undefined;
     const fontFamily = typeof body.fontFamily === "string" ? body.fontFamily.trim() || null : undefined;
     
-    // Legacy ticket branding (backward compatibility)
-    const ticketPrimaryColor = typeof body.ticketPrimaryColor === "string" ? body.ticketPrimaryColor.trim() || null : undefined;
-    const ticketSecondaryColor = typeof body.ticketSecondaryColor === "string" ? body.ticketSecondaryColor.trim() || null : undefined;
-    const ticketBannerUrl = typeof body.ticketBannerUrl === "string" ? body.ticketBannerUrl.trim() || null : undefined;
-    
     // Landing Page fields
     const landingPageContent = typeof body.landingPageContent === "string" ? body.landingPageContent : undefined;
     const useCustomLandingPage = typeof body.useCustomLandingPage === "boolean" ? body.useCustomLandingPage : undefined;
@@ -91,15 +86,6 @@ export async function PATCH(
     if (bannerUrl != null && !isValidUrl(bannerUrl)) {
       return NextResponse.json({ error: "URL do banner inválida" }, { status: 400 });
     }
-    if (ticketPrimaryColor != null && !isValidHexColor(ticketPrimaryColor)) {
-      return NextResponse.json({ error: "Cor primária do bilhete inválida (use #hex)" }, { status: 400 });
-    }
-    if (ticketSecondaryColor != null && !isValidHexColor(ticketSecondaryColor)) {
-      return NextResponse.json({ error: "Cor secundária do bilhete inválida (use #hex)" }, { status: 400 });
-    }
-    if (ticketBannerUrl != null && !isValidUrl(ticketBannerUrl)) {
-      return NextResponse.json({ error: "URL do banner do bilhete inválida" }, { status: 400 });
-    }
 
     const updateData: {
       primaryColor?: string | null;
@@ -107,9 +93,6 @@ export async function PATCH(
       logoUrl?: string | null;
       bannerUrl?: string | null;
       fontFamily?: string | null;
-      ticketPrimaryColor?: string | null;
-      ticketSecondaryColor?: string | null;
-      ticketBannerUrl?: string | null;
       landingPageContent?: string | null;
       useCustomLandingPage?: boolean;
     } = {};
@@ -119,9 +102,6 @@ export async function PATCH(
     if (logoUrl !== undefined) updateData.logoUrl = logoUrl;
     if (bannerUrl !== undefined) updateData.bannerUrl = bannerUrl;
     if (fontFamily !== undefined) updateData.fontFamily = fontFamily;
-    if (ticketPrimaryColor !== undefined) updateData.ticketPrimaryColor = ticketPrimaryColor;
-    if (ticketSecondaryColor !== undefined) updateData.ticketSecondaryColor = ticketSecondaryColor;
-    if (ticketBannerUrl !== undefined) updateData.ticketBannerUrl = ticketBannerUrl;
     if (landingPageContent !== undefined) updateData.landingPageContent = landingPageContent;
     if (useCustomLandingPage !== undefined) updateData.useCustomLandingPage = useCustomLandingPage;
 

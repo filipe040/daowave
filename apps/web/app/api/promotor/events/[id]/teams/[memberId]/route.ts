@@ -7,8 +7,17 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { EventTeamPermission } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+
+const VALID_PERMISSIONS: EventTeamPermission[] = [
+  "CREATE_EVENTS",
+  "SELL_TICKETS",
+  "VALIDATE_ENTRIES",
+  "VIEW_REPORTS",
+  "MANAGE_TEAMS",
+];
 
 export async function PATCH(
   request: Request,
@@ -77,13 +86,17 @@ export async function PATCH(
         where: { memberId },
       });
 
-      // Create new permissions
-      if (permissions.length > 0) {
+      // Create new permissions (validate and filter invalid ones)
+      const validPermissions = permissions
+        .filter((perm: string) => VALID_PERMISSIONS.includes(perm as EventTeamPermission))
+        .map((perm: string) => ({
+          memberId,
+          permission: perm as EventTeamPermission,
+        }));
+
+      if (validPermissions.length > 0) {
         await prisma.eventTeamMemberPermission.createMany({
-          data: permissions.map((perm: string) => ({
-            memberId,
-            permission: perm,
-          })),
+          data: validPermissions,
         });
       }
     }

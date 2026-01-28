@@ -7,8 +7,17 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { EventTeamPermission } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
+
+const VALID_PERMISSIONS: EventTeamPermission[] = [
+  "CREATE_EVENTS",
+  "SELL_TICKETS",
+  "VALIDATE_ENTRIES",
+  "VIEW_REPORTS",
+  "MANAGE_TEAMS",
+];
 
 export async function POST(
   request: Request,
@@ -93,9 +102,11 @@ export async function POST(
         isVolunteer: isVolunteer !== undefined ? isVolunteer : false,
         notes: notes || null,
         permissions: {
-          create: (permissions || []).map((perm: string) => ({
-            permission: perm,
-          })),
+          create: (permissions || [])
+            .filter((perm: string) => VALID_PERMISSIONS.includes(perm as EventTeamPermission))
+            .map((perm: string) => ({
+              permission: perm as EventTeamPermission,
+            })),
         },
       },
       include: {

@@ -30,10 +30,6 @@ async function getEventData(eventId: string, userId: string) {
       logoUrl: true,
       bannerUrl: true,
       fontFamily: true,
-      // Legacy ticket branding (backward compatibility)
-      ticketPrimaryColor: true,
-      ticketSecondaryColor: true,
-      ticketBannerUrl: true,
       // Landing Page
       landingPageContent: true,
       useCustomLandingPage: true,

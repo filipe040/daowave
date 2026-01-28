@@ -25,10 +25,6 @@ interface Event {
   logoUrl: string | null;
   bannerUrl: string | null;
   fontFamily: string | null;
-  // Legacy ticket branding
-  ticketPrimaryColor: string | null;
-  ticketSecondaryColor: string | null;
-  ticketBannerUrl: string | null;
   // Landing Page
   landingPageContent: string | null;
   useCustomLandingPage: boolean;
@@ -42,10 +38,10 @@ export default function BrandingContent({ event }: BrandingContentProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>("identidade");
   
   // Branding state (Editor de Marca)
-  const [primaryColor, setPrimaryColor] = useState(event.primaryColor ?? event.ticketPrimaryColor ?? DEFAULT_PRIMARY);
-  const [secondaryColor, setSecondaryColor] = useState(event.secondaryColor ?? event.ticketSecondaryColor ?? DEFAULT_SECONDARY);
+  const [primaryColor, setPrimaryColor] = useState(event.primaryColor ?? DEFAULT_PRIMARY);
+  const [secondaryColor, setSecondaryColor] = useState(event.secondaryColor ?? DEFAULT_SECONDARY);
   const [logoUrl, setLogoUrl] = useState(event.logoUrl ?? "");
-  const [bannerUrl, setBannerUrl] = useState(event.bannerUrl ?? event.ticketBannerUrl ?? "");
+  const [bannerUrl, setBannerUrl] = useState(event.bannerUrl ?? "");
   const [fontFamily, setFontFamily] = useState(event.fontFamily ?? "");
   
   // Landing Page state
@@ -68,10 +64,6 @@ export default function BrandingContent({ event }: BrandingContentProps) {
         body.logoUrl = logoUrl.trim() || null;
         body.bannerUrl = bannerUrl.trim() || null;
         body.fontFamily = fontFamily.trim() || null;
-        // Backward compatibility: também atualizar ticket branding
-        body.ticketPrimaryColor = primaryColor || null;
-        body.ticketSecondaryColor = secondaryColor || null;
-        body.ticketBannerUrl = bannerUrl.trim() || null;
       } else if (activeTab === "landing") {
         // Salvar landing page
         body.landingPageContent = landingPageContent;
