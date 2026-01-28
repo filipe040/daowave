@@ -14,14 +14,14 @@ async function getEvents(searchParams: { search?: string; city?: string; categor
 
   if (searchParams.search) {
     where.OR = [
-      { title: { contains: searchParams.search, mode: "insensitive" } },
-      { description: { contains: searchParams.search, mode: "insensitive" } },
-      { city: { contains: searchParams.search, mode: "insensitive" } },
+      { title: { contains: searchParams.search } },
+      { description: { contains: searchParams.search } },
+      { city: { contains: searchParams.search } },
     ];
   }
 
   if (searchParams.city && searchParams.city !== "ALL PORTUGAL") {
-    where.city = { contains: searchParams.city, mode: "insensitive" };
+    where.city = { contains: searchParams.city };
   }
 
   // Note: Category filtering would require a category field in the Event model

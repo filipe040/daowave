@@ -16,8 +16,8 @@ export default async function AdminUsersPage({
   const whereClause = searchTerm
     ? {
         OR: [
-          { email: { contains: searchTerm, mode: "insensitive" as const } },
-          { name: { contains: searchTerm, mode: "insensitive" as const } },
+          { email: { contains: searchTerm } },
+          { name: { contains: searchTerm } },
         ],
       }
     : {};

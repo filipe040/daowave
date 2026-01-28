@@ -20,14 +20,14 @@ export async function GET(request: Request) {
     };
 
     if (city) {
-      where.city = { contains: city, mode: 'insensitive' };
+      where.city = { contains: city };
     }
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
+        { description: { contains: search } },
+        { city: { contains: search } },
       ];
     }
 
