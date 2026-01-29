@@ -5,22 +5,93 @@ import { SearchAndPromoteUser } from "../components/search-and-promote-user";
 
 export const dynamic = "force-dynamic";
 
+function cn(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function Badge({
+  children,
+  tone = "neutral",
+}: {
+  children: React.ReactNode;
+  tone?: "neutral" | "green" | "yellow" | "purple";
+}) {
+  const tones = {
+    neutral: "bg-white/8 border-white/12 text-white/75",
+    green: "bg-emerald-500/12 border-emerald-500/30 text-emerald-200",
+    yellow: "bg-amber-500/12 border-amber-500/30 text-amber-200",
+    purple: "bg-violet-500/12 border-violet-500/30 text-violet-200",
+  } as const;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-1",
+        "text-[11px] font-semibold tracking-wide",
+        tones[tone]
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "blue" | "green" | "purple" | "yellow";
+}) {
+  const toneMap = {
+    neutral: "text-white/92",
+    blue: "text-sky-300",
+    green: "text-emerald-300",
+    purple: "text-violet-300",
+    yellow: "text-amber-300",
+  } as const;
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-3xl",
+        "border border-white/10 bg-white/5 backdrop-blur-2xl",
+        "p-6",
+        "shadow-[0_18px_60px_rgba(0,0,0,.35)]"
+      )}
+    >
+      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-white/6 blur-3xl" />
+      <div className="relative">
+        <div className="text-[11px] uppercase tracking-wider text-white/55">{label}</div>
+        <div className={cn("mt-3 text-4xl font-semibold tracking-tight", toneMap[tone])}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function AdminUsersPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
   const params = await searchParams;
-  const searchTerm = params.search?.toLowerCase().trim();
 
-  const whereClause = searchTerm
-    ? {
-        OR: [
-          { email: { contains: searchTerm } },
-          { name: { contains: searchTerm } },
-        ],
-      }
-    : {};
+  const searchRaw = (params.search ?? "").trim();
+  const searchTerm = searchRaw.toLowerCase();
+
+  const whereClause =
+    searchTerm.length > 0
+      ? {
+          OR: [
+            { email: { contains: searchTerm } },
+            { name: { contains: searchTerm } },
+          ],
+        }
+      : {};
 
   const users = await prisma.user.findMany({
     where: whereClause,
@@ -43,138 +114,161 @@ export default async function AdminUsersPage({
     customers: users.filter((u) => u.role === "USER").length,
     organizers: users.filter((u) => u.role === "PROMOTER").length,
     admins: users.filter((u) => u.role === "ADMIN").length,
-    validators: 0, // VALIDATOR role removed
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Gestão de Utilizadores</h1>
-        <p className="text-base md:text-lg text-zinc-400">Visualize e gerencie todos os utilizadores da plataforma</p>
+        <div className="text-[11px] uppercase tracking-wider text-white/50">Admin</div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white/90">
+          Gestão de utilizadores
+        </h1>
+        <p className="text-sm md:text-base text-white/55">
+          Pesquisa, auditoria e promoção de contas.
+        </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 border border-zinc-700/50">
-          <div className="text-sm text-zinc-400 mb-2">Total de Utilizadores</div>
-          <div className="text-4xl font-bold text-blue-400">{stats.total}</div>
-        </div>
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 border border-zinc-700/50">
-          <div className="text-sm text-zinc-400 mb-2">Clientes</div>
-          <div className="text-4xl font-bold text-green-400">{stats.customers}</div>
-        </div>
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 border border-zinc-700/50">
-          <div className="text-sm text-zinc-400 mb-2">Promotores</div>
-          <div className="text-4xl font-bold text-purple-400">{stats.organizers}</div>
-        </div>
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 border border-zinc-700/50">
-          <div className="text-sm text-zinc-400 mb-2">Administradores</div>
-          <div className="text-4xl font-bold text-yellow-400">{stats.admins}</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
+        <StatCard label="Total" value={stats.total} tone="blue" />
+        <StatCard label="Clientes" value={stats.customers} tone="green" />
+        <StatCard label="Promotores" value={stats.organizers} tone="purple" />
+        <StatCard label="Admins" value={stats.admins} tone="yellow" />
       </div>
 
-      {/* Search and Promote */}
-      <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6">
-        <h2 className="text-xl font-semibold mb-4">Promover Utilizador por Email</h2>
-        <p className="text-zinc-400 text-sm mb-4">
-          Digite o email do utilizador para procurar e promover a promotor, mesmo que não apareça na lista abaixo.
-        </p>
-        <SearchAndPromoteUser />
+      {/* Search & Promote */}
+      <div
+        className={cn(
+          "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl",
+          "p-6 sm:p-7",
+          "shadow-[0_18px_60px_rgba(0,0,0,.35)]"
+        )}
+      >
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-lg sm:text-xl font-semibold text-white/90">
+              Promover utilizador por email
+            </h2>
+            <p className="mt-2 text-[12px] sm:text-[13px] text-white/55 max-w-3xl">
+              Procura pelo email e promove a promotor mesmo que não esteja na lista atual.
+            </p>
+          </div>
+
+          <Badge tone="neutral">Ação imediata</Badge>
+        </div>
+
+        <div className="mt-5">
+          <SearchAndPromoteUser />
+        </div>
       </div>
 
       {/* Users List */}
-      <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 overflow-hidden">
-        <div className="p-6 border-b border-zinc-700/50 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Lista de Utilizadores</h2>
-          {searchTerm && (
-            <div className="text-sm text-zinc-400">
-              Resultados para: <span className="text-white font-semibold">{searchTerm}</span>
+      <div
+        className={cn(
+          "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl",
+          "overflow-hidden",
+          "shadow-[0_18px_60px_rgba(0,0,0,.35)]"
+        )}
+      >
+        <div className="p-6 border-b border-white/10 flex items-center justify-between gap-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-white/90">Lista de utilizadores</h2>
+
+          {searchRaw && (
+            <div className="text-[12px] text-white/55">
+              Resultados para:{" "}
+              <span className="text-white/85 font-semibold">{searchRaw}</span>
             </div>
           )}
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-zinc-900/50">
+            <thead className="bg-white/4">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Nome</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Role</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Perfil Promotor</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Criado em</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-300">Ações</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Nome</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Email</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Role</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Perfil promotor</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Criado</th>
+                <th className="px-6 py-4 text-left text-[12px] font-semibold text-white/70">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-700/50">
+
+            <tbody className="divide-y divide-white/10">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-400">
+                  <td colSpan={6} className="px-6 py-10 text-center text-white/55">
                     Nenhum utilizador encontrado
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
-                  <tr key={user.id} className="hover:bg-zinc-800/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-semibold">{user.name || "N/A"}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          user.role === "ADMIN"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : user.role === "PROMOTER"
-                            ? "bg-purple-500/20 text-purple-400"
-                            : "bg-green-500/20 text-green-400"
-                        }`}
-                      >
-                        {user.role === "ADMIN"
-                          ? "Administrador"
-                          : user.role === "PROMOTER"
-                          ? "Promotor"
-                          : "Cliente"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.promoterProfile ? (
-                        <div>
-                          <div className="font-semibold">{user.promoterProfile.brandName}</div>
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              user.promoterProfile.status === "APPROVED"
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-yellow-500/20 text-yellow-400"
-                            }`}
-                          >
-                            {user.promoterProfile.status === "APPROVED" ? "Aprovado" : "Pendente"}
-                          </span>
+                users.map((user) => {
+                  const roleLabel =
+                    user.role === "ADMIN" ? "Administrador" : user.role === "PROMOTER" ? "Promotor" : "Cliente";
+
+                  const roleTone =
+                    user.role === "ADMIN" ? "yellow" : user.role === "PROMOTER" ? "purple" : "green";
+
+                  return (
+                    <tr key={user.id} className="hover:bg-white/4 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-white/90">{user.name || "N/A"}</div>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="text-white/80">{user.email}</div>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <Badge tone={roleTone as any}>{roleLabel}</Badge>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {user.promoterProfile ? (
+                          <div className="space-y-2">
+                            <div className="font-semibold text-white/90">
+                              {user.promoterProfile.brandName || "—"}
+                            </div>
+                            <Badge tone={user.promoterProfile.status === "APPROVED" ? "green" : "yellow"}>
+                              {user.promoterProfile.status === "APPROVED" ? "Aprovado" : "Pendente"}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-white/45 text-sm">N/A</span>
+                        )}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="text-[12px] text-white/70">
+                          {new Date(user.createdAt).toLocaleDateString("pt-PT")}
                         </div>
-                      ) : (
-                        <span className="text-zinc-500 text-sm">N/A</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">{new Date(user.createdAt).toLocaleDateString("pt-PT")}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        {user.role !== "PROMOTER" && user.role !== "ADMIN" && (
-                          <PromoteToOrganizerButton userId={user.id} userEmail={user.email} />
-                        )}
-                        {user.promoterProfile && user.promoterProfile.status === "PENDING" && (
-                          <Link
-                            href={`/admin/organizers/${user.promoterProfile.id}`}
-                            className="px-3 py-1 rounded-lg bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/30 text-sm transition-colors"
-                          >
-                            Aprovar
-                          </Link>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          {user.role !== "PROMOTER" && user.role !== "ADMIN" && (
+                            <PromoteToOrganizerButton userId={user.id} userEmail={user.email} />
+                          )}
+
+                          {user.promoterProfile?.status === "PENDING" && (
+                            <Link
+                              href={`/admin/organizers/${user.promoterProfile.id}`}
+                              className={cn(
+                                "inline-flex items-center rounded-xl border",
+                                "border-amber-500/30 bg-amber-500/12 px-3 py-2",
+                                "text-[12px] font-semibold text-amber-200",
+                                "hover:bg-amber-500/16 hover:border-amber-500/40 transition"
+                              )}
+                            >
+                              Aprovar
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -183,4 +277,3 @@ export default async function AdminUsersPage({
     </div>
   );
 }
-

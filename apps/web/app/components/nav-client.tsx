@@ -82,9 +82,6 @@ export default function NavClient() {
             href="/" 
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-pink-500 flex items-center justify-center bg-transparent">
-              <span className="text-white font-bold text-sm md:text-base">LG</span>
-            </div>
             <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
               5ive Tickets
             </span>
