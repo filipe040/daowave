@@ -1,73 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 
 export default function NavClient() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
-  // local mirroring of session user so we can update UI when profile changes without full reload
-  const [localName, setLocalName] = useState<string | undefined>(undefined);
-  const [localAvatar, setLocalAvatar] = useState<string | undefined>(undefined);
-
-  // initialize from session after mount to avoid SSR type issues
-  useEffect(() => {
-    let mounted = true;
-    async function loadProfile() {
-      try {
-        const res = await fetch("/api/account/profile");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!mounted) return;
-        const u = data.user;
-        setLocalName(u?.name ?? undefined);
-        setLocalAvatar(u?.avatarUrl ?? undefined);
-      } catch (e) {
-        // ignore
-      }
-    }
-    loadProfile();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // subscribe to BroadcastChannel for session updates from other tabs/pages (e.g., profile page)
-  useEffect(() => {
-    if (typeof window === "undefined" || !(("BroadcastChannel" in window) as boolean)) return;
-    try {
-      const bc = new BroadcastChannel("daowave-session");
-      bc.onmessage = (ev) => {
-        const msg = ev.data;
-        if (msg?.type === "session:update") {
-          if (msg.name !== undefined) setLocalName(msg.name ?? undefined);
-          if (msg.avatarUrl !== undefined) setLocalAvatar(msg.avatarUrl ?? undefined);
-        }
-      };
-      return () => bc.close();
-    } catch (e) {
-      // ignore
-    }
-  }, []);
-
-  const getProfileHref = () => {
-    return "/account";
-  };
-
-  const displayName = localName ?? session?.user?.name ?? session?.user?.email ?? "";
-  const initials = displayName
-    ? displayName
-        .split(" ")
-        .filter(Boolean)
-        .map((part) => part[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "U";
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/", redirect: true });
@@ -78,15 +17,12 @@ export default function NavClient() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo - Left */}
-          <Link 
-            href="/" 
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
               5ive Tickets
             </span>
           </Link>
-          
+
           {/* Desktop Navigation - Center */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-12 absolute left-1/2 transform -translate-x-1/2">
             <Link
@@ -95,7 +31,7 @@ export default function NavClient() {
             >
               DISCOVER
             </Link>
-            
+
             {session && (
               <Link
                 href="/my-tickets"
@@ -104,7 +40,7 @@ export default function NavClient() {
                 MY TICKETS
               </Link>
             )}
-            
+
             <Link
               href="/help"
               className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -113,11 +49,11 @@ export default function NavClient() {
             </Link>
           </nav>
 
-          {/* Right Side - Login/User Menu */}
+          {/* Right Side */}
           <div className="flex items-center gap-4">
             {session ? (
-              <div className="flex items-center gap-4">
-                {/* User menu for desktop */}
+              <div className="flex items-center gap-3 md:gap-4">
+                {/* Desktop role links */}
                 <div className="hidden md:flex items-center gap-4">
                   {session.user.role === "PROMOTER" && (
                     <Link
@@ -135,110 +71,61 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-                  {/* User avatar + name + logout */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => router.push(getProfileHref())}
-                      className="flex items-center gap-2 group"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-semibold text-sm overflow-hidden">
-                        {localAvatar || (session?.user as any)?.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={localAvatar || (session?.user as any)?.avatarUrl}
-                            alt="avatar"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span>{initials}</span>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-start">
-                        {displayName && (
-                          <span className="text-xs text-white/80 truncate max-w-[140px]">
-                            {displayName}
-                          </span>
-                        )}
-                        <span className="text-[10px] text-white/50 uppercase tracking-wide group-hover:text-white">
-                          Ver perfil
-                        </span>
-                      </div>
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="bg-zinc-900 text-white font-bold text-sm uppercase tracking-wide px-4 py-2.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
-                    >
-                      LOG OUT
-                    </button>
-                  </div>
+
+                  {/* Simple account link (no avatar) */}
+                  <Link
+                    href="/account"
+                    className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
+                  >
+                    CONTA
+                  </Link>
+
+                  <button
+                    onClick={handleSignOut}
+                    className="bg-zinc-900 text-white font-bold text-sm uppercase tracking-wide px-4 py-2.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
+                  >
+                    LOG OUT
+                  </button>
                 </div>
-                
-                {/* Mobile menu button when logged in */}
+
+                {/* Mobile menu button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="md:hidden text-white p-2"
                   aria-label="Menu"
+                  type="button"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {mobileMenuOpen ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     )}
                   </svg>
                 </button>
               </div>
             ) : (
               <>
-                {/* Login Button - Desktop */}
+                {/* Desktop login */}
                 <Link
                   href="/auth/signin"
                   className="hidden md:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
                 >
                   LOG IN
                 </Link>
-                
+
                 {/* Mobile menu button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="md:hidden text-white p-2"
                   aria-label="Menu"
+                  type="button"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {mobileMenuOpen ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     )}
                   </svg>
                 </button>
@@ -257,7 +144,7 @@ export default function NavClient() {
             >
               DISCOVER
             </Link>
-            
+
             {session ? (
               <>
                 <Link
@@ -267,7 +154,15 @@ export default function NavClient() {
                 >
                   MY TICKETS
                 </Link>
-                
+
+                <Link
+                  href="/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
+                >
+                  CONTA
+                </Link>
+
                 {session.user.role === "PROMOTER" && (
                   <Link
                     href="/promotor"
@@ -277,7 +172,7 @@ export default function NavClient() {
                     PROMOTER
                   </Link>
                 )}
-                
+
                 {session.user.role === "ADMIN" && (
                   <Link
                     href="/admin"
@@ -287,7 +182,7 @@ export default function NavClient() {
                     ADMIN
                   </Link>
                 )}
-                
+
                 <Link
                   href="/help"
                   onClick={() => setMobileMenuOpen(false)}
@@ -295,7 +190,7 @@ export default function NavClient() {
                 >
                   HELP
                 </Link>
-                
+
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -315,7 +210,7 @@ export default function NavClient() {
                 >
                   HELP
                 </Link>
-                
+
                 <Link
                   href="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}

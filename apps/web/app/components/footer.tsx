@@ -1,103 +1,148 @@
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-950 mt-auto">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
-          <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="text-lg md:text-xl font-bold text-purple-400 mb-3 md:mb-4">7even Tickets</h3>
-            <p className="text-xs md:text-sm text-zinc-400 leading-relaxed">
-              Marketplace de bilhética para eventos em Portugal. Sistema seguro com QR codes assinados e validação em tempo real.
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Para Compradores</h4>
-            <ul className="space-y-2 text-xs md:text-sm text-zinc-400">
-              <li>
-                <a href="/events" className="hover:text-white transition">
-                  Explorar Eventos
-                </a>
-              </li>
-              <li>
-                <a href="/my-tickets" className="hover:text-white transition">
-                  Meus Bilhetes
-                </a>
-              </li>
-              <li>
-                <a href="/help" className="hover:text-white transition">
-                  Ajuda
-                </a>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Para Promotores</h4>
-            <ul className="space-y-2 text-xs md:text-sm text-zinc-400">
-              <li>
-                <a href="/auth/signin?register=organizer" className="hover:text-white transition">
-                  Criar Conta
-                </a>
-              </li>
-              <li>
-                <a href="/organizer" className="hover:text-white transition">
-                  Área do Promotor
-                </a>
-              </li>
-              <li>
-                <a href="/organizer/events/new" className="hover:text-white transition">
-                  Criar Evento
-                </a>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-3 md:mb-4 text-sm md:text-base">Suporte</h4>
-            <ul className="space-y-2 text-xs md:text-sm text-zinc-400">
-              <li>
-                <a href="/contact" className="hover:text-white transition">
-                  Contacto
-                </a>
-              </li>
-              <li>
-                <a href="/terms" className="hover:text-white transition">
-                  Termos e Condições
-                </a>
-              </li>
-              <li>
-                <a href="/privacy" className="hover:text-white transition">
-                  Privacidade
-                </a>
-              </li>
-            </ul>
+    <footer className="mt-auto border-t border-white/10 bg-zinc-950">
+      <div className="container mx-auto px-4">
+        {/* Top */}
+        <div className="py-10 md:py-12">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center">
+                  <div className="grid grid-cols-2 gap-1">
+                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
+                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
+                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
+                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <h3 className="text-base md:text-lg font-semibold tracking-wide text-white/90">
+                    7even Tickets
+                  </h3>
+                  <p className="text-[11px] md:text-xs uppercase tracking-wider text-white/40">
+                    Bilhética & acesso
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-white/55">
+                Marketplace de bilhética para eventos em Portugal. QR codes assinados e validação em tempo real.
+              </p>
+
+              {/* Trust chips */}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {["QR assinado", "Check-in realtime", "Pagamentos seguros"].map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/60"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Buyers */}
+            <div>
+              <h4 className="text-sm font-semibold text-white/85">Para Compradores</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>
+                  <a href="/events" className="text-white/55 hover:text-white transition">
+                    Explorar eventos
+                  </a>
+                </li>
+                <li>
+                  <a href="/my-tickets" className="text-white/55 hover:text-white transition">
+                    Meus bilhetes
+                  </a>
+                </li>
+                <li>
+                  <a href="/help" className="text-white/55 hover:text-white transition">
+                    Ajuda
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Promoters */}
+            <div>
+              <h4 className="text-sm font-semibold text-white/85">Para Promotores</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>
+                  <a
+                    href="/auth/signin?register=organizer"
+                    className="text-white/55 hover:text-white transition"
+                  >
+                    Criar conta
+                  </a>
+                </li>
+                <li>
+                  <a href="/organizer" className="text-white/55 hover:text-white transition">
+                    Área do promotor
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/organizer/events/new"
+                    className="text-white/55 hover:text-white transition"
+                  >
+                    Criar evento
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h4 className="text-sm font-semibold text-white/85">Suporte</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>
+                  <a href="/contact" className="text-white/55 hover:text-white transition">
+                    Contacto
+                  </a>
+                </li>
+                <li>
+                  <a href="/terms" className="text-white/55 hover:text-white transition">
+                    Termos e condições
+                  </a>
+                </li>
+                <li>
+                  <a href="/privacy" className="text-white/55 hover:text-white transition">
+                    Privacidade
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-        
-        <div className="pt-6 md:pt-8 border-t border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs md:text-sm text-zinc-500 text-center md:text-left">
-            © {new Date().getFullYear()} 7even Tickets. Todos os direitos reservados.
-          </p>
-          <div className="flex gap-4">
-            <a href="#" className="text-zinc-500 hover:text-white transition">
-              <span className="sr-only">Facebook</span>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-            </a>
-            <a href="#" className="text-zinc-500 hover:text-white transition">
-              <span className="sr-only">Instagram</span>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.06-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.049 1.023-.06 1.351-.06 3.807v.468c0 2.456.011 2.784.06 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.06 4.041.06h.08c2.597 0 2.917-.012 3.96-.06.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.06-1.37.06-4.041v-.08c0-2.597-.012-2.917-.06-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.049-1.351-.06-3.807-.06z"/>
-                <path d="M12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"/>
-              </svg>
-            </a>
-            <a href="#" className="text-zinc-500 hover:text-white transition">
-              <span className="sr-only">Twitter</span>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
-              </svg>
-            </a>
+
+        {/* Bottom */}
+        <div className="border-t border-white/10 py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm text-white/45">
+              © {year} 7even Tickets. Todos os direitos reservados.
+            </p>
+
+            <div className="flex items-center gap-2">
+              {[
+                { label: "Facebook", href: "#" },
+                { label: "Instagram", href: "#" },
+                { label: "X", href: "#" },
+              ].map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/55 hover:text-white hover:bg-white/8 transition"
+                  aria-label={s.label}
+                >
+                  <span className="text-xs font-semibold">{s.label === "Instagram" ? "IG" : s.label === "Facebook" ? "FB" : "X"}</span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>

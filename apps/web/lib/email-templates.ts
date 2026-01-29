@@ -1,5 +1,20 @@
 /**
- * Generate base email template with BETA branding (high-contrast, email-client safe)
+ * Email Templates with BETA branding
+ */
+
+import { config } from "./config";
+
+export interface EmailTemplateOptions {
+  title: string;
+  content: string;
+  showBetaBanner?: boolean;
+  supportEmail?: string;
+  downloadLink?: string;
+  downloadLinkExpiresAt?: Date;
+}
+
+/**
+ * Generate base email template with BETA branding
  */
 export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
   const {
@@ -11,179 +26,200 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
     downloadLinkExpiresAt,
   } = options;
 
-  const year = new Date().getFullYear();
-
   const betaBanner = showBetaBanner
     ? `
-      <div style="
-        margin: 0 0 16px 0;
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(245,158,11,.16);
-        border: 1px solid rgba(245,158,11,.35);
-        color: #fde68a;
-        font-size: 13px;
-        line-height: 1.5;
-        font-weight: 700;
-      ">
-        ⚠️ AMBIENTE BETA — Email de teste
-      </div>
-    `
+    <div style="background: #ffc107; color: #000; padding: 15px; margin-bottom: 20px; border-radius: 5px; text-align: center; font-weight: bold; border-left: 4px solid #ff9800;">
+      ⚠️ AMBIENTE BETA - Este é um email de teste
+    </div>
+  `
     : "";
 
   const downloadSection = downloadLink
     ? `
-      <div style="
-        margin: 18px 0 0 0;
-        padding: 16px;
-        border-radius: 16px;
-        background: rgba(255,255,255,.05);
-        border: 1px solid rgba(255,255,255,.10);
-      ">
-        <div style="font-size: 13px; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .12em;">
-          Download
-        </div>
-        <div style="margin-top: 8px; font-size: 14px; color: rgba(255,255,255,.88);">
-          Pode descarregar o seu bilhete através do botão abaixo.
-        </div>
-
-        <!-- Bulletproof button -->
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top: 14px;">
-          <tr>
-            <td align="center" bgcolor="#ffffff" style="border-radius: 999px;">
-              <a href="${downloadLink}"
-                style="
-                  display: inline-block;
-                  padding: 12px 18px;
-                  border-radius: 999px;
-                  background: #ffffff;
-                  color: #0b0b0b;
-                  text-decoration: none;
-                  font-weight: 800;
-                  font-size: 13px;
-                  letter-spacing: .02em;
-                ">
-                Descarregar Bilhete
-              </a>
-            </td>
-          </tr>
-        </table>
-
-        ${downloadLinkExpiresAt
-      ? `<div style="margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.60);">
-                Este link expira em ${downloadLinkExpiresAt.toLocaleString("pt-PT")}
-              </div>`
-      : ""
-    }
-
-        <div style="margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.60); line-height: 1.5;">
-          <strong style="color: rgba(255,255,255,.80);">Nota:</strong> por segurança, o link tem validade limitada.
-          Se expirar, gere um novo na área <strong>Meus Bilhetes</strong>.
-        </div>
-      </div>
-    `
+    <div style="background: #f0f0f0; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea;">
+      <h3 style="margin-top: 0; color: #333;">📥 Download</h3>
+      <p style="margin-bottom: 10px;">Pode descarregar o seu bilhete através do link abaixo:</p>
+      <p style="margin-bottom: 10px;">
+        <a href="${downloadLink}" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+          Descarregar Bilhete
+        </a>
+      </p>
+      ${downloadLinkExpiresAt
+        ? `<p style="font-size: 12px; color: #666; margin-top: 10px;">Este link expira em ${downloadLinkExpiresAt.toLocaleString("pt-PT")}</p>`
+        : ""}
+      <p style="font-size: 12px; color: #666; margin-top: 10px;">
+        <strong>Nota:</strong> Por questões de segurança, este link tem validade limitada. Se o link expirar, pode solicitar um novo através da área "Meus Bilhetes".
+      </p>
+    </div>
+  `
     : "";
 
   return `
-<!doctype html>
-<html lang="pt">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="x-apple-disable-message-reformatting" />
-    <title>${title}</title>
-  </head>
-
-  <body style="margin:0; padding:0; background:#050505;">
-    <!-- Preheader (hidden) -->
-    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
-      ${title} — 7even Tickets
-    </div>
-
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#050505; padding: 24px 12px;">
-      <tr>
-        <td align="center">
-          <!-- Container -->
-          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
-            <tr>
-              <td style="
-                border-radius: 20px;
-                overflow: hidden;
-                border: 1px solid rgba(255,255,255,.10);
-                background: #0b0b0b;
-              ">
-                <!-- Header -->
-                <div style="
-                  padding: 22px 22px 18px 22px;
-                  background: radial-gradient(1200px 400px at 10% 0%, rgba(99,102,241,.28) 0%, rgba(6,182,212,.18) 35%, rgba(0,0,0,0) 70%),
-                              #0b0b0b;
-                  border-bottom: 1px solid rgba(255,255,255,.10);
-                  text-align: left;
-                ">
-                  <div style="font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .14em; text-transform: uppercase; font-weight: 700;">
-                    7even Tickets
-                  </div>
-                  <div style="margin-top: 8px; font-size: 22px; line-height: 1.25; color: rgba(255,255,255,.92); font-weight: 800;">
-                    ${title}
-                  </div>
-                </div>
-
-                <!-- Body -->
-                <div style="padding: 18px 22px 22px 22px; color: rgba(255,255,255,.80); font-size: 14px; line-height: 1.65;">
-                  ${betaBanner}
-
-                  <div>
-                    ${content}
-                  </div>
-
-                  ${downloadSection}
-
-                  <!-- Support -->
-                  <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.10);">
-                    <div style="font-size: 12px; color: rgba(255,255,255,.60);">
-                      Precisa de ajuda? 
-                      <a href="mailto:${supportEmail}" style="color:#ffffff; text-decoration: underline; font-weight: 700;">
-                        ${supportEmail}
-                      </a>
-                    </div>
-
-                    ${showBetaBanner
-      ? `<div style="margin-top: 10px; font-size: 11px; color: rgba(255,255,255,.45); line-height: 1.5;">
-                            Ambiente de teste. Bilhetes enviados apenas para demonstração.
-                          </div>`
-      : ""
-    }
-                  </div>
-                </div>
-
-                <!-- Footer -->
-                <div style="
-                  padding: 14px 22px;
-                  background: rgba(255,255,255,.03);
-                  border-top: 1px solid rgba(255,255,255,.10);
-                  text-align: center;
-                  font-size: 11px;
-                  color: rgba(255,255,255,.55);
-                ">
-                  © ${year} 7even Tickets. Todos os direitos reservados.
-                </div>
-              </td>
-            </tr>
-
-            <!-- Tiny spacer -->
-            <tr><td style="height:14px;"></td></tr>
-
-            <!-- Unsubscribe/legal placeholder (se precisares depois) -->
-            <tr>
-              <td align="center" style="font-size: 11px; color: rgba(255,255,255,.40);">
-                Enviado automaticamente. Não respondas a este email.
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+          }
+          .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+          }
+          .content {
+            padding: 30px;
+            background: #ffffff;
+          }
+          .footer {
+            background: #f9f9f9;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+          }
+          .footer a {
+            color: #667eea;
+            text-decoration: none;
+          }
+          .footer a:hover {
+            text-decoration: underline;
+          }
+          .support-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #666;
+          }
+          .support-info a {
+            color: #667eea;
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div style="padding: 20px;">
+          <div class="email-container">
+            <div class="header">
+              <h1>${title}</h1>
+            </div>
+            <div class="content">
+              ${betaBanner}
+              ${content}
+              ${downloadSection}
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} 7even Tickets. Todos os direitos reservados.</p>
+              <div class="support-info">
+                <p>Precisa de ajuda? Contacte-nos:</p>
+                <p>
+                  <a href="mailto:${supportEmail}">${supportEmail}</a>
+                </p>
+                ${showBetaBanner
+                  ? `<p style="margin-top: 15px; font-size: 11px; color: #999;">
+                      Este é um ambiente de teste. Os bilhetes enviados são apenas para fins de demonstração.
+                    </p>`
+                  : ""}
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
   `;
 }
+
+/**
+ * Generate ticket email template
+ */
+export function getTicketEmailTemplate(
+  eventTitle: string,
+  eventDate: string,
+  venueName: string,
+  address: string,
+  ticketCount: number,
+  downloadLink?: string,
+  downloadLinkExpiresAt?: Date
+): string {
+  const content = `
+    <p>Olá,</p>
+    <p>Obrigado pela sua compra! Os seus bilhetes para <strong>${eventTitle}</strong> estão prontos.</p>
+    
+    <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea;">
+      <h3 style="margin-top: 0; color: #333;">Detalhes do Evento:</h3>
+      <p><strong>Evento:</strong> ${eventTitle}</p>
+      <p><strong>Data:</strong> ${eventDate}</p>
+      <p><strong>Local:</strong> ${venueName}</p>
+      <p><strong>Endereço:</strong> ${address}</p>
+      <p><strong>Total de bilhetes:</strong> ${ticketCount}</p>
+    </div>
+
+    <p><strong>Importante:</strong></p>
+    <ul>
+      <li>Os bilhetes em PDF estão anexados a este email</li>
+      ${downloadLink ? "<li>Também pode descarregar através do link abaixo</li>" : ""}
+      <li>Apresente o código QR na entrada do evento</li>
+      <li>Guarde este email para referência futura</li>
+    </ul>
+  `;
+
+  return getBetaEmailTemplate({
+    title: "🎫 Bilhetes Confirmados!",
+    content,
+    downloadLink,
+    downloadLinkExpiresAt,
+  });
+}
+
+/**
+ * Generate order confirmation email template
+ */
+export function getOrderConfirmationEmailTemplate(
+  orderId: string,
+  eventTitle: string,
+  total: string,
+  currency: string = "EUR"
+): string {
+  const content = `
+    <p>Olá,</p>
+    <p>Obrigado pela sua compra! A sua encomenda foi confirmada.</p>
+    
+    <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea;">
+      <h3 style="margin-top: 0; color: #333;">Detalhes da Encomenda:</h3>
+      <p><strong>Número da Encomenda:</strong> ${orderId}</p>
+      <p><strong>Evento:</strong> ${eventTitle}</p>
+      <p><strong>Total:</strong> ${total} ${currency}</p>
+    </div>
+
+    <p>Os seus bilhetes serão enviados por email em breve.</p>
+  `;
+
+  return getBetaEmailTemplate({
+    title: "✅ Encomenda Confirmada",
+    content,
+  });
+}
+
