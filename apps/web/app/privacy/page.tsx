@@ -36,7 +36,7 @@ export default function PrivacyPage() {
           </h1>
           <p className="mt-3 text-[13px] sm:text-[14px] text-white/55 max-w-2xl">
             Esta política explica como recolhemos, utilizamos e protegemos os seus dados pessoais quando utiliza a
-            7even Tickets.
+            EasyTicket.
           </p>
         </div>
       </div>

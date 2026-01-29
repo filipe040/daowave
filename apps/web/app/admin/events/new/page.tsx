@@ -30,7 +30,7 @@ export default async function AdminNewEventPage() {
       adminOrganizer = await prisma.promoterProfile.create({
         data: {
           userId: adminUser.id,
-          brandName: "7even Tickets Admin",
+          brandName: "EasyTicket Admin",
         },
       });
     }

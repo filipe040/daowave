@@ -13,13 +13,13 @@ export default function NavClient() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-black border-b border-zinc-900">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo - Left */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
-              5ive Tickets
+              EasyTicket
             </span>
           </Link>
 
@@ -82,7 +82,7 @@ export default function NavClient() {
 
                   <button
                     onClick={handleSignOut}
-                    className="bg-zinc-900 text-white font-bold text-sm uppercase tracking-wide px-4 py-2.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   >
                     LOG OUT
                   </button>

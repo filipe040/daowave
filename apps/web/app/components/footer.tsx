@@ -21,7 +21,7 @@ export default function Footer() {
 
                 <div className="min-w-0">
                   <h3 className="text-base md:text-lg font-semibold tracking-wide text-white/90">
-                    7even Tickets
+                    EasyTicket
                   </h3>
                   <p className="text-[11px] md:text-xs uppercase tracking-wider text-white/40">
                     Bilhética & acesso
@@ -124,7 +124,7 @@ export default function Footer() {
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-white/45">
-              © {year} 7even Tickets. Todos os direitos reservados.
+              © {year} EasyTicket. Todos os direitos reservados.
             </p>
 
             <div className="flex items-center gap-2">

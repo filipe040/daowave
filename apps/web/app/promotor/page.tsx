@@ -112,7 +112,7 @@ export default async function PromoterDashboard() {
         {/* Footer (flow, not absolute) */}
         <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[12px] text-muted-foreground">
           <div className="flex flex-col">
-            <span>LIVEGRID TERMINAL V4.0.0</span>
+            <span>EASYTICKET TERMINAL</span>
             <span className="text-foreground/50">LIS-HUB-01</span>
           </div>
 

@@ -3,102 +3,64 @@
 @tailwind utilities;
 
 /* =========================================================
-   APPLE-LIKE DESIGN TOKENS (Light + Dark)
-   - neutros premium
-   - glass controlado
-   - sombras suaves
-   - foco limpo
+   EASYTICKET DESIGN SYSTEM – Dark Premium / Liquid Glass
+   - Near-black base, glass cards, soft shadows
+   - Contrast: primary 85–95%, secondary 60–75%, tertiary 40–55%
+   - Short tokens for components: --bg, --card, --text, --muted, --accent, etc.
    ========================================================= */
 
 @layer base {
   :root {
-    /* Light */
-    --background: 240 20% 98%;        /* #F7F7FA-ish */
-    --foreground: 222 25% 12%;        /* near-black */
-    --muted: 220 14% 92%;
-    --muted-foreground: 222 10% 40%;
+    /* Short-name tokens (design system) */
+    --bg: 225 18% 5%;
+    --card: 225 16% 8%;
+    --border: 0 0% 100% / 0.10;
+    --text: 0 0% 96%;
+    --muted: 220 10% 55%;
+    --accent: 213 94% 56%;
+    --accent2: 270 60% 55%;
+    --danger: 0 72% 51%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 25% 12%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 25% 12%;
-
-    --border: 220 14% 86%;
-    --input: 220 14% 86%;
-
-    /* One accent (Apple-ish blue). Keep it simple. */
-    --primary: 213 94% 56%;           /* #0A84FF vibe */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 94%;
-    --secondary-foreground: 222 25% 12%;
-
-    --accent: 220 14% 94%;
-    --accent-foreground: 222 25% 12%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --ring: 213 94% 56%;
-
-    /* Radius system */
-    --radius: 1.25rem;               /* 20px default */
-    --radius-md: 0.875rem;           /* 14px */
-    --radius-sm: 0.75rem;            /* 12px */
-
-    /* Shadows (soft, premium) */
-    --shadow-sm: 0 6px 18px rgba(0,0,0,.08);
-    --shadow-md: 0 18px 60px rgba(0,0,0,.12);
-    --shadow-lg: 0 28px 90px rgba(0,0,0,.16);
-
-    /* Glass */
-    --glass: 0 0% 100% / 0.65;       /* used with hsl(var(--glass)) */
-    --glass-strong: 0 0% 100% / 0.78;
-
-    /* Motion */
-    --ease: cubic-bezier(.2,.8,.2,1);
-    --dur-1: 120ms;
-    --dur-2: 180ms;
-  }
-
-  .dark {
-    /* Dark */
-    --background: 225 18% 6%;        /* #0B0C0F */
+    /* Extended (Tailwind compatibility) */
+    --background: 225 18% 5%;
     --foreground: 0 0% 96%;
-
     --muted: 225 12% 14%;
     --muted-foreground: 220 10% 65%;
-
-    --card: 225 16% 9%;
+    --card: 225 16% 8%;
     --card-foreground: 0 0% 96%;
-
     --popover: 225 16% 9%;
     --popover-foreground: 0 0% 96%;
-
     --border: 0 0% 100% / 0.10;
     --input: 0 0% 100% / 0.10;
-
     --primary: 213 94% 56%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 0 0% 100% / 0.06;
     --secondary-foreground: 0 0% 96%;
-
     --accent: 0 0% 100% / 0.06;
     --accent-foreground: 0 0% 96%;
-
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-
     --ring: 213 94% 56%;
+
+    --radius: 1.25rem;
+    --radius-md: 0.875rem;
+    --radius-sm: 0.75rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 1.75rem;
+    --radius-3xl: 2rem;
 
     --shadow-sm: 0 10px 26px rgba(0,0,0,.35);
     --shadow-md: 0 18px 60px rgba(0,0,0,.45);
     --shadow-lg: 0 28px 90px rgba(0,0,0,.55);
 
-    --glass: 0 0% 0% / 0.35;
-    --glass-strong: 0 0% 0% / 0.45;
+    --glass: 0 0% 100% / 0.05;
+    --glass-strong: 0 0% 100% / 0.08;
+
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
   }
 
   * {
@@ -114,83 +76,71 @@
     font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter,
       "Segoe UI", Roboto, Arial;
     text-rendering: optimizeLegibility;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
-  /* Better focus */
   :focus-visible {
     outline: none;
-    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.20);
-    border-radius: 12px;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35);
+    border-radius: var(--radius-sm);
   }
 }
 
-/* =========================================================
-   COMPONENT PRIMITIVES (reusable)
-   ========================================================= */
 @layer components {
   .ui-card {
-    @apply rounded-[var(--radius)] border bg-card text-card-foreground;
+    @apply rounded-2xl border border-white/10 bg-card text-card-foreground;
     box-shadow: var(--shadow-sm);
   }
 
   .ui-glass {
-    @apply rounded-[var(--radius)] border;
+    @apply rounded-2xl border border-white/10;
     background: hsl(var(--glass));
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     box-shadow: var(--shadow-md);
   }
 
   .ui-input {
-    @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none;
-    background: hsl(var(--secondary));
-    transition: border-color var(--dur-2) var(--ease), background var(--dur-2) var(--ease),
-      transform var(--dur-2) var(--ease);
+    @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-all;
+    transition-duration: var(--dur-2);
+    transition-timing-function: var(--ease);
   }
   .ui-input:focus {
     border-color: hsl(var(--ring) / 0.45);
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.15);
   }
 
   .ui-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold;
-    transition: transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease),
-      background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition-all;
+    transition-duration: var(--dur-2);
+    transition-timing-function: var(--ease);
   }
-
   .ui-btn:active {
-    transform: scale(0.985);
+    transform: scale(0.99);
+  }
+  .ui-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.4);
   }
 
   .ui-btn-primary {
-    @apply ui-btn;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    border-color: hsl(var(--primary) / 0.35);
-    box-shadow: var(--shadow-sm);
+    @apply ui-btn border-transparent bg-primary text-primary-foreground shadow-md hover:opacity-95;
   }
   .ui-btn-primary:hover {
-    box-shadow: var(--shadow-md);
+    transform: scale(1.01);
   }
 
-  .ui-btn-ghost {
-    @apply ui-btn;
-    background: hsl(var(--secondary));
-    color: hsl(var(--foreground) / 0.85);
-    border-color: hsl(var(--border));
-  }
-  .ui-btn-ghost:hover {
-    background: hsl(var(--secondary) / 0.85);
+  .ui-btn-secondary {
+    @apply ui-btn border-white/10 bg-white/5 text-white hover:bg-white/10;
   }
 }
 
-/* =========================================================
-   UTILITIES
-   ========================================================= */
 @layer utilities {
   .glass {
     background: hsl(var(--glass));
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 
   .shadow-premium {
@@ -204,6 +154,10 @@
   .animate-slide-up {
     animation: slideUp 240ms var(--ease) both;
   }
+
+  .text-primary-contrast { color: hsl(var(--text) / 0.92); }
+  .text-secondary-contrast { color: hsl(var(--text) / 0.68); }
+  .text-tertiary-contrast { color: hsl(var(--text) / 0.48); }
 }
 
 @keyframes fadeIn {

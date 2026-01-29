@@ -83,7 +83,7 @@ export default function PromoterLoginPage() {
             </div>
 
             <h1 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">
-              7EVEN <span className="text-foreground/70">TICKETS</span>
+              EASY<span className="text-foreground/70">TICKET</span>
             </h1>
 
             <p className="mt-2 text-sm text-muted-foreground">
