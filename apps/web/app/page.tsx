@@ -78,9 +78,9 @@ function cn(...classes: Array<string | false | undefined | null>) {
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: { search?: string; city?: string; category?: string };
+  searchParams?: Promise<{ search?: string; city?: string; category?: string }>;
 }) {
-  const params = searchParams || {};
+  const params = (await searchParams) ?? {};
   const events = await getEvents(params);
   const cities = await getCities();
 
