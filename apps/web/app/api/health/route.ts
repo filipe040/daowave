@@ -35,4 +35,3 @@ export async function GET() {
   const statusCode = checks.status === "ok" ? 200 : 503;
   return NextResponse.json(checks, { status: statusCode });
 }
-
