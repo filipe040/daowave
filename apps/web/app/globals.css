@@ -2,105 +2,216 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   APPLE-LIKE DESIGN TOKENS (Light + Dark)
+   - neutros premium
+   - glass controlado
+   - sombras suaves
+   - foco limpo
+   ========================================================= */
+
 @layer base {
   :root {
-    /* Enterprise-grade dark premium theme */
-    --background: 11 8% 6%; /* #0B0D12 */
-    --foreground: 0 0% 98%;
-    --card: 224 38% 10%; /* #121621 */
-    --card-foreground: 0 0% 98%;
-    --popover: 224 38% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217 93% 60%; /* #3B82F6 */
+    /* Light */
+    --background: 240 20% 98%;        /* #F7F7FA-ish */
+    --foreground: 222 25% 12%;        /* near-black */
+    --muted: 220 14% 92%;
+    --muted-foreground: 222 10% 40%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 25% 12%;
+
+    --border: 220 14% 86%;
+    --input: 220 14% 86%;
+
+    /* One accent (Apple-ish blue). Keep it simple. */
+    --primary: 213 94% 56%;           /* #0A84FF vibe */
     --primary-foreground: 0 0% 100%;
-    --secondary: 224 30% 16%; /* #1F2433 */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 220 12% 30%;
-    --muted-foreground: 220 9% 70%;
-    --accent: 262 86% 66%; /* #8B5CF6 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 78% 53%; /* #EF4444 */
+
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 222 25% 12%;
+
+    --accent: 220 14% 94%;
+    --accent-foreground: 222 25% 12%;
+
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --success: 140 60% 42%; /* #22C55E */
-    --warning: 47 95% 60%; /* #FACC15 */
-    --border: 224 30% 16%;
-    --input: 224 30% 16%;
-    --ring: 217 86% 55%;
-    --radius: 1rem; /* ~16px */
-    --elevation-1: 0 6px 18px rgba(11,13,18,0.6);
+
+    --ring: 213 94% 56%;
+
+    /* Radius system */
+    --radius: 1.25rem;               /* 20px default */
+    --radius-md: 0.875rem;           /* 14px */
+    --radius-sm: 0.75rem;            /* 12px */
+
+    /* Shadows (soft, premium) */
+    --shadow-sm: 0 6px 18px rgba(0,0,0,.08);
+    --shadow-md: 0 18px 60px rgba(0,0,0,.12);
+    --shadow-lg: 0 28px 90px rgba(0,0,0,.16);
+
+    /* Glass */
+    --glass: 0 0% 100% / 0.65;       /* used with hsl(var(--glass)) */
+    --glass-strong: 0 0% 100% / 0.78;
+
+    /* Motion */
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
   }
 
   .dark {
-    /* Mantém o mesmo tema em modo dark para já */
-    --background: 222 47% 5%;
-    --foreground: 0 0% 100%;
-    --card: 222 47% 7%;
-    --card-foreground: 0 0% 100%;
-    --popover: 222 47% 7%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 277 84% 60%;
+    /* Dark */
+    --background: 225 18% 6%;        /* #0B0C0F */
+    --foreground: 0 0% 96%;
+
+    --muted: 225 12% 14%;
+    --muted-foreground: 220 10% 65%;
+
+    --card: 225 16% 9%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 225 16% 9%;
+    --popover-foreground: 0 0% 96%;
+
+    --border: 0 0% 100% / 0.10;
+    --input: 0 0% 100% / 0.10;
+
+    --primary: 213 94% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 27% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 222 15% 20%;
-    --muted-foreground: 220 9% 70%;
-    --accent: 330 81% 60%;
-    --accent-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 100% / 0.06;
+    --secondary-foreground: 0 0% 96%;
+
+    --accent: 0 0% 100% / 0.06;
+    --accent-foreground: 0 0% 96%;
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 24% 18%;
-    --input: 222 24% 18%;
-    --ring: 277 84% 60%;
+
+    --ring: 213 94% 56%;
+
+    --shadow-sm: 0 10px 26px rgba(0,0,0,.35);
+    --shadow-md: 0 18px 60px rgba(0,0,0,.45);
+    --shadow-lg: 0 28px 90px rgba(0,0,0,.55);
+
+    --glass: 0 0% 0% / 0.35;
+    --glass-strong: 0 0% 0% / 0.45;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased font-sans;
-  }
-  
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Inter,
+      "Segoe UI", Roboto, Arial;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Better focus */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.20);
+    border-radius: 12px;
+  }
 }
 
+/* =========================================================
+   COMPONENT PRIMITIVES (reusable)
+   ========================================================= */
+@layer components {
+  .ui-card {
+    @apply rounded-[var(--radius)] border bg-card text-card-foreground;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ui-glass {
+    @apply rounded-[var(--radius)] border;
+    background: hsl(var(--glass));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .ui-input {
+    @apply w-full rounded-2xl border px-4 py-3 text-sm outline-none;
+    background: hsl(var(--secondary));
+    transition: border-color var(--dur-2) var(--ease), background var(--dur-2) var(--ease),
+      transform var(--dur-2) var(--ease);
+  }
+  .ui-input:focus {
+    border-color: hsl(var(--ring) / 0.45);
+  }
+
+  .ui-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold;
+    transition: transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease),
+      background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+  }
+
+  .ui-btn:active {
+    transform: scale(0.985);
+  }
+
+  .ui-btn-primary {
+    @apply ui-btn;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: var(--shadow-sm);
+  }
+  .ui-btn-primary:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .ui-btn-ghost {
+    @apply ui-btn;
+    background: hsl(var(--secondary));
+    color: hsl(var(--foreground) / 0.85);
+    border-color: hsl(var(--border));
+  }
+  .ui-btn-ghost:hover {
+    background: hsl(var(--secondary) / 0.85);
+  }
+}
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
 @layer utilities {
+  .glass {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .shadow-premium {
+    box-shadow: var(--shadow-md);
+  }
+
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn var(--dur-2) var(--ease) both;
   }
-  
+
   .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: slideUp 240ms var(--ease) both;
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scrollBounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

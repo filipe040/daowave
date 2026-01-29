@@ -1,81 +1,139 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { X, Calendar, Sparkles, ArrowRight } from "lucide-react";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+type FormState = {
+  title: string;
+  slug: string;
+  startAt: string;
+  endAt: string;
+};
+
+function cn(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export default function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     title: "",
     slug: "",
     startAt: "",
     endAt: "",
   });
 
-  // Auto-generate slug from title
-  const handleTitleChange = (value: string) => {
+  const canSubmit = useMemo(() => {
+    if (!formData.title.trim()) return false;
+    if (!formData.slug.trim()) return false;
+    if (!formData.startAt) return false;
+    if (!formData.endAt) return false;
+    return true;
+  }, [formData]);
+
+  const reset = () =>
     setFormData({
-      ...formData,
-      title: value,
-      slug: value
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
+      title: "",
+      slug: "",
+      startAt: "",
+      endAt: "",
     });
+
+  // ESC to close + lock body scroll
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        reset();
+        onClose();
+      }
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const handleTitleChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      title: value,
+      slug: slugify(value),
+    }));
+  };
+
+  const handleSlugChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      slug: slugify(value),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || !canSubmit) return;
+
     setLoading(true);
 
     try {
-      // Convert datetime-local to ISO string
       const startAtISO = formData.startAt ? new Date(formData.startAt).toISOString() : "";
       const endAtISO = formData.endAt ? new Date(formData.endAt).toISOString() : "";
+
+      const payload = {
+        title: formData.title.trim(),
+        slug: formData.slug.trim() || slugify(formData.title),
+        startAt: startAtISO,
+        endAt: endAtISO,
+        description: formData.title.trim(),
+        venue: "A definir",
+        city: "A definir",
+        coverImage: "",
+      };
 
       const response = await fetch("/api/promotor/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formData.title,
-          slug: formData.slug || formData.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-          startAt: startAtISO,
-          endAt: endAtISO,
-          description: formData.title, // Use title as description for now
-          venue: "A definir",
-          city: "A definir",
-          coverImage: "",
-        }),
+        body: JSON.stringify(payload),
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        const error = await response.json();
-        alert(error.error || "Erro ao criar projeto");
+        alert((data && (data.error || data.message)) || "Erro ao criar projeto");
         setLoading(false);
         return;
       }
 
-      const data = await response.json();
-      // Reset form
-      setFormData({
-        title: "",
-        slug: "",
-        startAt: "",
-        endAt: "",
-      });
+      reset();
       onClose();
       router.push(`/promotor/events/${data.id}`);
       router.refresh();
-    } catch (error) {
-      console.error("Error creating project:", error);
+    } catch (err) {
+      console.error("Error creating project:", err);
       alert("Erro ao criar projeto");
       setLoading(false);
     }
@@ -85,193 +143,198 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      setFormData({
-        title: "",
-        slug: "",
-        startAt: "",
-        endAt: "",
-      });
+      reset();
       onClose();
     }
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4 py-8"
-      onClick={handleOverlayClick}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
+      onMouseDown={handleOverlayClick}
     >
-      <div 
-        className="bg-black border border-white/20 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={cn(
+          "relative w-full max-w-3xl overflow-hidden rounded-3xl",
+          "border border-white/10 bg-black/45 backdrop-blur-2xl",
+          "shadow-[0_18px_60px_rgba(0,0,0,.55)]"
+        )}
+        onMouseDown={(e) => e.stopPropagation()}
       >
+        {/* Top highlight */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
+
         {/* Header */}
-        <div className="border-b border-white/10 px-6 sm:px-8 py-4 sm:py-6 flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white uppercase mb-2">
-              NOVAS COORDEADAS.
+        <div className="flex items-start justify-between gap-6 border-b border-white/10 px-6 sm:px-8 py-5 sm:py-6">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/60">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="uppercase tracking-wider">Novo projeto</span>
+            </div>
+
+            <h2 className="mt-3 text-[18px] sm:text-[22px] font-semibold text-white/90">
+              Criar experiência
             </h2>
-            <p className="text-xs sm:text-sm text-white/70 uppercase tracking-wide">
-              INSTANCIAR NOVO AMBIENTE DE TRABALHO
+            <p className="mt-1 text-[12px] sm:text-[13px] text-white/55">
+              Define o nome, slug e janela temporal. O resto podes afinar depois.
             </p>
           </div>
+
           <button
-            onClick={onClose}
-            className="w-8 h-8 sm:w-10 sm:h-10 border border-white/30 flex items-center justify-center hover:border-white transition-colors"
+            type="button"
+            onClick={() => {
+              reset();
+              onClose();
+            }}
+            className={cn(
+              "h-10 w-10 rounded-2xl border border-white/10",
+              "bg-white/5 hover:bg-white/8",
+              "text-white/70 hover:text-white transition"
+            )}
+            aria-label="Fechar"
           >
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="mx-auto h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
-            {/* Left Column */}
-            <div className="space-y-6 sm:space-y-8">
-              {/* Project Identification */}
-              <div>
-                <label className="block text-xs sm:text-sm text-white/50 uppercase tracking-wider mb-2 sm:mb-3">
-                  IDENTIFICAÇÃO DO PROJETO
-                </label>
+        <form onSubmit={handleSubmit} className="px-6 sm:px-8 py-6 sm:py-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
+            {/* Title */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+                Nome do projeto
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="Ex: DAO WAVE SUMMIT"
+                required
+                className={cn(
+                  "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                  "px-4 py-3.5 text-[14px] sm:text-[15px]",
+                  "text-white/90 placeholder:text-white/35",
+                  "outline-none transition-all duration-200",
+                  "focus:border-white/18 focus:bg-white/7"
+                )}
+              />
+            </div>
+
+            {/* Slug */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+                Slug
+              </label>
+              <div className="flex items-center gap-3">
                 <input
                   type="text"
-                  value={formData.title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="NOME DO EVENTO"
+                  value={formData.slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="dao-wave-summit"
                   required
-                  className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 px-0 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors text-base sm:text-lg md:text-xl font-bold uppercase"
+                  className={cn(
+                    "flex-1 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "px-4 py-3.5 text-[14px] sm:text-[15px]",
+                    "text-white/80 placeholder:text-white/35",
+                    "outline-none transition-all duration-200",
+                    "focus:border-white/18 focus:bg-white/7"
+                  )}
                 />
-              </div>
 
-              {/* Start Date */}
-              <div>
-                <label className="block text-xs sm:text-sm text-white/50 uppercase tracking-wider mb-2 sm:mb-3">
-                  DATA INÍCIO
-                </label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={formData.startAt}
-                    onChange={(e) => setFormData({ ...formData, startAt: e.target.value })}
-                    required
-                    className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 px-0 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors text-sm sm:text-base pr-8 sm:pr-10"
-                  />
-                  <div className="absolute right-0 top-0 bottom-0 flex items-center text-white/50 pointer-events-none pr-2">
-                    <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
+                <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-[12px] text-white/55">
+                  <span className="text-white/35">/</span>
+                  <span className="font-medium">{formData.slug || "slug"}</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6 sm:space-y-8">
-              {/* Slug */}
-              <div>
-                <label className="block text-xs sm:text-sm text-white/50 uppercase tracking-wider mb-2 sm:mb-3">
-                  FREQUÊNCIA ÚNICA (SLUG)
-                </label>
+            {/* Start */}
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+                Início
+              </label>
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
                 <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      slug: e.target.value
-                        .toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, ""),
-                    })
-                  }
-                  placeholder="slug-do-evento"
+                  type="datetime-local"
+                  value={formData.startAt}
+                  onChange={(e) => setFormData((p) => ({ ...p, startAt: e.target.value }))}
                   required
-                  className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 px-0 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors text-base sm:text-lg md:text-xl font-bold text-white/70 uppercase"
+                  className={cn(
+                    "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "pl-10 pr-4 py-3.5 text-[13px] sm:text-[14px]",
+                    "text-white/85",
+                    "outline-none transition-all duration-200",
+                    "focus:border-white/18 focus:bg-white/7"
+                  )}
                 />
               </div>
+            </div>
 
-              {/* End Date */}
-              <div>
-                <label className="block text-xs sm:text-sm text-white/50 uppercase tracking-wider mb-2 sm:mb-3">
-                  DATA FIM
-                </label>
-                <div className="relative">
-                  <input
-                    type="datetime-local"
-                    value={formData.endAt}
-                    onChange={(e) => setFormData({ ...formData, endAt: e.target.value })}
-                    required
-                    className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 px-0 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors text-sm sm:text-base pr-8 sm:pr-10"
-                  />
-                  <div className="absolute right-0 top-0 bottom-0 flex items-center text-white/50 pointer-events-none pr-2">
-                    <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                </div>
+            {/* End */}
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+                Fim
+              </label>
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                <input
+                  type="datetime-local"
+                  value={formData.endAt}
+                  onChange={(e) => setFormData((p) => ({ ...p, endAt: e.target.value }))}
+                  required
+                  className={cn(
+                    "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "pl-10 pr-4 py-3.5 text-[13px] sm:text-[14px]",
+                    "text-white/85",
+                    "outline-none transition-all duration-200",
+                    "focus:border-white/18 focus:bg-white/7"
+                  )}
+                />
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-6 sm:pt-8 border-t border-white/10">
+          {/* Actions */}
+          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-white/10 pt-5">
             <button
               type="submit"
-              disabled={loading}
-              className="flex-1 bg-white text-black px-6 py-4 sm:py-5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wide hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !canSubmit}
+              className={cn(
+                "inline-flex w-full sm:flex-1 items-center justify-center gap-2 rounded-full",
+                "border border-white/10 bg-white/90 px-5 py-3.5",
+                "text-[13px] font-semibold text-black/90",
+                "shadow-[0_18px_60px_rgba(0,0,0,.18)]",
+                "transition-all duration-200",
+                "hover:bg-white hover:shadow-[0_18px_60px_rgba(0,0,0,.26)]",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
             >
-              {loading ? "A LANÇAR..." : "LANÇAR EXPERIÊNCIA"}
+              {loading ? "A criar…" : "Criar projeto"}
+              {!loading && <ArrowRight className="h-4 w-4" />}
             </button>
+
             <button
               type="button"
               onClick={() => {
-                setFormData({
-                  title: "",
-                  slug: "",
-                  startAt: "",
-                  endAt: "",
-                });
+                reset();
                 onClose();
               }}
-              className="flex-1 sm:flex-none sm:w-auto bg-black border-2 border-white text-white px-6 py-4 sm:py-5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wide hover:bg-white/10 transition-colors"
+              className={cn(
+                "inline-flex w-full sm:w-auto items-center justify-center rounded-full",
+                "border border-white/10 bg-white/5 px-5 py-3.5",
+                "text-[13px] font-semibold text-white/75 hover:text-white",
+                "hover:bg-white/8 transition-all duration-200"
+              )}
             >
-              ABORTAR
+              Cancelar
             </button>
           </div>
         </form>

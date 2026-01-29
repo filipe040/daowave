@@ -4,88 +4,6 @@ import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const UpdateSchema = z.object({
-  title: z.string().min(3).max(255).optional(),
-  slug: z.string().min(3).max(255).optional(),
-  description: z.string().optional().nullable(),
-  venue: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  startAt: z.string().optional(),
-  endAt: z.string().optional(),
-  coverImage: z.string().url().optional().nullable(),
-});
-
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const eventId = params.id;
-
-  // Check promoter ownership
-  const promoter = await prisma.promoterProfile.findUnique({ where: { userId: session.user.id } });
-  if (!promoter && (session.user as any).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const data = UpdateSchema.safeParse(body);
-  if (!data.success) {
-    return NextResponse.json({ error: data.error.errors[0].message }, { status: 400 });
-  }
-
-  try {
-    // Ensure promoter owns event unless admin
-    const ev = await prisma.event.findUnique({ where: { id: eventId }, select: { promoterId: true } });
-    if (!ev) return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    if ((session.user as any).role !== "ADMIN" && ev.promoterId !== promoter?.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const updateData: any = {};
-    if (data.data.title !== undefined) updateData.title = data.data.title;
-    if (data.data.slug !== undefined) updateData.slug = data.data.slug;
-    if (data.data.description !== undefined) updateData.description = data.data.description;
-    if (data.data.venue !== undefined) updateData.venue = data.data.venue;
-    if (data.data.city !== undefined) updateData.city = data.data.city;
-    if (data.data.startAt !== undefined) updateData.startAt = new Date(data.data.startAt);
-    if (data.data.endAt !== undefined) updateData.endAt = new Date(data.data.endAt);
-    if (data.data.coverImage !== undefined) updateData.coverImage = data.data.coverImage;
-
-    const updated = await prisma.event.update({
-      where: { id: eventId },
-      data: updateData,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        description: true,
-        venue: true,
-        city: true,
-        startAt: true,
-        endAt: true,
-        coverImage: true,
-      },
-    });
-
-    return NextResponse.json({ event: updated });
-  } catch (error) {
-    console.error("[promotor/events/settings] PATCH error:", error);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
-  }
-}
-
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
-import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-
 export const dynamic = "force-dynamic";
 
 const UpdateEventSettingsSchema = z.object({
@@ -124,7 +42,7 @@ export async function PATCH(
       where: { userId: session.user.id },
     });
 
-    if (!promoter) {
+    if (!promoter && userRole !== "ADMIN") {
       return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
     }
 
@@ -132,7 +50,7 @@ export async function PATCH(
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter.id } : {}),
+        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
       },
     });
 

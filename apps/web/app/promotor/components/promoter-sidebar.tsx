@@ -1,423 +1,343 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import {
+  LayoutGrid,
+  Ticket,
+  ShieldCheck,
+  Wallet,
+  Users,
+  Brush,
+  Images,
+  Settings,
+  Bell,
+  Plug,
+  BarChart3,
+  Database,
+  Wrench,
+  Bolt,
+  Building2,
+  LogOut,
+  User,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
 
 interface PromoterSidebarProps {
   eventId?: string;
   currentSection?: string;
 }
 
+type NavItem = {
+  label: string;
+  href?: string;
+  icon: React.ElementType;
+  activeMatch?: (pathname: string) => boolean;
+  rightIcon?: React.ElementType;
+  disabled?: boolean;
+  onClick?: () => void;
+};
+
+type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+function cn(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function isActive(pathname: string, href?: string, match?: (p: string) => boolean) {
+  if (match) return match(pathname);
+  if (!href) return false;
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
 export default function PromoterSidebar({ eventId, currentSection }: PromoterSidebarProps) {
-  const pathname = usePathname();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname() || "";
   const { data: session } = useSession();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Determine current section from pathname
-  const getCurrentSection = () => {
-    if (pathname?.includes("/tickets")) return "BILHÉTICA & RECEITA";
-    if (pathname?.includes("/checkin")) return "CONTROLO DE ACESSO";
+  const section = useMemo(() => {
+    if (currentSection) return currentSection;
+    if (pathname.includes("/tickets")) return "BILHÉTICA & RECEITA";
+    if (pathname.includes("/checkin")) return "CONTROLO DE ACESSO";
     return "DASHBOARD";
-  };
-
-  const section = currentSection || getCurrentSection();
+  }, [currentSection, pathname]);
 
   // Close sidebar on mobile when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      const sidebar = document.getElementById('promoter-sidebar');
-      const button = document.getElementById('mobile-menu-button');
-      if (isMobileOpen && sidebar && !sidebar.contains(e.target as Node) && !button?.contains(e.target as Node)) {
+      const sidebar = document.getElementById("promoter-sidebar");
+      const button = document.getElementById("mobile-menu-button");
+      if (
+        isMobileOpen &&
+        sidebar &&
+        !sidebar.contains(e.target as Node) &&
+        !button?.contains(e.target as Node)
+      ) {
         setIsMobileOpen(false);
       }
     };
 
-    if (isMobileOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isMobileOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobileOpen]);
+
+  // Base URLs
+  const baseEvent = eventId ? `/promotor/events/${eventId}` : "/promotor";
+
+  const groups: NavGroup[] = useMemo(() => {
+    const studioTitle = eventId ? "ESTÚDIO DO EVENTO" : "PAINEL DO PROMOTOR";
+
+    const management: NavGroup = {
+      title: studioTitle,
+      items: [
+        {
+          label: "Dashboard",
+          href: eventId ? baseEvent : "/promotor",
+          icon: LayoutGrid,
+          // safer match
+          activeMatch: (p) => (eventId ? p === baseEvent || p.startsWith(baseEvent + "/") : p === "/promotor"),
+        },
+        ...(eventId
+          ? ([
+              { label: "Bilhética", href: `${baseEvent}/tickets`, icon: Ticket },
+              {
+                label: "Acesso",
+                href: `/promotor/checkin/${eventId}`,
+                icon: ShieldCheck,
+                activeMatch: (p) => p.includes("/checkin"),
+              },
+              { label: "Carteiras", href: `${baseEvent}/carteiras`, icon: Wallet },
+            ] as NavItem[])
+          : ([] as NavItem[])),
+        {
+          label: "POS",
+          icon: Database,
+          disabled: true,
+        },
+      ],
+    };
+
+    const experience: NavGroup = {
+      title: "EXPERIÊNCIA & EQUIPA",
+      items: eventId
+        ? [
+            {
+              label: "Equipas",
+              href: `${baseEvent}/teams`,
+              icon: Users,
+              activeMatch: (p) => p.includes("/teams"),
+            },
+            {
+              label: "Branding & landing page",
+              href: `${baseEvent}/branding`,
+              icon: Brush,
+              activeMatch: (p) => p.includes("/branding"),
+            },
+            {
+              label: "Biblioteca de assets",
+              href: `${baseEvent}/assets`,
+              icon: Images,
+              activeMatch: (p) => p.includes("/assets"),
+            },
+            {
+              label: "Definições do evento",
+              href: `${baseEvent}/settings`,
+              icon: Settings,
+              activeMatch: (p) => p.includes("/settings"),
+            },
+          ]
+        : [{ label: "Branding & equipas", icon: Users, disabled: true }],
+    };
+
+    const config: NavGroup = {
+      title: "CONFIGURAÇÃO",
+      items: [
+        { label: "Integrações", icon: Plug, rightIcon: ChevronRight, disabled: true },
+        { label: "Notificações", icon: Bell, rightIcon: ChevronRight, disabled: true },
+        { label: "Definições", icon: Settings, disabled: true },
+      ],
+    };
+
+    const analytics: NavGroup = {
+      title: "ANÁLISE",
+      items: [
+        { label: "Relatórios", icon: BarChart3, rightIcon: ChevronRight, disabled: true },
+        { label: "Auditoria", icon: Database, rightIcon: ChevronRight, disabled: true },
+      ],
+    };
+
+    const system: NavGroup = {
+      title: "SISTEMA",
+      items: [
+        { label: "Manutenção", icon: Wrench, rightIcon: ChevronRight, disabled: true },
+        { label: "Jobs", icon: Bolt, disabled: true },
+        { label: "Tenants", icon: Building2, disabled: true },
+      ],
+    };
+
+    return [management, experience, config, analytics, system];
+  }, [eventId, baseEvent]);
 
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         id="mobile-menu-button"
-        className="lg:hidden fixed top-4 left-4 z-50 w-9 h-9 bg-zinc-900 border border-white/10 rounded-lg flex items-center justify-center text-white"
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className={cn(
+          "lg:hidden fixed top-4 left-4 z-50 h-10 w-10",
+          "rounded-xl border border-white/10",
+          "bg-white/5 backdrop-blur-xl",
+          "text-white/85 shadow-[0_18px_60px_rgba(0,0,0,.45)]"
+        )}
+        onClick={() => setIsMobileOpen((v) => !v)}
+        aria-label="Abrir menu"
+        type="button"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        {isMobileOpen ? <X className="mx-auto h-5 w-5" /> : <Menu className="mx-auto h-5 w-5" />}
       </button>
 
       {/* Mobile Overlay */}
       {isMobileOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/60 z-30"
-          onClick={() => setIsMobileOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/60 z-30" onClick={() => setIsMobileOpen(false)} />
       )}
 
       <aside
         id="promoter-sidebar"
-        className={`w-56 lg:w-64 border-r border-white/10 bg-black/50 flex flex-col fixed left-0 top-0 h-screen z-40 transition-transform duration-300 lg:translate-x-0 ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen w-64",
+          "border-r border-white/10",
+          "bg-black/40 backdrop-blur-2xl",
+          "shadow-[0_18px_60px_rgba(0,0,0,.45)]",
+          "transition-transform duration-300",
+          "lg:translate-x-0",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        {/* Logo */}
-        <div className="p-4 lg:p-5 border-b border-white/10">
-          <div className="flex items-center gap-2 lg:gap-3">
-            <div className="w-6 h-6 lg:w-7 lg:h-7 border-2 border-white flex items-center justify-center flex-shrink-0">
-              <div className="grid grid-cols-2 gap-0.5 p-0.5">
-                <div className="w-1 h-1 bg-white"></div>
-                <div className="w-1 h-1 bg-white"></div>
-                <div className="w-1 h-1 bg-white"></div>
-                <div className="w-1 h-1 bg-white"></div>
+        {/* Brand */}
+        <div className="px-5 py-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl border border-white/15 bg-white/5 backdrop-blur-xl flex items-center justify-center">
+              <div className="grid grid-cols-2 gap-1">
+                <span className="h-1.5 w-1.5 rounded-sm bg-white/85" />
+                <span className="h-1.5 w-1.5 rounded-sm bg-white/85" />
+                <span className="h-1.5 w-1.5 rounded-sm bg-white/85" />
+                <span className="h-1.5 w-1.5 rounded-sm bg-white/85" />
               </div>
             </div>
-            <h2 className="text-base lg:text-lg font-bold text-white uppercase">5IVE TICKETS</h2>
-          </div>
-        </div>
 
-
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-4 lg:space-y-5">
-        {/* GESTÃO / ESTÚDIO */}
-        <div>
-          <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            {eventId ? "ESTÚDIO DO EVENTO" : "PAINEL DO PROMOTOR"}
-          </div>
-          <div className="space-y-0.5">
-            {eventId ? (
-              <Link
-                href={`/promotor/events/${eventId}`}
-                className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 group ${
-                  pathname === `/promotor/events/${eventId}`
-                    ? "bg-white text-black shadow-lg scale-105"
-                    : "text-white/70 hover:text-white hover:bg-white/5 hover:scale-105"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-all ${
-                    pathname === `/promotor/events/${eventId}` ? "border-black group-hover:scale-110" : "border-white/30 group-hover:border-white"
-                  }`}>
-                    <div className="grid grid-cols-2 gap-0.5 p-0.5">
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === `/promotor/events/${eventId}` ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === `/promotor/events/${eventId}` ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === `/promotor/events/${eventId}` ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === `/promotor/events/${eventId}` ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                    </div>
-                  </div>
-                  <span className="text-xs lg:text-sm">Dashboard</span>
-                </div>
-              </Link>
-            ) : (
-              <Link
-                href="/promotor"
-                className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 group ${
-                  pathname === "/promotor"
-                    ? "bg-white text-black shadow-lg scale-105"
-                    : "text-white/70 hover:text-white hover:bg-white/5 hover:scale-105"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-all ${
-                    pathname === "/promotor" ? "border-black group-hover:scale-110" : "border-white/30 group-hover:border-white"
-                  }`}>
-                    <div className="grid grid-cols-2 gap-0.5 p-0.5">
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === "/promotor" ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === "/promotor" ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === "/promotor" ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                      <div className={`w-0.5 h-0.5 transition-all ${pathname === "/promotor" ? "bg-black" : "bg-white group-hover:scale-125"}`}></div>
-                    </div>
-                  </div>
-                  <span className="text-xs lg:text-sm">Dashboard</span>
-                </div>
-              </Link>
-            )}
-            {eventId && (
-              <>
-                <Link
-                  href={`/promotor/events/${eventId}/tickets`}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 group hover:scale-105"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                  </svg>
-                  <span className="group-hover:translate-x-0.5 transition-transform">Bilhética</span>
-                </Link>
-                <Link
-                  href={`/promotor/checkin/${eventId}`}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 group hover:scale-105"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  <span className="group-hover:translate-x-0.5 transition-transform">Acesso</span>
-                </Link>
-              </>
-            )}
-            <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 cursor-pointer group hover:scale-105">
-              <svg className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <span className="group-hover:translate-x-0.5 transition-transform">POS</span>
-            </div>
-            {eventId && (
-              <Link
-                href={`/promotor/events/${eventId}/carteiras`}
-                className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 group hover:scale-105"
-              >
-                <svg className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span className="group-hover:translate-x-0.5 transition-transform">Carteiras</span>
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* EXPERIÊNCIA & EQUIPA */}
-        <div>
-          <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            EXPERIÊNCIA &amp; EQUIPA
-          </div>
-          <div className="space-y-0.5">
-            {eventId ? (
-              <Link
-                href={`/promotor/events/${eventId}/teams`}
-                className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                  pathname?.includes("/teams")
-                    ? "text-white bg-white/10"
-                    : "text-white/70 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span>Equipas</span>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span>Equipas</span>
-              </div>
-            )}
-            {eventId ? (
-              <>
-                <Link
-                  href={`/promotor/events/${eventId}/branding`}
-                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                    pathname?.includes("/branding")
-                      ? "text-white bg-white/10"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
-                  <span>Branding &amp; landing page</span>
-                </Link>
-
-                <Link
-                  href={`/promotor/events/${eventId}/assets`}
-                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                    pathname?.includes("/assets")
-                      ? "text-white bg-white/10"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Biblioteca de assets</span>
-                </Link>
-
-                <Link
-                  href={`/promotor/events/${eventId}/teams`}
-                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                    pathname?.includes("/teams")
-                      ? "text-white bg-white/10"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <span>Equipas &amp; acessos</span>
-                </Link>
-
-                <Link
-                  href={`/promotor/events/${eventId}/settings`}
-                  className={`flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${
-                    pathname?.includes("/settings")
-                      ? "text-white bg-white/10"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>Definições do evento</span>
-                </Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                <span>Branding &amp; equipas</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* CONFIGURAÇÃO */}
-        <div>
-          <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            CONFIGURAÇÃO
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-center gap-2.5">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                </svg>
-                <span>Integrações</span>
-              </div>
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-center gap-2.5">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span>Notificações</span>
-              </div>
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>Definições</span>
+            <div className="min-w-0">
+              <div className="text-[13px] font-semibold text-white/90 tracking-wide uppercase">5IVE TICKETS</div>
+              <div className="text-[11px] text-white/55 truncate">{section}</div>
             </div>
           </div>
         </div>
 
-        {/* ANÁLISE */}
-        <div>
-          <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            ANÁLISE
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-center gap-2.5">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <span>Relatórios</span>
-              </div>
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-center gap-2.5">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                </svg>
-                <span>Auditoria</span>
-              </div>
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+          {groups.map((g) => (
+            <div key={g.title}>
+              <div className="px-3 pb-2 text-[10px] tracking-wider uppercase text-white/45">{g.title}</div>
 
-        {/* SISTEMA */}
-        <div>
-          <div className="px-3 py-1.5 text-[10px] lg:text-xs text-white/50 uppercase tracking-wider mb-1.5">
-            SISTEMA
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center justify-between gap-2 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <div className="flex items-center gap-2.5">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Manutenção</span>
-              </div>
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>Jobs</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-3 py-2 text-xs lg:text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span>Tenants</span>
-            </div>
-          </div>
-        </div>
-      </nav>
+              <div className="space-y-1">
+                {g.items.map((it) => {
+                  const Icon = it.icon;
+                  const RightIcon = it.rightIcon;
+                  const active = isActive(pathname, it.href, it.activeMatch);
 
-      {/* User Account Section */}
-      {session?.user && (
-        <div className="border-t border-white/10 p-4 mt-auto">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 flex items-center justify-center flex-shrink-0 bg-white/5">
-              <svg className="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+                  const itemClass = cn(
+                    "group w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl",
+                    "transition-all duration-200",
+                    active
+                      ? "bg-white text-black shadow-[0_18px_60px_rgba(0,0,0,.35)]"
+                      : "text-white/70 hover:text-white hover:bg-white/6",
+                    it.disabled && "opacity-50 pointer-events-none"
+                  );
+
+                  const content = (
+                    <>
+                      <span
+                        className={cn(
+                          "h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0",
+                          active ? "bg-black/8" : "bg-white/0 group-hover:bg-white/6",
+                          "transition-all"
+                        )}
+                      >
+                        <Icon className={cn("h-5 w-5", active ? "text-black/80" : "text-white/80")} />
+                      </span>
+
+                      <span className={cn("text-[13px] font-medium", active && "font-semibold")}>{it.label}</span>
+
+                      {RightIcon && (
+                        <span className="ml-auto">
+                          <RightIcon className={cn("h-4 w-4", active ? "text-black/50" : "text-white/35")} />
+                        </span>
+                      )}
+                    </>
+                  );
+
+                  if (it.href) {
+                    return (
+                      <Link
+                        key={it.label}
+                        href={it.href}
+                        className={itemClass}
+                        onClick={() => setIsMobileOpen(false)}
+                      >
+                        {content}
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <button key={it.label} className={itemClass} onClick={it.onClick} type="button">
+                      {content}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-white truncate">
-                {/* Show role instead of large name per requirement */}
-                {(session.user as any).role || "USER"}
+          ))}
+        </nav>
+
+        {/* Account */}
+        {session?.user && (
+          <div className="border-t border-white/10 p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-2xl border border-white/12 bg-white/5 backdrop-blur-xl flex items-center justify-center">
+                <User className="h-5 w-5 text-white/70" />
               </div>
-              <div className="text-xs text-white/70 truncate">
-                {session.user.email}
-              </div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">
-                {(session.user as any).role || "USER"}
+
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-white/90 truncate">{(session.user as any).role || "USER"}</div>
+                <div className="text-xs text-white/60 truncate">{session.user.email}</div>
               </div>
             </div>
+
+            <button
+              onClick={() => signOut({ callbackUrl: "/promotor/login" })}
+              className={cn(
+                "w-full rounded-xl border border-white/10",
+                "bg-white/5 hover:bg-white/8",
+                "text-white/75 hover:text-white",
+                "px-4 py-2.5 flex items-center justify-center gap-2",
+                "transition-all duration-200"
+              )}
+              type="button"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm font-medium">Sair</span>
+            </button>
           </div>
-          <button
-            onClick={() => signOut({ callbackUrl: "/promotor/login" })}
-            className="w-full bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 text-sm text-white/70 hover:text-white transition-all duration-200 group"
-          >
-            <svg className="w-4 h-4 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Sair</span>
-          </button>
-        </div>
-      )}
-    </aside>
+        )}
+      </aside>
     </>
   );
 }

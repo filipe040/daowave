@@ -66,7 +66,7 @@ export async function DELETE(
       where: { userId: session.user.id },
     });
 
-    if (!promoter) {
+    if (!promoter && userRole !== "ADMIN") {
       return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
     }
 
@@ -74,7 +74,7 @@ export async function DELETE(
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter.id } : {}),
+        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
       },
     });
 
@@ -108,7 +108,7 @@ export async function DELETE(
 
     // Delete file from disk
     try {
-      const filePath = join(process.cwd(), "public", asset.url);
+      const filePath = join(process.cwd(), "public", asset.url.replace(/^\//, ""));
       await unlink(filePath);
     } catch (error: any) {
       // File doesn't exist, continue anyway
