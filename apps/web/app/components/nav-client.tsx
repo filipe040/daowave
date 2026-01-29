@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,7 @@ export default function NavClient() {
   // local mirroring of session user so we can update UI when profile changes without full reload
   const [localName, setLocalName] = useState<string | undefined>(session?.user?.name ?? undefined);
   const [localAvatar, setLocalAvatar] = useState<string | undefined>(
-    (session?.user?.image as string | undefined) ?? ((session?.user as any)?.avatarUrl as string | undefined) ?? undefined
+    ((session?.user as any)?.image as string | undefined) ?? ((session?.user as any)?.avatarUrl as string | undefined) ?? undefined
   );
 
   // subscribe to BroadcastChannel for session updates from other tabs/pages (e.g., profile page)
