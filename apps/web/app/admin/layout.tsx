@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
+import * as Navigation from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { canAccessAdminArea, isPromoter } from "@/lib/auth/permissions";
 import AdminSidebar from "./components/admin-sidebar";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export default async function AdminLayout({
   children,
@@ -15,7 +12,7 @@ export default async function AdminLayout({
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/admin");
+    Navigation.redirect("/auth/signin?callbackUrl=/admin");
   }
 
   const role = (session.user as any).role;
@@ -23,14 +20,14 @@ export default async function AdminLayout({
   if (!canAccessAdminArea(role)) {
     // Redirecionar com base no role real
     if (isPromoter(role)) {
-      redirect("/organizer");
+      Navigation.redirect("/organizer");
     }
 
     if (role === "USER") {
-      redirect("/validator");
+      Navigation.redirect("/validator");
     }
 
-    redirect("/");
+    Navigation.redirect("/");
   }
 
   return (
