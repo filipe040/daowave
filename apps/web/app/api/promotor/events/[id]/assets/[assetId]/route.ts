@@ -2,6 +2,45 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import fs from "fs";
+import path from "path";
+
+export async function DELETE(request: Request, { params }: { params: { id: string; assetId: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id: eventId, assetId } = params;
+  try {
+    const promoter = await prisma.promoterProfile.findUnique({ where: { userId: session.user.id } });
+    const ev = await prisma.event.findUnique({ where: { id: eventId }, select: { promoterId: true } });
+    if (!ev) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    if ((session.user as any).role !== "ADMIN" && promoter?.id !== ev.promoterId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const asset = await prisma.eventAsset.findUnique({ where: { id: assetId } });
+    if (!asset) return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+
+    // delete file from disk
+    const filepath = path.join(process.cwd(), "public", asset.url.replace(/^\//, ""));
+    try {
+      await fs.promises.unlink(filepath);
+    } catch (e) {
+      // ignore
+    }
+
+    await prisma.eventAsset.delete({ where: { id: assetId } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[assets/delete] error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
+import { prisma } from "@/lib/prisma";
 import { unlink } from "fs/promises";
 import { join } from "path";
 

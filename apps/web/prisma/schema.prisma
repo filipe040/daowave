@@ -330,6 +330,7 @@ model EventAsset {
   id          String   @id @default(uuid())
   eventId     String
   filename    String
+  name        String?
   url         String   // URL pública do asset (ex: /uploads/events/{eventId}/{filename})
   mimeType    String   // image/png, image/jpeg, etc.
   size        Int      // Tamanho em bytes

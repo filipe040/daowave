@@ -2,6 +2,63 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import fs from "fs";
+import path from "path";
+
+export const runtime = "edge" as const;
+
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const eventId = params.id;
+  // Check promoter ownership
+  const promoter = await prisma.promoterProfile.findUnique({ where: { userId: session.user.id } });
+  const ev = await prisma.event.findUnique({ where: { id: eventId }, select: { promoterId: true } });
+  if (!ev) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+  if ((session.user as any).role !== "ADMIN" && promoter?.id !== ev.promoterId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    // Parse form-data using Web API
+    const formData = await request.formData();
+    const file = formData.get("file") as any;
+    if (!file || !file.name) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+
+    const filename = `${Date.now()}-${file.name}`;
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", "events", eventId);
+    await fs.promises.mkdir(uploadsDir, { recursive: true });
+    const arrayBuffer = await file.arrayBuffer();
+    await fs.promises.writeFile(path.join(uploadsDir, filename), Buffer.from(arrayBuffer));
+
+    const url = `/uploads/events/${eventId}/${filename}`;
+    const mimeType = file.type || "application/octet-stream";
+    const size = Buffer.byteLength(Buffer.from(arrayBuffer));
+
+    const created = await prisma.eventAsset.create({
+      data: {
+        id: require("crypto").randomUUID(),
+        eventId,
+        filename,
+        name: file.name,
+        url,
+        mimeType,
+        size,
+      },
+    });
+
+    return NextResponse.json({ asset: created });
+  } catch (error: any) {
+    console.error("[assets/upload] error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+}
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
+import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 

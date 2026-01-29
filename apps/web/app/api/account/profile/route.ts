@@ -78,3 +78,43 @@ export async function PATCH(request: Request) {
   }
 }
 
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatarUrl: true,
+      },
+    });
+
+    return NextResponse.json({ user });
+  } catch (error: any) {
+    // Graceful fallback if avatarUrl column doesn't exist yet
+    if (error?.code === "P2022" || error?.message?.includes("Unknown column")) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      });
+      return NextResponse.json({ user: { ...user, avatarUrl: null } });
+    }
+
+    console.error("[account-profile] GET error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+

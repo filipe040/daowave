@@ -1,5 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export async function GET() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return NextResponse.json({ status: "ok", db: true });
+  } catch (e) {
+    console.error("[health] DB error:", e);
+    return NextResponse.json({ status: "error", db: false }, { status: 500 });
+  }
+}
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 // CRITICAL: Dynamic imports to prevent build-time execution
 // Health check should be lightweight and not depend on heavy initialization
 

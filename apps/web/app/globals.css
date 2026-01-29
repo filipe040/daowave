@@ -4,27 +4,30 @@
 
 @layer base {
   :root {
-    /* Tema base DãoWave / 7even Tickets (escuro, roxos e rosa) */
-    --background: 222 47% 5%; /* quase preto azulado */
-    --foreground: 0 0% 100%;
-    --card: 222 47% 7%;
-    --card-foreground: 0 0% 100%;
-    --popover: 222 47% 7%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 277 84% 60%; /* roxo principal */
+    /* Enterprise-grade dark premium theme */
+    --background: 11 8% 6%; /* #0B0D12 */
+    --foreground: 0 0% 98%;
+    --card: 224 38% 10%; /* #121621 */
+    --card-foreground: 0 0% 98%;
+    --popover: 224 38% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 93% 60%; /* #3B82F6 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 27% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 222 15% 20%;
+    --secondary: 224 30% 16%; /* #1F2433 */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 12% 30%;
     --muted-foreground: 220 9% 70%;
-    --accent: 330 81% 60%; /* rosa */
+    --accent: 262 86% 66%; /* #8B5CF6 */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 53%; /* #EF4444 */
     --destructive-foreground: 0 0% 100%;
-    --border: 222 24% 18%;
-    --input: 222 24% 18%;
-    --ring: 277 84% 60%;
-    --radius: 0.5rem;
+    --success: 140 60% 42%; /* #22C55E */
+    --warning: 47 95% 60%; /* #FACC15 */
+    --border: 224 30% 16%;
+    --input: 224 30% 16%;
+    --ring: 217 86% 55%;
+    --radius: 1rem; /* ~16px */
+    --elevation-1: 0 6px 18px rgba(11,13,18,0.6);
   }
 
   .dark {

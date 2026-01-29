@@ -1,6 +1,24 @@
 module.exports = {
   apps: [
     {
+      name: "daowave-web",
+      script: "npm",
+      args: "run start --workspace apps/web",
+      cwd: process.cwd(),
+      env: {
+        NODE_ENV: "production",
+      },
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "512M",
+    },
+  ],
+};
+
+module.exports = {
+  apps: [
+    {
       name: "daowave",
       cwd: "/var/www/daowave/daowave",
       script: "npm",

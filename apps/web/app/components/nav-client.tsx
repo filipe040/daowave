@@ -11,10 +11,30 @@ export default function NavClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   // local mirroring of session user so we can update UI when profile changes without full reload
-  const [localName, setLocalName] = useState<string | undefined>(session?.user?.name ?? undefined);
-  const [localAvatar, setLocalAvatar] = useState<string | undefined>(
-    ((session?.user as any)?.image as string | undefined) ?? ((session?.user as any)?.avatarUrl as string | undefined) ?? undefined
-  );
+  const [localName, setLocalName] = useState<string | undefined>(undefined);
+  const [localAvatar, setLocalAvatar] = useState<string | undefined>(undefined);
+
+  // initialize from session after mount to avoid SSR type issues
+  useEffect(() => {
+    let mounted = true;
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/account/profile");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!mounted) return;
+        const u = data.user;
+        setLocalName(u?.name ?? undefined);
+        setLocalAvatar(u?.avatarUrl ?? undefined);
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // subscribe to BroadcastChannel for session updates from other tabs/pages (e.g., profile page)
   useEffect(() => {

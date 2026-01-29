@@ -85,26 +85,6 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
           </div>
         </div>
 
-        {/* Breadcrumb Section */}
-        {eventId && (
-          <div className="p-4 lg:p-5 border-b border-white/10">
-            <div className="w-6 h-6 lg:w-7 lg:h-7 border-2 border-green-500 flex items-center justify-center mb-3 hover:border-green-400 transition-colors cursor-pointer group">
-              <span className="text-white font-bold text-sm lg:text-base group-hover:scale-110 transition-transform">Σ</span>
-            </div>
-            {section !== "DASHBOARD" && (
-              <div className="text-xs lg:text-sm text-white">
-                <Link
-                  href={`/promotor/events/${eventId}`}
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  DASHBOARD
-                </Link>
-                <span className="text-white/30 mx-1.5">/</span>
-                <span className="text-green-400">{section}</span>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-4 lg:space-y-5">
@@ -415,7 +395,8 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold text-white truncate">
-                {session.user.name || "Promotor"}
+                {/* Show role instead of large name per requirement */}
+                {(session.user as any).role || "USER"}
               </div>
               <div className="text-xs text-white/70 truncate">
                 {session.user.email}

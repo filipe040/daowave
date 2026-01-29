@@ -35,6 +35,7 @@ async function getEventData(eventId: string, userId: string) {
   let assets: Array<{
     id: string;
     filename: string;
+    name?: string | null;
     url: string;
     mimeType: string;
     size: number;

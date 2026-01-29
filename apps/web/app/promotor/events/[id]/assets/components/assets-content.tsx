@@ -14,6 +14,7 @@ interface Event {
 interface Asset {
   id: string;
   filename: string;
+  name?: string | null;
   url: string;
   mimeType: string;
   size: number;
@@ -198,7 +199,7 @@ export default function AssetsContent({ event, initialAssets }: AssetsContentPro
                   <div className="aspect-square relative bg-zinc-800">
                     <img
                       src={asset.url}
-                      alt={asset.filename}
+                      alt={asset.name ?? asset.filename}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
@@ -216,8 +217,8 @@ export default function AssetsContent({ event, initialAssets }: AssetsContentPro
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-xs text-white/70 truncate mb-1" title={asset.filename}>
-                      {asset.filename}
+                    <p className="text-xs text-white/70 truncate mb-1" title={asset.name ?? asset.filename}>
+                      {asset.name ?? asset.filename}
                     </p>
                     <div className="flex items-center justify-between text-[10px] text-white/50">
                       <span>{formatFileSize(asset.size)}</span>
