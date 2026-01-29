@@ -10,12 +10,31 @@ export default function NavClient() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  // local mirroring of session user so we can update UI when profile changes without full reload
+  const [localName, setLocalName] = useState<string | undefined>(session?.user?.name);
+  const [localAvatar, setLocalAvatar] = useState<string | undefined>(session?.user?.image || (session?.user as any)?.avatarUrl);
+
+  // subscribe to BroadcastChannel for session updates from other tabs/pages (e.g., profile page)
+  if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+    try {
+      const bc = new BroadcastChannel("daowave-session");
+      bc.onmessage = (ev) => {
+        const msg = ev.data;
+        if (msg?.type === "session:update") {
+          if (msg.name !== undefined) setLocalName(msg.name);
+          if (msg.avatarUrl !== undefined) setLocalAvatar(msg.avatarUrl);
+        }
+      };
+    } catch (e) {
+      // ignore
+    }
+  }
 
   const getProfileHref = () => {
     return "/account";
   };
 
-  const displayName = session?.user?.name || session?.user?.email || "";
+  const displayName = localName ?? session?.user?.name ?? session?.user?.email ?? "";
   const initials = displayName
     ? displayName
         .split(" ")
@@ -101,8 +120,17 @@ export default function NavClient() {
                       onClick={() => router.push(getProfileHref())}
                       className="flex items-center gap-2 group"
                     >
-                      <div className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-semibold text-sm">
-                        {initials}
+                      <div className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-semibold text-sm overflow-hidden">
+                        {localAvatar || (session?.user as any)?.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={localAvatar || (session?.user as any)?.avatarUrl}
+                            alt="avatar"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{initials}</span>
+                        )}
                       </div>
                       <div className="flex flex-col items-start">
                         {displayName && (

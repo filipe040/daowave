@@ -106,6 +106,16 @@ export default function AccountProfile({ user }: AccountProfileProps) {
 
       setToast({ type: "success", message: "Nome atualizado com sucesso." });
       router.refresh();
+      // notify other tabs/components about session/user update
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel("daowave-session");
+          bc.postMessage({ type: "session:update", name: name.trim() || null });
+          bc.close();
+        } catch (e) {
+          // ignore
+        }
+      }
     } catch (error) {
       setToast({
         type: "error",
@@ -154,6 +164,16 @@ export default function AccountProfile({ user }: AccountProfileProps) {
       setAvatarUrl(data.avatarUrl ?? null);
       setToast({ type: "success", message: "Foto de perfil atualizada." });
       router.refresh();
+      // notify other tabs/components about avatar update
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel("daowave-session");
+          bc.postMessage({ type: "session:update", avatarUrl: data.avatarUrl ?? null });
+          bc.close();
+        } catch (e) {
+          // ignore
+        }
+      }
     } catch (error) {
       setToast({
         type: "error",
