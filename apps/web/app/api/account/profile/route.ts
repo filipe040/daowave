@@ -22,8 +22,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const body = await request.json().catch(() => ({}));
+
   try {
-    const body = await request.json().catch(() => ({}));
     const data = UpdateProfileSchema.parse(body);
 
     const updated = await prisma.user.update({
@@ -51,10 +52,12 @@ export async function PATCH(request: Request) {
 
     // Se coluna avatarUrl ainda não existir, fazer update sem a selecionar
     if (error?.code === "P2021" || error?.message?.includes("Unknown column")) {
+      const data = UpdateProfileSchema.parse(body);
+
       const updated = await prisma.user.update({
         where: { id: session!.user!.id },
         data: {
-          name: (await request.json()).name ?? null,
+          name: data.name ?? null,
         },
         select: {
           id: true,

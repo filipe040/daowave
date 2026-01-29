@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,26 @@ interface AccountUser {
   email: string;
   role: string;
   avatarUrl: string | null;
+}
+
+interface TicketItem {
+  id: string;
+  code: string;
+  checkedInAt: string | null;
+  entriesUsed: number;
+  lastCheckinAt: string | null;
+  createdAt: string;
+  event: {
+    id: string;
+    title: string;
+    startAt: string;
+    endAt: string;
+    slug?: string;
+  } | null;
+  ticketLot?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface AccountProfileProps {
@@ -26,11 +46,46 @@ export default function AccountProfile({ user }: AccountProfileProps) {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // tickets
+  const [activeTab, setActiveTab] = useState<"profile" | "tickets">("profile");
+  const [tickets, setTickets] = useState<TicketItem[] | null>(null);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [ticketsError, setTicketsError] = useState<string | null>(null);
+
+  // transfer modal
+  const [transferingTicket, setTransferingTicket] = useState<TicketItem | null>(null);
+  const [transferEmail, setTransferEmail] = useState("");
+  const [transferLoading, setTransferLoading] = useState(false);
+
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 4000);
     return () => clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (activeTab === "tickets") {
+      fetchTickets();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const fetchTickets = async () => {
+    setLoadingTickets(true);
+    setTicketsError(null);
+    try {
+      const res = await fetch("/api/account/tickets");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || "Erro ao obter bilhetes");
+      }
+      setTickets(data.tickets ?? []);
+    } catch (e: any) {
+      setTicketsError(e?.message || "Erro ao obter bilhetes");
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
 
   const handleNameSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,9 +175,45 @@ export default function AccountProfile({ user }: AccountProfileProps) {
       .slice(0, 2)
       .toUpperCase() || "U";
 
+  const openTransfer = (t: TicketItem) => {
+    setTransferingTicket(t);
+    setTransferEmail("");
+  };
+
+  const closeTransfer = () => {
+    setTransferingTicket(null);
+    setTransferEmail("");
+    setTransferLoading(false);
+  };
+
+  const submitTransfer = async () => {
+    if (!transferingTicket || !transferEmail) {
+      setToast({ type: "error", message: "Email do destinatário é obrigatório." });
+      return;
+    }
+    setTransferLoading(true);
+    try {
+      const res = await fetch("/api/account/tickets/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketId: transferingTicket.id, recipientEmail: transferEmail.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Erro ao transferir bilhete");
+      }
+      setToast({ type: "success", message: "Bilhete transferido com sucesso." });
+      closeTransfer();
+      fetchTickets();
+    } catch (e: any) {
+      setToast({ type: "error", message: e?.message || "Erro ao transferir bilhete" });
+      setTransferLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* Toast */}
         {toast && (
           <div
@@ -141,8 +232,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
         </h1>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
-          {/* Avatar + info básica */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -166,72 +256,146 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 )}
               </button>
               <div>
-                <p className="text-sm text-slate-500">Foto de perfil</p>
-                <p className="text-xs text-slate-500">
-                  Imagem quadrada recomendada, até 5MB (JPG, PNG, WEBP)
-                </p>
+                <p className="text-sm text-slate-500">Perfil</p>
+                <p className="text-sm font-semibold text-slate-900">{user.name || user.email}</p>
+                <p className="text-xs text-slate-500">{user.email}</p>
               </div>
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarChange}
-            />
+            <div>
+              <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700">
+                {user.role}
+              </div>
+            </div>
           </div>
 
-          {/* Nome + email + role */}
-          <form onSubmit={handleNameSave} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">
-                  Nome de utilizador
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="O teu nome"
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={user.email}
-                  disabled
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 cursor-not-allowed"
-                />
-              </div>
-            </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="pt-3 border-t border-slate-200">
+            <nav className="flex gap-3 mb-4">
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === "profile" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
+              >
+                Perfil
+              </button>
+              <button
+                onClick={() => setActiveTab("tickets")}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === "tickets" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
+              >
+                Meus Bilhetes
+              </button>
+            </nav>
+
+            {activeTab === "profile" && (
+              <form onSubmit={handleNameSave} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">
+                      Nome de utilizador
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="O teu nome"
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={user.email}
+                      disabled
+                      className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={savingName}
+                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {savingName ? "A guardar..." : "Guardar alterações"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {activeTab === "tickets" && (
               <div>
-                <label className="block text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">
-                  Perfil
-                </label>
-                <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700">
-                  {user.role}
+                {loadingTickets && <div className="text-sm text-slate-500">A carregar bilhetes...</div>}
+                {ticketsError && <div className="text-sm text-red-600">{ticketsError}</div>}
+                {!loadingTickets && tickets && tickets.length === 0 && (
+                  <div className="text-sm text-slate-500">Ainda não tens bilhetes.</div>
+                )}
+
+                <div className="space-y-3">
+                  {tickets?.map((t) => (
+                    <div key={t.id} className="border rounded-md p-3 flex items-center justify-between bg-slate-50">
+                      <div>
+                        <div className="font-semibold text-slate-900">{t.event?.title || "Evento"}</div>
+                        <div className="text-xs text-slate-500">Código: {t.code}</div>
+                        <div className="text-xs text-slate-500">
+                          Compra: {new Date(t.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openTransfer(t)}
+                          className="px-3 py-1 rounded-md bg-white border border-slate-200 text-sm text-slate-700 hover:bg-slate-100"
+                        >
+                          Transferir
+                        </button>
+                        <a
+                          href={`/events/${t.event?.slug ?? t.event?.id}`}
+                          className="px-3 py-1 rounded-md bg-blue-600 text-sm text-white"
+                        >
+                          Ver evento
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-
-            <div className="pt-3 border-t border-slate-200 flex justify-end">
-              <button
-                type="submit"
-                disabled={savingName}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {savingName ? "A guardar..." : "Guardar alterações"}
-              </button>
-            </div>
-          </form>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Transfer modal */}
+      {transferingTicket && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-md p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-2">Transferir bilhete</h3>
+            <p className="text-sm text-slate-600 mb-4">Bilhete: {transferingTicket.code} — {transferingTicket.event?.title}</p>
+            <label className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1.5">Email do destinatário</label>
+            <input
+              value={transferEmail}
+              onChange={(e) => setTransferEmail(e.target.value)}
+              type="email"
+              placeholder="email@exemplo.com"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm mb-4"
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={closeTransfer} className="px-3 py-2 rounded-md bg-slate-100">Cancelar</button>
+              <button onClick={submitTransfer} disabled={transferLoading} className="px-3 py-2 rounded-md bg-blue-600 text-white">
+                {transferLoading ? "A processar..." : "Confirmar Transferência"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
