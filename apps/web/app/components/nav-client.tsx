@@ -11,24 +11,28 @@ export default function NavClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   // local mirroring of session user so we can update UI when profile changes without full reload
-  const [localName, setLocalName] = useState<string | undefined>(session?.user?.name);
-  const [localAvatar, setLocalAvatar] = useState<string | undefined>(session?.user?.image || (session?.user as any)?.avatarUrl);
+  const [localName, setLocalName] = useState<string | undefined>(session?.user?.name ?? undefined);
+  const [localAvatar, setLocalAvatar] = useState<string | undefined>(
+    (session?.user?.image as string | undefined) ?? ((session?.user as any)?.avatarUrl as string | undefined) ?? undefined
+  );
 
   // subscribe to BroadcastChannel for session updates from other tabs/pages (e.g., profile page)
-  if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+  useEffect(() => {
+    if (typeof window === "undefined" || !(("BroadcastChannel" in window) as boolean)) return;
     try {
       const bc = new BroadcastChannel("daowave-session");
       bc.onmessage = (ev) => {
         const msg = ev.data;
         if (msg?.type === "session:update") {
-          if (msg.name !== undefined) setLocalName(msg.name);
-          if (msg.avatarUrl !== undefined) setLocalAvatar(msg.avatarUrl);
+          if (msg.name !== undefined) setLocalName(msg.name ?? undefined);
+          if (msg.avatarUrl !== undefined) setLocalAvatar(msg.avatarUrl ?? undefined);
         }
       };
+      return () => bc.close();
     } catch (e) {
       // ignore
     }
-  }
+  }, []);
 
   const getProfileHref = () => {
     return "/account";
