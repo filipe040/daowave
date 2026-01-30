@@ -170,10 +170,10 @@ export default function NavClient() {
                   )}
                   {displayRole === "ADMIN" && (
                     <Link
-                      href="/admin"
+                      href="/promotor"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
                     >
-                      ADMIN
+                      DASHBOARD
                     </Link>
                   )}
                 </div>
@@ -290,11 +290,11 @@ export default function NavClient() {
 
                 {session.user.role === "ADMIN" && (
                   <Link
-                    href="/admin"
+                    href="/promotor"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                   >
-                    ADMIN
+                    DASHBOARD
                   </Link>
                 )}
 

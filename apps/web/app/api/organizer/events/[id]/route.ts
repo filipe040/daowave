@@ -215,42 +215,20 @@ export async function PUT(
       }
     }
 
-    // Prepare update data
-    const updateData: any = {};
+    // Prepare update data — only fields that exist on Event model (schema.prisma)
+    const updateData: Record<string, unknown> = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.category !== undefined) updateData.category = data.category;
     if (data.venueName !== undefined) updateData.venue = data.venueName;
-    if (data.address !== undefined) updateData.address = data.address;
     if (data.city !== undefined) updateData.city = data.city;
     if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);
     if (data.endAt !== undefined) updateData.endAt = new Date(data.endAt);
-    if (data.timezone !== undefined) updateData.timezone = data.timezone;
-    // Only add check-in fields if they exist (migration applied)
-    try {
-      if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
-      if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
-      if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
-      if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
-    } catch {
-      // Fields don't exist, skip them
-    }
-    if (data.capacityTotal !== undefined) updateData.capacityTotal = data.capacityTotal;
-    if (data.ageRestriction !== undefined) updateData.ageRestriction = data.ageRestriction;
-    if (data.refundPolicy !== undefined) updateData.refundPolicy = data.refundPolicy;
-    if (data.cancellationPolicy !== undefined) updateData.cancellationPolicy = data.cancellationPolicy;
-    if (data.termsText !== undefined) updateData.termsText = data.termsText;
-    if (data.consentRGPD !== undefined) updateData.consentRGPD = data.consentRGPD;
-    if (data.wheelchairAccess !== undefined) updateData.wheelchairAccess = data.wheelchairAccess;
-    if (data.signLanguageSupport !== undefined) updateData.signLanguageSupport = data.signLanguageSupport;
-    if (data.accessibleWC !== undefined) updateData.accessibleWC = data.accessibleWC;
-    if (data.accessibilityNotes !== undefined) updateData.accessibilityNotes = data.accessibilityNotes;
-    if (data.contactEmail !== undefined) updateData.contactEmail = data.contactEmail;
-    if (data.contactPhone !== undefined) updateData.contactPhone = data.contactPhone;
-    if (data.supportInstructions !== undefined) updateData.supportInstructions = data.supportInstructions;
+    if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
+    if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
+    if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
+    if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
     if (data.bannerUrl !== undefined) {
-      // Normalize imgur URLs
       let bannerUrl = data.bannerUrl;
       if (bannerUrl && bannerUrl.includes("imgur.com")) {
         if (!bannerUrl.startsWith("http")) {
@@ -264,7 +242,6 @@ export async function PUT(
       }
       updateData.bannerUrl = bannerUrl;
     }
-    if (data.galleryUrls !== undefined) updateData.galleryUrls = data.galleryUrls;
 
     const event = await prisma.event.update({
       where: { id },

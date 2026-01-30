@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
-import { canAccessAdminArea, isPromoter } from "@/lib/auth/permissions";
-import DashboardShell from "@/app/promotor/components/dashboard-shell";
+import { canAccessPromoterArea } from "@/lib/auth/permissions";
+import DashboardShell from "../components/dashboard-shell";
 
-export default async function AdminLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -12,14 +12,11 @@ export default async function AdminLayout({
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/promotor");
+    redirect("/promotor/login");
   }
 
   const role = (session.user as { role?: string }).role;
-
-  if (!canAccessAdminArea(role)) {
-    if (isPromoter(role)) redirect("/organizer");
-    if (role === "USER") redirect("/validator");
+  if (!canAccessPromoterArea(role)) {
     redirect("/");
   }
 

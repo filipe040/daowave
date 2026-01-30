@@ -71,10 +71,8 @@ function SignInContent() {
           const userRole = sessionData?.user?.role;
 
           let redirectUrl = from;
-          if (from === "/" || from === "/admin" || from.startsWith("/admin")) {
-            if (userRole === "ADMIN") {
-              redirectUrl = "/admin";
-            } else if (userRole === "PROMOTER") {
+          if (from === "/" || from === "/admin" || from.startsWith("/admin") || from === "/promotor") {
+            if (userRole === "ADMIN" || userRole === "PROMOTER") {
               redirectUrl = "/promotor";
             } else {
               redirectUrl = "/";

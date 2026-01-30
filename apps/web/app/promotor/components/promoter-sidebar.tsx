@@ -25,6 +25,13 @@ import {
   ChevronRight,
   Menu,
   X,
+  UserCheck,
+  Calendar,
+  CalendarCheck,
+  CreditCard,
+  FileCheck,
+  Shield,
+  PlusCircle,
 } from "lucide-react";
 
 interface PromoterSidebarProps {
@@ -62,8 +69,12 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
   const { data: session } = useSession();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  const role = (session?.user as { role?: string })?.role;
+  const isAdmin = role === "ADMIN";
+
   const section = useMemo(() => {
     if (currentSection) return currentSection;
+    if (pathname.startsWith("/admin")) return "ADMINISTRAÇÃO";
     if (pathname.includes("/tickets")) return "BILHÉTICA & RECEITA";
     if (pathname.includes("/checkin")) return "CONTROLO DE ACESSO";
     return "DASHBOARD";
@@ -170,8 +181,27 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
       ],
     };
 
-    return [management, experience, config, analytics, system];
-  }, [eventId, baseEvent]);
+    const adminGroup: NavGroup = {
+      title: "ADMINISTRAÇÃO",
+      items: [
+        { label: "Dashboard Admin", href: "/admin", icon: LayoutGrid, activeMatch: (p) => p === "/admin" },
+        { label: "Utilizadores", href: "/admin/users", icon: Users },
+        { label: "Promotores", href: "/admin/organizers", icon: UserCheck },
+        { label: "Eventos", href: "/admin/events", icon: Calendar },
+        { label: "Aprovar Eventos", href: "/admin/events/pending", icon: CalendarCheck },
+        { label: "Pagamentos", href: "/admin/payments", icon: CreditCard },
+        { label: "Auditoria", href: "/admin/audit", icon: FileCheck },
+        { label: "Sistema", href: "/admin/system", icon: Shield },
+        { label: "Definições", href: "/admin/settings", icon: Settings },
+        { label: "Criar Evento", href: "/admin/events/new", icon: PlusCircle },
+        { label: "Fix Session", href: "/admin/fix-session", icon: Wrench },
+      ],
+    };
+
+    const allGroups = [management, experience, config, analytics, system];
+    if (isAdmin) allGroups.push(adminGroup);
+    return allGroups;
+  }, [eventId, baseEvent, isAdmin]);
 
   return (
     <>

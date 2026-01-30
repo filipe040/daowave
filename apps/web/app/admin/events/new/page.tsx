@@ -9,7 +9,7 @@ export default async function AdminNewEventPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/auth/signin?from=/admin/events/new");
+    redirect("/auth/signin?callbackUrl=/promotor");
   }
 
   // Get or create admin organizer profile

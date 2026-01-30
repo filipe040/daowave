@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminSettingsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/admin/settings");
+    redirect("/auth/signin?callbackUrl=/promotor");
   }
 
   return (
@@ -28,7 +28,7 @@ export default async function AdminSettingsPage() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
-            href="/admin"
+            href="/promotor"
             className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-medium transition-colors"
           >
             Voltar ao Dashboard
