@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 interface HealthStatus {
   status: "ok" | "degraded" | "error";
@@ -114,19 +112,22 @@ export default function SystemStatusPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded mb-4"></div>
+      <div className="w-full min-w-0 max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-zinc-700 rounded w-1/4"></div>
+          <div className="h-32 bg-zinc-800 rounded-2xl"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">System Status</h1>
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Sistema</h1>
+          <p className="text-base md:text-lg text-zinc-400">Estado dos serviços e erros críticos</p>
+        </div>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2">
             <input
@@ -135,7 +136,7 @@ export default function SystemStatusPage() {
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm">Auto-refresh (30s)</span>
+            <span className="text-sm text-zinc-400">Auto-refresh (30s)</span>
           </label>
           <button
             onClick={() => {

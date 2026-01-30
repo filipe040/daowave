@@ -3,44 +3,46 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPaymentsPage() {
-  const orders = await prisma.order.findMany({
-    include: {
-      event: {
-        select: {
-          title: true,
-          slug: true,
+  const [orders, total, paid, pending, revenueAgg] = await Promise.all([
+    prisma.order.findMany({
+      include: {
+        event: {
+          select: {
+            title: true,
+            slug: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            tickets: true,
+          },
         },
       },
-      user: {
-        select: {
-          name: true,
-          email: true,
-        },
+      orderBy: {
+        createdAt: "desc",
       },
-      _count: {
-        select: {
-          tickets: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 100,
-  });
+      take: 100,
+    }),
+    prisma.order.count(),
+    prisma.order.count({ where: { status: "PAID" } }),
+    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.aggregate({
+      where: { status: "PAID" },
+      _sum: { totalCents: true },
+    }),
+  ]);
 
-  const stats = {
-    total: orders.length,
-    paid: orders.filter((o) => o.status === "PAID").length,
-    pending: orders.filter((o) => o.status === "PENDING").length,
-    failed: 0, // OrderStatus enum doesn't include FAILED
-    totalRevenue: orders
-      .filter((o) => o.status === "PAID")
-      .reduce((sum, o) => sum + o.totalCents, 0),
-  };
+  const totalRevenue = revenueAgg._sum.totalCents ?? 0;
+  const stats = { total, paid, pending, totalRevenue };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
       <div className="space-y-2">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Gestão de Pagamentos</h1>
         <p className="text-base md:text-lg text-zinc-400">Visualize e gerencie todos os pagamentos da plataforma</p>
@@ -62,7 +64,7 @@ export default async function AdminPaymentsPage() {
         </div>
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 border border-zinc-700/50">
           <div className="text-sm text-zinc-400 mb-2">Receita Total</div>
-          <div className="text-4xl font-bold text-purple-400">{(stats.totalRevenue / 100).toFixed(2)} €</div>
+          <div className="text-4xl font-bold text-purple-400">{(stats.totalRevenue / 100).toFixed(2)}€</div>
         </div>
       </div>
 

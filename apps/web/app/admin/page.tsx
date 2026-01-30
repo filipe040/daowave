@@ -1,121 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
-
-const eur = new Intl.NumberFormat("pt-PT", {
-  style: "currency",
-  currency: "EUR",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-function cn(...classes: Array<string | false | undefined | null>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function StatCard({
-  label,
-  value,
-  tone = "neutral",
-  href,
-  footnote,
-}: {
-  label: string;
-  value: React.ReactNode;
-  tone?: "neutral" | "yellow" | "blue" | "green" | "purple" | "orange";
-  href?: string;
-  footnote?: React.ReactNode;
-}) {
-  const toneMap = {
-    neutral: "text-white/92",
-    yellow: "text-amber-300",
-    blue: "text-sky-300",
-    green: "text-emerald-300",
-    purple: "text-violet-300",
-    orange: "text-orange-300",
-  } as const;
-
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-3xl",
-        "border border-white/10 bg-white/5 backdrop-blur-2xl",
-        "p-6 md:p-7",
-        "shadow-[0_18px_60px_rgba(0,0,0,.35)]",
-        "transition-all duration-200",
-        "hover:bg-white/6 hover:border-white/14"
-      )}
-    >
-      {/* soft highlight */}
-      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-white/6 blur-3xl" />
-
-      <div className="relative">
-        <div className="text-[11px] uppercase tracking-wider text-white/55">{label}</div>
-
-        <div className={cn("mt-3 text-4xl md:text-5xl font-semibold tracking-tight", toneMap[tone])}>
-          {value}
-        </div>
-
-        {footnote && <div className="mt-2 text-sm text-white/55">{footnote}</div>}
-
-        {href && (
-          <Link
-            href={href}
-            className={cn(
-              "mt-5 inline-flex items-center gap-2",
-              "text-[12px] font-semibold text-white/70 hover:text-white",
-              "transition"
-            )}
-          >
-            Ver detalhes <span className="opacity-60">→</span>
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ActionCard({
-  title,
-  description,
-  href,
-  tone = "neutral",
-}: {
-  title: string;
-  description: React.ReactNode;
-  href: string;
-  tone?: "neutral" | "yellow" | "orange" | "green" | "purple";
-}) {
-  const toneBg = {
-    neutral: "bg-white/5 border-white/10",
-    yellow: "bg-amber-500/10 border-amber-500/30",
-    orange: "bg-orange-500/10 border-orange-500/30",
-    green: "bg-emerald-500/10 border-emerald-500/30",
-    purple: "bg-violet-500/10 border-violet-500/30",
-  } as const;
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border p-5 md:p-6",
-        "backdrop-blur-2xl transition-all duration-200",
-        toneBg[tone],
-        "hover:border-white/18 hover:bg-white/7"
-      )}
-    >
-      <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-white/6 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-      <div className="relative">
-        <div className="text-[13px] font-semibold text-white/90">{title}</div>
-        <div className="mt-2 text-[12px] leading-relaxed text-white/60">{description}</div>
-        <div className="mt-4 text-[12px] font-semibold text-white/70 group-hover:text-white transition">
-          Abrir <span className="opacity-60">→</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 export default async function AdminDashboard() {
   const [
@@ -144,106 +32,226 @@ export default async function AdminDashboard() {
 
   const revenueCents = totalRevenue._sum.totalCents ?? 0;
 
+  const recentEvents = await prisma.event.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: {
+      promoter: {
+        include: {
+          user: { select: { name: true, email: true } },
+        },
+      },
+    },
+  });
+
+  const pendingCount = pendingOrganizers + pendingEvents;
+
   return (
-    <div className="w-full min-w-0 mx-auto max-w-7xl space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="text-[11px] uppercase tracking-wider text-white/50">Admin</div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white/90">
-          Dashboard
-        </h1>
-        <p className="text-sm md:text-base text-white/55">
-          Operação, aprovações e métricas essenciais.
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <StatCard
-          label="Promotores pendentes"
-          value={pendingOrganizers}
-          tone="yellow"
-          href="/admin/organizers?status=PENDING"
-        />
-
-        <StatCard
-          label="Total de eventos"
-          value={totalEvents}
-          tone="blue"
-          footnote={
-            <span>
-              <span className="text-white/70 font-semibold">{publishedEvents}</span>{" "}
-              <span className="text-white/45">publicados</span>
-            </span>
-          }
-        />
-
-        <StatCard label="Pedidos pagos" value={totalOrders} tone="green" />
-
-        <StatCard label="Receita total" value={eur.format(revenueCents / 100)} tone="purple" />
-      </div>
-
-      {/* Quick Actions */}
-      <div
-        className={cn(
-          "rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl",
-          "p-6 md:p-8",
-          "shadow-[0_18px_60px_rgba(0,0,0,.35)]"
-        )}
-      >
-        <div className="flex items-end justify-between gap-4 mb-6">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-white/50">Operação</div>
-            <h2 className="mt-2 text-xl md:text-2xl font-semibold text-white/90">Ações rápidas</h2>
-          </div>
-
-          <div className="text-[12px] text-white/55">
-            Pendências:{" "}
-            <span className="text-white/80 font-semibold">
-              {pendingOrganizers + pendingEvents}
-            </span>
-          </div>
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 md:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+        <div className="space-y-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Dashboard</h1>
+          <p className="text-base md:text-lg text-zinc-400">Bem-vindo ao painel de administração</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <ActionCard
-            href="/admin/organizers?status=PENDING"
-            title="Aprovar promotores"
-            description={
-              <>
-                <span className="text-white/80 font-semibold">{pendingOrganizers}</span>{" "}
-                aguardando aprovação.
-              </>
-            }
-            tone="yellow"
-          />
-
-          <ActionCard
-            href="/admin/events/pending"
-            title="Aprovar eventos"
-            description={
-              <>
-                <span className="text-white/80 font-semibold">{pendingEvents}</span>{" "}
-                em rascunho pendente.
-              </>
-            }
-            tone="orange"
-          />
-
-          <ActionCard
+        <div className="flex flex-wrap gap-3">
+          {pendingCount > 0 && (
+            <Link
+              href="/admin/organizers?status=PENDING"
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-amber-500/20 hover:shadow-xl hover:scale-105 whitespace-nowrap"
+            >
+              Aprovar pendências ({pendingCount})
+            </Link>
+          )}
+          <Link
             href="/admin/events/new"
-            title="Criar evento"
-            description="Criar novo evento como admin."
-            tone="green"
-          />
-
-          <ActionCard
-            href="/admin/audit"
-            title="Auditoria"
-            description="Transferências, check-ins e ações críticas."
-            tone="purple"
-          />
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105 whitespace-nowrap"
+          >
+            + Criar Evento
+          </Link>
         </div>
+      </div>
+
+      {/* Stats Grid - mesmo estilo do dashboard promotor */}
+      <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="text-4xl md:text-5xl mb-3">👥</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{pendingOrganizers}</div>
+          <div className="text-sm md:text-base text-zinc-400">Promotores pendentes</div>
+          <Link
+            href="/admin/organizers?status=PENDING"
+            className="mt-3 inline-block text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Ver pendentes →
+          </Link>
+        </div>
+
+        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="text-4xl md:text-5xl mb-3">🎫</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{totalEvents}</div>
+          <div className="text-sm md:text-base text-zinc-400">
+            Total de eventos <span className="text-zinc-500">({publishedEvents} publicados)</span>
+          </div>
+          <Link
+            href="/admin/events"
+            className="mt-3 inline-block text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Ver eventos →
+          </Link>
+        </div>
+
+        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="text-4xl md:text-5xl mb-3">🛒</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{totalOrders}</div>
+          <div className="text-sm md:text-base text-zinc-400">Pedidos pagos</div>
+          <Link
+            href="/admin/payments"
+            className="mt-3 inline-block text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Ver pagamentos →
+          </Link>
+        </div>
+
+        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="text-4xl md:text-5xl mb-3">💰</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">
+            {(revenueCents / 100).toFixed(2)}€
+          </div>
+          <div className="text-sm md:text-base text-zinc-400">Receita total</div>
+          <Link
+            href="/admin/payments"
+            className="mt-3 inline-block text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Ver detalhes →
+          </Link>
+        </div>
+      </div>
+
+      {/* Ações rápidas - card estilo promotor */}
+      <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold">Ações rápidas</h2>
+          {pendingCount > 0 && (
+            <span className="text-sm text-amber-400 font-medium">
+              {pendingCount} pendência(s)
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/admin/organizers?status=PENDING"
+            className="flex items-center gap-4 p-5 rounded-xl border border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-900/80 transition-all group"
+          >
+            <span className="text-3xl">👤</span>
+            <div>
+              <div className="font-semibold group-hover:text-amber-400 transition-colors">
+                Aprovar promotores
+              </div>
+              <div className="text-sm text-zinc-500">{pendingOrganizers} pendentes</div>
+            </div>
+            <span className="text-zinc-600 group-hover:text-amber-400 ml-auto text-xl">→</span>
+          </Link>
+          <Link
+            href="/admin/events/pending"
+            className="flex items-center gap-4 p-5 rounded-xl border border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-900/80 transition-all group"
+          >
+            <span className="text-3xl">📋</span>
+            <div>
+              <div className="font-semibold group-hover:text-purple-400 transition-colors">
+                Aprovar eventos
+              </div>
+              <div className="text-sm text-zinc-500">{pendingEvents} em rascunho</div>
+            </div>
+            <span className="text-zinc-600 group-hover:text-purple-400 ml-auto text-xl">→</span>
+          </Link>
+          <Link
+            href="/admin/events/new"
+            className="flex items-center gap-4 p-5 rounded-xl border border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-900/80 transition-all group"
+          >
+            <span className="text-3xl">➕</span>
+            <div>
+              <div className="font-semibold group-hover:text-green-400 transition-colors">
+                Criar evento
+              </div>
+              <div className="text-sm text-zinc-500">Novo evento como admin</div>
+            </div>
+            <span className="text-zinc-600 group-hover:text-green-400 ml-auto text-xl">→</span>
+          </Link>
+          <Link
+            href="/admin/audit"
+            className="flex items-center gap-4 p-5 rounded-xl border border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-900/80 transition-all group"
+          >
+            <span className="text-3xl">📜</span>
+            <div>
+              <div className="font-semibold group-hover:text-purple-400 transition-colors">
+                Auditoria
+              </div>
+              <div className="text-sm text-zinc-500">Check-ins e transferências</div>
+            </div>
+            <span className="text-zinc-600 group-hover:text-purple-400 ml-auto text-xl">→</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Eventos recentes - mesmo layout do promotor */}
+      <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold">Eventos recentes</h2>
+          <Link
+            href="/admin/events"
+            className="text-sm md:text-base text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-2 group"
+          >
+            Ver todos
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
+          </Link>
+        </div>
+
+        {recentEvents.length === 0 ? (
+          <div className="text-center py-12 md:py-16">
+            <div className="text-5xl md:text-6xl mb-4 opacity-50">📅</div>
+            <p className="text-lg md:text-xl text-zinc-400 mb-6">Ainda não há eventos</p>
+            <Link
+              href="/admin/events/new"
+              className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-8 py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+            >
+              Criar evento
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3 md:space-y-4">
+            {recentEvents.map((event) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.slug}`}
+                target="_blank"
+                className="flex items-center justify-between p-5 md:p-6 rounded-xl border border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-900/80 transition-all group"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h3 className="font-semibold text-base md:text-lg group-hover:text-purple-400 transition-colors truncate">
+                      {event.title}
+                    </h3>
+                    <span
+                      className={`text-xs md:text-sm px-3 py-1 rounded-lg ${
+                        event.status === "PUBLISHED"
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                      }`}
+                    >
+                      {event.status === "PUBLISHED" ? "Publicado" : "Rascunho"}
+                    </span>
+                  </div>
+                  <p className="text-sm md:text-base text-zinc-500">
+                    {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
+                    {event.promoter?.user?.email && (
+                      <span className="ml-2 text-zinc-600">· {event.promoter.user.email}</span>
+                    )}
+                  </p>
+                </div>
+                <span className="text-zinc-600 group-hover:text-purple-400 transition-colors ml-4 text-xl">→</span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

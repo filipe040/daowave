@@ -1,4 +1,3 @@
-import AdminSidebar from "../components/admin-sidebar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -12,29 +11,30 @@ export default async function AdminSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      <AdminSidebar />
-      <main className="ml-72 p-8">
-        <div className="max-w-4xl">
-          <h1 className="text-2xl font-bold mb-4">Definições do Sistema</h1>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-6">
-            <p className="text-zinc-300">
-              Em desenvolvimento — aqui ficarão opções de configuração do sistema,
-              integrações e parâmetros globais. Para já, esta secção serve como
-              espaço de gestão centralizado.
-            </p>
-            <div className="mt-4">
-              <button
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
-                onClick={() => window.location.reload()}
-              >
-                Recarregar
-              </button>
-            </div>
-          </div>
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="space-y-2">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Definições</h1>
+        <p className="text-base md:text-lg text-zinc-400">
+          Configuração do sistema, integrações e parâmetros globais.
+        </p>
+      </div>
+
+      <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg">
+        <h2 className="text-xl font-semibold mb-4">Definições do Sistema</h2>
+        <p className="text-zinc-400 leading-relaxed">
+          Em desenvolvimento — aqui ficarão opções de configuração do sistema,
+          integrações (pagamentos, email, storage) e parâmetros globais. Para já,
+          esta secção serve como espaço de gestão centralizado.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href="/admin"
+            className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-medium transition-colors"
+          >
+            Voltar ao Dashboard
+          </a>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
-

@@ -61,7 +61,7 @@ export default async function AdminAuditPage() {
   ]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
       <div className="space-y-2">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Auditoria</h1>
         <p className="text-base md:text-lg text-zinc-400">Registos de check-ins e transferências de bilhetes</p>

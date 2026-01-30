@@ -46,7 +46,7 @@ export default async function AdminOrganizersPage({
   const [pending, approved, rejected] = statusCounts;
 
   return (
-    <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto">
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 md:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Gestão de Promotores</h1>

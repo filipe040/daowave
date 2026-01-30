@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { User, LogOut } from "lucide-react";
 
 const menuItems = [
   { href: "/organizer", label: "Dashboard", icon: "📊" },
@@ -84,15 +85,29 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
             })}
           </nav>
 
-          <div className="p-4 border-t border-zinc-800">
-            <div className="text-xs text-zinc-500 mb-1">Logado como:</div>
-            <div className="text-xs uppercase tracking-wider text-zinc-400 mb-1">
-              {(session?.user as any)?.role || "USER"}
+          {session?.user && (
+            <div className="p-4 border-t border-zinc-800">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-2xl border border-zinc-700 bg-zinc-800/80 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <User className="h-5 w-5 text-zinc-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-white truncate">
+                    {(session.user as any).role || "PROMOTOR"}
+                  </div>
+                  <div className="text-xs text-zinc-400 truncate">{session.user.email}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-800/80 text-white px-4 py-2.5 flex items-center justify-center gap-2 transition-all hover:bg-zinc-700/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                type="button"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm font-medium">Sair</span>
+              </button>
             </div>
-            <div className="text-sm font-medium text-zinc-300 truncate">
-              {session?.user?.email}
-            </div>
-          </div>
+          )}
         </div>
       </aside>
     </>
