@@ -21,8 +21,12 @@ async function getCurrentUser(userId: string) {
 
     return user;
   } catch (error: any) {
-    // Fallback se avatarUrl ainda não existir na BD
-    if (error?.code === "P2021" || error?.message?.includes("Unknown column")) {
+    // Fallback se avatarUrl ainda não existir na BD (ex.: migração não aplicada ou MySQL sem IF NOT EXISTS)
+    const isMissingColumn =
+      error?.code === "P2021" ||
+      error?.message?.includes("Unknown column") ||
+      error?.message?.includes("does not exist");
+    if (isMissingColumn) {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {

@@ -100,7 +100,11 @@ export async function GET() {
     return NextResponse.json({ user });
   } catch (error: any) {
     // Graceful fallback if avatarUrl column doesn't exist yet
-    if (error?.code === "P2022" || error?.message?.includes("Unknown column")) {
+    const isMissingColumn =
+      error?.code === "P2022" ||
+      error?.message?.includes("Unknown column") ||
+      error?.message?.includes("does not exist");
+    if (isMissingColumn) {
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: {

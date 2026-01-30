@@ -2,15 +2,111 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+
+function roleLabel(role: string) {
+  if (role === "ADMIN") return "Admin";
+  if (role === "PROMOTER") return "Promotor";
+  if (role === "USER") return "Cliente";
+  return role;
+}
 
 export default function NavClient() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profile, setProfile] = useState<{
+    name: string | null;
+    avatarUrl: string | null;
+    role: string;
+  } | null>(null);
+
+  const displayName = profile?.name ?? session?.user?.name ?? session?.user?.email ?? "Conta";
+  const displayRole = profile?.role ?? (session?.user as { role?: string })?.role ?? "USER";
+  const avatarUrl = profile?.avatarUrl ?? null;
+
+  const initials = useMemo(() => {
+    const src = displayName === "Conta" ? session?.user?.email : displayName;
+    return (
+      (src || "")
+        ?.split(" ")
+        .filter(Boolean)
+        .map((p) => p[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase() || "U"
+    );
+  }, [displayName, session?.user?.email]);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setProfile(null);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/account/profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.user) return;
+        setProfile({
+          name: data.user.name ?? null,
+          avatarUrl: data.user.avatarUrl ?? null,
+          role: data.user.role ?? (session?.user as { role?: string })?.role ?? "USER",
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+    const bc = new BroadcastChannel("daowave-session");
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type !== "session:update") return;
+      setProfile((prev) => ({
+        name: e.data.name !== undefined ? e.data.name : prev?.name ?? null,
+        avatarUrl: e.data.avatarUrl !== undefined ? e.data.avatarUrl : prev?.avatarUrl ?? null,
+        role: prev?.role ?? (session?.user as { role?: string })?.role ?? "USER",
+      }));
+    };
+    bc.addEventListener("message", handler);
+    return () => {
+      bc.removeEventListener("message", handler);
+      bc.close();
+    };
+  }, [session?.user?.role]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/", redirect: true });
   };
+
+  const userBlock = (
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <Link
+        href="/account"
+        className="flex items-center gap-2 sm:gap-3 min-w-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+      >
+        <span
+          className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-white text-xs font-semibold"
+          aria-hidden
+        >
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            initials
+          )}
+        </span>
+        <span className="hidden sm:block text-white font-medium text-sm truncate max-w-[120px] md:max-w-[160px]">
+          {displayName}
+        </span>
+        <span className="hidden md:inline text-white/60 text-xs font-normal truncate max-w-[80px]">
+          {roleLabel(displayRole)}
+        </span>
+      </Link>
+    </div>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
@@ -53,9 +149,11 @@ export default function NavClient() {
           <div className="flex items-center gap-4">
             {session ? (
               <div className="flex items-center gap-3 md:gap-4">
-                {/* Desktop role links */}
+                {/* Desktop: avatar + name + role + links */}
                 <div className="hidden md:flex items-center gap-4">
-                  {session.user.role === "PROMOTER" && (
+                  {userBlock}
+
+                  {displayRole === "PROMOTER" && (
                     <Link
                       href="/promotor"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -63,7 +161,7 @@ export default function NavClient() {
                       PROMOTER
                     </Link>
                   )}
-                  {session.user.role === "ADMIN" && (
+                  {displayRole === "ADMIN" && (
                     <Link
                       href="/admin"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -71,14 +169,6 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-
-                  {/* Simple account link (no avatar) */}
-                  <Link
-                    href="/account"
-                    className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
-                  >
-                    CONTA
-                  </Link>
 
                   <button
                     onClick={handleSignOut}
@@ -88,10 +178,14 @@ export default function NavClient() {
                   </button>
                 </div>
 
-                {/* Mobile menu button */}
+                {/* Mobile: avatar + name (compact) then menu button */}
+                <div className="flex md:hidden items-center gap-2 min-w-0">
+                  {userBlock}
+                </div>
+
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden text-white p-2"
+                  className="md:hidden text-white p-2 flex-shrink-0"
                   aria-label="Menu"
                   type="button"
                 >
@@ -137,6 +231,27 @@ export default function NavClient() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <nav className="md:hidden pb-6 pt-4 border-t border-zinc-900 space-y-4">
+            {session && (
+              <Link
+                href="/account"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mb-4"
+              >
+                <span className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-white text-sm font-semibold">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-white font-medium text-sm truncate">{displayName}</div>
+                  <div className="text-white/60 text-xs">{roleLabel(displayRole)}</div>
+                </div>
+              </Link>
+            )}
+
             <Link
               href="/events"
               onClick={() => setMobileMenuOpen(false)}
