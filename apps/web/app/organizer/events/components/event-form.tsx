@@ -18,9 +18,19 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+interface OrganizerOption {
+  id: string;
+  brandName: string;
+  user: { name: string | null; email: string };
+}
+
 interface EventFormProps {
   eventId?: string;
   initialData?: any;
+  /** Quando true, mostra seletor de promotor e envia para API admin (criar evento como admin) */
+  isAdminCreate?: boolean;
+  availableOrganizers?: OrganizerOption[];
+  defaultPromoterId?: string;
 }
 
 const categories = [
@@ -45,12 +55,13 @@ const tabs: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "media", label: "Media", icon: Image },
 ];
 
-export default function EventForm({ eventId, initialData }: EventFormProps) {
+export default function EventForm({ eventId, initialData, isAdminCreate, availableOrganizers = [], defaultPromoterId }: EventFormProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
+  const [promoterId, setPromoterId] = useState(defaultPromoterId ?? "");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -201,6 +212,12 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
       }
     }
 
+    if (isAdminCreate && !promoterId?.trim()) {
+      setErrors((prev) => ({ ...prev, promoterId: "Selecione o promotor responsável" }));
+      setLoading(false);
+      return;
+    }
+
     if (!isValid) {
       setLoading(false);
       // Go to first tab with errors
@@ -218,35 +235,40 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     }
 
     try {
-      // Convert datetime-local format to ISO 8601
-      const convertToISO = (dateTimeLocal: string, timezone: string = "Europe/Lisbon"): string | null => {
-        if (!dateTimeLocal) return null;
-        // datetime-local format: "yyyy-MM-ddTHH:mm"
-        // Convert to ISO by adding timezone offset
-        const date = new Date(dateTimeLocal);
-        // Format as ISO string
-        return date.toISOString();
+      // Convert datetime-local ("yyyy-MM-ddTHH:mm") or any parseable date to ISO 8601
+      const convertToISO = (dateTimeLocal: string): string | null => {
+        if (!dateTimeLocal || typeof dateTimeLocal !== "string") return null;
+        const trimmed = dateTimeLocal.trim();
+        if (!trimmed) return null;
+        const date = new Date(trimmed);
+        if (Number.isNaN(date.getTime())) return null;
+        try {
+          return date.toISOString();
+        } catch {
+          return null;
+        }
       };
 
       const payload: any = {
         ...formData,
-        startAt: formData.startAt ? convertToISO(formData.startAt, formData.timezone) : null,
-        endAt: formData.endAt ? convertToISO(formData.endAt, formData.timezone) : null,
-        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt, formData.timezone) : null,
-        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt, formData.timezone) : null,
+        startAt: convertToISO(formData.startAt ?? "") ?? (formData.startAt ? null : undefined),
+        endAt: convertToISO(formData.endAt ?? "") ?? (formData.endAt ? null : undefined),
+        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt) : null,
+        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt) : null,
         maxEntries: formData.maxEntries ? parseInt(formData.maxEntries as any) : null,
         capacityTotal: formData.capacityTotal ? parseInt(formData.capacityTotal as any) : null,
         ageRestriction: formData.ageRestriction ? parseInt(formData.ageRestriction as any) : null,
         galleryUrls: Array.isArray(formData.galleryUrls) ? formData.galleryUrls : [],
       };
 
-      const url = eventId ? `/api/organizer/events/${eventId}` : "/api/organizer/events";
-      const method = eventId ? "PUT" : "POST";
+      const url = isAdminCreate ? "/api/admin/events" : eventId ? `/api/organizer/events/${eventId}` : "/api/organizer/events";
+      const method = isAdminCreate ? "POST" : eventId ? "PUT" : "POST";
+      const body = isAdminCreate ? { ...payload, promoterId } : payload;
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -270,16 +292,18 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
       setLoading(false);
       setErrors({});
       
+      if (isAdminCreate) {
+        router.push("/admin/events");
+        router.refresh();
+        return;
+      }
       if (!eventId) {
         // New event - redirect to events list first, then to edit page
-        // This ensures the list is refreshed
         router.push(`/organizer/events`);
-        // Small delay to ensure navigation completes, then redirect to edit
         setTimeout(() => {
           window.location.href = `/organizer/events/${data.id}/edit`;
         }, 100);
       } else {
-        // Existing event - refresh page data
         router.refresh();
       }
     } catch (error) {
@@ -298,20 +322,25 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     setLoading(true);
     setPublishErrors([]);
 
-    const convertToISO = (dateTimeLocal: string, tz: string = "Europe/Lisbon"): string | null => {
-      if (!dateTimeLocal) return null;
-      const date = new Date(dateTimeLocal);
-      return date.toISOString();
+    const convertToISO = (dateTimeLocal: string): string | null => {
+      if (!dateTimeLocal || typeof dateTimeLocal !== "string") return null;
+      const date = new Date(dateTimeLocal.trim());
+      if (Number.isNaN(date.getTime())) return null;
+      try {
+        return date.toISOString();
+      } catch {
+        return null;
+      }
     };
 
     try {
       // Save current form data first so publish validates the same dates/times the user sees
       const payload: any = {
         ...formData,
-        startAt: formData.startAt ? convertToISO(formData.startAt, formData.timezone) : null,
-        endAt: formData.endAt ? convertToISO(formData.endAt, formData.timezone) : null,
-        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt, formData.timezone) : null,
-        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt, formData.timezone) : null,
+        startAt: convertToISO(formData.startAt ?? "") ?? null,
+        endAt: convertToISO(formData.endAt ?? "") ?? null,
+        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt) : null,
+        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt) : null,
         maxEntries: formData.maxEntries ? parseInt(formData.maxEntries as any) : null,
         capacityTotal: formData.capacityTotal ? parseInt(formData.capacityTotal as any) : null,
         ageRestriction: formData.ageRestriction ? parseInt(formData.ageRestriction as any) : null,
@@ -371,6 +400,35 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      {/* Promotor responsável (apenas quando admin cria evento) */}
+      {isAdminCreate && availableOrganizers.length > 0 && (
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6 backdrop-blur-sm">
+          <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
+            Promotor responsável <span className="text-red-400">*</span>
+          </label>
+          <select
+            value={promoterId}
+            onChange={(e) => {
+              setPromoterId(e.target.value);
+              setErrors((prev) => ({ ...prev, promoterId: "" }));
+            }}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+          >
+            <option value="">Selecione um promotor</option>
+            {availableOrganizers.map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.brandName} ({org.user.email})
+              </option>
+            ))}
+          </select>
+          {errors.promoterId && (
+            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.promoterId}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="border-b border-zinc-800 overflow-x-auto -mx-6 px-6">
         <div className="flex gap-1 sm:gap-2 min-w-max pb-1">
@@ -1001,10 +1059,18 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
             disabled={loading}
             className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "A guardar..." : eventId ? "Guardar Alterações" : "Criar Evento"}
+            {loading
+              ? isAdminCreate
+                ? "A criar..."
+                : "A guardar..."
+              : isAdminCreate
+                ? "Criar e Publicar Evento"
+                : eventId
+                  ? "Guardar Alterações"
+                  : "Criar Evento"}
           </button>
 
-          {eventId && (
+          {eventId && !isAdminCreate && (
             <button
               type="button"
               onClick={handlePublish}

@@ -84,41 +84,24 @@ export async function POST(req: Request) {
     }
 
     // Create event with PUBLISHED status (admin creates published events)
+    // Only fields that exist on Event model (schema.prisma)
     const event = await prisma.event.create({
       data: {
         promoterId: data.promoterId,
         title: data.title,
         slug: data.slug,
         description: data.description,
-        category: data.category || null,
-        venueName: data.venueName,
-        address: data.address,
+        venue: data.venueName,
         city: data.city,
         startAt,
         endAt,
-        timezone: data.timezone,
         checkinMode: data.checkinMode,
-        reentryAllowed: data.reentryAllowed,
         maxEntries: data.maxEntries || null,
-        entryWindowStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
-        entryWindowEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
-        capacityTotal: data.capacityTotal || null,
-        ageRestriction: data.ageRestriction || null,
-        refundPolicy: data.refundPolicy || null,
-        cancellationPolicy: data.cancellationPolicy || null,
-        termsText: data.termsText || null,
-        consentRGPD: data.consentRGPD,
-        wheelchairAccess: data.wheelchairAccess,
-        signLanguageSupport: data.signLanguageSupport,
-        accessibleWC: data.accessibleWC,
-        accessibilityNotes: data.accessibilityNotes || null,
-        contactEmail: data.contactEmail,
-        contactPhone: data.contactPhone || null,
-        supportInstructions: data.supportInstructions || null,
+        checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
+        checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
         bannerUrl: data.bannerUrl || null,
-        galleryUrls: data.galleryUrls || null,
-        status: "PUBLISHED", // Admin creates published events directly
-      } as any,
+        status: "PUBLISHED",
+      },
     });
 
     return NextResponse.json(event, { status: 201 });

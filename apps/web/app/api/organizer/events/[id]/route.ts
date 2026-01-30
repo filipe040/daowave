@@ -13,15 +13,27 @@ const UpdateEventSchema = z.object({
   venueName: z.string().min(1).optional(),
   address: z.string().min(1).optional(),
   city: z.string().min(1).optional(),
-  startAt: z.string().datetime().or(z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Data inválida" })).optional(),
-  endAt: z.string().datetime().or(z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Data inválida" })).optional(),
+  startAt: z.union([
+    z.string().refine((val) => val === "" || !isNaN(Date.parse(val)), { message: "Data de início inválida" }),
+    z.null(),
+  ]).optional().transform((val) => (val === "" || val == null ? undefined : val)),
+  endAt: z.union([
+    z.string().refine((val) => val === "" || !isNaN(Date.parse(val)), { message: "Data de fim inválida" }),
+    z.null(),
+  ]).optional().transform((val) => (val === "" || val == null ? undefined : val)),
   timezone: z.string().optional(),
   
   // Check-in
   checkinMode: z.enum(["SINGLE", "MULTI"]).optional(),
   maxEntries: z.number().int().positive().optional().nullable(),
-  entryWindowStartAt: z.string().datetime().optional().nullable(),
-  entryWindowEndAt: z.string().datetime().optional().nullable(),
+  entryWindowStartAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
+  entryWindowEndAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
   
   // Capacity
   capacityTotal: z.number().int().positive().optional().nullable(),

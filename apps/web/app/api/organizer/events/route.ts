@@ -74,20 +74,21 @@ const CreateEventSchema = z.object({
   venueName: z.string().min(1, "Nome do local é obrigatório"),
   address: z.string().min(1, "Endereço é obrigatório"),
   city: z.string().min(1, "Cidade é obrigatória"),
-  startAt: z.string().datetime().or(z.string().refine((val) => {
-    // Accept datetime-local format or ISO format
-    return !isNaN(Date.parse(val));
-  }, { message: "Data inválida" })),
-  endAt: z.string().datetime().or(z.string().refine((val) => {
-    return !isNaN(Date.parse(val));
-  }, { message: "Data inválida" })),
+  startAt: z.string().refine((val) => val !== "" && !isNaN(Date.parse(val)), { message: "Data de início inválida" }),
+  endAt: z.string().refine((val) => val !== "" && !isNaN(Date.parse(val)), { message: "Data de fim inválida" }),
   timezone: z.string().default("Europe/Lisbon"),
   
   // Check-in
   checkinMode: z.enum(["SINGLE", "MULTI"]).default("SINGLE"),
   maxEntries: z.number().int().positive().optional(),
-  entryWindowStartAt: z.string().datetime().optional().nullable(),
-  entryWindowEndAt: z.string().datetime().optional().nullable(),
+  entryWindowStartAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
+  entryWindowEndAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
   
   // Capacity
   capacityTotal: z.number().int().positive().optional().nullable(),
