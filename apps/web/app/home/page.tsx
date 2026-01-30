@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
+import { MapPin, Calendar } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,11 +95,11 @@ export default async function HomePage() {
                     </p>
                     <div className="space-y-1.5 text-xs text-slate-500 mb-4">
                       <div className="flex items-center gap-2">
-                        <span>📍</span>
+                        <MapPin className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                         <span>{event.venue}, {event.city}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>📅</span>
+                        <Calendar className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                         <span>{formatDate(event.startAt)}</span>
                       </div>
                     </div>

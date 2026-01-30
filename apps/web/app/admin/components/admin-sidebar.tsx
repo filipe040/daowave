@@ -81,7 +81,7 @@ export default function AdminSidebar({ mobileOpen = false, onClose }: AdminSideb
             <Link href="/admin" onClick={onClose} className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
               <div>
-                <div className="font-bold text-sm">Admin Terminal</div>
+                <div className="font-bold text-sm">Admin Dashboard</div>
                 <div className="text-xs text-zinc-400">Gestão & Administração</div>
               </div>
             </Link>

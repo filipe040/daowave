@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { Ticket } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -47,11 +48,13 @@ export default async function CouponsPage() {
     createdAt: Date;
     updatedAt: Date;
     event: {
+      id: string;
       title: string;
       slug: string;
+      status: string;
     };
   };
-  
+
   let coupons: CouponWithEvent[] = [];
   try {
     coupons = await prisma.coupon.findMany({
@@ -63,8 +66,10 @@ export default async function CouponsPage() {
       include: {
         event: {
           select: {
+            id: true,
             title: true,
             slug: true,
+            status: true,
           },
         },
       },
@@ -133,7 +138,7 @@ export default async function CouponsPage() {
                       </td>
                       <td className="px-8 py-5">
                         <Link
-                          href={`/events/${coupon.event.slug}`}
+                          href={coupon.event.status === "PUBLISHED" ? `/events/${coupon.event.slug}` : `/organizer/events/${coupon.event.id}/edit`}
                           className="hover:text-purple-400 transition-colors text-base"
                         >
                           {coupon.event.title}
@@ -207,7 +212,7 @@ export default async function CouponsPage() {
                         {coupon.code}
                       </div>
                       <Link
-                        href={`/events/${coupon.event.slug}`}
+                        href={coupon.event.status === "PUBLISHED" ? `/events/${coupon.event.slug}` : `/organizer/events/${coupon.event.id}/edit`}
                         className="text-base text-zinc-300 hover:text-purple-400 transition-colors block truncate"
                       >
                         {coupon.event.title}
@@ -264,7 +269,9 @@ export default async function CouponsPage() {
         </div>
       ) : (
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-12 md:p-16 lg:p-20 text-center shadow-lg">
-          <div className="text-5xl md:text-6xl mb-6">🎟️</div>
+          <div className="mb-6 flex justify-center">
+            <Ticket className="h-16 w-16 text-zinc-500" strokeWidth={1.5} />
+          </div>
           <h3 className="text-2xl md:text-3xl font-semibold mb-3">Ainda não tem cupões</h3>
           <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-md mx-auto">
             Crie o seu primeiro cupão de desconto para aumentar as vendas

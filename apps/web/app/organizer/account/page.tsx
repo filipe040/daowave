@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { Ticket, CircleDollarSign, Calendar } from "lucide-react";
 import AccountForm from "../components/account-form";
 
 export const dynamic = "force-dynamic";
@@ -93,7 +94,7 @@ export default async function OrganizerAccountPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Eventos</span>
-            <span className="text-2xl">🎫</span>
+            <Ticket className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">{stats.totalEvents}</p>
           <p className="text-xs text-zinc-500 mt-1">
@@ -104,7 +105,7 @@ export default async function OrganizerAccountPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Bilhetes</span>
-            <span className="text-2xl">🎟️</span>
+            <Ticket className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">{stats.totalTickets}</p>
         </div>
@@ -112,7 +113,7 @@ export default async function OrganizerAccountPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Receita</span>
-            <span className="text-2xl">💰</span>
+            <CircleDollarSign className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">
             {((stats.totalRevenue._sum.totalCents || 0) / 100).toFixed(2)} €
@@ -122,7 +123,7 @@ export default async function OrganizerAccountPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Membro desde</span>
-            <span className="text-2xl">📅</span>
+            <Calendar className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-sm font-bold text-white">
             {format(new Date(organizerProfile.user.createdAt), "MMM yyyy", { locale: pt })}

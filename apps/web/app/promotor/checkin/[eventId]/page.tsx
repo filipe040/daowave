@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CheckinPage() {
@@ -110,8 +111,9 @@ export default function CheckinPage() {
           {/* Result */}
           {result && (
             <div className={`mt-5 rounded-xl p-4 ${resultClass}`}>
-              <p className="text-sm font-semibold">
-                {result.success ? "✓" : "✗"} {result.message}
+              <p className="text-sm font-semibold flex items-center gap-2">
+                {result.success ? <CheckCircle className="h-4 w-4 shrink-0" /> : <XCircle className="h-4 w-4 shrink-0" />}
+                {result.message}
               </p>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Image as ImageIcon } from "lucide-react";
 import PromoterSidebar from "../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 
@@ -122,7 +123,7 @@ export default function AssetsContent({ event, initialAssets }: AssetsContentPro
   return (
     <div className="min-h-screen bg-black text-white flex">
       <PromoterSidebar eventId={event.id} />
-      <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
+      <main className="flex-1 overflow-y-auto lg:ml-72 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {/* Breadcrumbs */}
           <Breadcrumbs
@@ -183,7 +184,9 @@ export default function AssetsContent({ event, initialAssets }: AssetsContentPro
           {/* Assets Grid */}
           {assets.length === 0 ? (
             <div className="bg-zinc-900 border border-white/10 rounded-lg p-12 md:p-16 lg:p-20 text-center">
-              <div className="text-5xl md:text-6xl mb-6 opacity-50">🖼️</div>
+              <div className="mb-6 flex justify-center">
+              <ImageIcon className="h-16 w-16 text-white/40" strokeWidth={1.5} />
+            </div>
               <h3 className="text-xl md:text-2xl font-semibold mb-3">Nenhum asset carregado</h3>
               <p className="text-base md:text-lg text-white/50 mb-8 max-w-md mx-auto">
                 Carregue imagens para usar no branding e landing page do evento

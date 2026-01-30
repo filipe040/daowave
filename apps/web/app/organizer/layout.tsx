@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { FileText, Loader2, XCircle } from "lucide-react";
 import { Providers } from "../providers";
 import { canAccessOrganizerArea, isAdmin, isPromoter } from "@/lib/auth/permissions";
 import OrganizerDashboardShell from "./components/organizer-dashboard-shell";
@@ -49,8 +50,14 @@ export default async function OrganizerLayout({
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
         <div className="flex min-h-screen items-center justify-center px-4">
           <div className="w-full max-w-md text-center">
-            <div className="mb-6 text-6xl opacity-50">
-              {!organizerProfile ? "📝" : organizerProfile.status === "PENDING" ? "⏳" : "❌"}
+            <div className="mb-6 flex justify-center opacity-70">
+              {!organizerProfile ? (
+                <FileText className="h-16 w-16 text-zinc-400" strokeWidth={1.5} />
+              ) : organizerProfile.status === "PENDING" ? (
+                <Loader2 className="h-16 w-16 animate-spin text-amber-400" strokeWidth={1.5} />
+              ) : (
+                <XCircle className="h-16 w-16 text-red-400" strokeWidth={1.5} />
+              )}
             </div>
             <h2 className="mb-2 text-2xl font-bold">
               {!organizerProfile

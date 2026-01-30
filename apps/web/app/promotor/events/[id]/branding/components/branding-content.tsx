@@ -93,7 +93,7 @@ export default function BrandingContent({ event }: BrandingContentProps) {
     <div className="min-h-screen bg-black text-white flex">
       <PromoterSidebar eventId={event.id} />
 
-      <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
+      <main className="flex-1 overflow-y-auto lg:ml-72 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8">
           {/* Breadcrumbs */}
           <Breadcrumbs

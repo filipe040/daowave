@@ -3,6 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import {
+  FileText,
+  MapPin,
+  Ticket,
+  Users,
+  FileCheck,
+  Accessibility,
+  Phone,
+  Image,
+  Info,
+  AlertTriangle,
+  Lightbulb,
+  type LucideIcon,
+} from "lucide-react";
 
 interface EventFormProps {
   eventId?: string;
@@ -20,15 +34,15 @@ const categories = [
   "Outros",
 ];
 
-const tabs = [
-  { id: "basic", label: "Informações Básicas", icon: "📝" },
-  { id: "location", label: "Local e Datas", icon: "📍" },
-  { id: "checkin", label: "Check-in e Entradas", icon: "🎫" },
-  { id: "capacity", label: "Bilhética e Capacidade", icon: "👥" },
-  { id: "policies", label: "Políticas e Legal", icon: "📋" },
-  { id: "accessibility", label: "Acessibilidade", icon: "♿" },
-  { id: "contact", label: "Contactos e Suporte", icon: "📞" },
-  { id: "media", label: "Media", icon: "🖼️" },
+const tabs: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "basic", label: "Informações Básicas", icon: FileText },
+  { id: "location", label: "Local e Datas", icon: MapPin },
+  { id: "checkin", label: "Check-in e Entradas", icon: Ticket },
+  { id: "capacity", label: "Bilhética e Capacidade", icon: Users },
+  { id: "policies", label: "Políticas e Legal", icon: FileCheck },
+  { id: "accessibility", label: "Acessibilidade", icon: Accessibility },
+  { id: "contact", label: "Contactos e Suporte", icon: Phone },
+  { id: "media", label: "Media", icon: Image },
 ];
 
 export default function EventForm({ eventId, initialData }: EventFormProps) {
@@ -352,7 +366,10 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                     : "border-transparent text-zinc-400 hover:text-zinc-300 hover:border-zinc-700"
                 }`}
               >
-                <span className="text-base sm:text-lg">{tab.icon}</span>
+                {(() => {
+                  const Icon = tab.icon;
+                  return <Icon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={1.5} />;
+                })()}
                 <span className="hidden sm:inline">{tab.label}</span>
                 <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
                 {hasError && <span className="text-red-500 text-xs">●</span>}
@@ -379,7 +396,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Ex: Festival de Verão 2024"
               />
               {errors.title && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.title}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.title}
               </p>}
             </div>
 
@@ -398,7 +415,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 />
               </div>
               {errors.slug && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.slug}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.slug}
               </p>}
               <p className="text-zinc-500 text-xs mt-1.5">
                 URL completa: <code className="bg-zinc-800/50 px-1.5 py-0.5 rounded text-zinc-300">/events/{formData.slug || "..."}</code>
@@ -433,7 +450,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Descreva o evento em detalhe..."
               />
               {errors.description && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.description}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.description}
               </p>}
             </div>
           </div>
@@ -455,7 +472,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Lisboa"
                 />
                 {errors.city && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.city}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.city}
                 </p>}
               </div>
 
@@ -471,7 +488,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Pavilhão Atlântico"
                 />
                 {errors.venueName && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.venueName}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.venueName}
                 </p>}
               </div>
             </div>
@@ -488,7 +505,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Rua Exemplo 123, 1000-000 Lisboa"
               />
                 {errors.address && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.address}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.address}
                 </p>}
             </div>
 
@@ -504,7 +521,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
                 {errors.startAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.startAt}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.startAt}
                 </p>}
               </div>
 
@@ -519,7 +536,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
                 {errors.endAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.endAt}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.endAt}
                 </p>}
               </div>
             </div>
@@ -587,11 +604,11 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 </option>
               </select>
               {errors.checkinMode && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.checkinMode}
+                <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} /> {errors.checkinMode}
               </p>}
               {!formData.reentryAllowed && (
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 flex items-center gap-1.5">
-                  <span>ℹ️</span>
+                  <Info className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                   <span>Ative "Permitir sair e entrar" para usar modo MULTI</span>
                 </p>
               )}
@@ -611,7 +628,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Ex: 5"
                 />
                 {errors.maxEntries && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.maxEntries}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.maxEntries}
                 </p>}
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1.5">
                   Número máximo de vezes que o mesmo bilhete pode entrar no evento
@@ -661,8 +678,9 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Ex: 1000"
               />
-              <p className="text-zinc-500 text-xs mt-1">
-                ⚠️ A capacidade não pode ser inferior ao total de bilhetes vendidos
+              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                A capacidade não pode ser inferior ao total de bilhetes vendidos
               </p>
             </div>
           </div>
@@ -883,11 +901,13 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   />
                 </div>
               )}
-              <p className="text-zinc-500 text-xs mt-1">
-                ⚠️ Banner é obrigatório para publicar o evento
+              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                Banner é obrigatório para publicar o evento
               </p>
-              <p className="text-zinc-400 text-xs mt-1">
-                💡 Suporta links do Imgur: pode colar links como <code className="bg-zinc-800 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-zinc-800 px-1 rounded">i.imgur.com/xxx.jpg</code>
+              <p className="text-zinc-400 text-xs mt-1 flex items-center gap-1.5">
+                <Lightbulb className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                Suporta links do Imgur: pode colar links como <code className="bg-zinc-800 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-zinc-800 px-1 rounded">i.imgur.com/xxx.jpg</code>
               </p>
             </div>
 

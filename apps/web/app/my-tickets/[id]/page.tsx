@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
+import { CheckCircle } from "lucide-react";
 import { generateQrCodeDataUrl, generateQrToken } from "@/lib/qr";
 
 async function getTicket(ticketId: string, userId: string) {
@@ -91,13 +92,20 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Status</span>
               <div className="mt-2">
                 <span
-                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
                     !ticket.checkedInAt
                       ? "bg-green-500/20 text-green-400 border border-green-500/30"
                       : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                   }`}
                 >
-                  {!ticket.checkedInAt ? "✓ Válido" : "Utilizado"}
+                  {!ticket.checkedInAt ? (
+                    <>
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                      Válido
+                    </>
+                  ) : (
+                    "Utilizado"
+                  )}
                 </span>
               </div>
             </div>

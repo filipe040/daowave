@@ -241,8 +241,8 @@ export default async function AdminDashboard() {
               {recentEvents.map((event) => (
                 <li key={event.id}>
                   <Link
-                    href={`/events/${event.slug}`}
-                    target="_blank"
+                    href={event.status === "PUBLISHED" ? `/events/${event.slug}` : `/organizer/events/${event.id}/edit`}
+                    target={event.status === "PUBLISHED" ? "_blank" : undefined}
                     className="flex items-center gap-4 p-5 transition-colors hover:bg-white/[0.03] group"
                   >
                     <div className="min-w-0 flex-1">

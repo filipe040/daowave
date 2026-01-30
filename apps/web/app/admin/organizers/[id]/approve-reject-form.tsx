@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrganizerStatus } from "@prisma/client";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface Props {
   promoterId: string;
@@ -62,7 +63,7 @@ export function ApproveRejectForm({ promoterId, currentStatus }: Props) {
   if (currentStatus === "APPROVED") {
     return (
       <div className="text-center p-4 md:p-6 rounded-xl bg-green-500/10 border border-green-500/30">
-        <div className="text-3xl mb-2">✅</div>
+        <CheckCircle className="mx-auto mb-2 h-8 w-8 text-green-400" strokeWidth={1.5} />
         <div className="text-green-400 text-base md:text-lg font-semibold mb-1">Promotor Aprovado</div>
         <div className="text-sm md:text-base text-zinc-400">
           {new Date().toLocaleDateString("pt-PT")}
@@ -74,7 +75,7 @@ export function ApproveRejectForm({ promoterId, currentStatus }: Props) {
   if (currentStatus === "REJECTED") {
     return (
       <div className="text-center p-4 md:p-6 rounded-xl bg-red-500/10 border border-red-500/30">
-        <div className="text-3xl mb-2">❌</div>
+        <XCircle className="mx-auto mb-2 h-8 w-8 text-red-400" strokeWidth={1.5} />
         <div className="text-red-400 text-base md:text-lg font-semibold">Promotor Rejeitado</div>
       </div>
     );
@@ -93,7 +94,7 @@ export function ApproveRejectForm({ promoterId, currentStatus }: Props) {
             Processando...
           </span>
         ) : (
-          "✅ Aprovar Promotor"
+          <><CheckCircle className="mr-2 inline h-5 w-5" strokeWidth={1.5} /> Aprovar Promotor</>
         )}
       </button>
 
@@ -119,7 +120,7 @@ export function ApproveRejectForm({ promoterId, currentStatus }: Props) {
               Processando...
             </span>
           ) : (
-            "❌ Rejeitar Promotor"
+            <><XCircle className="mr-2 inline h-5 w-5" strokeWidth={1.5} /> Rejeitar Promotor</>
           )}
         </button>
       </div>

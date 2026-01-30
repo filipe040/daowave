@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export default async function AdminDebugPage() {
   const session = await getServerSession(authOptions);
@@ -18,17 +19,17 @@ export default async function AdminDebugPage() {
       <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700/50">
         <h2 className="text-xl font-semibold mb-4">Verificações</h2>
         <ul className="space-y-2">
-          <li>
-            <strong>Sessão existe:</strong> {session ? "✅ Sim" : "❌ Não"}
+          <li className="flex items-center gap-2">
+            <strong>Sessão existe:</strong> {session ? <><CheckCircle className="h-4 w-4 text-emerald-500" /> Sim</> : <><XCircle className="h-4 w-4 text-red-500" /> Não</>}
           </li>
-          <li>
-            <strong>User existe:</strong> {session?.user ? "✅ Sim" : "❌ Não"}
+          <li className="flex items-center gap-2">
+            <strong>User existe:</strong> {session?.user ? <><CheckCircle className="h-4 w-4 text-emerald-500" /> Sim</> : <><XCircle className="h-4 w-4 text-red-500" /> Não</>}
           </li>
           <li>
             <strong>Role:</strong> {session?.user?.role || "N/A"}
           </li>
-          <li>
-            <strong>Role é ADMIN:</strong> {session?.user?.role === "ADMIN" ? "✅ Sim" : "❌ Não"}
+          <li className="flex items-center gap-2">
+            <strong>Role é ADMIN:</strong> {session?.user?.role === "ADMIN" ? <><CheckCircle className="h-4 w-4 text-emerald-500" /> Sim</> : <><XCircle className="h-4 w-4 text-red-500" /> Não</>}
           </li>
           <li>
             <strong>Tipo do role:</strong> {typeof session?.user?.role}

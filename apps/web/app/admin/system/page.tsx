@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CheckCircle, XCircle, AlertTriangle, HelpCircle } from "lucide-react";
 
 interface HealthStatus {
   status: "ok" | "degraded" | "error";
@@ -98,15 +99,16 @@ export default function SystemStatusPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    const cls = "h-5 w-5 shrink-0";
     switch (status) {
       case "ok":
-        return "✅";
+        return <CheckCircle className={cls} strokeWidth={1.5} />;
       case "error":
-        return "❌";
+        return <XCircle className={cls} strokeWidth={1.5} />;
       case "degraded":
-        return "⚠️";
+        return <AlertTriangle className={cls} strokeWidth={1.5} />;
       default:
-        return "❓";
+        return <HelpCircle className={cls} strokeWidth={1.5} />;
     }
   };
 
@@ -220,9 +222,9 @@ export default function SystemStatusPage() {
           <div className="border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">Payments</h3>
-              <span className="px-2 py-1 rounded text-sm bg-gray-100 text-gray-700">
-                {health.services.payments.stripe ? "✅ Stripe" : "❌ Stripe"} |{" "}
-                {health.services.payments.mock ? "✅ Mock" : "❌ Mock"}
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-sm bg-gray-100 text-gray-700">
+                {health.services.payments.stripe ? <><CheckCircle className="h-4 w-4" /> Stripe</> : <><XCircle className="h-4 w-4" /> Stripe</>} |{" "}
+                {health.services.payments.mock ? <><CheckCircle className="h-4 w-4" /> Mock</> : <><XCircle className="h-4 w-4" /> Mock</>}
               </span>
             </div>
             <p className="text-sm text-gray-600">

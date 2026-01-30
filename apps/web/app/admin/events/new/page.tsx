@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Info } from "lucide-react";
 import AdminEventForm from "../components/admin-event-form";
 
 export default async function AdminNewEventPage() {
@@ -60,9 +61,10 @@ export default async function AdminNewEventPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 backdrop-blur-sm">
+      <div className="flex items-start gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 backdrop-blur-sm">
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-400" strokeWidth={1.5} />
         <p className="text-sm text-blue-300">
-          ℹ️ Eventos criados por administradores são publicados automaticamente. Eventos criados por promotores precisam de aprovação.
+          Eventos criados por administradores são publicados automaticamente. Eventos criados por promotores precisam de aprovação.
         </p>
       </div>
 

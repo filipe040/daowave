@@ -206,7 +206,9 @@ export default async function Home({
 
           {events.length === 0 ? (
             <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl py-14 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
-              <div className="mb-3 text-4xl">📅</div>
+              <div className="mb-3 flex justify-center">
+              <Calendar className="h-12 w-12 text-zinc-400" strokeWidth={1.5} />
+            </div>
               <p className="text-[14px] font-semibold text-white/85">
                 Não encontrámos eventos para os filtros selecionados.
               </p>

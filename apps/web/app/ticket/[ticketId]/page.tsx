@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { generateQRCode } from "@/lib/qr/generate";
 import Image from "next/image";
+import { Lock, CheckCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,9 @@ export default async function TicketPage({
     return (
       <div className="min-h-screen grid place-items-center px-4 bg-background text-foreground">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-          <div className="mb-4 text-5xl opacity-80">🔒</div>
+          <div className="mb-4 flex justify-center">
+          <Lock className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+        </div>
           <h1 className="text-2xl font-semibold">Autenticação necessária</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Faça login para aceder ao seu bilhete.
@@ -176,8 +179,9 @@ export default async function TicketPage({
                 {/* Used banner */}
                 {ticket.checkedInAt && (
                   <div className="rounded-2xl border border-emerald-500/35 bg-emerald-500/10 p-5">
-                    <p className="text-sm font-semibold text-foreground">
-                      ✓ Bilhete utilizado
+                    <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      Bilhete utilizado
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Check-in em {formatDate(ticket.checkedInAt)}

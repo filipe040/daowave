@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { Ticket, MapPin, Calendar, CircleDollarSign } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -59,7 +60,9 @@ export default async function OrganizerEventsPage() {
 
       {events.length === 0 ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <div className="text-5xl mb-4 opacity-50">🎫</div>
+          <div className="mb-4 flex justify-center">
+          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+        </div>
           <p className="text-lg text-zinc-400 mb-2">Ainda não criou nenhum evento</p>
           <p className="text-sm text-zinc-500 mb-6">Comece por criar o seu primeiro evento</p>
           <Link
@@ -100,25 +103,25 @@ export default async function OrganizerEventsPage() {
                   </div>
                   
                   <div className="grid sm:grid-cols-2 gap-4 mt-4 text-sm">
-                    <div>
-                      <span className="text-zinc-500">📍</span>
-                      <span className="ml-2 text-zinc-400">{event.venue}, {event.city}</span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
+                      <span className="text-zinc-400">{event.venue}, {event.city}</span>
                     </div>
-                    <div>
-                      <span className="text-zinc-500">📅</span>
-                      <span className="ml-2 text-zinc-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
+                      <span className="text-zinc-400">
                         {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-zinc-500">🎟️</span>
-                      <span className="ml-2 text-zinc-400">
+                    <div className="flex items-center gap-2">
+                      <Ticket className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
+                      <span className="text-zinc-400">
                         {event._count.tickets} bilhetes vendidos
                       </span>
                     </div>
-                    <div>
-                      <span className="text-zinc-500">💰</span>
-                      <span className="ml-2 text-zinc-400">
+                    <div className="flex items-center gap-2">
+                      <CircleDollarSign className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
+                      <span className="text-zinc-400">
                         {event._count.orders} encomendas pagas
                       </span>
                     </div>
@@ -128,9 +131,9 @@ export default async function OrganizerEventsPage() {
                 <div className="flex flex-col gap-2 ml-4">
                   <Link
                     href={`/organizer/events/${event.id}/tickets`}
-                    className="px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500/50 text-purple-400 hover:bg-purple-500/30 text-sm font-medium transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500/50 text-purple-400 hover:bg-purple-500/30 text-sm font-medium transition-colors whitespace-nowrap"
                   >
-                    🎫 Bilhetes
+                    <Ticket className="h-4 w-4" strokeWidth={1.5} /> Bilhetes
                   </Link>
                   <Link
                     href={`/organizer/events/${event.id}/edit`}

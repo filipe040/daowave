@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Users, TrendingUp, Heart, BarChart3, Shield, FileText, PlusCircle, Clock, ChevronRight } from "lucide-react";
 import PromoterSidebar from "../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 import RBACMatrix from "./rbac-matrix";
@@ -72,7 +73,7 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
     <div className="min-h-screen bg-black text-white flex">
       <PromoterSidebar eventId={event.id} />
 
-      <main className="flex-1 overflow-y-auto lg:ml-56 xl:ml-64 pt-12 lg:pt-0">
+      <main className="flex-1 overflow-y-auto lg:ml-72 pt-12 lg:pt-0">
         <div className="p-4 sm:p-6 lg:p-8">
           {/* Breadcrumbs */}
           <Breadcrumbs
@@ -109,7 +110,7 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-2xl">👥</div>
+                <Users className="h-7 w-7 text-gray-600" strokeWidth={1.5} />
                 <div className="flex items-center gap-1 text-xs text-green-600">
                   <span>+0</span>
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
@@ -122,7 +123,7 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
 
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-2xl">📈</div>
+                <TrendingUp className="h-7 w-7 text-gray-600" strokeWidth={1.5} />
                 <div className="flex items-center gap-1 text-xs text-green-600">
                   <span>+0</span>
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
@@ -135,7 +136,7 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
 
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-2xl">❤️</div>
+                <Heart className="h-7 w-7 text-gray-600" strokeWidth={1.5} />
                 <div className="flex items-center gap-1 text-xs text-green-600">
                   <span>+0</span>
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
@@ -148,7 +149,7 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
 
             <div className="bg-white rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-2xl">📊</div>
+                <BarChart3 className="h-7 w-7 text-gray-600" strokeWidth={1.5} />
                 <div className="flex items-center gap-1 text-xs text-green-600">
                   <span>+0</span>
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
@@ -165,10 +166,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Estrutura de Equipas */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">👥</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <Users className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Estrutura de Equipas</h3>
               <p className="text-xs text-gray-600">Defina a hierarquia de líderes e subdivisões operacionais.</p>
@@ -177,10 +176,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Membros de Staff */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setShowRBACMatrix(true)}>
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">🛡️</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <Shield className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Membros de Staff</h3>
               <p className="text-xs text-gray-600">Gestão de credenciais, funções e permissões de acesso.</p>
@@ -189,10 +186,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Corpo de Voluntários */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">❤️</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <Heart className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Corpo de Voluntários</h3>
               <p className="text-xs text-gray-600">Coordenação de voluntariado e atribuição de tarefas.</p>
@@ -201,10 +196,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Escala de Turnos */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">🕐</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <Clock className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Escala de Turnos</h3>
               <p className="text-xs text-gray-600">Planeamento horário e controlo de lotação por sector.</p>
@@ -213,10 +206,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Formulários de Recrutamento */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">📄</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <FileText className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Formulários de Recrutamento</h3>
               <p className="text-xs text-gray-600">Criação de fluxos de candidatura personalizados.</p>
@@ -225,10 +216,8 @@ export default function TeamsContent({ event, teamMembers, stats }: TeamsContent
             {/* Fluxo de Candidaturas */}
             <div className="bg-white rounded-lg p-5 cursor-pointer hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="text-3xl">➕</div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <PlusCircle className="h-8 w-8 text-gray-600" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Fluxo de Candidaturas</h3>
               <p className="text-xs text-gray-600">Triagem, entrevista e aprovação de novos membros.</p>
