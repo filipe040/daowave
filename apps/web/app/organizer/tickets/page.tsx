@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
-import { Ticket, CheckCircle, ScanCheck, XCircle } from "lucide-react";
+import { Ticket, CheckCircle, Scan, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -171,7 +171,7 @@ export default async function OrganizerTicketsPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Validados</span>
-            <ScanCheck className="h-6 w-6 text-blue-400" strokeWidth={1.5} />
+            <Scan className="h-6 w-6 text-blue-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-blue-400">{checkedInTickets}</p>
         </div>
