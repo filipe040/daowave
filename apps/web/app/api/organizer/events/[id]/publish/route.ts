@@ -59,16 +59,19 @@ export async function POST(
     if (!event.description) errors.push("Descrição é obrigatória");
     if (!event.venue) errors.push("Nome do local é obrigatório");
     if (!event.city) errors.push("Cidade é obrigatória");
-    // contactEmail field doesn't exist in Event model
-    if (!event.coverImage) errors.push("Imagem de banner é obrigatória para publicar");
-    // consentRGPD field doesn't exist in Event model
+    // Banner: form saves to bannerUrl; legacy field is coverImage
+    const hasBanner = !!(event.coverImage?.trim() || (event as { bannerUrl?: string | null }).bannerUrl?.trim());
+    if (!hasBanner) errors.push("Imagem de banner é obrigatória para publicar");
 
-    // Validate dates
-    if (event.endAt <= event.startAt) {
+    // Validate dates (allow 5 min grace for clock skew; admins can publish past events)
+    const now = Date.now();
+    const startMs = new Date(event.startAt).getTime();
+    const endMs = new Date(event.endAt).getTime();
+    if (endMs <= startMs) {
       errors.push("Data de fim deve ser posterior à data de início");
     }
-
-    if (event.startAt < new Date()) {
+    const isAdmin = session.user.role === "ADMIN";
+    if (!isAdmin && startMs < now - 5 * 60 * 1000) {
       errors.push("Data de início não pode estar no passado");
     }
 
