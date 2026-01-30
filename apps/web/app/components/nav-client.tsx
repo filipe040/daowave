@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useMemo } from "react";
 
 function roleLabel(role: string) {
@@ -85,10 +85,6 @@ export default function NavClient() {
       bc.close();
     };
   }, [session?.user?.role]);
-
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/", redirect: true });
-  };
 
   const userBlock = (
     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -180,13 +176,6 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-
-                  <button
-                    onClick={handleSignOut}
-                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                  >
-                    LOG OUT
-                  </button>
                 </div>
 
                 {/* Mobile: avatar + name (compact) then menu button */}
@@ -316,16 +305,6 @@ export default function NavClient() {
                 >
                   HELP
                 </Link>
-
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors mt-4"
-                >
-                  LOG OUT
-                </button>
               </>
             ) : (
               <>
