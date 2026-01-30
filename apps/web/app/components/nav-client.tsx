@@ -11,6 +11,15 @@ function roleLabel(role: string) {
   return role;
 }
 
+/** Converte URL de upload (/uploads/avatars/...) para URL servida pela API para a imagem carregar. */
+function avatarDisplayUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/uploads/avatars/")) {
+    return `/api/account/avatar/serve/${url.replace(/^\/uploads\/avatars\//, "")}`;
+  }
+  return url;
+}
+
 export default function NavClient() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -93,17 +102,19 @@ export default function NavClient() {
         >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+            <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
           ) : (
             initials
           )}
         </span>
-        <span className="hidden sm:block text-white font-medium text-sm truncate max-w-[120px] md:max-w-[160px]">
-          {displayName}
-        </span>
-        <span className="hidden md:inline text-white/60 text-xs font-normal truncate max-w-[80px]">
-          {roleLabel(displayRole)}
-        </span>
+        <div className="hidden sm:flex flex-col items-start min-w-0">
+          <span className="text-white font-medium text-sm truncate max-w-[120px] md:max-w-[160px] leading-tight">
+            {displayName}
+          </span>
+          <span className="text-white/60 text-xs font-normal truncate max-w-[120px] md:max-w-[160px] leading-tight">
+            {roleLabel(displayRole)}
+          </span>
+        </div>
       </Link>
     </div>
   );
@@ -240,7 +251,7 @@ export default function NavClient() {
                 <span className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-white text-sm font-semibold">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
                   ) : (
                     initials
                   )}

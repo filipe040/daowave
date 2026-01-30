@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 interface AccountUser {
   id: string;
@@ -51,6 +52,15 @@ function roleLabel(role: string) {
   if (role === "PROMOTER") return "Promotor";
   if (role === "USER") return "Cliente";
   return role;
+}
+
+/** Converte URL de upload (/uploads/avatars/...) para URL servida pela API para a imagem carregar. */
+function avatarDisplayUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/uploads/avatars/")) {
+    return `/api/account/avatar/serve/${url.replace(/^\/uploads\/avatars\//, "")}`;
+  }
+  return url;
 }
 
 export default function AccountProfile({ user }: AccountProfileProps) {
@@ -290,7 +300,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="Foto de perfil" className="h-full w-full object-cover" />
+                  <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="Foto de perfil" className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-lg">{initials}</span>
                 )}
@@ -401,6 +411,23 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                     )}
                   >
                     {savingName ? "A guardar…" : "Guardar alterações"}
+                  </button>
+                </div>
+
+                {/* Terminar sessão - definições do perfil */}
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="text-[11px] uppercase tracking-wider text-white/45 mb-3">Sessão</div>
+                  <button
+                    type="button"
+                    onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-full",
+                      "border border-white/20 bg-white/5 text-white/90",
+                      "px-5 py-3 text-[13px] font-semibold",
+                      "hover:bg-white/10 hover:text-white transition"
+                    )}
+                  >
+                    Terminar sessão
                   </button>
                 </div>
               </form>
