@@ -99,7 +99,7 @@ export default async function PromoterDashboard() {
         {/* Titles */}
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
-            LiveGrid
+            EASYTICKET
           </h1>
           <p className="mt-2 text-sm sm:text-base text-muted-foreground">
             Workspace para gestão de experiências, bilhética e operação.
