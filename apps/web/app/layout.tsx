@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Providers } from "./providers";
 import ConditionalNav from "./components/conditional-nav";
 import { BetaBanner } from "./components/beta-banner";
@@ -12,12 +12,14 @@ export const metadata: Metadata = {
   applicationName: "EasyTicket",
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0B0C0F" },
-    { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
-  ],
-};
+export function generateViewport() {
+  return {
+    themeColor: [
+      { media: "(prefers-color-scheme: dark)", color: "#0B0C0F" },
+      { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
+    ] as const,
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
