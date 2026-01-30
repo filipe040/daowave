@@ -63,7 +63,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     
     // Location
     city: initialData?.city || "",
-    venueName: initialData?.venueName || "",
+    venueName: initialData?.venueName || (initialData as { venue?: string })?.venue || "",
     address: initialData?.address || "",
     startAt: initialData?.startAt ? format(new Date(initialData.startAt), "yyyy-MM-dd'T'HH:mm") : "",
     endAt: initialData?.endAt ? format(new Date(initialData.endAt), "yyyy-MM-dd'T'HH:mm") : "",
@@ -298,7 +298,43 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     setLoading(true);
     setPublishErrors([]);
 
+    const convertToISO = (dateTimeLocal: string, tz: string = "Europe/Lisbon"): string | null => {
+      if (!dateTimeLocal) return null;
+      const date = new Date(dateTimeLocal);
+      return date.toISOString();
+    };
+
     try {
+      // Save current form data first so publish validates the same dates/times the user sees
+      const payload: any = {
+        ...formData,
+        startAt: formData.startAt ? convertToISO(formData.startAt, formData.timezone) : null,
+        endAt: formData.endAt ? convertToISO(formData.endAt, formData.timezone) : null,
+        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt, formData.timezone) : null,
+        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt, formData.timezone) : null,
+        maxEntries: formData.maxEntries ? parseInt(formData.maxEntries as any) : null,
+        capacityTotal: formData.capacityTotal ? parseInt(formData.capacityTotal as any) : null,
+        ageRestriction: formData.ageRestriction ? parseInt(formData.ageRestriction as any) : null,
+        galleryUrls: Array.isArray(formData.galleryUrls) ? formData.galleryUrls : [],
+      };
+
+      const saveRes = await fetch(`/api/organizer/events/${eventId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!saveRes.ok) {
+        const saveData = await saveRes.json();
+        if (saveData.details) {
+          setPublishErrors(saveData.details);
+        } else {
+          setPublishErrors([saveData.error || "Erro ao guardar. Corrija os dados e tente publicar novamente."]);
+        }
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`/api/organizer/events/${eventId}/publish`, {
         method: "POST",
       });

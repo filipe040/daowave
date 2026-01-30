@@ -221,7 +221,7 @@ export async function PUT(
     if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.category !== undefined) updateData.category = data.category;
-    if (data.venueName !== undefined) updateData.venueName = data.venueName;
+    if (data.venueName !== undefined) updateData.venue = data.venueName;
     if (data.address !== undefined) updateData.address = data.address;
     if (data.city !== undefined) updateData.city = data.city;
     if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);

@@ -202,7 +202,7 @@ export async function POST(req: Request) {
       slug: data.slug,
       description: data.description,
       category: data.category || null,
-      venueName: data.venueName,
+      venue: data.venueName,
       address: data.address,
       city: data.city,
       startAt,
