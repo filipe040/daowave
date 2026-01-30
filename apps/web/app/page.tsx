@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import EventsSearch from "./components/events-search";
+import { CITIES_PT } from "./constants/cities";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +57,10 @@ async function getCities() {
     })
     .catch(() => []);
 
-  return events.map((e) => e.city).filter(Boolean).sort();
+  const dbCities = events.map((e) => e.city).filter(Boolean);
+  const citySet = new Set(CITIES_PT.map((c) => c.toLowerCase()));
+  const extra = dbCities.filter((c) => !citySet.has(c.toLowerCase()));
+  return [...CITIES_PT, ...extra].sort((a, b) => a.localeCompare(b, "pt-PT"));
 }
 
 function formatDateTimePT(d: Date | string) {

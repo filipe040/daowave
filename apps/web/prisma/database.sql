@@ -350,4 +350,4 @@ SELECT '' as message;
 SELECT 'Next steps:' as message;
 SELECT '1. Update .env with: DATABASE_URL="mysql://ticketing:ticketing_dev_password@localhost:3306/ticketing"' as message;
 SELECT '2. Run: npx prisma generate' as message;
-SELECT '3. Run: npx tsx prisma/seed-clean.ts' as message;
+SELECT '3. (Opcional) Execute o script de seed do projeto se existir.' as message;

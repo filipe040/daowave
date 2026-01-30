@@ -9,7 +9,7 @@ const { execSync } = require("child_process");
 const prisma = new PrismaClient();
 
 async function setupSupabase() {
-  console.log("🚀 Configurando Supabase para 7even Tickets\n");
+  console.log("🚀 Configurando Supabase para EasyTicket\n");
 
   const dbUrl = process.env.DATABASE_URL;
 

@@ -22,7 +22,7 @@ export default function OrganizerSidebar() {
     <aside className="w-64 border-r border-zinc-800 bg-zinc-950/50 min-h-screen sticky top-0">
       <div className="p-6 border-b border-zinc-800">
         <Link href="/organizer" className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-          7even Tickets
+          EasyTicket
         </Link>
         <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
       </div>

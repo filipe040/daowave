@@ -132,7 +132,7 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
               ${downloadSection}
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} 7even Tickets. Todos os direitos reservados.</p>
+              <p>© ${new Date().getFullYear()} EasyTicket. Todos os direitos reservados.</p>
               <div class="support-info">
                 <p>Precisa de ajuda? Contacte-nos:</p>
                 <p>

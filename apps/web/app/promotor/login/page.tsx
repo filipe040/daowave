@@ -4,16 +4,18 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+
+function cn(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function PromoterLoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,182 +47,185 @@ export default function PromoterLoginPage() {
           setError("Acesso restrito a promotores");
           setLoading(false);
         }
-      } catch (err) {
+      } catch {
         router.push("/promotor");
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao fazer login");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-12">
-      {/* Logo and Header */}
-      <div className="text-center mb-12 sm:mb-16">
-        {/* Grid Icon */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 border-2 border-white flex items-center justify-center">
-          <div className="grid grid-cols-2 gap-1 p-2">
-            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white"></div>
-            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white"></div>
-            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white"></div>
-            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white"></div>
-          </div>
-        </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2">
-          5IVE TICKETS.
-        </h1>
-        <p className="text-xs sm:text-sm text-white italic">
-          ACESSO RESTRITO AO ESTÚDIO
-        </p>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Ambient */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/35" />
       </div>
 
-      {/* Login Form */}
-      <div className="w-full max-w-md">
-        <h2 className="text-lg sm:text-xl font-semibold text-white mb-8 uppercase tracking-wide">
-          CREDENCIAIS
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 rounded px-4 py-3 text-sm">
-              {error}
+      <div className="relative mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 sm:mb-10 text-center">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card shadow-[var(--elevation-1)]">
+              <div className="grid grid-cols-2 gap-1">
+                <span className="h-2.5 w-2.5 rounded-sm bg-foreground/90" />
+                <span className="h-2.5 w-2.5 rounded-sm bg-foreground/90" />
+                <span className="h-2.5 w-2.5 rounded-sm bg-foreground/90" />
+                <span className="h-2.5 w-2.5 rounded-sm bg-foreground/90" />
+              </div>
             </div>
-          )}
 
-          {/* Email Field */}
-          <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 flex items-center text-white">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+              Acesso ao Estúdio
             </div>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="EMAIL@ESTUDIO"
-              required
-              className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 pl-8 sm:pl-10 pr-4 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors uppercase text-sm sm:text-base"
-            />
+
+            <h1 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">
+              EASY<span className="text-foreground/70">TICKET</span>
+            </h1>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              Login para promotores e admins.
+            </p>
           </div>
 
-          {/* Password Field */}
-          <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 flex items-center text-white">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+          {/* Card */}
+          <div className="rounded-3xl border border-border bg-card/70 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+            <div className="p-6 sm:p-8">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Credenciais</div>
+                  <h2 className="mt-1 text-[18px] font-semibold text-foreground">Entrar</h2>
+                </div>
+
+                <span className="rounded-full border border-border bg-secondary px-3 py-1 text-[11px] text-muted-foreground">
+                  Studio
+                </span>
+              </div>
+
+              {error && (
+                <div className="mb-5 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-foreground">
+                  <div className="font-semibold text-destructive">Erro</div>
+                  <div className="text-foreground/80">{error}</div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email */}
+                <div>
+                  <label className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Email
+                  </label>
+
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="email@dominio"
+                      required
+                      autoComplete="email"
+                      className={cn(
+                        "w-full rounded-2xl border border-border bg-background/40",
+                        "px-10 py-3 text-[14px] text-foreground placeholder:text-muted-foreground/70",
+                        "outline-none transition",
+                        "focus:border-ring focus:ring-2 focus:ring-ring/20"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="mb-2 block text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Password
+                  </label>
+
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                      className={cn(
+                        "w-full rounded-2xl border border-border bg-background/40",
+                        "px-10 pr-12 py-3 text-[14px] text-foreground placeholder:text-muted-foreground/70",
+                        "outline-none transition",
+                        "focus:border-ring focus:ring-2 focus:ring-ring/20"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className={cn(
+                        "absolute right-2 top-1/2 -translate-y-1/2",
+                        "h-9 w-9 rounded-xl border border-border bg-secondary",
+                        "text-muted-foreground hover:text-foreground transition",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      )}
+                      aria-label={showPassword ? "Ocultar password" : "Mostrar password"}
+                    >
+                      {showPassword ? <EyeOff className="mx-auto h-4 w-4" /> : <Eye className="mx-auto h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={cn(
+                    "mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl",
+                    "bg-primary px-5 py-3.5 text-[13px] font-semibold text-primary-foreground",
+                    "shadow-[0_18px_60px_rgba(0,0,0,.25)] transition",
+                    "hover:opacity-95 active:scale-[0.99]",
+                    "disabled:opacity-60 disabled:cursor-not-allowed",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  )}
+                >
+                  {loading ? "A entrar…" : "Entrar no sistema"}
+                  {!loading && <ArrowRight className="h-4 w-4" />}
+                </button>
+
+                {/* Links */}
+                <div className="mt-4 flex items-center justify-between text-[12px]">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-muted-foreground hover:text-foreground transition"
+                  >
+                    Recuperar password
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="text-muted-foreground hover:text-foreground transition"
+                  >
+                    Novas credenciais
+                  </Link>
+                </div>
+              </form>
             </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="CHAVE SEGURA"
-              required
-              className="w-full bg-transparent border-0 border-b-2 border-white/30 text-white placeholder-white/50 pl-8 sm:pl-10 pr-10 sm:pr-12 py-3 sm:py-4 focus:outline-none focus:border-white transition-colors uppercase text-sm sm:text-base"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-0 top-0 bottom-0 flex items-center text-white/70 hover:text-white transition-colors pr-2"
-            >
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {showPassword ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.736m0 0L21 21"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                )}
-              </svg>
-            </button>
+
+            {/* Footer strip */}
+            <div className="flex items-center justify-between border-t border-border px-6 py-4 text-[11px] text-muted-foreground">
+              <div className="flex flex-col">
+                <span>TERMINAL • V4.0.0</span>
+                <span>SECURE SESSION</span>
+              </div>
+              <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
+            </div>
           </div>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-white text-black px-6 py-4 sm:py-5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wide hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading ? "A ENTRAR..." : "ENTRAR NO SISTEMA"}
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </form>
-
-        {/* Footer Links */}
-        <div className="flex justify-between items-center mt-8 sm:mt-10 text-sm sm:text-base">
-          <Link
-            href="/auth/forgot-password"
-            className="text-white/70 hover:text-white transition-colors uppercase tracking-wide"
-          >
-            RECUPERAR CHAVE
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="text-white/70 hover:text-white transition-colors uppercase tracking-wide"
-          >
-            NOVAS CREDENCIAIS
-          </Link>
+          {/* Bottom note */}
+          <div className="mt-6 text-center text-[12px] text-muted-foreground">
+            Se não tens permissões, fala com um admin.
+          </div>
         </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2 text-xs sm:text-sm text-white/50">
-        <div className="flex flex-col">
-          <span>5IVE TICKETS TERMINAL V4.0.0</span>
-          <span>ENCRYPTED TUNNEL ACTIVE</span>
-        </div>
-        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
       </div>
     </div>
   );

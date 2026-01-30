@@ -321,7 +321,7 @@ export default function TicketingCenterContent({ event, stats, badgeDesign }: Ti
                   <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-xs lg:text-sm text-white">Bem-vindo à 5IVE TICKETS</span>
+                  <span className="text-xs lg:text-sm text-white">Bem-vindo à EASYTICKET</span>
                 </div>
               </div>
 
@@ -359,7 +359,7 @@ export default function TicketingCenterContent({ event, stats, badgeDesign }: Ti
                       <span className="text-xs lg:text-sm text-green-400 font-semibold group-hover:text-green-300 transition-colors">INSIGHT OPERATIVO</span>
                     </div>
                     <p className="text-[10px] lg:text-xs text-white/70 italic group-hover:text-white/80 transition-colors">
-                      "OTIMIZAÇÃO DE CHECKOUT EM TEMPO REAL VIA BALANCEAMENTO DE CARGA 5IVE TICKETS CLOUD."
+                      "Otimização de checkout em tempo real."
                     </p>
                   </div>
                 </div>

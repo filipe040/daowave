@@ -2,15 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Search,
-  ChevronRight,
-  Globe,
-  Calendar,
-  Dot,
-  Ticket,
-  ShoppingCart,
-} from "lucide-react";
+import { Search, ChevronRight, Globe, Calendar, Dot, Ticket, ShoppingCart } from "lucide-react";
 
 interface Event {
   id: string;
@@ -53,25 +45,31 @@ export default function EventsWorkspace({ events }: EventsWorkspaceProps) {
       {/* Search */}
       <div className="mx-auto w-full max-w-2xl">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Pesquisar projeto…"
             className={cn(
-              "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+              "w-full rounded-2xl border border-border bg-background",
               "px-10 py-3.5 text-[13px] sm:text-[14px]",
-              "text-white/90 placeholder:text-white/35",
+              "text-foreground placeholder:text-muted-foreground/75",
               "outline-none transition-all duration-200",
-              "focus:border-white/18 focus:bg-white/7"
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             )}
           />
           {search.length > 0 && (
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[12px] text-white/70 hover:text-white hover:bg-white/8 transition"
+              className={cn(
+                "absolute right-2 top-1/2 -translate-y-1/2 rounded-xl",
+                "border border-border bg-secondary px-2.5 py-1.5",
+                "text-[12px] font-medium text-foreground",
+                "hover:bg-secondary/80 transition",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              )}
             >
               Limpar
             </button>
@@ -81,8 +79,8 @@ export default function EventsWorkspace({ events }: EventsWorkspaceProps) {
 
       {/* Grid / Empty */}
       {filteredEvents.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-10 sm:p-14 text-center">
-          <div className="text-white/55 text-[13px] sm:text-[14px]">
+        <div className="rounded-3xl border border-border bg-card p-10 sm:p-14 text-center">
+          <div className="text-muted-foreground text-[13px] sm:text-[14px]">
             {search ? "Nenhum projeto encontrado." : "Ainda não tens projetos."}
           </div>
         </div>
@@ -97,28 +95,34 @@ export default function EventsWorkspace({ events }: EventsWorkspaceProps) {
                 href={`/promotor/events/${event.id}`}
                 className={cn(
                   "group relative overflow-hidden rounded-3xl",
-                  "border border-white/10 bg-white/4 backdrop-blur-2xl",
+                  "border border-border bg-card",
                   "p-5 sm:p-6",
                   "transition-all duration-200",
-                  "hover:bg-white/6 hover:border-white/16",
-                  "active:scale-[0.99]"
+                  "hover:border-ring/40 hover:bg-card/90",
+                  "active:scale-[0.99]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               >
-                {/* subtle highlight */}
+                {/* subtle glow */}
                 <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
+                  <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
                 </div>
 
                 {/* top row */}
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[11px] tracking-wider uppercase text-white/45 truncate">
+                    <div className="text-[11px] tracking-wider uppercase text-muted-foreground truncate">
                       {event.slug}
                     </div>
 
                     <div className="mt-2 flex items-center gap-2">
-                      <Dot className={cn("h-6 w-6 -ml-2", published ? "text-emerald-400/70" : "text-amber-300/70")} />
-                      <span className="text-[11px] uppercase tracking-wider text-white/55">
+                      <Dot
+                        className={cn(
+                          "h-6 w-6 -ml-2",
+                          published ? "text-[hsl(var(--success))]" : "text-[hsl(var(--warning))]"
+                        )}
+                      />
+                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
                         {published ? "Publicado" : "Rascunho"}
                       </span>
                     </div>
@@ -127,8 +131,8 @@ export default function EventsWorkspace({ events }: EventsWorkspaceProps) {
                   <span
                     className={cn(
                       "h-9 w-9 rounded-2xl flex items-center justify-center",
-                      "border border-white/10 bg-white/5",
-                      "text-white/60 group-hover:text-white",
+                      "border border-border bg-secondary",
+                      "text-muted-foreground group-hover:text-foreground",
                       "transition"
                     )}
                     aria-hidden="true"
@@ -138,37 +142,39 @@ export default function EventsWorkspace({ events }: EventsWorkspaceProps) {
                 </div>
 
                 {/* title */}
-                <h3 className="relative mt-4 text-[18px] sm:text-[20px] font-semibold text-white/92 leading-snug">
+                <h3 className="relative mt-4 text-[18px] sm:text-[20px] font-semibold text-foreground leading-snug">
                   {event.title}
                 </h3>
 
                 {/* meta */}
-                <div className="relative mt-5 space-y-3 text-[12px] text-white/55">
+                <div className="relative mt-5 space-y-3 text-[12px] text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-white/40" />
-                    <span className="uppercase tracking-wider text-white/40">Cidade</span>
-                    <span className="ml-auto font-medium text-white/70">{event.city?.toUpperCase?.() || "—"}</span>
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <span className="uppercase tracking-wider text-muted-foreground/80">Cidade</span>
+                    <span className="ml-auto font-semibold text-foreground">
+                      {event.city?.toUpperCase?.() || "—"}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-white/40" />
-                    <span className="uppercase tracking-wider text-white/40">Data</span>
-                    <span className="ml-auto font-medium text-white/70">{formatDatePT(event.startAt)}</span>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="uppercase tracking-wider text-muted-foreground/80">Data</span>
+                    <span className="ml-auto font-semibold text-foreground">{formatDatePT(event.startAt)}</span>
                   </div>
 
-                  <div className="h-px bg-white/10 my-3" />
+                  <div className="h-px bg-border my-3" />
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <Ticket className="h-4 w-4 text-white/40" />
-                      <span className="text-white/60">{event._count?.tickets ?? 0}</span>
-                      <span className="text-white/40">tickets</span>
+                      <Ticket className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold text-foreground">{event._count?.tickets ?? 0}</span>
+                      <span className="text-muted-foreground/80">tickets</span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-white/40" />
-                      <span className="text-white/60">{event._count?.orders ?? 0}</span>
-                      <span className="text-white/40">encomendas</span>
+                      <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-semibold text-foreground">{event._count?.orders ?? 0}</span>
+                      <span className="text-muted-foreground/80">encomendas</span>
                     </div>
                   </div>
                 </div>

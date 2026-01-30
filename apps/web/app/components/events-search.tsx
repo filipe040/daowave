@@ -2,20 +2,24 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
+import { CITIES_PT } from "@/app/constants/cities";
 
 interface EventsSearchProps {
-  cities: string[];
+  cities?: string[];
   initialSearch?: string;
   initialCity?: string;
 }
 
-export default function EventsSearch({ cities, initialSearch = "", initialCity = "ALL PORTUGAL" }: EventsSearchProps) {
+export default function EventsSearch({ cities = [], initialSearch = "", initialCity = "ALL PORTUGAL" }: EventsSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(initialSearch || searchParams.get("search") || "");
   const [city, setCity] = useState(initialCity || searchParams.get("city") || "ALL PORTUGAL");
   const [category, setCategory] = useState("ALL STYLES");
   const [isPending, startTransition] = useTransition();
+
+  // Sempre mostrar a lista de cidades (do servidor ou estática)
+  const cityOptions = (cities && cities.length > 0) ? cities : [...CITIES_PT].sort((a, b) => a.localeCompare(b, "pt-PT"));
 
   const handleSearch = (value: string) => {
     setSearch(value);
@@ -87,10 +91,10 @@ export default function EventsSearch({ cities, initialSearch = "", initialCity =
           onChange={(e) => handleCityChange(e.target.value)}
           className="w-full bg-transparent border-0 rounded-lg px-3 sm:px-4 pt-5 sm:pt-6 pb-3 sm:pb-4 text-white focus:outline-none focus:ring-0 appearance-none cursor-pointer pr-8 sm:pr-10 uppercase text-xs sm:text-sm md:text-base font-bold"
         >
-          <option value="ALL PORTUGAL" className="bg-zinc-900">ALL PORTUGAL</option>
-          {cities.map((cityName) => (
-            <option key={cityName} value={cityName} className="bg-zinc-900">
-              {cityName.toUpperCase()}
+          <option value="ALL PORTUGAL" className="bg-zinc-900 text-white">ALL PORTUGAL</option>
+          {cityOptions.map((cityName) => (
+            <option key={cityName} value={cityName} className="bg-zinc-900 text-white">
+              {cityName}
             </option>
           ))}
         </select>

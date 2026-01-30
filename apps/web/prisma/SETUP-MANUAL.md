@@ -77,7 +77,4 @@ Depois de criar a base de dados:
    npx prisma generate
    ```
 
-3. **Popular dados de teste**:
-   ```bash
-   npx tsx prisma/seed-clean.ts
-   ```
+3. **Popular dados de teste** (opcional): se existir um script de seed no projeto, execute-o conforme o README.

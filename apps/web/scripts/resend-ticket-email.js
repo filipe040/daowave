@@ -74,7 +74,7 @@ async function sendTicketsEmailManually(orderId, recipientEmail) {
 
   // Send email
   const info = await transporter.sendMail({
-    from: `"7even Tickets" <${process.env.SMTP_USER}>`,
+    from: `"EasyTicket" <${process.env.SMTP_USER}>`,
     to: recipientEmail,
     subject: `Os seus bilhetes para ${order.event.title}`,
     html: `

@@ -149,12 +149,9 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
-      onMouseDown={handleOverlayClick}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8" onMouseDown={handleOverlayClick}>
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal */}
       <div
@@ -162,27 +159,28 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
         aria-modal="true"
         className={cn(
           "relative w-full max-w-3xl overflow-hidden rounded-3xl",
-          "border border-white/10 bg-black/45 backdrop-blur-2xl",
-          "shadow-[0_18px_60px_rgba(0,0,0,.55)]"
+          "border border-border bg-card",
+          "shadow-[0_22px_90px_rgba(0,0,0,.55)]"
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        {/* Top highlight */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
+        {/* Ambient glow (token-based) */}
+        <div className="pointer-events-none absolute -top-28 -right-28 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-6 border-b border-white/10 px-6 sm:px-8 py-5 sm:py-6">
+        <div className="flex items-start justify-between gap-6 border-b border-border px-6 sm:px-8 py-5 sm:py-6">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/60">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-[11px] text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5" />
               <span className="uppercase tracking-wider">Novo projeto</span>
             </div>
 
-            <h2 className="mt-3 text-[18px] sm:text-[22px] font-semibold text-white/90">
+            <h2 className="mt-3 text-[18px] sm:text-[22px] font-semibold tracking-tight text-foreground">
               Criar experiência
             </h2>
-            <p className="mt-1 text-[12px] sm:text-[13px] text-white/55">
-              Define o nome, slug e janela temporal. O resto podes afinar depois.
+            <p className="mt-1 text-[12px] sm:text-[13px] text-muted-foreground">
+              Define o nome, slug e janela temporal. O resto afinas depois.
             </p>
           </div>
 
@@ -193,9 +191,11 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
               onClose();
             }}
             className={cn(
-              "h-10 w-10 rounded-2xl border border-white/10",
-              "bg-white/5 hover:bg-white/8",
-              "text-white/70 hover:text-white transition"
+              "h-10 w-10 rounded-2xl border border-border",
+              "bg-secondary hover:bg-secondary/80",
+              "text-muted-foreground hover:text-foreground",
+              "transition",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             )}
             aria-label="Fechar"
           >
@@ -208,7 +208,7 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
             {/* Title */}
             <div className="md:col-span-2">
-              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+              <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
                 Nome do projeto
               </label>
               <input
@@ -218,18 +218,18 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
                 placeholder="Ex: DAO WAVE SUMMIT"
                 required
                 className={cn(
-                  "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                  "w-full rounded-2xl border border-border bg-background",
                   "px-4 py-3.5 text-[14px] sm:text-[15px]",
-                  "text-white/90 placeholder:text-white/35",
+                  "text-foreground placeholder:text-muted-foreground/70",
                   "outline-none transition-all duration-200",
-                  "focus:border-white/18 focus:bg-white/7"
+                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               />
             </div>
 
             {/* Slug */}
             <div className="md:col-span-2">
-              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+              <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
                 Slug
               </label>
               <div className="flex items-center gap-3">
@@ -240,39 +240,39 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
                   placeholder="dao-wave-summit"
                   required
                   className={cn(
-                    "flex-1 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "flex-1 rounded-2xl border border-border bg-background",
                     "px-4 py-3.5 text-[14px] sm:text-[15px]",
-                    "text-white/80 placeholder:text-white/35",
+                    "text-foreground placeholder:text-muted-foreground/70",
                     "outline-none transition-all duration-200",
-                    "focus:border-white/18 focus:bg-white/7"
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   )}
                 />
 
-                <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-[12px] text-white/55">
-                  <span className="text-white/35">/</span>
-                  <span className="font-medium">{formData.slug || "slug"}</span>
+                <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-border bg-secondary px-3 py-3 text-[12px] text-muted-foreground">
+                  <span className="text-muted-foreground/70">/</span>
+                  <span className="font-medium text-foreground">{formData.slug || "slug"}</span>
                 </div>
               </div>
             </div>
 
             {/* Start */}
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+              <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
                 Início
               </label>
               <div className="relative">
-                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="datetime-local"
                   value={formData.startAt}
                   onChange={(e) => setFormData((p) => ({ ...p, startAt: e.target.value }))}
                   required
                   className={cn(
-                    "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "w-full rounded-2xl border border-border bg-background",
                     "pl-10 pr-4 py-3.5 text-[13px] sm:text-[14px]",
-                    "text-white/85",
+                    "text-foreground",
                     "outline-none transition-all duration-200",
-                    "focus:border-white/18 focus:bg-white/7"
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   )}
                 />
               </div>
@@ -280,22 +280,22 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
 
             {/* End */}
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-white/45 mb-2">
+              <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
                 Fim
               </label>
               <div className="relative">
-                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="datetime-local"
                   value={formData.endAt}
                   onChange={(e) => setFormData((p) => ({ ...p, endAt: e.target.value }))}
                   required
                   className={cn(
-                    "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                    "w-full rounded-2xl border border-border bg-background",
                     "pl-10 pr-4 py-3.5 text-[13px] sm:text-[14px]",
-                    "text-white/85",
+                    "text-foreground",
                     "outline-none transition-all duration-200",
-                    "focus:border-white/18 focus:bg-white/7"
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   )}
                 />
               </div>
@@ -303,18 +303,19 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
           </div>
 
           {/* Actions */}
-          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-white/10 pt-5">
+          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-border pt-5">
             <button
               type="submit"
               disabled={loading || !canSubmit}
               className={cn(
                 "inline-flex w-full sm:flex-1 items-center justify-center gap-2 rounded-full",
-                "border border-white/10 bg-white/90 px-5 py-3.5",
-                "text-[13px] font-semibold text-black/90",
-                "shadow-[0_18px_60px_rgba(0,0,0,.18)]",
+                "bg-primary px-5 py-3.5",
+                "text-[13px] font-semibold text-primary-foreground",
+                "shadow-[0_18px_60px_rgba(0,0,0,.22)]",
                 "transition-all duration-200",
-                "hover:bg-white hover:shadow-[0_18px_60px_rgba(0,0,0,.26)]",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
+                "hover:brightness-110",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               )}
             >
               {loading ? "A criar…" : "Criar projeto"}
@@ -329,13 +330,19 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
               }}
               className={cn(
                 "inline-flex w-full sm:w-auto items-center justify-center rounded-full",
-                "border border-white/10 bg-white/5 px-5 py-3.5",
-                "text-[13px] font-semibold text-white/75 hover:text-white",
-                "hover:bg-white/8 transition-all duration-200"
+                "border border-border bg-secondary px-5 py-3.5",
+                "text-[13px] font-semibold text-foreground",
+                "hover:bg-secondary/80 transition-all duration-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               )}
             >
               Cancelar
             </button>
+          </div>
+
+          {/* Micro hint */}
+          <div className="mt-4 text-[12px] text-muted-foreground">
+            Dica: o slug é gerado automaticamente, mas podes ajustar.
           </div>
         </form>
       </div>

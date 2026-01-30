@@ -16,4 +16,7 @@ node_modules
 .next
 node_modules
 apps/web/public/uploads/
+<<<<<<< HEAD
 
+=======
+>>>>>>> release/apple-ui-fix

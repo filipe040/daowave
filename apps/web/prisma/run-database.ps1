@@ -110,7 +110,7 @@ try {
         Write-Host "Proximos passos:" -ForegroundColor Cyan
         Write-Host "1. Configurar .env com DATABASE_URL" -ForegroundColor White
         Write-Host "2. npx prisma generate" -ForegroundColor White
-        Write-Host "3. npx tsx prisma/seed-clean.ts" -ForegroundColor White
+        Write-Host "3. (Opcional) Execute o script de seed do projeto se existir." -ForegroundColor White
     } else {
         Write-Host ""
         Write-Host "Erro ao executar script SQL" -ForegroundColor Red
