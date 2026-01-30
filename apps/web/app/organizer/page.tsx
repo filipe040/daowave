@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { Ticket, CircleCheck, FileText, CircleDollarSign, Calendar, ChevronRight } from "lucide-react";
 
 export default async function OrganizerDashboard() {
   const session = await getServerSession(authOptions);
@@ -77,25 +78,33 @@ export default async function OrganizerDashboard() {
       {/* Stats Grid */}
       <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">🎫</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <Ticket className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{totalEvents}</div>
           <div className="text-sm md:text-base text-zinc-400">Total de Eventos</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">✅</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <CircleCheck className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{publishedEvents}</div>
           <div className="text-sm md:text-base text-zinc-400">Publicados</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">📝</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <FileText className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{draftEvents}</div>
           <div className="text-sm md:text-base text-zinc-400">Rascunhos</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">💰</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <CircleDollarSign className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">
             {totalRevenue._sum.totalCents ? (totalRevenue._sum.totalCents / 100).toFixed(2) : "0.00"}€
           </div>
@@ -109,16 +118,18 @@ export default async function OrganizerDashboard() {
           <h2 className="text-xl md:text-2xl font-bold">Eventos Recentes</h2>
           <Link
             href="/organizer/events"
-            className="text-sm md:text-base text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-2 group"
+            className="text-sm md:text-base text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1"
           >
             Ver todos
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
         
         {recentEvents.length === 0 ? (
           <div className="text-center py-12 md:py-16">
-            <div className="text-5xl md:text-6xl mb-4 opacity-50">📅</div>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-zinc-500">
+              <Calendar className="h-8 w-8" strokeWidth={1.5} />
+            </div>
             <p className="text-lg md:text-xl text-zinc-400 mb-6">Ainda não criou nenhum evento</p>
             <Link
               href="/organizer/events/new"
@@ -154,7 +165,7 @@ export default async function OrganizerDashboard() {
                     {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                   </p>
                 </div>
-                <span className="text-zinc-600 group-hover:text-purple-400 transition-colors ml-4 text-xl">→</span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500 group-hover:text-purple-400 transition-colors ml-4" />
               </Link>
             ))}
           </div>

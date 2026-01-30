@@ -3,16 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { User, LogOut } from "lucide-react";
+import {
+  User,
+  LogOut,
+  LayoutDashboard,
+  Calendar,
+  DollarSign,
+  Ticket,
+  Tags,
+  FileText,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 
-const menuItems = [
-  { href: "/organizer", label: "Dashboard", icon: "📊" },
-  { href: "/organizer/events", label: "Eventos", icon: "🎫" },
-  { href: "/organizer/sales", label: "Vendas", icon: "💰" },
-  { href: "/organizer/tickets", label: "Bilhetes", icon: "🎟️" },
-  { href: "/organizer/coupons", label: "Cupões", icon: "🎟️" },
-  { href: "/organizer/templates", label: "Templates", icon: "📋" },
-  { href: "/organizer/account", label: "Conta", icon: "⚙️" },
+const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/organizer", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/organizer/events", label: "Eventos", icon: Calendar },
+  { href: "/organizer/sales", label: "Vendas", icon: DollarSign },
+  { href: "/organizer/tickets", label: "Bilhetes", icon: Ticket },
+  { href: "/organizer/coupons", label: "Cupões", icon: Tags },
+  { href: "/organizer/templates", label: "Templates", icon: FileText },
+  { href: "/organizer/account", label: "Conta", icon: Settings },
 ];
 
 interface OrganizerSidebarProps {
@@ -43,8 +54,8 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div className="flex flex-col h-full">
-          <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800">
+        <div className="flex min-h-0 flex-col h-full">
+          <div className="md:hidden flex shrink-0 items-center justify-between p-4 border-b border-zinc-800">
             <span className="font-bold text-sm">Menu</span>
             <button
               type="button"
@@ -57,16 +68,17 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
               </svg>
             </button>
           </div>
-          <div className="p-4 sm:p-6 border-b border-zinc-800">
+          <div className="shrink-0 p-4 sm:p-6 border-b border-zinc-800">
             <Link href="/organizer" onClick={onClose} className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
               EasyTicket
             </Link>
             <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
           </div>
 
-          <nav className="p-4 space-y-1 overflow-y-auto flex-1">
+          <nav className="min-h-0 flex-1 overflow-y-auto p-4 space-y-1">
             {menuItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/organizer" && pathname.startsWith(item.href));
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -78,7 +90,7 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
                       : "text-zinc-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
               );
@@ -86,7 +98,7 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           </nav>
 
           {session?.user && (
-            <div className="p-4 border-t border-zinc-800">
+            <div className="shrink-0 p-4 border-t border-zinc-800">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-2xl border border-zinc-700 bg-zinc-800/80 flex items-center justify-center flex-shrink-0 shadow-sm">
                   <User className="h-5 w-5 text-zinc-300" />
