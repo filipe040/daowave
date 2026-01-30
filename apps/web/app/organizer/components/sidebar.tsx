@@ -14,52 +14,88 @@ const menuItems = [
   { href: "/organizer/account", label: "Conta", icon: "⚙️" },
 ];
 
-export default function OrganizerSidebar() {
+interface OrganizerSidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function OrganizerSidebar({ mobileOpen = false, onClose }: OrganizerSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   return (
-    <aside className="w-64 border-r border-zinc-800 bg-zinc-950/50 min-h-screen sticky top-0">
-      <div className="p-6 border-b border-zinc-800">
-        <Link href="/organizer" className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-          EasyTicket
-        </Link>
-        <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
-      </div>
-      
-      <nav className="p-4 space-y-1">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/organizer" && pathname.startsWith(item.href));
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                isActive
-                  ? "bg-white/10 text-white font-semibold"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-white"
-              }`}
+    <>
+      {/* Backdrop mobile */}
+      <div
+        className={`
+          md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity
+          ${mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
+        onClick={onClose}
+        aria-hidden
+      />
+      <aside
+        className={`
+          w-64 flex-shrink-0 fixed left-0 top-0 h-screen border-r border-zinc-800 bg-zinc-950/95 backdrop-blur-xl z-50
+          transform transition-transform duration-200 ease-out
+          md:translate-x-0
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        <div className="flex flex-col h-full">
+          <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800">
+            <span className="font-bold text-sm">Menu</span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+              aria-label="Fechar menu"
             >
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-sm font-medium">{item.label}</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="p-4 sm:p-6 border-b border-zinc-800">
+            <Link href="/organizer" onClick={onClose} className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+              EasyTicket
             </Link>
-          );
-        })}
-      </nav>
-      
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-800">
-        <div className="text-xs text-zinc-500 mb-1">
-          Logado como:
+            <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
+          </div>
+
+          <nav className="p-4 space-y-1 overflow-y-auto flex-1">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== "/organizer" && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isActive
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t border-zinc-800">
+            <div className="text-xs text-zinc-500 mb-1">Logado como:</div>
+            <div className="text-xs uppercase tracking-wider text-zinc-400 mb-1">
+              {(session?.user as any)?.role || "USER"}
+            </div>
+            <div className="text-sm font-medium text-zinc-300 truncate">
+              {session?.user?.email}
+            </div>
+          </div>
         </div>
-        <div className="text-xs uppercase tracking-wider text-zinc-400 mb-1">
-          {(session?.user as any)?.role || "USER"}
-        </div>
-        <div className="text-sm font-medium text-zinc-300 truncate">
-          {session?.user?.email}
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

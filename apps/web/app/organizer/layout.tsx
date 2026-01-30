@@ -3,10 +3,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import OrganizerSidebar from "./components/sidebar";
-import OrganizerHeader from "./components/header";
 import { Providers } from "../providers";
 import { canAccessOrganizerArea, isAdmin, isPromoter } from "@/lib/auth/permissions";
+import OrganizerDashboardShell from "./components/organizer-dashboard-shell";
 
 export default async function OrganizerLayout({
   children,
@@ -81,20 +80,12 @@ export default async function OrganizerLayout({
 
   return (
     <Providers>
-      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
-        <div className="flex">
-          <OrganizerSidebar />
-          <div className="flex-1 flex flex-col">
-            <OrganizerHeader 
-              organizerName={organizerProfile?.brandName || session.user.name || "Promotor"}
-              userEmail={session.user.email || ""}
-            />
-            <main className="flex-1 p-6 md:p-8 lg:p-10">
-              {children}
-            </main>
-          </div>
-        </div>
-      </div>
+      <OrganizerDashboardShell
+        organizerName={organizerProfile?.brandName || session.user.name || "Promotor"}
+        userEmail={session.user.email || ""}
+      >
+        {children}
+      </OrganizerDashboardShell>
     </Providers>
   );
 }

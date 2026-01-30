@@ -4,12 +4,48 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function AdminSidebar({ mobileOpen = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   return (
-    <aside className="w-72 fixed left-0 top-0 h-screen bg-zinc-950 border-r border-zinc-800 text-white z-40">
+    <>
+      {/* Backdrop mobile */}
+      <div
+        className={`
+          md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity
+          ${mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
+        onClick={onClose}
+        aria-hidden
+      />
+      <aside
+        className={`
+          w-72 fixed left-0 top-0 h-screen bg-zinc-950 border-r border-zinc-800 text-white z-50
+          transform transition-transform duration-200 ease-out
+          md:translate-x-0
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* Close button mobile */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800">
+          <span className="font-bold text-sm">Menu</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+            aria-label="Fechar menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       <div className="p-4 border-b border-zinc-800">
         <Link href="/admin" className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
@@ -83,12 +119,13 @@ export default function AdminSidebar() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Link href="/admin/users" className="flex-1 px-3 py-2 rounded bg-zinc-800 text-center">Conta</Link>
+            <Link href="/admin/users" className="flex-1 px-3 py-2 rounded bg-zinc-800 text-center" onClick={onClose}>Conta</Link>
             <button onClick={() => signOut({ callbackUrl: "/" })} className="flex-1 px-3 py-2 rounded bg-zinc-700">Sair</button>
           </div>
         </div>
       )}
     </aside>
+    </>
   );
 }
 

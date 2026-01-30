@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
   const revenueCents = totalRevenue._sum.totalCents ?? 0;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+    <div className="w-full min-w-0 mx-auto max-w-7xl space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
       {/* Header */}
       <div className="space-y-2">
         <div className="text-[11px] uppercase tracking-wider text-white/50">Admin</div>

@@ -613,8 +613,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       value={user.email}
                       disabled
                       className={cn(
-                        "w-full rounded-2xl border border-white/10 bg-white/3",
-                        "px-4 py-3 text-sm text-white/55 cursor-not-allowed"
+                        "w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl",
+                        "px-4 py-3 text-sm text-white/70 cursor-not-allowed"
                       )}
                     />
                   </div>
