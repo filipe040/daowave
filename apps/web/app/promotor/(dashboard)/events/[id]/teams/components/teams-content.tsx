@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Users, TrendingUp, Heart, BarChart3, Shield, FileText, PlusCircle, Clock, ChevronRight } from "lucide-react";
-import PromoterSidebar from "../../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 import RBACMatrix from "./rbac-matrix";
 import MemberFormModal from "./member-form-modal";

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import PromoterSidebar from "../../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../../components/promoter-sidebar";
 
 interface Event {
   id: string;

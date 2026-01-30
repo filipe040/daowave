@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import PromoterSidebar from "../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 
 function ArchiveButton({ eventId, eventStatus, archivedAt }: { eventId: string; eventStatus: string; archivedAt: Date | string | null }) {

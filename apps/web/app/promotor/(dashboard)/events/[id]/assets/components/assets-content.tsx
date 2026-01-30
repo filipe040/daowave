@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
-import PromoterSidebar from "../../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 
 interface Event {

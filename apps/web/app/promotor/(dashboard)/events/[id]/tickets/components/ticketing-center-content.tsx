@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import PromoterSidebar from "../../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 import NewCategoryModal from "./new-category-modal";
 import BadgeDesignerModal from "./badge-designer-modal";

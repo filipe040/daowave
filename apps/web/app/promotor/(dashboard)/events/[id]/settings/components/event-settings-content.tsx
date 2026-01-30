@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import PromoterSidebar from "../../../../components/promoter-sidebar";
+import PromoterSidebar from "../../../../../components/promoter-sidebar";
 import Breadcrumbs from "@/app/components/breadcrumbs";
 
 interface Event {
