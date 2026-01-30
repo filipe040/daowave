@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
 import ConditionalNav from "./components/conditional-nav";
 import { BetaBanner } from "./components/beta-banner";
@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
   metadataBase: new URL("https://ticket.daowave.pt"),
   applicationName: "EasyTicket",
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#0B0C0F" },
     { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
