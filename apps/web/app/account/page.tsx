@@ -7,11 +7,15 @@ import { ShoppingBag, Ticket, ArrowRight } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 async function getCounts(userId: string) {
-  const [ordersCount, ticketsCount] = await Promise.all([
-    prisma.order.count({ where: { userId } }),
-    prisma.ticket.count({ where: { userId } }),
-  ]);
-  return { ordersCount, ticketsCount };
+  try {
+    const [ordersCount, ticketsCount] = await Promise.all([
+      prisma.order.count({ where: { userId } }),
+      prisma.ticket.count({ where: { userId } }),
+    ]);
+    return { ordersCount, ticketsCount };
+  } catch {
+    return { ordersCount: 0, ticketsCount: 0 };
+  }
 }
 
 export default async function AccountDashboardPage() {

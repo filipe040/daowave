@@ -27,6 +27,14 @@ export async function GET() {
       })),
     });
   } catch (e) {
+    const err = e as { message?: string; code?: string };
+    const isMissingTable =
+      err?.message?.includes("Unknown table") ||
+      err?.message?.includes("doesn't exist") ||
+      err?.code === "P2021";
+    if (isMissingTable) {
+      return NextResponse.json({ sessions: [] });
+    }
     console.error("[api/account/sessions] GET error:", e);
     return NextResponse.json({ error: "Erro ao carregar sessões" }, { status: 500 });
   }

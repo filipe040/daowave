@@ -18,6 +18,14 @@ export async function POST() {
     });
     return NextResponse.json({ success: true });
   } catch (e) {
+    const err = e as { message?: string; code?: string };
+    const isMissingTable =
+      err?.message?.includes("Unknown table") ||
+      err?.message?.includes("doesn't exist") ||
+      err?.code === "P2021";
+    if (isMissingTable) {
+      return NextResponse.json({ success: true });
+    }
     console.error("[api/account/sessions/revoke-all] error:", e);
     return NextResponse.json({ error: "Erro ao terminar sessões" }, { status: 500 });
   }

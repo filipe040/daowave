@@ -42,6 +42,14 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ success: true });
   } catch (e) {
+    const err = e as { message?: string; code?: string };
+    const isMissingTable =
+      err?.message?.includes("Unknown table") ||
+      err?.message?.includes("doesn't exist") ||
+      err?.code === "P2021";
+    if (isMissingTable) {
+      return NextResponse.json({ success: true });
+    }
     console.error("[api/account/sessions/revoke] error:", e);
     return NextResponse.json({ error: "Erro ao revogar sessão" }, { status: 500 });
   }
