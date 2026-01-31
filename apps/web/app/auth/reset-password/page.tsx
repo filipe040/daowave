@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import Link from "next/link";
+import { XCircle, CheckCircle } from "lucide-react";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -24,7 +25,7 @@ function ResetPasswordContent() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="mx-auto max-w-md">
           <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-red-500/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
-            <div className="text-6xl mb-6">❌</div>
+            <div className="mb-6 flex justify-center"><XCircle className="h-16 w-16 text-red-400" strokeWidth={1.5} /></div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4 text-red-400">Token inválido</h1>
             <p className="text-zinc-400 mb-6">
               O link de recuperação é inválido ou expirou. Por favor, solicite um novo.
@@ -89,7 +90,7 @@ function ResetPasswordContent() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="mx-auto max-w-md">
           <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
-            <div className="text-6xl mb-6">✅</div>
+            <div className="mb-6 flex justify-center"><CheckCircle className="h-16 w-16 text-green-400" strokeWidth={1.5} /></div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4 text-green-400">Palavra-passe redefinida!</h1>
             <p className="text-zinc-400 mb-6">A redirecionar para a página de login...</p>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Wrench } from "lucide-react";
 
 function MockCheckoutContent() {
   const router = useRouter();
@@ -44,7 +45,9 @@ function MockCheckoutContent() {
       </div>
       <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-6 sm:p-8 backdrop-blur-sm">
         <div className="mb-6">
-          <div className="mb-4 text-5xl">🔧</div>
+          <div className="mb-4 flex justify-center">
+          <Wrench className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+        </div>
           <h2 className="text-xl font-bold mb-2 text-yellow-400">Modo Mock Ativo</h2>
           <p className="text-sm text-zinc-300 mb-4">
             Está a usar um pagamento simulado porque o Stripe não está configurado ou a chave é inválida.

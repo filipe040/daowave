@@ -1,3 +1,9 @@
+/**
+ * @deprecated Use /api/promotor/coupons/[id] (canonical). This route is kept as legacy alias.
+ * GET /api/organizer/coupons/[id] - Get coupon
+ * PUT /api/organizer/coupons/[id] - Update coupon
+ * DELETE /api/organizer/coupons/[id] - Delete coupon
+ */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

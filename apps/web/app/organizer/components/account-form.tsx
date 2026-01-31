@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle, Loader2, Save } from "lucide-react";
 
 interface AccountFormProps {
   organizerProfile: {
@@ -41,7 +42,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
     setErrors({});
 
     try {
-      const res = await fetch("/api/organizer/account", {
+      const res = await fetch("/api/promotor/account", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -78,7 +79,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
       {errors.submit && (
         <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-400 backdrop-blur-sm">
           <div className="flex items-center gap-2">
-            <span className="text-lg">⚠️</span>
+            <AlertTriangle className="h-5 w-5 shrink-0" strokeWidth={1.5} />
             <span className="text-sm sm:text-base">{errors.submit}</span>
           </div>
         </div>
@@ -98,7 +99,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
         />
         {errors.brandName && (
           <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-            <span>⚠</span> {errors.brandName}
+            <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} /> {errors.brandName}
           </p>
         )}
       </div>
@@ -116,7 +117,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
         />
         {errors.userName && (
           <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-            <span>⚠</span> {errors.userName}
+            <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} /> {errors.userName}
           </p>
         )}
       </div>
@@ -129,12 +130,12 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
         >
           {loading ? (
             <>
-              <span className="animate-spin">⏳</span>
+              <Loader2 className="h-5 w-5 animate-spin shrink-0" strokeWidth={1.5} />
               <span>A guardar...</span>
             </>
           ) : (
             <>
-              <span>💾</span>
+              <Save className="h-5 w-5 shrink-0" strokeWidth={1.5} />
               <span>Guardar Alterações</span>
             </>
           )}

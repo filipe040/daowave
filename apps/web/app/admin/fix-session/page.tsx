@@ -18,11 +18,11 @@ export default function FixSessionPage() {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Redirect to login
-      router.push("/auth/signin?callbackUrl=/admin");
+      router.push("/auth/signin?callbackUrl=/promotor");
     } catch (error) {
       console.error("Error fixing session:", error);
       // Fallback: redirect manually
-      window.location.href = "/auth/signin?callbackUrl=/admin";
+      window.location.href = "/auth/signin?callbackUrl=/promotor";
     } finally {
       setLoading(false);
     }

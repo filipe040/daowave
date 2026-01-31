@@ -2,7 +2,47 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security";
 import { z } from "zod";
+import type { EventStatus } from "@prisma/client";
+
+// GET /api/admin/events — lista eventos com paginação e filtro por status
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
+    const statusParam = searchParams.get("status");
+    const statusFilter: { status?: EventStatus } =
+      statusParam === "DRAFT" || statusParam === "PUBLISHED"
+        ? { status: statusParam as EventStatus }
+        : {};
+
+    const [data, total] = await Promise.all([
+      prisma.event.findMany({
+        where: statusFilter,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          promoter: { select: { id: true, brandName: true, user: { select: { email: true } } } },
+          _count: { select: { tickets: true, orders: true } },
+        },
+      }),
+      prisma.event.count({ where: statusFilter }),
+    ]);
+
+    return NextResponse.json({ data, total, page, limit });
+  } catch (error) {
+    safeLog.error("Admin events list error", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
 const CreateEventSchema = z.object({
   promoterId: z.string().min(1, "Organizador é obrigatório"),
@@ -84,41 +124,24 @@ export async function POST(req: Request) {
     }
 
     // Create event with PUBLISHED status (admin creates published events)
+    // Only fields that exist on Event model (schema.prisma)
     const event = await prisma.event.create({
       data: {
         promoterId: data.promoterId,
         title: data.title,
         slug: data.slug,
         description: data.description,
-        category: data.category || null,
-        venueName: data.venueName,
-        address: data.address,
+        venue: data.venueName,
         city: data.city,
         startAt,
         endAt,
-        timezone: data.timezone,
         checkinMode: data.checkinMode,
-        reentryAllowed: data.reentryAllowed,
         maxEntries: data.maxEntries || null,
-        entryWindowStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
-        entryWindowEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
-        capacityTotal: data.capacityTotal || null,
-        ageRestriction: data.ageRestriction || null,
-        refundPolicy: data.refundPolicy || null,
-        cancellationPolicy: data.cancellationPolicy || null,
-        termsText: data.termsText || null,
-        consentRGPD: data.consentRGPD,
-        wheelchairAccess: data.wheelchairAccess,
-        signLanguageSupport: data.signLanguageSupport,
-        accessibleWC: data.accessibleWC,
-        accessibilityNotes: data.accessibilityNotes || null,
-        contactEmail: data.contactEmail,
-        contactPhone: data.contactPhone || null,
-        supportInstructions: data.supportInstructions || null,
+        checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
+        checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
         bannerUrl: data.bannerUrl || null,
-        galleryUrls: data.galleryUrls || null,
-        status: "PUBLISHED", // Admin creates published events directly
-      } as any,
+        status: "PUBLISHED",
+      },
     });
 
     return NextResponse.json(event, { status: 201 });

@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="min-h-screen flex flex-col">
             <BetaBanner />
             <ConditionalNav />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 min-w-0 w-full overflow-x-auto">{children}</main>
             <ConditionalFooter />
           </div>
         </Providers>

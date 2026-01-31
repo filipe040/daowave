@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 
 interface TicketLotFormProps {
   eventId: string;
@@ -31,7 +32,7 @@ export default function TicketLotForm({
     setError("");
 
     try {
-      const res = await fetch(`/api/organizer/events/${eventId}/tickets/lots`, {
+      const res = await fetch(`/api/promotor/events/${eventId}/tickets/lots`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,9 +64,10 @@ export default function TicketLotForm({
           <h2 className="text-2xl font-bold">Criar Lote de Bilhetes</h2>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white transition-colors"
+            className="text-zinc-400 hover:text-white transition-colors p-1"
+            aria-label="Fechar"
           >
-            ✕
+            <X className="h-5 w-5" strokeWidth={1.5} />
           </button>
         </div>
 

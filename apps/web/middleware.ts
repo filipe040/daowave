@@ -34,6 +34,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // OBJETIVO A: /organizer is legacy alias -> redirect 308 to canonical /promotor
+  if (pathname.startsWith("/organizer")) {
+    let target: string;
+    if (pathname === "/organizer" || pathname === "/organizer/") {
+      target = "/promotor";
+    } else if (pathname.match(/^\/organizer\/events\/[^/]+\/edit\/?$/)) {
+      target = pathname.replace(/^\/organizer\/events\/([^/]+)\/edit\/?$/, "/promotor/events/$1");
+    } else if (pathname === "/organizer/events" || pathname === "/organizer/events/") {
+      target = "/promotor";
+    } else if (pathname.startsWith("/organizer/account")) {
+      target = "/account";
+    } else {
+      target = pathname.replace(/^\/organizer/, "/promotor");
+    }
+    const url = new URL(target, request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     // Create response with security headers
     const response = NextResponse.next();
@@ -66,10 +85,10 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Check if route needs protection
-    const isProtectedRoute = 
+    // Check if route needs protection (canonical: /admin, /promotor, /validator)
+    const isProtectedRoute =
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/organizer") ||
+      pathname.startsWith("/promotor") ||
       pathname.startsWith("/validator");
 
     // If not a protected route, return early with security headers
@@ -126,14 +145,15 @@ export async function middleware(request: NextRequest) {
     const userRole = token.role as string | undefined;
 
     if (pathname.startsWith("/admin")) {
+      // OBJETIVO C: /admin only for ADMIN
       if (userRole !== "ADMIN") {
         const signInUrl = new URL("/auth/signin", request.url);
         signInUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(signInUrl);
       }
-    } else if (pathname.startsWith("/organizer")) {
-      // ORGANIZER or ADMIN allowed
-      if (userRole !== "ORGANIZER" && userRole !== "ADMIN") {
+    } else if (pathname.startsWith("/promotor")) {
+      // PROMOTER or ADMIN allowed
+      if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
         const signInUrl = new URL("/auth/signin", request.url);
         signInUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(signInUrl);

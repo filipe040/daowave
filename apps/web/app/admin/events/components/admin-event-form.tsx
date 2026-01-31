@@ -3,6 +3,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import {
+  FileText,
+  MapPin,
+  Ticket,
+  Users,
+  FileCheck,
+  Accessibility,
+  Phone,
+  Image,
+  type LucideIcon,
+} from "lucide-react";
 
 interface AdminEventFormProps {
   defaultOrganizerId?: string;
@@ -27,15 +38,15 @@ const categories = [
   "Outros",
 ];
 
-const tabs = [
-  { id: "basic", label: "Informações Básicas", icon: "📝" },
-  { id: "location", label: "Local e Datas", icon: "📍" },
-  { id: "checkin", label: "Check-in e Entradas", icon: "🎫" },
-  { id: "capacity", label: "Bilhética e Capacidade", icon: "👥" },
-  { id: "policies", label: "Políticas e Legal", icon: "📋" },
-  { id: "accessibility", label: "Acessibilidade", icon: "♿" },
-  { id: "contact", label: "Contactos e Suporte", icon: "📞" },
-  { id: "media", label: "Media", icon: "🖼️" },
+const tabs: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "basic", label: "Informações Básicas", icon: FileText },
+  { id: "location", label: "Local e Datas", icon: MapPin },
+  { id: "checkin", label: "Check-in e Entradas", icon: Ticket },
+  { id: "capacity", label: "Bilhética e Capacidade", icon: Users },
+  { id: "policies", label: "Políticas e Legal", icon: FileCheck },
+  { id: "accessibility", label: "Acessibilidade", icon: Accessibility },
+  { id: "contact", label: "Contactos e Suporte", icon: Phone },
+  { id: "media", label: "Media", icon: Image },
 ];
 
 export default function AdminEventForm({ defaultOrganizerId, availableOrganizers }: AdminEventFormProps) {
@@ -182,21 +193,24 @@ export default function AdminEventForm({ defaultOrganizerId, availableOrganizers
       <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 overflow-hidden">
         <div className="border-b border-zinc-700/50 px-6">
           <div className="flex overflow-x-auto scrollbar-hide">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "text-purple-400 border-b-2 border-purple-400"
-                    : "text-zinc-400 hover:text-zinc-300"
-                }`}
-              >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "text-purple-400 border-b-2 border-purple-400"
+                      : "text-zinc-400 hover:text-zinc-300"
+                  }`}
+                >
+                  <Icon className="mr-2 h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

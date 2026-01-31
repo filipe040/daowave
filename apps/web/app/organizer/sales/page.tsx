@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { CircleDollarSign, Ticket, Package } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -96,7 +97,7 @@ export default async function OrganizerSalesPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Receita Total</span>
-            <span className="text-2xl">💰</span>
+            <CircleDollarSign className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">
             {(totalRevenue / 100).toFixed(2)} €
@@ -106,7 +107,7 @@ export default async function OrganizerSalesPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Bilhetes Vendidos</span>
-            <span className="text-2xl">🎟️</span>
+            <Ticket className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">{totalTickets}</p>
         </div>
@@ -114,7 +115,7 @@ export default async function OrganizerSalesPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Encomendas</span>
-            <span className="text-2xl">📦</span>
+            <Package className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">{totalOrders}</p>
         </div>
@@ -157,7 +158,9 @@ export default async function OrganizerSalesPage() {
         <h2 className="text-xl font-bold mb-4">Encomendas Recentes</h2>
         {orders.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-4 opacity-50">📦</div>
+            <div className="mb-4 flex justify-center">
+              <Package className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+            </div>
             <p className="text-lg text-zinc-400 mb-2">Ainda não há vendas</p>
             <p className="text-sm text-zinc-500">As encomendas pagas aparecerão aqui</p>
           </div>

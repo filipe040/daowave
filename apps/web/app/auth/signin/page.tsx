@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,10 +71,8 @@ function SignInContent() {
           const userRole = sessionData?.user?.role;
 
           let redirectUrl = from;
-          if (from === "/" || from === "/admin" || from.startsWith("/admin")) {
-            if (userRole === "ADMIN") {
-              redirectUrl = "/admin";
-            } else if (userRole === "PROMOTER") {
+          if (from === "/" || from === "/admin" || from.startsWith("/admin") || from === "/promotor") {
+            if (userRole === "ADMIN" || userRole === "PROMOTER") {
               redirectUrl = "/promotor";
             } else {
               redirectUrl = "/";
@@ -107,26 +106,30 @@ function SignInContent() {
           </div>
 
           {verified && (
-            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
-              ✅ Email verificado com sucesso! Por favor, faça login.
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 shrink-0" />
+              <span>Email verificado com sucesso! Por favor, faça login.</span>
             </div>
           )}
 
           {emailNotVerified && (
-            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm md:text-base text-red-400">
-              ❌ O seu email ainda não foi verificado. Por favor, verifique a sua caixa de entrada.
+            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm md:text-base text-red-400 flex items-center gap-2">
+              <XCircle className="h-5 w-5 shrink-0" />
+              <span>O seu email ainda não foi verificado. Por favor, verifique a sua caixa de entrada.</span>
             </div>
           )}
 
           {registered && (
-            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
-              ✅ Conta criada com sucesso! Verifique o seu email para ativar a conta.
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 shrink-0" />
+              <span>Conta criada com sucesso! Verifique o seu email para ativar a conta.</span>
             </div>
           )}
 
           {passwordReset && (
-            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400">
-              ✅ Palavra-passe redefinida com sucesso! Por favor, faça login.
+            <div className="mb-6 rounded-xl border border-green-500/50 bg-green-500/10 p-4 text-sm md:text-base text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 shrink-0" />
+              <span>Palavra-passe redefinida com sucesso! Por favor, faça login.</span>
             </div>
           )}
 
@@ -136,7 +139,7 @@ function SignInContent() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+          <form data-testid="signin-form" onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-base md:text-sm font-semibold text-zinc-300">
                 Email

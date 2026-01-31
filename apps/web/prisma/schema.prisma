@@ -10,7 +10,7 @@ datasource db {
 model User {
   id                              String    @id @default(uuid())
   name                            String?
-  avatarUrl                       String?
+  avatarUrl                       String?   @db.VarChar(2048)
   email                           String    @unique
   passwordHash                    String
   role                            Role      @default(USER)
@@ -21,7 +21,17 @@ model User {
   // Password reset
   passwordResetToken              String?   @unique
   passwordResetTokenExpiresAt     DateTime?
-  
+  // Profile & preferences
+  phone                           String?   @db.VarChar(32)
+  emailVerifiedAt                 DateTime?
+  lastLoginAt                     DateTime?
+  termsAcceptedAt                 DateTime?
+  termsVersion                    String?   @db.VarChar(32)
+  marketingOptIn                  Boolean   @default(false)
+  notifyEmail                     Boolean   @default(true)
+  notifyEventReminders            Boolean   @default(true)
+  notifyTransfers                 Boolean   @default(true)
+
   orders              Order[]
   tickets             Ticket[]
   promoterProfile      PromoterProfile?
@@ -29,9 +39,25 @@ model User {
   transferFromUser     TransferLog[]      @relation("TransferFromUser")
   transferToUser       TransferLog[]      @relation("TransferToUser")
   eventTeamMembers     EventTeamMember[]
-  
+  userSessions        UserSession[]
+
   @@index([email])
   @@index([emailVerificationToken])
+}
+
+model UserSession {
+  id         String    @id @default(uuid())
+  userId     String
+  ip         String?   @db.VarChar(45)
+  userAgent  String?   @db.VarChar(512)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([revokedAt])
 }
 
 enum OrganizerStatus {
@@ -41,16 +67,19 @@ enum OrganizerStatus {
 }
 
 model PromoterProfile {
-  id          String          @id @default(uuid())
-  userId      String          @unique
-  brandName   String
-  vatNumber   String?
-  status      OrganizerStatus @default(PENDING)
+  id           String          @id @default(uuid())
+  userId       String          @unique
+  brandName    String
+  vatNumber    String?
+  status       OrganizerStatus @default(PENDING)
   contactEmail String?
-  createdAt   DateTime        @default(now())
+  score        Int?            // Score/reputação (admin); null = não calculado
+  adminNotes   String?         @db.Text // Notas internas admin
+  createdAt    DateTime        @default(now())
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   events      Event[]
+  payouts     Payout[]
   
   @@index([userId])
 }
@@ -87,14 +116,15 @@ model Event {
   checkinEndAt          DateTime? // Fim da janela de check-in
   maxEntries            Int?     // Máximo de entradas por bilhete (MULTI mode)
 
-  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
-  ticketLots   TicketLot[]
-  orders      Order[]
-  tickets     Ticket[]
-  checkinLogs CheckinLog[]
-  teamMembers EventTeamMember[]
-  coupons     Coupon[]
-  assets      EventAsset[]
+  promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  ticketLots    TicketLot[]
+  orders        Order[]
+  tickets       Ticket[]
+  checkinLogs   CheckinLog[]
+  teamMembers   EventTeamMember[]
+  coupons       Coupon[]
+  assets        EventAsset[]
+  trackingLinks TrackingLink[]
   
   @@index([slug])
   @@index([status])
@@ -121,21 +151,24 @@ model TicketLot {
 }
 
 model Order {
-  id             String      @id @default(uuid())
-  userId         String
-  eventId        String
+  id              String      @id @default(uuid())
+  userId          String
+  eventId         String
   totalCents      Int
   currency        String      @default("EUR")
   status          OrderStatus @default(PENDING)
   paymentProvider String?
   paymentRef      String?
+  buyerName       String?
+  buyerEmail      String?
+  buyerPhone      String?
   createdAt       DateTime    @default(now())
-  
-  user            User        @relation(fields: [userId], references: [id])
-  event           Event       @relation(fields: [eventId], references: [id])
-  items           OrderItem[]
-  tickets         Ticket[]
-  
+
+  user   User   @relation(fields: [userId], references: [id])
+  event  Event  @relation(fields: [eventId], references: [id])
+  items   OrderItem[]
+  tickets Ticket[]
+
   @@index([userId])
   @@index([eventId])
   @@index([status])
@@ -162,7 +195,7 @@ model Ticket {
   userId      String
   ticketLotId String
   code        String   @unique
-  qrPayload   String
+  qrPayload   String   @db.Text
   checkedInAt DateTime?
   checkedInByUserId String?
   createdAt   DateTime @default(now())
@@ -375,4 +408,40 @@ model EventTeamMemberPermission {
   @@unique([memberId, permission])
   @@index([memberId])
   @@index([permission])
+}
+
+// Fase 2 — links de rastreio por evento (marketing)
+model TrackingLink {
+  id        String   @id @default(uuid())
+  eventId   String
+  code      String   // slug/código único por evento (ex: "instagram")
+  label     String?  // etiqueta legível (ex: "Instagram Stories")
+  createdAt DateTime @default(now())
+  
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([eventId, code])
+  @@index([eventId])
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// Fase 2 — pagamentos a promotores
+model Payout {
+  id          String       @id @default(uuid())
+  promoterId  String
+  amountCents Int
+  currency    String       @default("EUR")
+  status      PayoutStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime     @default(now())
+  
+  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  
+  @@index([promoterId])
+  @@index([status])
 }

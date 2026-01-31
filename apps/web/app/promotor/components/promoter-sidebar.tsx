@@ -25,6 +25,13 @@ import {
   ChevronRight,
   Menu,
   X,
+  UserCheck,
+  Calendar,
+  CalendarCheck,
+  CreditCard,
+  FileCheck,
+  Shield,
+  PlusCircle,
 } from "lucide-react";
 
 interface PromoterSidebarProps {
@@ -64,6 +71,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
 
   const section = useMemo(() => {
     if (currentSection) return currentSection;
+    if (pathname.startsWith("/admin")) return "ADMINISTRAÇÃO";
     if (pathname.includes("/tickets")) return "BILHÉTICA & RECEITA";
     if (pathname.includes("/checkin")) return "CONTROLO DE ACESSO";
     return "DASHBOARD";
@@ -104,12 +112,15 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
         ...(eventId
           ? ([
               { label: "Bilhética", href: `${baseEvent}/tickets`, icon: Ticket },
+              { label: "Vendas", href: `${baseEvent}/sales`, icon: CreditCard, activeMatch: (p) => p.includes("/sales") },
               {
                 label: "Acesso",
                 href: `/promotor/checkin/${eventId}`,
                 icon: ShieldCheck,
-                activeMatch: (p) => p.includes("/checkin"),
+                activeMatch: (p) => p.includes("/checkin") && !p.endsWith("/checkins"),
               },
+              { label: "Lista check-ins", href: `${baseEvent}/checkins`, icon: FileCheck, activeMatch: (p) => p.includes("/checkins") },
+              { label: "Tracking links", href: `${baseEvent}/tracking-links`, icon: BarChart3, activeMatch: (p) => p.includes("/tracking-links") },
               { label: "Carteiras", href: `${baseEvent}/carteiras`, icon: Wallet },
             ] as NavItem[])
           : ([] as NavItem[])),
@@ -156,7 +167,8 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
     const analytics: NavGroup = {
       title: "ANÁLISE",
       items: [
-        { label: "Relatórios", icon: BarChart3, rightIcon: ChevronRight, disabled: true },
+        { label: "Relatórios", href: "/promotor/analytics", icon: BarChart3, rightIcon: ChevronRight, activeMatch: (p) => p === "/promotor/analytics" },
+        { label: "Financeiro", href: "/promotor/finance", icon: CreditCard, activeMatch: (p) => p === "/promotor/finance" },
         { label: "Auditoria", icon: Database, rightIcon: ChevronRight, disabled: true },
       ],
     };
@@ -170,7 +182,9 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
       ],
     };
 
-    return [management, experience, config, analytics, system];
+    // OBJETIVO C: Promoter sidebar has no /admin/* links (admin uses its own sidebar)
+    const allGroups = [management, experience, config, analytics, system];
+    return allGroups;
   }, [eventId, baseEvent]);
 
   return (
@@ -202,7 +216,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
       <aside
         id="promoter-sidebar"
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64",
+          "fixed left-0 top-0 z-40 h-screen w-72",
           "border-r border-border bg-background/80 backdrop-blur-2xl",
           "shadow-[0_18px_60px_rgba(0,0,0,.45)]",
           "transition-transform duration-300",
@@ -210,8 +224,9 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Brand */}
-        <div className="px-5 py-5 border-b border-border">
+        <div className="flex min-h-0 flex-col h-full">
+          {/* Brand */}
+          <div className="shrink-0 px-5 py-5 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-xl border border-border bg-card flex items-center justify-center shadow-[var(--elevation-1)]">
               <div className="grid grid-cols-2 gap-1">
@@ -231,8 +246,8 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+          {/* Nav */}
+          <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-5">
           {groups.map((g) => (
             <div key={g.title}>
               <div className="px-3 pb-2 text-[10px] tracking-wider uppercase text-muted-foreground">
@@ -267,12 +282,12 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
                         <Icon className={cn("h-5 w-5", active ? "text-foreground" : "text-foreground/80")} />
                       </span>
 
-                      <span className={cn("text-[13px] font-medium", active && "font-semibold")}>
+                      <span className={cn("min-w-0 flex-1 truncate text-[13px] font-medium", active && "font-semibold")}>
                         {it.label}
                       </span>
 
                       {RightIcon && (
-                        <span className="ml-auto">
+                        <span className="ml-2 flex-shrink-0">
                           <RightIcon className={cn("h-4 w-4", active ? "text-foreground/60" : "text-muted-foreground")} />
                         </span>
                       )}
@@ -301,11 +316,11 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               </div>
             </div>
           ))}
-        </nav>
+          </nav>
 
-        {/* Account */}
-        {session?.user && (
-          <div className="border-t border-border p-4">
+          {/* Account */}
+          {session?.user && (
+            <div className="shrink-0 border-t border-border p-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-10 w-10 rounded-2xl border border-border bg-card flex items-center justify-center shadow-[var(--elevation-1)]">
                 <User className="h-5 w-5 text-foreground/80" />
@@ -332,8 +347,9 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               <LogOut className="h-4 w-4" />
               <span className="text-sm font-medium">Sair</span>
             </button>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );

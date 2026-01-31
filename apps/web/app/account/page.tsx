@@ -1,60 +1,73 @@
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
-import AccountProfile from "./components/account-profile";
+import Link from "next/link";
+import { ShoppingBag, Ticket, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-async function getCurrentUser(userId: string) {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarUrl: true,
-      },
-    });
-
-    return user;
-  } catch (error: any) {
-    // Fallback se avatarUrl ainda não existir na BD
-    if (error?.code === "P2021" || error?.message?.includes("Unknown column")) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      });
-
-      if (!user) return null;
-
-      return { ...user, avatarUrl: null as string | null };
-    }
-
-    throw error;
-  }
+async function getCounts(userId: string) {
+  const [ordersCount, ticketsCount] = await Promise.all([
+    prisma.order.count({ where: { userId } }),
+    prisma.ticket.count({ where: { userId } }),
+  ]);
+  return { ordersCount, ticketsCount };
 }
 
-export default async function AccountPage() {
+export default async function AccountDashboardPage() {
   const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
 
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/account");
-  }
+  const { ordersCount, ticketsCount } = await getCounts(session.user.id);
 
-  const user = await getCurrentUser(session.user.id);
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
+          Resumo da conta
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Visão geral das tuas compras e bilhetes.
+        </p>
+      </div>
 
-  if (!user) {
-    redirect("/");
-  }
+      <div className="grid gap-4 sm:grid-cols-2" data-testid="account-dashboard-cards">
+        <Link
+          href="/account/orders"
+          className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors hover:bg-zinc-800/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          data-testid="card-orders"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Compras</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{ordersCount}</p>
+            </div>
+            <ShoppingBag className="h-10 w-10 text-zinc-500" />
+          </div>
+          <p className="mt-4 flex items-center gap-2 text-sm font-medium text-primary">
+            Ver histórico
+            <ArrowRight className="h-4 w-4" />
+          </p>
+        </Link>
 
-  return <AccountProfile user={user} />;
+        <Link
+          href="/account/tickets"
+          className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors hover:bg-zinc-800/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          data-testid="card-tickets"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Bilhetes</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{ticketsCount}</p>
+            </div>
+            <Ticket className="h-10 w-10 text-zinc-500" />
+          </div>
+          <p className="mt-4 flex items-center gap-2 text-sm font-medium text-primary">
+            Ver bilhetes
+            <ArrowRight className="h-4 w-4" />
+          </p>
+        </Link>
+      </div>
+    </div>
+  );
 }
-

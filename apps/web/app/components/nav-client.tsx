@@ -24,6 +24,14 @@ function getInitials(name: string | null | undefined, email: string | undefined)
   return "U";
 }
 
+function avatarDisplayUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("/uploads/avatars/")) {
+    return `/api/account/avatar/serve/${url.replace(/^\/uploads\/avatars\//, "")}`;
+  }
+  return url;
+}
+
 export default function NavClient() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -87,7 +95,7 @@ export default function NavClient() {
       <div className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 rounded-full overflow-hidden border border-white/10 bg-white/10 flex items-center justify-center">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
         ) : (
           <span className="text-xs font-bold text-white/90">{initials}</span>
         )}
@@ -107,14 +115,12 @@ export default function NavClient() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo - Left */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
               EasyTicket
             </span>
           </Link>
 
-          {/* Desktop Navigation - Center */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-12 absolute left-1/2 transform -translate-x-1/2">
             <Link
               href="/events"
@@ -122,7 +128,6 @@ export default function NavClient() {
             >
               DISCOVER
             </Link>
-
             {session && (
               <Link
                 href="/my-tickets"
@@ -131,7 +136,6 @@ export default function NavClient() {
                 MY TICKETS
               </Link>
             )}
-
             <Link
               href="/help"
               className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -140,11 +144,9 @@ export default function NavClient() {
             </Link>
           </nav>
 
-          {/* Right Side */}
           <div className="flex items-center gap-4">
             {session ? (
               <div className="flex items-center gap-3 md:gap-4">
-                {/* Desktop role links */}
                 <div className="hidden md:flex items-center gap-4">
                   {role === "PROMOTER" && (
                     <Link
@@ -162,9 +164,7 @@ export default function NavClient() {
                       ADMIN
                     </Link>
                   )}
-
                   <UserBlock />
-
                   <button
                     onClick={handleSignOut}
                     className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -173,7 +173,6 @@ export default function NavClient() {
                   </button>
                 </div>
 
-                {/* Mobile menu button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="md:hidden text-white p-2"
@@ -191,15 +190,12 @@ export default function NavClient() {
               </div>
             ) : (
               <>
-                {/* Desktop login */}
                 <Link
                   href="/auth/signin"
                   className="hidden md:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
                 >
                   LOG IN
                 </Link>
-
-                {/* Mobile menu button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="md:hidden text-white p-2"
@@ -219,7 +215,6 @@ export default function NavClient() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <nav className="md:hidden pb-6 pt-4 border-t border-white/10 space-y-4">
             {session && (
@@ -234,7 +229,6 @@ export default function NavClient() {
             >
               DISCOVER
             </Link>
-
             {session ? (
               <>
                 <Link
@@ -244,7 +238,6 @@ export default function NavClient() {
                 >
                   MY TICKETS
                 </Link>
-
                 {role === "PROMOTER" && (
                   <Link
                     href="/promotor"
@@ -254,7 +247,6 @@ export default function NavClient() {
                     PROMOTER
                   </Link>
                 )}
-
                 {role === "ADMIN" && (
                   <Link
                     href="/admin"
@@ -264,7 +256,6 @@ export default function NavClient() {
                     ADMIN
                   </Link>
                 )}
-
                 <Link
                   href="/help"
                   onClick={() => setMobileMenuOpen(false)}
@@ -272,7 +263,6 @@ export default function NavClient() {
                 >
                   HELP
                 </Link>
-
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -292,7 +282,6 @@ export default function NavClient() {
                 >
                   HELP
                 </Link>
-
                 <Link
                   href="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}

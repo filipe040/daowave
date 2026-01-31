@@ -10,7 +10,8 @@
     "build": "npm --workspace apps/web run build",
     "dev": "npm --workspace apps/web run dev",
     "db:generate": "npm --workspace apps/web run db:generate",
-    "db:migrate:deploy": "npm --workspace apps/web run db:migrate:deploy"
+    "db:migrate:deploy": "npm --workspace apps/web run db:migrate:deploy",
+    "db:seed": "npm --workspace apps/web run db:seed"
   },
   "devDependencies": {
     "prisma": "^5.20.0"

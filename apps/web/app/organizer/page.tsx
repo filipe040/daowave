@@ -1,10 +1,12 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPromoterOverview } from "@/lib/services/promoter-overview.service";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { Ticket, CircleCheck, FileText, CircleDollarSign, Calendar, ChevronRight } from "lucide-react";
 
 export default async function OrganizerDashboard() {
   const session = await getServerSession(authOptions);
@@ -13,54 +15,35 @@ export default async function OrganizerDashboard() {
     redirect("/auth/signin?from=/organizer");
   }
 
-  // Get organizer profile
   const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
   if (!organizerProfile || organizerProfile.status !== "APPROVED") {
-    // This will be handled by layout, but just in case
     redirect("/");
   }
 
-  // Get events stats
-  const [totalEvents, publishedEvents, draftEvents, totalTicketsSold, totalRevenue] = await Promise.all([
-    prisma.event.count({ where: { promoterId: organizerProfile.id } }),
-    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "PUBLISHED" } }),
-    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "DRAFT" } }),
-    prisma.ticket.count({
-      where: {
-        event: { promoterId: organizerProfile.id },
-        // TODO: Add status field to Ticket model or filter by checkedInAt
-        // status: "ISSUED",
+  const [overview, recentEvents] = await Promise.all([
+    getPromoterOverview(organizerProfile.id),
+    prisma.event.findMany({
+      where: { promoterId: organizerProfile.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        startAt: true,
+        createdAt: true,
       },
-    }),
-    prisma.order.aggregate({
-      where: {
-        event: { promoterId: organizerProfile.id },
-        status: "PAID",
-      },
-      _sum: { totalCents: true },
     }),
   ]);
 
-  // Get recent events
-  const recentEvents = await prisma.event.findMany({
-    where: { promoterId: organizerProfile.id },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      status: true,
-      startAt: true,
-      createdAt: true,
-    },
-  });
+  const draftEvents = overview.eventsTotal - overview.eventsActive;
 
   return (
-    <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto">
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 md:space-y-8 px-2 sm:px-4 md:px-0">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Dashboard</h1>
@@ -77,27 +60,35 @@ export default async function OrganizerDashboard() {
       {/* Stats Grid */}
       <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">🎫</div>
-          <div className="text-4xl md:text-5xl font-bold mb-2">{totalEvents}</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <Ticket className="h-6 w-6" strokeWidth={1.5} />
+          </div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsTotal}</div>
           <div className="text-sm md:text-base text-zinc-400">Total de Eventos</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">✅</div>
-          <div className="text-4xl md:text-5xl font-bold mb-2">{publishedEvents}</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <CircleCheck className="h-6 w-6" strokeWidth={1.5} />
+          </div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsActive}</div>
           <div className="text-sm md:text-base text-zinc-400">Publicados</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">📝</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <FileText className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{draftEvents}</div>
           <div className="text-sm md:text-base text-zinc-400">Rascunhos</div>
         </div>
         
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="text-4xl md:text-5xl mb-3">💰</div>
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
+            <CircleDollarSign className="h-6 w-6" strokeWidth={1.5} />
+          </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">
-            {totalRevenue._sum.totalCents ? (totalRevenue._sum.totalCents / 100).toFixed(2) : "0.00"}€
+            {(overview.revenueCents / 100).toFixed(2)}€
           </div>
           <div className="text-sm md:text-base text-zinc-400">Receita Total</div>
         </div>
@@ -109,16 +100,18 @@ export default async function OrganizerDashboard() {
           <h2 className="text-xl md:text-2xl font-bold">Eventos Recentes</h2>
           <Link
             href="/organizer/events"
-            className="text-sm md:text-base text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-2 group"
+            className="text-sm md:text-base text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1"
           >
             Ver todos
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
         
         {recentEvents.length === 0 ? (
           <div className="text-center py-12 md:py-16">
-            <div className="text-5xl md:text-6xl mb-4 opacity-50">📅</div>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-zinc-500">
+              <Calendar className="h-8 w-8" strokeWidth={1.5} />
+            </div>
             <p className="text-lg md:text-xl text-zinc-400 mb-6">Ainda não criou nenhum evento</p>
             <Link
               href="/organizer/events/new"
@@ -154,7 +147,7 @@ export default async function OrganizerDashboard() {
                     {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                   </p>
                 </div>
-                <span className="text-zinc-600 group-hover:text-purple-400 transition-colors ml-4 text-xl">→</span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500 group-hover:text-purple-400 transition-colors ml-4" />
               </Link>
             ))}
           </div>

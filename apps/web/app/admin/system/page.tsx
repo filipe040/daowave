@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { CheckCircle, XCircle, AlertTriangle, HelpCircle } from "lucide-react";
 
 interface HealthStatus {
   status: "ok" | "degraded" | "error";
@@ -100,33 +99,37 @@ export default function SystemStatusPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    const cls = "h-5 w-5 shrink-0";
     switch (status) {
       case "ok":
-        return "✅";
+        return <CheckCircle className={cls} strokeWidth={1.5} />;
       case "error":
-        return "❌";
+        return <XCircle className={cls} strokeWidth={1.5} />;
       case "degraded":
-        return "⚠️";
+        return <AlertTriangle className={cls} strokeWidth={1.5} />;
       default:
-        return "❓";
+        return <HelpCircle className={cls} strokeWidth={1.5} />;
     }
   };
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded mb-4"></div>
+      <div className="w-full min-w-0 max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-zinc-700 rounded w-1/4"></div>
+          <div className="h-32 bg-zinc-800 rounded-2xl"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">System Status</h1>
+    <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Sistema</h1>
+          <p className="text-base md:text-lg text-zinc-400">Estado dos serviços e erros críticos</p>
+        </div>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2">
             <input
@@ -135,7 +138,7 @@ export default function SystemStatusPage() {
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm">Auto-refresh (30s)</span>
+            <span className="text-sm text-zinc-400">Auto-refresh (30s)</span>
           </label>
           <button
             onClick={() => {
@@ -219,9 +222,9 @@ export default function SystemStatusPage() {
           <div className="border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">Payments</h3>
-              <span className="px-2 py-1 rounded text-sm bg-gray-100 text-gray-700">
-                {health.services.payments.stripe ? "✅ Stripe" : "❌ Stripe"} |{" "}
-                {health.services.payments.mock ? "✅ Mock" : "❌ Mock"}
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-sm bg-gray-100 text-gray-700">
+                {health.services.payments.stripe ? <><CheckCircle className="h-4 w-4" /> Stripe</> : <><XCircle className="h-4 w-4" /> Stripe</>} |{" "}
+                {health.services.payments.mock ? <><CheckCircle className="h-4 w-4" /> Mock</> : <><XCircle className="h-4 w-4" /> Mock</>}
               </span>
             </div>
             <p className="text-sm text-gray-600">

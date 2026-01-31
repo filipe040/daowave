@@ -3,7 +3,10 @@
  * Tests: checkout -> order PENDING -> webhook -> order PAID -> tickets ISSUED
  */
 
-import { PrismaClient, OrderStatus, TicketStatus } from "@prisma/client";
+import { PrismaClient, OrderStatus } from "@prisma/client";
+
+/** Ticket status string (Prisma Ticket.status is String, not enum) */
+const TICKET_ISSUED = "ISSUED";
 
 // Mock Prisma for testing
 const prisma = {
@@ -170,7 +173,7 @@ describe("Checkout Flow Integration", () => {
             ticketLotId: "lot-123",
             eventId: "event-123",
             holderUserId: "user-123",
-            status: TicketStatus.ISSUED,
+            status: TICKET_ISSUED,
             qrNonce: "nonce-1",
           },
           {
@@ -178,7 +181,7 @@ describe("Checkout Flow Integration", () => {
             ticketLotId: "lot-123",
             eventId: "event-123",
             holderUserId: "user-123",
-            status: TicketStatus.ISSUED,
+            status: TICKET_ISSUED,
             qrNonce: "nonce-2",
           },
         ],
@@ -221,7 +224,7 @@ describe("Checkout Flow Integration", () => {
         id: `ticket-${index + 1}`,
         attendeeName: attendee.name,
         attendeeEmail: attendee.email,
-        status: TicketStatus.ISSUED,
+        status: TICKET_ISSUED,
       }));
 
       expect(tickets.length).toBe(2);
@@ -243,10 +246,10 @@ describe("Checkout Flow Integration", () => {
     it("should set ticket status to ISSUED", async () => {
       const ticket = {
         id: "ticket-123",
-        status: TicketStatus.ISSUED,
+        status: TICKET_ISSUED,
       };
 
-      expect(ticket.status).toBe(TicketStatus.ISSUED);
+      expect(ticket.status).toBe(TICKET_ISSUED);
     });
   });
 });

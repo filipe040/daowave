@@ -1,9 +1,15 @@
+/**
+ * @deprecated Use /api/promotor/events/[id] (canonical). This route is kept as legacy alias.
+ * GET /api/organizer/events/[id] - Get single event
+ * PUT /api/organizer/events/[id] - Update event
+ */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { safeLog } from "@/lib/security";
+import { EventService } from "@/lib/services/event.service";
 
 const UpdateEventSchema = z.object({
   title: z.string().min(1).optional(),
@@ -13,15 +19,27 @@ const UpdateEventSchema = z.object({
   venueName: z.string().min(1).optional(),
   address: z.string().min(1).optional(),
   city: z.string().min(1).optional(),
-  startAt: z.string().datetime().or(z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Data inválida" })).optional(),
-  endAt: z.string().datetime().or(z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Data inválida" })).optional(),
+  startAt: z.union([
+    z.string().refine((val) => val === "" || !isNaN(Date.parse(val)), { message: "Data de início inválida" }),
+    z.null(),
+  ]).optional().transform((val) => (val === "" || val == null ? undefined : val)),
+  endAt: z.union([
+    z.string().refine((val) => val === "" || !isNaN(Date.parse(val)), { message: "Data de fim inválida" }),
+    z.null(),
+  ]).optional().transform((val) => (val === "" || val == null ? undefined : val)),
   timezone: z.string().optional(),
   
   // Check-in
   checkinMode: z.enum(["SINGLE", "MULTI"]).optional(),
   maxEntries: z.number().int().positive().optional().nullable(),
-  entryWindowStartAt: z.string().datetime().optional().nullable(),
-  entryWindowEndAt: z.string().datetime().optional().nullable(),
+  entryWindowStartAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
+  entryWindowEndAt: z.union([
+    z.string().refine((val) => val === "" || val == null || !isNaN(Date.parse(val)), { message: "Data inválida" }),
+    z.null(),
+  ]).optional().nullable().transform((val) => (val === "" || val == null ? null : val)),
   
   // Capacity
   capacityTotal: z.number().int().positive().optional().nullable(),
@@ -83,41 +101,27 @@ export async function GET(
 
     const { id } = await params;
 
-    // For admins, skip organizer profile check
-    let organizerProfile = null;
+    let promoterId: string | undefined;
     if (session.user.role === "PROMOTER") {
-      organizerProfile = await prisma.promoterProfile.findUnique({
+      const organizerProfile = await prisma.promoterProfile.findUnique({
         where: { userId: session.user.id },
       });
-
       if (!organizerProfile || organizerProfile.status !== "APPROVED") {
         return NextResponse.json(
           { error: "Organizer profile not approved" },
           { status: 403 }
         );
       }
+      promoterId = organizerProfile.id;
     }
 
-    const event = await prisma.event.findUnique({
-      where: { id },
-      include: {
-        ticketLots: true,
-        _count: {
-          select: {
-            tickets: true,
-            orders: { where: { status: "PAID" } },
-          },
-        },
-      },
+    const event = await EventService.getById(id, {
+      promoterId,
+      isAdmin: session.user.role === "ADMIN",
     });
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
-
-    // Verify ownership (admins can access any event)
-    if (session.user.role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json(event);
@@ -158,41 +162,27 @@ export async function PUT(
       }
     }
 
-    // Verify ownership
-    const existingEvent = await prisma.event.findUnique({
-      where: { id },
+    const existingEvent = await EventService.getById(id, {
+      promoterId: organizerProfile?.id,
+      isAdmin: session.user.role === "ADMIN",
     });
 
     if (!existingEvent) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Admins can access any event
-    if (session.user.role !== "ADMIN" && organizerProfile && existingEvent.promoterId !== organizerProfile.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const body = await req.json();
     const data = UpdateEventSchema.parse(body);
 
-    // Validate dates if provided
     if (data.startAt || data.endAt) {
       const startAt = data.startAt ? new Date(data.startAt) : existingEvent.startAt;
       const endAt = data.endAt ? new Date(data.endAt) : existingEvent.endAt;
-      
       if (isNaN(startAt.getTime())) {
-        return NextResponse.json(
-          { error: "Data de início inválida" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Data de início inválida" }, { status: 400 });
       }
       if (isNaN(endAt.getTime())) {
-        return NextResponse.json(
-          { error: "Data de fim inválida" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Data de fim inválida" }, { status: 400 });
       }
-      
       if (endAt <= startAt) {
         return NextResponse.json(
           { error: "Data de fim deve ser posterior à data de início" },
@@ -201,76 +191,38 @@ export async function PUT(
       }
     }
 
-    // Check slug uniqueness if changed
-    if (data.slug && data.slug !== existingEvent.slug) {
-      const slugExists = await prisma.event.findUnique({
-        where: { slug: data.slug },
-      });
-
-      if (slugExists) {
-        return NextResponse.json(
-          { error: "Já existe um evento com este slug" },
-          { status: 400 }
-        );
-      }
+    if (data.slug && data.slug !== existingEvent.slug && (await EventService.isSlugTaken(data.slug, id))) {
+      return NextResponse.json(
+        { error: "Já existe um evento com este slug" },
+        { status: 400 }
+      );
     }
 
-    // Prepare update data
-    const updateData: any = {};
-    if (data.title !== undefined) updateData.title = data.title;
-    if (data.slug !== undefined) updateData.slug = data.slug;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.category !== undefined) updateData.category = data.category;
-    if (data.venueName !== undefined) updateData.venueName = data.venueName;
-    if (data.address !== undefined) updateData.address = data.address;
-    if (data.city !== undefined) updateData.city = data.city;
-    if (data.startAt !== undefined) updateData.startAt = new Date(data.startAt);
-    if (data.endAt !== undefined) updateData.endAt = new Date(data.endAt);
-    if (data.timezone !== undefined) updateData.timezone = data.timezone;
-    // Only add check-in fields if they exist (migration applied)
-    try {
-      if (data.checkinMode !== undefined) updateData.checkinMode = data.checkinMode;
-      if (data.maxEntries !== undefined) updateData.maxEntries = data.maxEntries;
-      if (data.entryWindowStartAt !== undefined) updateData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
-      if (data.entryWindowEndAt !== undefined) updateData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
-    } catch {
-      // Fields don't exist, skip them
-    }
-    if (data.capacityTotal !== undefined) updateData.capacityTotal = data.capacityTotal;
-    if (data.ageRestriction !== undefined) updateData.ageRestriction = data.ageRestriction;
-    if (data.refundPolicy !== undefined) updateData.refundPolicy = data.refundPolicy;
-    if (data.cancellationPolicy !== undefined) updateData.cancellationPolicy = data.cancellationPolicy;
-    if (data.termsText !== undefined) updateData.termsText = data.termsText;
-    if (data.consentRGPD !== undefined) updateData.consentRGPD = data.consentRGPD;
-    if (data.wheelchairAccess !== undefined) updateData.wheelchairAccess = data.wheelchairAccess;
-    if (data.signLanguageSupport !== undefined) updateData.signLanguageSupport = data.signLanguageSupport;
-    if (data.accessibleWC !== undefined) updateData.accessibleWC = data.accessibleWC;
-    if (data.accessibilityNotes !== undefined) updateData.accessibilityNotes = data.accessibilityNotes;
-    if (data.contactEmail !== undefined) updateData.contactEmail = data.contactEmail;
-    if (data.contactPhone !== undefined) updateData.contactPhone = data.contactPhone;
-    if (data.supportInstructions !== undefined) updateData.supportInstructions = data.supportInstructions;
+    const updateInput: Parameters<typeof EventService.update>[1] = {};
+    if (data.title !== undefined) updateInput.title = data.title;
+    if (data.slug !== undefined) updateInput.slug = data.slug;
+    if (data.description !== undefined) updateInput.description = data.description;
+    if (data.venueName !== undefined) updateInput.venue = data.venueName;
+    if (data.city !== undefined) updateInput.city = data.city;
+    if (data.startAt !== undefined) updateInput.startAt = new Date(data.startAt);
+    if (data.endAt !== undefined) updateInput.endAt = new Date(data.endAt);
+    if (data.checkinMode !== undefined) updateInput.checkinMode = data.checkinMode;
+    if (data.maxEntries !== undefined) updateInput.maxEntries = data.maxEntries;
+    if (data.entryWindowStartAt !== undefined) updateInput.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
+    if (data.entryWindowEndAt !== undefined) updateInput.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
     if (data.bannerUrl !== undefined) {
-      // Normalize imgur URLs
       let bannerUrl = data.bannerUrl;
-      if (bannerUrl && bannerUrl.includes("imgur.com")) {
+      if (bannerUrl?.includes("imgur.com")) {
         if (!bannerUrl.startsWith("http")) {
           const match = bannerUrl.match(/imgur\.com\/([a-zA-Z0-9]+)/);
-          if (match && !bannerUrl.includes("/a/")) {
-            bannerUrl = `https://i.imgur.com/${match[1]}.jpg`;
-          } else {
-            bannerUrl = `https://${bannerUrl}`;
-          }
+          if (match && !bannerUrl.includes("/a/")) bannerUrl = `https://i.imgur.com/${match[1]}.jpg`;
+          else bannerUrl = `https://${bannerUrl}`;
         }
       }
-      updateData.bannerUrl = bannerUrl;
+      updateInput.bannerUrl = bannerUrl ?? null;
     }
-    if (data.galleryUrls !== undefined) updateData.galleryUrls = data.galleryUrls;
 
-    const event = await prisma.event.update({
-      where: { id },
-      data: updateData,
-    });
-
+    const event = await EventService.update(id, updateInput);
     return NextResponse.json(event);
   } catch (error) {
     if (error instanceof z.ZodError) {

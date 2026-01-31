@@ -28,6 +28,7 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const updateQuantity = (lotId: string, delta: number) => {
     setQuantities((prev) => {
@@ -44,16 +45,33 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
     return sum + (quantities[lot.id] || 0) * lot.priceCents;
   }, 0);
 
-  const handleCheckout = async () => {
-    if (totalItems === 0) return;
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  const handleCheckout = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setCheckoutError(null);
+
+    const items = Object.entries(quantities)
+      .filter(([_, qty]) => qty > 0)
+      .map(([lotId, quantity]) => ({ ticketLotId: lotId, quantity }));
+
+    if (items.length === 0 || items.every((i) => i.quantity === 0)) {
+      setCheckoutError('Selecione pelo menos um bilhete.');
+      return;
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      const invalid = items.find((item) => !UUID_REGEX.test(item.ticketLotId));
+      if (invalid) {
+        const msg = `ticketLotId must be TicketLot.id (UUID). Got: "${invalid.ticketLotId}". Check that event.ticketLots include id.`;
+        setCheckoutError(msg);
+        return;
+      }
+    }
 
     setLoading(true);
     try {
-      const items = Object.entries(quantities)
-        .filter(([_, qty]) => qty > 0)
-        .map(([lotId, quantity]) => ({ ticketLotId: lotId, quantity }));
-
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/checkout/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -62,17 +80,21 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         }),
       });
 
+      const body = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const error = await response.json();
-        alert(error.error || 'Erro ao processar checkout');
+        setCheckoutError((body.error as string) || `Erro ${response.status} ao processar checkout`);
         return;
       }
 
-      const data = await response.json();
-      router.push(`/checkout/${data.orderId}`);
+      const orderId = body.orderId;
+      if (!orderId) {
+        setCheckoutError('Resposta do servidor sem orderId');
+        return;
+      }
+      router.push(`/checkout/${orderId}`);
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Erro ao processar checkout');
+      setCheckoutError('Erro ao processar checkout');
     } finally {
       setLoading(false);
     }
@@ -87,7 +109,7 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
   }
 
   return (
-    <div className="bg-slate-50 rounded-lg p-6">
+    <div data-testid="event-ticket-selector" className="bg-slate-50 rounded-lg p-6">
       <h2 className="text-xl font-semibold text-slate-900 mb-6">
         Selecionar Bilhetes
       </h2>
@@ -157,7 +179,19 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         </div>
       )}
 
+      {checkoutError && (
+        <div
+          data-testid="checkout-error"
+          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+          role="alert"
+        >
+          {checkoutError}
+        </div>
+      )}
+
       <Button
+        type="button"
+        data-testid="btn-continue-checkout"
         onClick={handleCheckout}
         disabled={totalItems === 0 || loading}
         className="w-full"

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestMetadata } from "@/lib/security";
 
 export async function POST(
   req: Request,
@@ -21,6 +22,17 @@ export async function POST(
       data: {
         status: "APPROVED",
       },
+    });
+
+    const metadata = getRequestMetadata(req);
+    await createAuditLog({
+      userId: session.user.id,
+      action: "ADMIN_PROMOTER_APPROVED",
+      entityType: "promoter",
+      entityId: id,
+      details: { brandName: organizer.brandName },
+      ipAddress: metadata.ip,
+      userAgent: metadata.userAgent,
     });
 
     return NextResponse.json({ success: true, organizer });

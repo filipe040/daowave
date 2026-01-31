@@ -3,10 +3,34 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import {
+  FileText,
+  MapPin,
+  Ticket,
+  Users,
+  FileCheck,
+  Accessibility,
+  Phone,
+  Image,
+  Info,
+  AlertTriangle,
+  Lightbulb,
+  type LucideIcon,
+} from "lucide-react";
+
+interface OrganizerOption {
+  id: string;
+  brandName: string;
+  user: { name: string | null; email: string };
+}
 
 interface EventFormProps {
   eventId?: string;
   initialData?: any;
+  /** Quando true, mostra seletor de promotor e envia para API admin (criar evento como admin) */
+  isAdminCreate?: boolean;
+  availableOrganizers?: OrganizerOption[];
+  defaultPromoterId?: string;
 }
 
 const categories = [
@@ -20,23 +44,24 @@ const categories = [
   "Outros",
 ];
 
-const tabs = [
-  { id: "basic", label: "Informações Básicas", icon: "📝" },
-  { id: "location", label: "Local e Datas", icon: "📍" },
-  { id: "checkin", label: "Check-in e Entradas", icon: "🎫" },
-  { id: "capacity", label: "Bilhética e Capacidade", icon: "👥" },
-  { id: "policies", label: "Políticas e Legal", icon: "📋" },
-  { id: "accessibility", label: "Acessibilidade", icon: "♿" },
-  { id: "contact", label: "Contactos e Suporte", icon: "📞" },
-  { id: "media", label: "Media", icon: "🖼️" },
+const tabs: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "basic", label: "Informações Básicas", icon: FileText },
+  { id: "location", label: "Local e Datas", icon: MapPin },
+  { id: "checkin", label: "Check-in e Entradas", icon: Ticket },
+  { id: "capacity", label: "Bilhética e Capacidade", icon: Users },
+  { id: "policies", label: "Políticas e Legal", icon: FileCheck },
+  { id: "accessibility", label: "Acessibilidade", icon: Accessibility },
+  { id: "contact", label: "Contactos e Suporte", icon: Phone },
+  { id: "media", label: "Media", icon: Image },
 ];
 
-export default function EventForm({ eventId, initialData }: EventFormProps) {
+export default function EventForm({ eventId, initialData, isAdminCreate, availableOrganizers = [], defaultPromoterId }: EventFormProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
+  const [promoterId, setPromoterId] = useState(defaultPromoterId ?? "");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +74,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     
     // Location
     city: initialData?.city || "",
-    venueName: initialData?.venueName || "",
+    venueName: initialData?.venueName || (initialData as { venue?: string })?.venue || "",
     address: initialData?.address || "",
     startAt: initialData?.startAt ? format(new Date(initialData.startAt), "yyyy-MM-dd'T'HH:mm") : "",
     endAt: initialData?.endAt ? format(new Date(initialData.endAt), "yyyy-MM-dd'T'HH:mm") : "",
@@ -187,6 +212,12 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
       }
     }
 
+    if (isAdminCreate && !promoterId?.trim()) {
+      setErrors((prev) => ({ ...prev, promoterId: "Selecione o promotor responsável" }));
+      setLoading(false);
+      return;
+    }
+
     if (!isValid) {
       setLoading(false);
       // Go to first tab with errors
@@ -204,35 +235,40 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     }
 
     try {
-      // Convert datetime-local format to ISO 8601
-      const convertToISO = (dateTimeLocal: string, timezone: string = "Europe/Lisbon"): string | null => {
-        if (!dateTimeLocal) return null;
-        // datetime-local format: "yyyy-MM-ddTHH:mm"
-        // Convert to ISO by adding timezone offset
-        const date = new Date(dateTimeLocal);
-        // Format as ISO string
-        return date.toISOString();
+      // Convert datetime-local ("yyyy-MM-ddTHH:mm") or any parseable date to ISO 8601
+      const convertToISO = (dateTimeLocal: string): string | null => {
+        if (!dateTimeLocal || typeof dateTimeLocal !== "string") return null;
+        const trimmed = dateTimeLocal.trim();
+        if (!trimmed) return null;
+        const date = new Date(trimmed);
+        if (Number.isNaN(date.getTime())) return null;
+        try {
+          return date.toISOString();
+        } catch {
+          return null;
+        }
       };
 
       const payload: any = {
         ...formData,
-        startAt: formData.startAt ? convertToISO(formData.startAt, formData.timezone) : null,
-        endAt: formData.endAt ? convertToISO(formData.endAt, formData.timezone) : null,
-        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt, formData.timezone) : null,
-        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt, formData.timezone) : null,
+        startAt: convertToISO(formData.startAt ?? "") ?? (formData.startAt ? null : undefined),
+        endAt: convertToISO(formData.endAt ?? "") ?? (formData.endAt ? null : undefined),
+        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt) : null,
+        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt) : null,
         maxEntries: formData.maxEntries ? parseInt(formData.maxEntries as any) : null,
         capacityTotal: formData.capacityTotal ? parseInt(formData.capacityTotal as any) : null,
         ageRestriction: formData.ageRestriction ? parseInt(formData.ageRestriction as any) : null,
         galleryUrls: Array.isArray(formData.galleryUrls) ? formData.galleryUrls : [],
       };
 
-      const url = eventId ? `/api/organizer/events/${eventId}` : "/api/organizer/events";
-      const method = eventId ? "PUT" : "POST";
+      const url = isAdminCreate ? "/api/admin/events" : eventId ? `/api/promotor/events/${eventId}` : "/api/promotor/events";
+      const method = isAdminCreate ? "POST" : eventId ? "PUT" : "POST";
+      const body = isAdminCreate ? { ...payload, promoterId } : payload;
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -256,16 +292,18 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
       setLoading(false);
       setErrors({});
       
+      if (isAdminCreate) {
+        router.push("/admin/events");
+        router.refresh();
+        return;
+      }
       if (!eventId) {
         // New event - redirect to events list first, then to edit page
-        // This ensures the list is refreshed
-        router.push(`/organizer/events`);
-        // Small delay to ensure navigation completes, then redirect to edit
+        router.push(`/promotor/events`);
         setTimeout(() => {
-          window.location.href = `/organizer/events/${data.id}/edit`;
+          window.location.href = `/promotor/events/${data.id}/edit`;
         }, 100);
       } else {
-        // Existing event - refresh page data
         router.refresh();
       }
     } catch (error) {
@@ -284,8 +322,52 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
     setLoading(true);
     setPublishErrors([]);
 
+    const convertToISO = (dateTimeLocal: string): string | null => {
+      if (!dateTimeLocal || typeof dateTimeLocal !== "string") return null;
+      const date = new Date(dateTimeLocal.trim());
+      if (Number.isNaN(date.getTime())) return null;
+      try {
+        return date.toISOString();
+      } catch {
+        return null;
+      }
+    };
+
     try {
-      const res = await fetch(`/api/organizer/events/${eventId}/publish`, {
+      // Save current form data first so publish validates the same dates/times the user sees
+      const payload: any = {
+        ...formData,
+        startAt: convertToISO(formData.startAt ?? "") ?? null,
+        endAt: convertToISO(formData.endAt ?? "") ?? null,
+        entryWindowStartAt: formData.entryWindowStartAt ? convertToISO(formData.entryWindowStartAt) : null,
+        entryWindowEndAt: formData.entryWindowEndAt ? convertToISO(formData.entryWindowEndAt) : null,
+        maxEntries: formData.maxEntries ? parseInt(formData.maxEntries as any) : null,
+        capacityTotal: formData.capacityTotal ? parseInt(formData.capacityTotal as any) : null,
+        ageRestriction: formData.ageRestriction ? parseInt(formData.ageRestriction as any) : null,
+        galleryUrls: Array.isArray(formData.galleryUrls) ? formData.galleryUrls : [],
+      };
+
+      const saveRes = await fetch(`/api/organizer/events/${eventId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!saveRes.ok) {
+        const saveData = await saveRes.json();
+        if (saveData.details) {
+          const messages = Array.isArray(saveData.details)
+            ? saveData.details.map((e: { message?: string; path?: string[] } | string) => typeof e === "string" ? e : (e as { message?: string }).message ?? "")
+            : [];
+          setPublishErrors(messages.length ? messages : [saveData.error || "Erro ao guardar. Corrija os dados e tente publicar novamente."]);
+        } else {
+          setPublishErrors([saveData.error || "Erro ao guardar. Corrija os dados e tente publicar novamente."]);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/promotor/events/${eventId}/publish`, {
         method: "POST",
       });
 
@@ -293,7 +375,10 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
 
       if (!res.ok) {
         if (data.details) {
-          setPublishErrors(data.details);
+          const messages = Array.isArray(data.details)
+            ? data.details.map((e: { field?: string; message?: string } | string) => typeof e === "string" ? e : (e as { message?: string }).message ?? "")
+            : [];
+          setPublishErrors(messages.length ? messages : [data.error || "Erro ao publicar evento"]);
         } else {
           // If it's a 403 error about needing approval, show friendly message
           if (res.status === 403 && data.error?.includes("aprovação")) {
@@ -310,7 +395,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
       }
 
       // Success
-      router.push("/organizer/events");
+      router.push("/promotor/events");
       router.refresh();
     } catch (error) {
       console.error("Publish error:", error);
@@ -321,6 +406,35 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      {/* Promotor responsável (apenas quando admin cria evento) */}
+      {isAdminCreate && availableOrganizers.length > 0 && (
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6 backdrop-blur-sm">
+          <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
+            Promotor responsável <span className="text-red-400">*</span>
+          </label>
+          <select
+            value={promoterId}
+            onChange={(e) => {
+              setPromoterId(e.target.value);
+              setErrors((prev) => ({ ...prev, promoterId: "" }));
+            }}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+          >
+            <option value="">Selecione um promotor</option>
+            {availableOrganizers.map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.brandName} ({org.user.email})
+              </option>
+            ))}
+          </select>
+          {errors.promoterId && (
+            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.promoterId}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="border-b border-zinc-800 overflow-x-auto -mx-6 px-6">
         <div className="flex gap-1 sm:gap-2 min-w-max pb-1">
@@ -352,7 +466,10 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                     : "border-transparent text-zinc-400 hover:text-zinc-300 hover:border-zinc-700"
                 }`}
               >
-                <span className="text-base sm:text-lg">{tab.icon}</span>
+                {(() => {
+                  const Icon = tab.icon;
+                  return <Icon className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={1.5} />;
+                })()}
                 <span className="hidden sm:inline">{tab.label}</span>
                 <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
                 {hasError && <span className="text-red-500 text-xs">●</span>}
@@ -379,7 +496,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Ex: Festival de Verão 2024"
               />
               {errors.title && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.title}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.title}
               </p>}
             </div>
 
@@ -398,7 +515,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 />
               </div>
               {errors.slug && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.slug}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.slug}
               </p>}
               <p className="text-zinc-500 text-xs mt-1.5">
                 URL completa: <code className="bg-zinc-800/50 px-1.5 py-0.5 rounded text-zinc-300">/events/{formData.slug || "..."}</code>
@@ -433,7 +550,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Descreva o evento em detalhe..."
               />
               {errors.description && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.description}
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.description}
               </p>}
             </div>
           </div>
@@ -455,7 +572,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Lisboa"
                 />
                 {errors.city && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.city}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.city}
                 </p>}
               </div>
 
@@ -471,7 +588,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Pavilhão Atlântico"
                 />
                 {errors.venueName && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.venueName}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.venueName}
                 </p>}
               </div>
             </div>
@@ -488,7 +605,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 placeholder="Rua Exemplo 123, 1000-000 Lisboa"
               />
                 {errors.address && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.address}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.address}
                 </p>}
             </div>
 
@@ -504,7 +621,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
                 {errors.startAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.startAt}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.startAt}
                 </p>}
               </div>
 
@@ -519,7 +636,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
                 {errors.endAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.endAt}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.endAt}
                 </p>}
               </div>
             </div>
@@ -587,11 +704,11 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 </option>
               </select>
               {errors.checkinMode && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                <span>⚠</span> {errors.checkinMode}
+                <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} /> {errors.checkinMode}
               </p>}
               {!formData.reentryAllowed && (
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 flex items-center gap-1.5">
-                  <span>ℹ️</span>
+                  <Info className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                   <span>Ative "Permitir sair e entrar" para usar modo MULTI</span>
                 </p>
               )}
@@ -611,7 +728,7 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   placeholder="Ex: 5"
                 />
                 {errors.maxEntries && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <span>⚠</span> {errors.maxEntries}
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.maxEntries}
                 </p>}
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1.5">
                   Número máximo de vezes que o mesmo bilhete pode entrar no evento
@@ -661,8 +778,9 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Ex: 1000"
               />
-              <p className="text-zinc-500 text-xs mt-1">
-                ⚠️ A capacidade não pode ser inferior ao total de bilhetes vendidos
+              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                A capacidade não pode ser inferior ao total de bilhetes vendidos
               </p>
             </div>
           </div>
@@ -883,11 +1001,13 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
                   />
                 </div>
               )}
-              <p className="text-zinc-500 text-xs mt-1">
-                ⚠️ Banner é obrigatório para publicar o evento
+              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                Banner é obrigatório para publicar o evento
               </p>
-              <p className="text-zinc-400 text-xs mt-1">
-                💡 Suporta links do Imgur: pode colar links como <code className="bg-zinc-800 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-zinc-800 px-1 rounded">i.imgur.com/xxx.jpg</code>
+              <p className="text-zinc-400 text-xs mt-1 flex items-center gap-1.5">
+                <Lightbulb className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                Suporta links do Imgur: pode colar links como <code className="bg-zinc-800 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-zinc-800 px-1 rounded">i.imgur.com/xxx.jpg</code>
               </p>
             </div>
 
@@ -945,10 +1065,18 @@ export default function EventForm({ eventId, initialData }: EventFormProps) {
             disabled={loading}
             className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "A guardar..." : eventId ? "Guardar Alterações" : "Criar Evento"}
+            {loading
+              ? isAdminCreate
+                ? "A criar..."
+                : "A guardar..."
+              : isAdminCreate
+                ? "Criar e Publicar Evento"
+                : eventId
+                  ? "Guardar Alterações"
+                  : "Criar Evento"}
           </button>
 
-          {eventId && (
+          {eventId && !isAdminCreate && (
             <button
               type="button"
               onClick={handlePublish}

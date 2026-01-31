@@ -14,11 +14,11 @@ Plataforma completa de venda de bilhetes nominais para eventos, com sistema de v
 
 - **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
 - **Backend**: Next.js API Routes (REST)
-- **Database**: PostgreSQL + Prisma ORM
-- **Autenticação**: NextAuth.js com RBAC (USER, ORGANIZER, ADMIN, VALIDATOR)
+- **Database**: MySQL/MariaDB + Prisma ORM (ver `apps/web/prisma/schema.prisma`)
+- **Autenticação**: NextAuth.js com RBAC (USER, PROMOTER, ADMIN)
 - **Pagamentos**: Camada abstrata com providers (MBWay, Multibanco, PayPal)
 - **QR Codes**: Assinados com HMAC-SHA256 (contém ticketId, eventId, nonce, timestamp)
-- **Infraestrutura**: Docker Compose (PostgreSQL)
+- **Infraestrutura**: Docker Compose (MariaDB/MySQL)
 
 ## 📦 Estrutura do Monorepo
 
@@ -54,14 +54,14 @@ cd infra
 docker-compose up -d
 ```
 
-Isto irá iniciar PostgreSQL na porta 5432.
+Isto irá iniciar MariaDB/MySQL (conforme `infra/docker-compose.yml`).
 
 ### 3. Configure variáveis de ambiente
 
 Crie `apps/web/.env`:
 
 ```env
-DATABASE_URL="postgresql://app:app@localhost:5432/tickets"
+DATABASE_URL="mysql://app:app@localhost:3306/tickets"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="gerar-secret-aleatorio-aqui"
 QR_SECRET="gerar-secret-aleatorio-para-qr-aqui"
@@ -107,29 +107,49 @@ CORS_ORIGINS=https://daowave-beta.vercel.app,https://daowave.pt  # CSV de origen
 
 ```bash
 npm run db:generate
-npm run db:migrate
+npm run db:migrate:deploy
+```
+
+**Seed (dados de desenvolvimento — Fase 2)**  
+Para popular a base com 1 promotor, 2 eventos, 3 lotes de bilhetes, 1 cupom e ~20 bilhetes/orders:
+
+```bash
 npm run db:seed
 ```
 
-O seed cria utilizadores:
-- **Admin**: admin@demo.pt / Password123!
-- **Organizador**: org@demo.pt / Password123!
-- **Validador**: val@demo.pt / Password123!
-- **Utilizador**: user@demo.pt / Password123!
+Ou a partir de `apps/web`: `npx prisma db seed`.
+
+O seed cria:
+- **Promotor**: promotor@seed.pt / TestPassword123! (PromoterProfile aprovado)
+- **Eventos**: "Festival Seed 2025" (slug: evento-seed-1), "Concerto Acústico Seed" (slug: evento-seed-2)
+- **Lotes**: General, VIP (evento 1), Único (evento 2)
+- **Cupom**: SEED10 (10% desconto)
+- **Compradores**: comprador1@seed.pt … comprador5@seed.pt (mesma password) e encomendas PAID com bilhetes e QR válidos
 
 ### 5. Inicie a aplicação
 
+Na raiz do monorepo:
+
 ```bash
-npm run dev:web
+npm run dev
 ```
 
-A aplicação estará disponível em http://localhost:3000
+Ou em `apps/web`: `npm run dev`. A aplicação estará disponível em http://localhost:3000
+
+### 6. Testar os dashboards
+
+Após `db:seed`, pode testar:
+
+- **Promotor (canonical)**: `/promotor` — login com promotor@seed.pt / TestPassword123!; KPIs e lista de eventos
+- **Admin**: `/admin` — requer role ADMIN; KPIs da plataforma, promotores, eventos, audit
+
+> **Nota:** `/organizer` é um alias legado; redireciona para `/promotor`. Use `/promotor` nas novas integrações.
 
 ## 📋 Modelos de Dados
 
 ### Principais Entidades
 
-- **User**: Utilizadores (USER, ORGANIZER, ADMIN, VALIDATOR)
+- **User**: Utilizadores (role: USER, PROMOTER, ADMIN)
 - **Event**: Eventos com configuração de check-in (SINGLE/MULTI)
 - **Ticket**: Bilhetes nominais (attendeeName, attendeeEmail) com holderUserId
 - **Order**: Pedidos de compra com paymentProvider e paymentRef
@@ -225,15 +245,62 @@ Em produção, integrar com APIs reais dos providers.
 - `POST /api/validator/validate` - Validação online
 - `POST /api/validator/sync` - Sync logs offline
 
+### Promotor (PROMOTER / ADMIN)
+- `GET /api/promotor/overview` - KPIs do dashboard
+- `GET /api/promotor/events/:id/sales` - Vendas do evento
+- `GET /api/promotor/events/:id/checkins` - Logs de check-in
+- `POST /api/promotor/checkin/verify` - Validar QR (check-in)
+- `GET /api/promotor/analytics` - Analytics
+- `GET /api/promotor/finance` - Resumo financeiro
+
+### Admin (ADMIN)
+- `GET /api/admin/overview` - KPIs da plataforma
+- `GET /api/admin/promoters` - Lista promotores
+- `GET /api/admin/events` - Lista eventos
+- `GET /api/admin/audit-logs` - Logs de auditoria
+- `GET /api/admin/finance` - Financeiro plataforma
+- `GET /api/admin/fraud` - Indicadores de fraude
+
 ## 🧪 Testar
 
-### Gerar código de bilhete para teste:
+### Testes unitários e integração (Jest)
+
+Em `apps/web`:
+
+```bash
+npm run test
+```
+
+Inclui: regras de check-in, QR, agregação de overview (receita), transferências, checkout (mocks).
+
+### E2E (Playwright)
+
+Em `apps/web`, com a app a correr (ex.: `npm run dev` noutro terminal):
+
+```bash
+npm run test:e2e
+```
+
+Smoke: homepage, listagem de eventos, login, uma rota promotor. Para login promotor com seed: credenciais promotor@seed.pt / TestPassword123! (ou env `E2E_PROMOTER_EMAIL`, `E2E_PROMOTER_PASSWORD`).
+
+### Gerar código de bilhete para teste
 
 ```bash
 npm run test:ticket
 ```
 
 Copia o token QR e testa no validator em `/validator`.
+
+## 🔐 Permissões por role
+
+| Role     | Áreas                          | APIs principais                                      |
+|----------|--------------------------------|------------------------------------------------------|
+| Público  | `/`, `/events`, `/checkout`    | `GET /api/events`, `POST /api/checkout`              |
+| USER     | `/account`, `/my-tickets`      | `/api/account/*`, `/api/tickets/*`                   |
+| PROMOTER | `/promotor`                    | `/api/promotor/*` (canonical)                        |
+| ADMIN    | `/admin`, `/promotor`          | `/api/admin/*`, `/api/promotor/*`                    |
+
+PromoterProfile com status APPROVED é necessário para aceder a `/promotor` e APIs promotor. `/organizer` e `/api/organizer/*` são aliases legados (redirecionam ou estão deprecated).
 
 ## 🔒 Segurança
 

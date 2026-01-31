@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { canAccessAdminArea, isPromoter } from "@/lib/auth/permissions";
-import AdminSidebar from "./components/admin-sidebar";
+import AdminDashboardShell from "./components/admin-dashboard-shell";
 
 export default async function AdminLayout({
   children,
@@ -15,18 +15,13 @@ export default async function AdminLayout({
     redirect("/auth/signin?callbackUrl=/admin");
   }
 
-  const role = (session.user as any).role;
+  const role = (session.user as { role?: string }).role;
 
   if (!canAccessAdminArea(role)) {
-    if (isPromoter(role)) redirect("/organizer");
+    if (isPromoter(role)) redirect("/promotor");
     if (role === "USER") redirect("/validator");
     redirect("/");
   }
 
-  return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      <AdminSidebar />
-      <main className="ml-72 min-h-screen py-8 md:py-12">{children}</main>
-    </div>
-  );
+  return <AdminDashboardShell>{children}</AdminDashboardShell>;
 }

@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { FileText, Calendar, CheckCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -50,7 +51,9 @@ export default async function OrganizerTemplatesPage() {
 
       {publishedEvents.length === 0 ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <div className="text-5xl mb-4 opacity-50">📋</div>
+          <div className="mb-4 flex justify-center">
+          <FileText className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+        </div>
           <p className="text-lg text-zinc-400 mb-2">Ainda não há eventos publicados</p>
           <p className="text-sm text-zinc-500 mb-6">
             Os eventos publicados podem ser usados como templates para criar novos eventos rapidamente
@@ -79,8 +82,8 @@ export default async function OrganizerTemplatesPage() {
                     Criado em {new Date(event.createdAt).toLocaleDateString("pt-PT")}
                   </p>
                   <div className="flex items-center gap-4 text-sm text-zinc-500">
-                    <span>📅 {new Date(event.startAt).toLocaleDateString("pt-PT")}</span>
-                    <span>✅ Publicado</span>
+                    <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" strokeWidth={1.5} /> {new Date(event.startAt).toLocaleDateString("pt-PT")}</span>
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-500" strokeWidth={1.5} /> Publicado</span>
                   </div>
                 </div>
                 <span className="text-zinc-600 group-hover:text-zinc-400 transition-colors ml-4">

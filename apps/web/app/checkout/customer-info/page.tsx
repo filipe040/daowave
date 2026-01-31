@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AlertTriangle } from "lucide-react";
 
 function CustomerInfoContent() {
   const searchParams = useSearchParams();
@@ -134,7 +135,7 @@ function CustomerInfoContent() {
           />
           {errors.buyerName && (
             <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-              <span>⚠</span> {errors.buyerName}
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerName}
             </p>
           )}
         </div>
@@ -153,7 +154,7 @@ function CustomerInfoContent() {
           />
           {errors.buyerEmail && (
             <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-              <span>⚠</span> {errors.buyerEmail}
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerEmail}
             </p>
           )}
         </div>
@@ -172,7 +173,7 @@ function CustomerInfoContent() {
           />
           {errors.buyerPhone && (
             <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-              <span>⚠</span> {errors.buyerPhone}
+              <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerPhone}
             </p>
           )}
           <p className="text-zinc-500 text-xs mt-1.5">

@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import { MapPin, Calendar } from 'lucide-react';
 import { TicketSelector } from './ticket-selector';
 
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,14 @@ async function getEvent(slug: string) {
         },
         orderBy: {
           priceCents: 'asc',
+        },
+        select: {
+          id: true,
+          name: true,
+          priceCents: true,
+          currency: true,
+          quantityTotal: true,
+          quantitySold: true,
         },
       },
     },
@@ -160,7 +169,7 @@ export default async function EventPage({
                 
                 <div className="space-y-3 text-slate-600">
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl">📍</span>
+                    <MapPin className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
                     <div>
                       <p className="font-semibold">Local</p>
                       <p>{event.venue}</p>
@@ -169,7 +178,7 @@ export default async function EventPage({
                   </div>
                   
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl">📅</span>
+                    <Calendar className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
                     <div>
                       <p className="font-semibold">Data e Hora</p>
                       <p>{formatDate(event.startAt)}</p>

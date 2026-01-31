@@ -1,3 +1,8 @@
+/**
+ * @deprecated Use /api/promotor/coupons (canonical). This route is kept as legacy alias.
+ * GET /api/organizer/coupons - List coupons
+ * POST /api/organizer/coupons - Create coupon
+ */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

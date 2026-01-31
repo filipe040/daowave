@@ -4,22 +4,25 @@
   - A unique constraint covering the columns `[passwordResetToken]` on the table `User` will be added. If there are existing duplicate values, this will fail.
 
 */
--- AlterTable
-ALTER TABLE `Event` ADD COLUMN `checkinEndAt` DATETIME(3) NULL,
-    ADD COLUMN `checkinMode` VARCHAR(191) NULL DEFAULT 'SINGLE',
-    ADD COLUMN `checkinStartAt` DATETIME(3) NULL,
-    ADD COLUMN `maxEntries` INTEGER NULL;
+-- AlterTable (idempotente para bases já parcialmente migradas)
+ALTER TABLE `Event`
+    ADD COLUMN IF NOT EXISTS `checkinEndAt` DATETIME(3) NULL,
+    ADD COLUMN IF NOT EXISTS `checkinMode` VARCHAR(191) NULL DEFAULT 'SINGLE',
+    ADD COLUMN IF NOT EXISTS `checkinStartAt` DATETIME(3) NULL,
+    ADD COLUMN IF NOT EXISTS `maxEntries` INTEGER NULL;
 
 -- AlterTable
-ALTER TABLE `Ticket` ADD COLUMN `entriesUsed` INTEGER NOT NULL DEFAULT 0,
-    ADD COLUMN `lastCheckinAt` DATETIME(3) NULL;
+ALTER TABLE `Ticket`
+    ADD COLUMN IF NOT EXISTS `entriesUsed` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS `lastCheckinAt` DATETIME(3) NULL;
 
 -- AlterTable
-ALTER TABLE `User` ADD COLUMN `passwordResetToken` VARCHAR(191) NULL,
-    ADD COLUMN `passwordResetTokenExpiresAt` DATETIME(3) NULL;
+ALTER TABLE `User`
+    ADD COLUMN IF NOT EXISTS `passwordResetToken` VARCHAR(191) NULL,
+    ADD COLUMN IF NOT EXISTS `passwordResetTokenExpiresAt` DATETIME(3) NULL;
 
 -- CreateTable
-CREATE TABLE `Coupon` (
+CREATE TABLE IF NOT EXISTS `Coupon` (
     `id` VARCHAR(191) NOT NULL,
     `eventId` VARCHAR(191) NOT NULL,
     `code` VARCHAR(191) NOT NULL,
@@ -42,7 +45,12 @@ CREATE TABLE `Coupon` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateIndex
-CREATE UNIQUE INDEX `User_passwordResetToken_key` ON `User`(`passwordResetToken`);
+CREATE UNIQUE INDEX IF NOT EXISTS `User_passwordResetToken_key` ON `User`(`passwordResetToken`);
 
--- AddForeignKey
-ALTER TABLE `Coupon` ADD CONSTRAINT `Coupon_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey Coupon_eventId_fkey apenas se ainda não existir (idempotente)
+SET @fk_exists = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'Coupon' AND CONSTRAINT_NAME = 'Coupon_eventId_fkey' AND CONSTRAINT_TYPE = 'FOREIGN KEY');
+SET @sql = IF(@fk_exists = 0, 'ALTER TABLE `Coupon` ADD CONSTRAINT `Coupon_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE CASCADE', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

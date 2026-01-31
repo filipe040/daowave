@@ -13,6 +13,8 @@ const UpdateProfileSchema = z.object({
     .max(80, "Nome demasiado longo")
     .nullable()
     .optional(),
+  avatarUrl: z.union([z.string().url(), z.literal("")]).nullable().optional(),
+  phone: z.string().max(32).nullable().optional().or(z.literal("")),
 });
 
 export async function PATCH(request: Request) {
@@ -30,7 +32,9 @@ export async function PATCH(request: Request) {
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: data.name ?? null,
+        name: data.name ?? undefined,
+        avatarUrl: data.avatarUrl !== undefined ? (data.avatarUrl || null) : undefined,
+        phone: data.phone !== undefined ? (data.phone || null) : undefined,
       },
       select: {
         id: true,
@@ -38,6 +42,7 @@ export async function PATCH(request: Request) {
         email: true,
         role: true,
         avatarUrl: true,
+        phone: true,
       },
     });
 
@@ -94,25 +99,36 @@ export async function GET() {
         email: true,
         role: true,
         avatarUrl: true,
+        phone: true,
+        notifyEmail: true,
+        notifyEventReminders: true,
+        notifyTransfers: true,
+        marketingOptIn: true,
       },
     });
 
     return NextResponse.json({ user });
-  } catch (error: any) {
-    // Graceful fallback if avatarUrl column doesn't exist yet
-    if (error?.code === "P2022" || error?.message?.includes("Unknown column")) {
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      });
-      return NextResponse.json({ user: { ...user, avatarUrl: null } });
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    const isMissingColumn =
+      err?.code === "P2022" ||
+      err?.message?.includes("Unknown column") ||
+      err?.message?.includes("does not exist");
+    if (isMissingColumn) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { id: true, name: true, email: true, role: true, avatarUrl: true },
+        });
+        return NextResponse.json({
+          user: user
+            ? { ...user, phone: null, notifyEmail: true, notifyEventReminders: true, notifyTransfers: true, marketingOptIn: false }
+            : null,
+        });
+      } catch {
+        // ignore
+      }
     }
-
     console.error("[account-profile] GET error:", error);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }

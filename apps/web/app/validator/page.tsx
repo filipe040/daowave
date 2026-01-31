@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Lock, CheckCircle, AlertTriangle, Ban, XCircle } from "lucide-react";
 
 interface ValidateResult {
   valid: boolean;
@@ -162,7 +163,9 @@ export default function ValidatorPage() {
     return (
       <div className="min-h-screen grid place-items-center px-4">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-          <div className="mb-5 text-5xl opacity-70">🔒</div>
+          <div className="mb-5 flex justify-center">
+          <Lock className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+        </div>
           <h2 className="mb-2 text-2xl font-semibold text-foreground">Acesso restrito</h2>
           <p className="mb-6 text-sm text-muted-foreground">Esta área é apenas para validadores.</p>
 
@@ -186,16 +189,17 @@ export default function ValidatorPage() {
     return "border-rose-500/40 bg-rose-500/10 text-foreground";
   };
 
-  const resultIcon = () => {
-    if (!result) return "";
-    if (result.valid) return "✓";
-    if (result.result === "already_used") return "⚠";
-    if (result.result === "cancelled") return "⦸";
-    return "✕";
+  const ResultIcon = () => {
+    if (!result) return null;
+    const size = "h-14 w-14 sm:h-16 sm:w-16";
+    if (result.valid) return <CheckCircle className={`${size} text-emerald-500 mx-auto`} strokeWidth={1.5} />;
+    if (result.result === "already_used") return <AlertTriangle className={`${size} text-amber-500 mx-auto`} strokeWidth={1.5} />;
+    if (result.result === "cancelled") return <Ban className={`${size} text-slate-500 mx-auto`} strokeWidth={1.5} />;
+    return <XCircle className={`${size} text-rose-500 mx-auto`} strokeWidth={1.5} />;
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 animate-fade-in">
+    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 animate-fade-in" data-testid="validator-page">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl sm:text-4xl font-semibold text-foreground">Validador de Bilhetes</h1>
@@ -211,7 +215,7 @@ export default function ValidatorPage() {
           role="status"
           aria-live="polite"
         >
-          <div className="mb-3 text-5xl sm:text-6xl font-semibold">{resultIcon()}</div>
+          <div className="mb-3 flex justify-center"><ResultIcon /></div>
           <p className="text-lg sm:text-xl font-semibold">{result.message}</p>
 
           <div className="mt-3 space-y-1 text-sm text-muted-foreground">

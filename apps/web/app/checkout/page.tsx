@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
+import { AlertTriangle } from "lucide-react";
 import {
   Elements,
   PaymentElement,
@@ -86,7 +87,9 @@ function CheckoutContent() {
     return (
       <div className="mx-auto max-w-2xl px-4 sm:px-0">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <div className="mb-4 text-5xl opacity-50">⚠️</div>
+          <div className="mb-4 flex justify-center">
+          <AlertTriangle className="h-14 w-14 text-amber-400" strokeWidth={1.5} />
+        </div>
           <p className="text-lg font-semibold text-zinc-300 mb-2">Sessão de pagamento inválida</p>
           <p className="text-sm text-zinc-500 mb-6">A sua sessão expirou ou é inválida.</p>
           <a

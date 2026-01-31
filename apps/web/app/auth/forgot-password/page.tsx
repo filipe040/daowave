@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,7 @@ export default function ForgotPasswordPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="mx-auto max-w-md">
           <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
-            <div className="text-6xl mb-6">📧</div>
+            <div className="mb-6 flex justify-center"><Mail className="h-16 w-16 text-green-400" strokeWidth={1.5} /></div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4 text-green-400">Email enviado!</h1>
             <p className="text-zinc-400 mb-2">
               Enviámos um email para <strong className="text-white">{email}</strong> com instruções para recuperar a sua palavra-passe.

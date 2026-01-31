@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { Ticket } from "lucide-react";
 import TicketTypeForm from "./ticket-type-form";
 import TicketLotForm from "./ticket-lot-form";
 
@@ -44,7 +45,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
   const refreshData = async () => {
-    const res = await fetch(`/api/organizer/events/${eventId}/tickets`);
+    const res = await fetch(`/api/promotor/events/${eventId}/tickets`);
     const data = await res.json();
     // TODO: Adapt API to return ticketLots structure
     if (data.ticketTypes) {
@@ -86,7 +87,9 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
       {/* Ticket Types List */}
       {ticketTypes.length === 0 ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <div className="text-5xl mb-4 opacity-50">🎫</div>
+          <div className="mb-4 flex justify-center">
+          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+        </div>
           <p className="text-lg text-zinc-400 mb-2">Ainda não há tipos de bilhetes</p>
           <p className="text-sm text-zinc-500 mb-6">
             Crie o primeiro tipo de bilhete para começar a vender

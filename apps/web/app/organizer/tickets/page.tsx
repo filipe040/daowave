@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
+import { Ticket, CheckCircle, Scan, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -154,7 +155,7 @@ export default async function OrganizerTicketsPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Total</span>
-            <span className="text-2xl">🎫</span>
+            <Ticket className="h-6 w-6 text-zinc-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-white">{totalTickets}</p>
         </div>
@@ -162,7 +163,7 @@ export default async function OrganizerTicketsPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Emitidos</span>
-            <span className="text-2xl">✅</span>
+            <CheckCircle className="h-6 w-6 text-green-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-green-400">{issuedTickets}</p>
         </div>
@@ -170,7 +171,7 @@ export default async function OrganizerTicketsPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Validados</span>
-            <span className="text-2xl">🎯</span>
+            <Scan className="h-6 w-6 text-blue-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-blue-400">{checkedInTickets}</p>
         </div>
@@ -178,7 +179,7 @@ export default async function OrganizerTicketsPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-zinc-400">Cancelados</span>
-            <span className="text-2xl">❌</span>
+            <XCircle className="h-6 w-6 text-red-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-red-400">{cancelledTickets}</p>
         </div>
@@ -288,7 +289,9 @@ export default async function OrganizerTicketsPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
-          <div className="text-5xl mb-4 opacity-50">🎟️</div>
+          <div className="mb-4 flex justify-center">
+          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+        </div>
           <p className="text-lg text-zinc-400 mb-2">Ainda não há bilhetes emitidos</p>
           <p className="text-sm text-zinc-500">Os bilhetes aparecerão aqui após serem vendidos</p>
         </div>

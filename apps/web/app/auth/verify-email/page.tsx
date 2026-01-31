@@ -8,6 +8,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { Loader2, XCircle, CheckCircle, Clock } from 'lucide-react';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -114,7 +115,7 @@ function VerifyEmailContent() {
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
           {status === 'loading' && (
             <>
-              <div className="text-6xl mb-6">⏳</div>
+              <div className="mb-6 flex justify-center"><Loader2 className="h-16 w-16 animate-spin text-zinc-400" strokeWidth={1.5} /></div>
               <h1 className="text-2xl md:text-3xl font-bold mb-4 text-zinc-300">
                 A verificar email...
               </h1>
@@ -124,7 +125,7 @@ function VerifyEmailContent() {
 
           {status === 'success' && (
             <>
-              <div className="text-6xl mb-6">✅</div>
+              <div className="mb-6 flex justify-center"><CheckCircle className="h-16 w-16 text-green-400" strokeWidth={1.5} /></div>
               <h1 className="text-2xl md:text-3xl font-bold mb-4 text-green-400">
                 Email verificado!
               </h1>
@@ -140,7 +141,7 @@ function VerifyEmailContent() {
 
           {status === 'error' && (
             <>
-              <div className="text-6xl mb-6">❌</div>
+              <div className="mb-6 flex justify-center"><XCircle className="h-16 w-16 text-red-400" strokeWidth={1.5} /></div>
               <h1 className="text-2xl md:text-3xl font-bold mb-4 text-red-400">
                 Erro na verificação
               </h1>
@@ -156,7 +157,7 @@ function VerifyEmailContent() {
 
           {status === 'expired' && (
             <>
-              <div className="text-6xl mb-6">⏰</div>
+              <div className="mb-6 flex justify-center"><Clock className="h-16 w-16 text-yellow-400" strokeWidth={1.5} /></div>
               <h1 className="text-2xl md:text-3xl font-bold mb-4 text-yellow-400">
                 Link expirado
               </h1>
@@ -187,7 +188,7 @@ export default function VerifyEmailPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="mx-auto max-w-md">
           <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
-            <div className="text-6xl mb-6">⏳</div>
+            <div className="mb-6 flex justify-center"><Loader2 className="h-16 w-16 animate-spin text-zinc-400" strokeWidth={1.5} /></div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4 text-zinc-300">
               A carregar...
             </h1>

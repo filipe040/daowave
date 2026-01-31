@@ -32,7 +32,8 @@ export const ticketLotSchema = z.object({
   saleEndAt: z.string().datetime(),
 });
 
-export const checkoutSchema = z.object({
+/** Step 1: create order (eventId + items only). ticketLotId must be UUID (DB type). */
+export const checkoutCreateSchema = z.object({
   eventId: z.string().uuid(),
   items: z.array(
     z.object({
@@ -40,7 +41,12 @@ export const checkoutSchema = z.object({
       quantity: z.number().int().positive(),
     })
   ),
+});
+
+/** Step 2: confirm order with buyer data and optional mock payment. buyerName/buyerEmail required. */
+export const checkoutConfirmSchema = z.object({
   buyerName: z.string().min(1, 'Nome é obrigatório'),
   buyerEmail: emailSchema,
   buyerPhone: z.string().optional(),
+  paymentMock: z.boolean().optional(),
 });

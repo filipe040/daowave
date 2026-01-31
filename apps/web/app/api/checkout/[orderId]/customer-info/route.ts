@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -44,15 +44,14 @@ export async function PUT(
       );
     }
 
-    // Update order with buyer information
-    // Using raw SQL temporarily until Prisma Client is regenerated after server restart
-    await prisma.$executeRaw`
-      UPDATE "Order"
-      SET "buyerName" = ${data.buyerName},
-          "buyerEmail" = ${data.buyerEmail},
-          "buyerPhone" = ${data.buyerPhone}
-      WHERE id = ${orderId}
-    `;
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        buyerName: data.buyerName,
+        buyerEmail: data.buyerEmail,
+        buyerPhone: data.buyerPhone,
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
