@@ -48,7 +48,7 @@ export default async function PromoterDashboard() {
 
   if (!session?.user) redirect("/promotor/login");
 
-  const userRole = (session.user as any).role;
+  const userRole = (session.user as { role?: string }).role;
   if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
     return (
       <EmptyStateCard

@@ -146,7 +146,7 @@ export default function NavClient() {
               <div className="flex items-center gap-3 md:gap-4">
                 {/* Desktop role links */}
                 <div className="hidden md:flex items-center gap-4">
-                  {session.user.role === "PROMOTER" && (
+                  {role === "PROMOTER" && (
                     <Link
                       href="/promotor"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -154,7 +154,7 @@ export default function NavClient() {
                       PROMOTER
                     </Link>
                   )}
-                  {session.user.role === "ADMIN" && (
+                  {role === "ADMIN" && (
                     <Link
                       href="/admin"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
@@ -245,7 +245,7 @@ export default function NavClient() {
                   MY TICKETS
                 </Link>
 
-                {session.user.role === "PROMOTER" && (
+                {role === "PROMOTER" && (
                   <Link
                     href="/promotor"
                     onClick={() => setMobileMenuOpen(false)}
@@ -255,7 +255,7 @@ export default function NavClient() {
                   </Link>
                 )}
 
-                {session.user.role === "ADMIN" && (
+                {role === "ADMIN" && (
                   <Link
                     href="/admin"
                     onClick={() => setMobileMenuOpen(false)}
