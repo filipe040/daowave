@@ -139,7 +139,7 @@ function SignInContent() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+          <form data-testid="signin-form" onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-base md:text-sm font-semibold text-zinc-300">
                 Email

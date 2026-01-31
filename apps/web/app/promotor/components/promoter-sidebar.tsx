@@ -69,9 +69,6 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
   const { data: session } = useSession();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const role = (session?.user as { role?: string })?.role;
-  const isAdmin = role === "ADMIN";
-
   const section = useMemo(() => {
     if (currentSection) return currentSection;
     if (pathname.startsWith("/admin")) return "ADMINISTRAÇÃO";
@@ -115,12 +112,15 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
         ...(eventId
           ? ([
               { label: "Bilhética", href: `${baseEvent}/tickets`, icon: Ticket },
+              { label: "Vendas", href: `${baseEvent}/sales`, icon: CreditCard, activeMatch: (p) => p.includes("/sales") },
               {
                 label: "Acesso",
                 href: `/promotor/checkin/${eventId}`,
                 icon: ShieldCheck,
-                activeMatch: (p) => p.includes("/checkin"),
+                activeMatch: (p) => p.includes("/checkin") && !p.endsWith("/checkins"),
               },
+              { label: "Lista check-ins", href: `${baseEvent}/checkins`, icon: FileCheck, activeMatch: (p) => p.includes("/checkins") },
+              { label: "Tracking links", href: `${baseEvent}/tracking-links`, icon: BarChart3, activeMatch: (p) => p.includes("/tracking-links") },
               { label: "Carteiras", href: `${baseEvent}/carteiras`, icon: Wallet },
             ] as NavItem[])
           : ([] as NavItem[])),
@@ -167,7 +167,8 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
     const analytics: NavGroup = {
       title: "ANÁLISE",
       items: [
-        { label: "Relatórios", icon: BarChart3, rightIcon: ChevronRight, disabled: true },
+        { label: "Relatórios", href: "/promotor/analytics", icon: BarChart3, rightIcon: ChevronRight, activeMatch: (p) => p === "/promotor/analytics" },
+        { label: "Financeiro", href: "/promotor/finance", icon: CreditCard, activeMatch: (p) => p === "/promotor/finance" },
         { label: "Auditoria", icon: Database, rightIcon: ChevronRight, disabled: true },
       ],
     };
@@ -181,27 +182,10 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
       ],
     };
 
-    const adminGroup: NavGroup = {
-      title: "ADMINISTRAÇÃO",
-      items: [
-        { label: "Dashboard Admin", href: "/admin", icon: LayoutGrid, activeMatch: (p) => p === "/admin" },
-        { label: "Utilizadores", href: "/admin/users", icon: Users },
-        { label: "Promotores", href: "/admin/organizers", icon: UserCheck },
-        { label: "Eventos", href: "/admin/events", icon: Calendar },
-        { label: "Aprovar Eventos", href: "/admin/events/pending", icon: CalendarCheck },
-        { label: "Pagamentos", href: "/admin/payments", icon: CreditCard },
-        { label: "Auditoria", href: "/admin/audit", icon: FileCheck },
-        { label: "Sistema", href: "/admin/system", icon: Shield },
-        { label: "Definições", href: "/admin/settings", icon: Settings },
-        { label: "Criar Evento", href: "/admin/events/new", icon: PlusCircle },
-        { label: "Fix Session", href: "/admin/fix-session", icon: Wrench },
-      ],
-    };
-
+    // OBJETIVO C: Promoter sidebar has no /admin/* links (admin uses its own sidebar)
     const allGroups = [management, experience, config, analytics, system];
-    if (isAdmin) allGroups.push(adminGroup);
     return allGroups;
-  }, [eventId, baseEvent, isAdmin]);
+  }, [eventId, baseEvent]);
 
   return (
     <>

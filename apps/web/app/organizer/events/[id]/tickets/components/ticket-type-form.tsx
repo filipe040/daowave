@@ -29,7 +29,7 @@ export default function TicketTypeForm({
     setError("");
 
     try {
-      const res = await fetch(`/api/organizer/events/${eventId}/tickets/types`, {
+      const res = await fetch(`/api/promotor/events/${eventId}/tickets/types`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

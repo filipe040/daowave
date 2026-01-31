@@ -2,7 +2,47 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security";
 import { z } from "zod";
+import type { EventStatus } from "@prisma/client";
+
+// GET /api/admin/events — lista eventos com paginação e filtro por status
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
+    const statusParam = searchParams.get("status");
+    const statusFilter: { status?: EventStatus } =
+      statusParam === "DRAFT" || statusParam === "PUBLISHED"
+        ? { status: statusParam as EventStatus }
+        : {};
+
+    const [data, total] = await Promise.all([
+      prisma.event.findMany({
+        where: statusFilter,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          promoter: { select: { id: true, brandName: true, user: { select: { email: true } } } },
+          _count: { select: { tickets: true, orders: true } },
+        },
+      }),
+      prisma.event.count({ where: statusFilter }),
+    ]);
+
+    return NextResponse.json({ data, total, page, limit });
+  } catch (error) {
+    safeLog.error("Admin events list error", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
 const CreateEventSchema = z.object({
   promoterId: z.string().min(1, "Organizador é obrigatório"),

@@ -56,7 +56,7 @@ export default function CheckinPage() {
       : "border border-destructive/30 bg-destructive/10 text-foreground";
 
   return (
-    <div className="min-h-screen bg-background py-10 sm:py-12">
+    <div data-testid="page-promotor-checkin" className="min-h-screen bg-background py-10 sm:py-12">
       <div className="container mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -80,6 +80,7 @@ export default function CheckinPage() {
             </label>
 
             <textarea
+              data-testid="input-qr"
               value={qrCode}
               onChange={(e) => setQrCode(e.target.value)}
               placeholder="Cole ou digite o código QR aqui..."
@@ -110,7 +111,7 @@ export default function CheckinPage() {
 
           {/* Result */}
           {result && (
-            <div className={`mt-5 rounded-xl p-4 ${resultClass}`}>
+            <div data-testid="checkin-result" className={`mt-5 rounded-xl p-4 ${resultClass}`}>
               <p className="text-sm font-semibold flex items-center gap-2">
                 {result.success ? <CheckCircle className="h-4 w-4 shrink-0" /> : <XCircle className="h-4 w-4 shrink-0" />}
                 {result.message}

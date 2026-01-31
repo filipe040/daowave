@@ -20,7 +20,7 @@ export default function NewCouponPage() {
   });
 
   useEffect(() => {
-    fetch("/api/organizer/events?select=all")
+    fetch("/api/promotor/events?select=all")
       .then((res) => res.json())
       .then((data) => {
         if (data.events) setEvents(data.events);
@@ -33,7 +33,7 @@ export default function NewCouponPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/organizer/coupons", {
+      const res = await fetch("/api/promotor/coupons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

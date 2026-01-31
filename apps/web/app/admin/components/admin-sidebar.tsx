@@ -27,6 +27,8 @@ const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/admin/events", label: "Eventos", icon: Calendar },
   { href: "/admin/events/pending", label: "Aprovar Eventos", icon: CalendarCheck },
   { href: "/admin/payments", label: "Pagamentos", icon: CreditCard },
+  { href: "/admin/finance", label: "Financeiro", icon: CreditCard },
+  { href: "/admin/fraud", label: "Anti-fraude", icon: Shield },
   { href: "/admin/audit", label: "Auditoria", icon: FileCheck },
   { href: "/admin/system", label: "Sistema", icon: Shield },
   { href: "/admin/settings", label: "Definições", icon: Settings },

@@ -140,7 +140,7 @@ export default async function AdminEventsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <Link
-                        href={event.status === "PUBLISHED" ? `/events/${event.slug}` : `/organizer/events/${event.id}/edit`}
+                        href={event.status === "PUBLISHED" ? `/events/${event.slug}` : `/promotor/events/${event.id}`}
                         target={event.status === "PUBLISHED" ? "_blank" : undefined}
                         className="text-purple-400 hover:text-purple-300 text-sm transition-colors"
                       >

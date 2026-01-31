@@ -22,16 +22,21 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    if (!formData.buyerName.trim() || !formData.buyerEmail.trim()) {
+      return;
+    }
     setLoading(true);
 
     try {
-      // Confirm payment (mock)
-      const response = await fetch('/api/payments/confirm', {
+      const response = await fetch(`/api/checkout/${orderId}/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          orderId,
-          paymentIntentId: `mock_${Date.now()}`,
+          buyerName: formData.buyerName.trim(),
+          buyerEmail: formData.buyerEmail.trim(),
+          buyerPhone: formData.buyerPhone.trim() || undefined,
+          paymentMock: true,
         }),
       });
 
@@ -41,7 +46,6 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         return;
       }
 
-      // Redirect to success page
       router.push(`/my-tickets?order=${orderId}`);
     } catch (error) {
       console.error('Payment error:', error);
@@ -59,6 +63,7 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         <Label htmlFor="buyerName">Nome Completo *</Label>
         <Input
           id="buyerName"
+          data-testid="input-buyer-name"
           required
           value={formData.buyerName}
           onChange={(e) =>
@@ -71,6 +76,7 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         <Label htmlFor="buyerEmail">Email *</Label>
         <Input
           id="buyerEmail"
+          data-testid="input-buyer-email"
           type="email"
           required
           value={formData.buyerEmail}
@@ -99,7 +105,7 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         </p>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full" size="lg">
+      <Button type="submit" disabled={loading} className="w-full" size="lg" aria-busy={loading}>
         {loading ? 'A processar...' : 'Confirmar Pagamento'}
       </Button>
     </form>

@@ -42,7 +42,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
     setErrors({});
 
     try {
-      const res = await fetch("/api/organizer/account", {
+      const res = await fetch("/api/promotor/account", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

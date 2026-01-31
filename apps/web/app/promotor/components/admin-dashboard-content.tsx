@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getAdminOverview } from "@/lib/services/admin-overview.service";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -18,14 +19,8 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardContent() {
-  const [
-    pendingOrganizers,
-    pendingEvents,
-    totalEvents,
-    publishedEvents,
-    totalOrders,
-    totalRevenue,
-  ] = await Promise.all([
+  const [overview, pendingOrganizers, pendingEventsCount, recentEvents] = await Promise.all([
+    getAdminOverview(),
     prisma.promoterProfile.count({ where: { status: "PENDING" } }),
     prisma.event.count({
       where: {
@@ -33,31 +28,22 @@ export default async function AdminDashboardContent() {
         promoter: { user: { role: "PROMOTER" } },
       },
     }),
-    prisma.event.count(),
-    prisma.event.count({ where: { status: "PUBLISHED" } }),
-    prisma.order.count({ where: { status: "PAID" } }),
-    prisma.order.aggregate({
-      where: { status: "PAID" },
-      _sum: { totalCents: true },
-    }),
-  ]);
-
-  const revenueCents = totalRevenue._sum.totalCents ?? 0;
-  const recentEvents = await prisma.event.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    include: {
-      promoter: {
-        include: {
-          user: { select: { name: true, email: true } },
+    prisma.event.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        promoter: {
+          include: {
+            user: { select: { name: true, email: true } },
+          },
         },
       },
-    },
-  });
-  const pendingCount = pendingOrganizers + pendingEvents;
+    }),
+  ]);
+  const pendingCount = pendingOrganizers + pendingEventsCount;
 
   return (
-    <div className="w-full min-w-0 max-w-6xl mx-auto space-y-12 md:space-y-16 px-4 sm:px-6 lg:px-8 pb-16">
+    <div className="w-full min-w-0 max-w-6xl mx-auto space-y-12 md:space-y-16 px-4 sm:px-6 lg:px-8 pb-16" data-testid="page-admin-dashboard">
       <header className="pt-2">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           <div>
@@ -100,22 +86,22 @@ export default async function AdminDashboardContent() {
             {
               href: "/admin/events",
               icon: Ticket,
-              value: totalEvents,
+              value: overview.eventsTotal,
               label: "Total de eventos",
-              sub: `${publishedEvents} publicados`,
+              sub: `${overview.eventsActive} publicados`,
             },
             {
               href: "/admin/payments",
               icon: ShoppingBag,
-              value: totalOrders,
+              value: overview.ordersPaid,
               label: "Pedidos pagos",
               sub: "Ver pagamentos",
             },
             {
               href: "/admin/payments",
               icon: CircleDollarSign,
-              value: `${(revenueCents / 100).toFixed(2)}€`,
-              label: "Receita total",
+              value: `${(overview.gmvCents / 100).toFixed(2)}€`,
+              label: "GMV total",
               sub: "Ver detalhes",
             },
           ].map(({ href, icon: Icon, value, label, sub }) => (
@@ -160,7 +146,7 @@ export default async function AdminDashboardContent() {
               href: "/admin/events/pending",
               icon: ClipboardList,
               title: "Aprovar eventos",
-              desc: `${pendingEvents} em rascunho`,
+              desc: `${pendingEventsCount} em rascunho`,
               accent: "purple",
             },
             {
@@ -237,7 +223,7 @@ export default async function AdminDashboardContent() {
                     href={
                       event.status === "PUBLISHED"
                         ? `/events/${event.slug}`
-                        : `/organizer/events/${event.id}/edit`
+                        : `/promotor/events/${event.id}`
                     }
                     target={event.status === "PUBLISHED" ? "_blank" : undefined}
                     className="flex items-center gap-4 p-5 transition-colors hover:bg-muted/50 group"

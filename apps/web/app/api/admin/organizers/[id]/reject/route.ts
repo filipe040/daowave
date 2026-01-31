@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestMetadata } from "@/lib/security";
 import { z } from "zod";
 
 const RejectSchema = z.object({
@@ -29,6 +30,17 @@ export async function POST(
       data: {
         status: "REJECTED",
       },
+    });
+
+    const metadata = getRequestMetadata(req);
+    await createAuditLog({
+      userId: session.user.id,
+      action: "ADMIN_PROMOTER_REJECTED",
+      entityType: "promoter",
+      entityId: id,
+      details: { brandName: organizer.brandName, reason },
+      ipAddress: metadata.ip,
+      userAgent: metadata.userAgent,
     });
 
     return NextResponse.json({ success: true, organizer });

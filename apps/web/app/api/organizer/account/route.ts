@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use /api/promotor/account (canonical). This route is kept as legacy alias.
+ * PUT /api/organizer/account - Update promoter account
+ */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

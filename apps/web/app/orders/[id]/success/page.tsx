@@ -44,7 +44,7 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
+    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in" data-testid="page-order-success">
       <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-500/10 to-green-500/5 p-8 sm:p-12 text-center backdrop-blur-sm">
         <div className="mb-6 flex justify-center"><CheckCircle className="h-16 w-16 text-green-400 animate-pulse-slow" strokeWidth={1.5} /></div>
         <h1 className="mb-3 text-3xl sm:text-4xl font-bold">Pagamento concluído!</h1>

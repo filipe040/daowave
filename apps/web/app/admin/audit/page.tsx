@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import AuditLogsSection from "./components/audit-logs-section";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,9 @@ export default async function AdminAuditPage() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Auditoria</h1>
         <p className="text-base md:text-lg text-zinc-400">Registos de check-ins e transferências de bilhetes</p>
       </div>
+
+      {/* Audit Log (API) */}
+      <AuditLogsSection />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

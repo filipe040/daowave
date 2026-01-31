@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const rateLimitRes = await applyRateLimit(req, RATE_LIMITS.adminRead);
+  if (rateLimitRes) return rateLimitRes;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "ADMIN") {

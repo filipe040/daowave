@@ -261,7 +261,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
         galleryUrls: Array.isArray(formData.galleryUrls) ? formData.galleryUrls : [],
       };
 
-      const url = isAdminCreate ? "/api/admin/events" : eventId ? `/api/organizer/events/${eventId}` : "/api/organizer/events";
+      const url = isAdminCreate ? "/api/admin/events" : eventId ? `/api/promotor/events/${eventId}` : "/api/promotor/events";
       const method = isAdminCreate ? "POST" : eventId ? "PUT" : "POST";
       const body = isAdminCreate ? { ...payload, promoterId } : payload;
 
@@ -299,9 +299,9 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       }
       if (!eventId) {
         // New event - redirect to events list first, then to edit page
-        router.push(`/organizer/events`);
+        router.push(`/promotor/events`);
         setTimeout(() => {
-          window.location.href = `/organizer/events/${data.id}/edit`;
+          window.location.href = `/promotor/events/${data.id}/edit`;
         }, 100);
       } else {
         router.refresh();
@@ -356,7 +356,10 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       if (!saveRes.ok) {
         const saveData = await saveRes.json();
         if (saveData.details) {
-          setPublishErrors(saveData.details);
+          const messages = Array.isArray(saveData.details)
+            ? saveData.details.map((e: { message?: string; path?: string[] } | string) => typeof e === "string" ? e : (e as { message?: string }).message ?? "")
+            : [];
+          setPublishErrors(messages.length ? messages : [saveData.error || "Erro ao guardar. Corrija os dados e tente publicar novamente."]);
         } else {
           setPublishErrors([saveData.error || "Erro ao guardar. Corrija os dados e tente publicar novamente."]);
         }
@@ -364,7 +367,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
         return;
       }
 
-      const res = await fetch(`/api/organizer/events/${eventId}/publish`, {
+      const res = await fetch(`/api/promotor/events/${eventId}/publish`, {
         method: "POST",
       });
 
@@ -372,7 +375,10 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
 
       if (!res.ok) {
         if (data.details) {
-          setPublishErrors(data.details);
+          const messages = Array.isArray(data.details)
+            ? data.details.map((e: { field?: string; message?: string } | string) => typeof e === "string" ? e : (e as { message?: string }).message ?? "")
+            : [];
+          setPublishErrors(messages.length ? messages : [data.error || "Erro ao publicar evento"]);
         } else {
           // If it's a 403 error about needing approval, show friendly message
           if (res.status === 403 && data.error?.includes("aprovação")) {
@@ -389,7 +395,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       }
 
       // Success
-      router.push("/organizer/events");
+      router.push("/promotor/events");
       router.refresh();
     } catch (error) {
       console.error("Publish error:", error);

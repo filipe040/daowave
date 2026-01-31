@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPromoterOverview } from "@/lib/services/promoter-overview.service";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -14,51 +15,32 @@ export default async function OrganizerDashboard() {
     redirect("/auth/signin?from=/organizer");
   }
 
-  // Get organizer profile
   const organizerProfile = await prisma.promoterProfile.findUnique({
     where: { userId: session.user.id },
   });
 
   if (!organizerProfile || organizerProfile.status !== "APPROVED") {
-    // This will be handled by layout, but just in case
     redirect("/");
   }
 
-  // Get events stats
-  const [totalEvents, publishedEvents, draftEvents, totalTicketsSold, totalRevenue] = await Promise.all([
-    prisma.event.count({ where: { promoterId: organizerProfile.id } }),
-    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "PUBLISHED" } }),
-    prisma.event.count({ where: { promoterId: organizerProfile.id, status: "DRAFT" } }),
-    prisma.ticket.count({
-      where: {
-        event: { promoterId: organizerProfile.id },
-        // TODO: Add status field to Ticket model or filter by checkedInAt
-        // status: "ISSUED",
+  const [overview, recentEvents] = await Promise.all([
+    getPromoterOverview(organizerProfile.id),
+    prisma.event.findMany({
+      where: { promoterId: organizerProfile.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        startAt: true,
+        createdAt: true,
       },
-    }),
-    prisma.order.aggregate({
-      where: {
-        event: { promoterId: organizerProfile.id },
-        status: "PAID",
-      },
-      _sum: { totalCents: true },
     }),
   ]);
 
-  // Get recent events
-  const recentEvents = await prisma.event.findMany({
-    where: { promoterId: organizerProfile.id },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      status: true,
-      startAt: true,
-      createdAt: true,
-    },
-  });
+  const draftEvents = overview.eventsTotal - overview.eventsActive;
 
   return (
     <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6 md:space-y-8 px-2 sm:px-4 md:px-0">
@@ -81,7 +63,7 @@ export default async function OrganizerDashboard() {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
             <Ticket className="h-6 w-6" strokeWidth={1.5} />
           </div>
-          <div className="text-4xl md:text-5xl font-bold mb-2">{totalEvents}</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsTotal}</div>
           <div className="text-sm md:text-base text-zinc-400">Total de Eventos</div>
         </div>
         
@@ -89,7 +71,7 @@ export default async function OrganizerDashboard() {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
             <CircleCheck className="h-6 w-6" strokeWidth={1.5} />
           </div>
-          <div className="text-4xl md:text-5xl font-bold mb-2">{publishedEvents}</div>
+          <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsActive}</div>
           <div className="text-sm md:text-base text-zinc-400">Publicados</div>
         </div>
         
@@ -106,7 +88,7 @@ export default async function OrganizerDashboard() {
             <CircleDollarSign className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">
-            {totalRevenue._sum.totalCents ? (totalRevenue._sum.totalCents / 100).toFixed(2) : "0.00"}€
+            {(overview.revenueCents / 100).toFixed(2)}€
           </div>
           <div className="text-sm md:text-base text-zinc-400">Receita Total</div>
         </div>

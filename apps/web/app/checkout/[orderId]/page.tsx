@@ -83,7 +83,7 @@ export default async function CheckoutPage({
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
+    <div data-testid="page-checkout" className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <h1 className="text-3xl font-bold text-slate-900 mb-8">
           Finalizar Compra

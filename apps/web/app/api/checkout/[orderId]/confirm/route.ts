@@ -1,0 +1,153 @@
+/**
+ * POST /api/checkout/[orderId]/confirm
+ * Step 2: Validate buyer (buyerName, buyerEmail required), then confirm payment and issue tickets.
+ * Body: { buyerName, buyerEmail, buyerPhone?, paymentMock?: boolean, paymentIntentId?: string }
+ */
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
+import { prisma } from "@/lib/prisma";
+import { getPaymentProvider } from "@/lib/payment";
+import { generateTicketCode } from "@/lib/utils";
+import { getQRPayload } from "@/lib/qr/generate";
+import { checkoutConfirmSchema } from "@/lib/security/validation";
+
+export const dynamic = "force-dynamic";
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { orderId } = await params;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    if (body === null || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const validated = checkoutConfirmSchema.parse({
+      buyerName: body.buyerName,
+      buyerEmail: body.buyerEmail,
+      buyerPhone: body.buyerPhone,
+      paymentMock: body.paymentMock,
+    });
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: { include: { ticketLot: true } },
+        event: true,
+      },
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    if (order.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (order.status === "PAID") {
+      return NextResponse.json({
+        success: true,
+        orderId: order.id,
+        message: "Order already paid",
+      });
+    }
+
+    const paymentMock = validated.paymentMock === true;
+    const paymentIntentId = body.paymentIntentId as string | undefined;
+
+    let paymentRef: string;
+    let paymentProviderName: string;
+
+    if (paymentMock) {
+      paymentRef = `mock_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      paymentProviderName = "mock";
+    } else if (paymentIntentId) {
+      const provider = getPaymentProvider();
+      const result = await provider.confirmPayment(paymentIntentId);
+      if (!result.success) {
+        return NextResponse.json(
+          { error: result.error || "Payment failed" },
+          { status: 400 }
+        );
+      }
+      paymentRef = result.paymentRef;
+      paymentProviderName = "stripe"; // or from provider
+    } else {
+      return NextResponse.json(
+        { error: "Provide paymentMock: true or paymentIntentId" },
+        { status: 400 }
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          buyerName: validated.buyerName,
+          buyerEmail: validated.buyerEmail,
+          buyerPhone: validated.buyerPhone ?? null,
+          status: "PAID",
+          paymentProvider: paymentProviderName,
+          paymentRef,
+        },
+      });
+
+      for (const item of order.items) {
+        for (let i = 0; i < item.quantity; i++) {
+          const code = generateTicketCode();
+          const ticket = await tx.ticket.create({
+            data: {
+              orderId: order.id,
+              eventId: order.eventId,
+              userId: order.userId,
+              ticketLotId: item.ticketLotId,
+              code,
+              qrPayload: "",
+            },
+          });
+          const finalQRPayload = getQRPayload({ ticketId: ticket.id, code });
+          await tx.ticket.update({
+            where: { id: ticket.id },
+            data: { qrPayload: finalQRPayload },
+          });
+          await tx.ticketLot.update({
+            where: { id: item.ticketLotId },
+            data: { quantitySold: { increment: 1 } },
+          });
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      orderId: order.id,
+      message: "Payment confirmed and tickets issued",
+    });
+  } catch (error: unknown) {
+    const err = error as { name?: string; errors?: unknown };
+    if (err.name === "ZodError") {
+      return NextResponse.json(
+        { error: "Validation error", details: err.errors },
+        { status: 400 }
+      );
+    }
+    console.error("Checkout confirm error:", error);
+    return NextResponse.json(
+      { error: "Failed to confirm order" },
+      { status: 500 }
+    );
+  }
+}

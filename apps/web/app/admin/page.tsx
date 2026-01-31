@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
+import AdminDashboardContent from "@/app/promotor/components/admin-dashboard-content";
 
 export const dynamic = "force-dynamic";
 
-/** Admin root: tudo está no dashboard promotor; redirecionar para /promotor */
+/** Dashboard admin com KPIs da plataforma e ações rápidas */
 export default function AdminPage() {
-  redirect("/promotor");
+  return <AdminDashboardContent />;
 }

@@ -55,6 +55,14 @@ async function getEvent(slug: string) {
         orderBy: {
           priceCents: 'asc',
         },
+        select: {
+          id: true,
+          name: true,
+          priceCents: true,
+          currency: true,
+          quantityTotal: true,
+          quantitySold: true,
+        },
       },
     },
   });

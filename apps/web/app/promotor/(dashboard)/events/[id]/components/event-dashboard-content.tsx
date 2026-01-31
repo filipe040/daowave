@@ -229,16 +229,58 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                   <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-green-400 transition-colors">CONTROLO DE ACESSO</h3>
                 </div>
               </Link>
-              <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105 hover:shadow-lg">
+              <Link
+                href={`/promotor/events/${event.id}/teams`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group hover:scale-105 hover:shadow-lg"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-white/90 transition-colors">EQUIPA GLOBAL</h3>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-green-400 transition-colors">EQUIPA</h3>
                 </div>
-              </div>
+              </Link>
+              <Link
+                href={`/promotor/events/${event.id}/sales`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-green-400 transition-colors">VENDAS</h3>
+                </div>
+              </Link>
+              <Link
+                href={`/promotor/events/${event.id}/checkins`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-green-400 transition-colors">LISTA CHECK-INS</h3>
+                </div>
+              </Link>
+              <Link
+                href={`/promotor/events/${event.id}/tracking-links`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-green-400 transition-colors">TRACKING LINKS</h3>
+                </div>
+              </Link>
             </div>
           </div>
 
@@ -248,7 +290,10 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
               CONFIGURAÇÃO VISUAL
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105">
+              <Link
+                href={`/promotor/events/${event.id}/branding`}
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +305,7 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                     <span className="text-[10px] text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded uppercase group-hover:bg-green-400/20 transition-colors">PRO</span>
                   </div>
                 </div>
-              </div>
+              </Link>
               <Link
                 href={`/promotor/events/${event.id}/assets`}
                 className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105"
@@ -274,7 +319,10 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                   <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-blue-400 transition-colors">BIBLIOTECA ASSETS</h3>
                 </div>
               </Link>
-              <div className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105">
+              <Link
+                href="/promotor/analytics"
+                className="bg-zinc-900 border border-white/10 rounded-lg p-4 sm:p-5 hover:border-white/20 hover:bg-zinc-800 transition-all duration-200 group cursor-pointer hover:scale-105"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-lg flex items-center justify-center group-hover:border-white/40 group-hover:scale-110 group-hover:bg-white/5 transition-all duration-200 flex-shrink-0">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:rotate-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,7 +331,7 @@ export default function EventDashboardContent({ event, stats }: EventDashboardCo
                   </div>
                   <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white uppercase group-hover:text-purple-400 transition-colors">ANALÍTICA</h3>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
 

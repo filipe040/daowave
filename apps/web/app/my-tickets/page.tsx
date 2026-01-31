@@ -66,7 +66,7 @@ export default async function MyTicketsPage() {
   const tickets = await getTickets(session.user.id);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white" data-testid="page-my-tickets">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* Header */}
         <div className="mb-8 sm:mb-10">

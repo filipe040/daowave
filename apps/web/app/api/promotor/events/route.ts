@@ -1,96 +1,147 @@
 /**
- * POST /api/promotor/events
- * Create new event
+ * GET /api/promotor/events — List events for current promoter (canonical).
+ * POST /api/promotor/events — Create new event (canonical).
  */
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/config';
-import { prisma } from '@/lib/prisma';
-import { eventSchema } from '@/lib/security/validation';
-import { generateSlug } from '@/lib/utils';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import { safeLog } from "@/lib/security";
+import { EventService } from "@/lib/services/event.service";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
+const CreateEventSchema = z.object({
+  title: z.string().min(1, "Título é obrigatório"),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug inválido"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  venueName: z.string().min(1, "Nome do local é obrigatório"),
+  city: z.string().min(1, "Cidade é obrigatória"),
+  startAt: z.string().refine((val) => val !== "" && !isNaN(Date.parse(val)), { message: "Data de início inválida" }),
+  endAt: z.string().refine((val) => val !== "" && !isNaN(Date.parse(val)), { message: "Data de fim inválida" }),
+  checkinMode: z.enum(["SINGLE", "MULTI"]).default("SINGLE"),
+  maxEntries: z.number().int().positive().optional().nullable(),
+  entryWindowStartAt: z.union([z.string(), z.null()]).optional().nullable(),
+  entryWindowEndAt: z.union([z.string(), z.null()]).optional().nullable(),
+  bannerUrl: z.string().optional().nullable(),
+  galleryUrls: z.array(z.string()).optional().nullable(),
+});
+
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if ((session.user as { role?: string }).role !== "PROMOTER" && (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const promoter = await prisma.promoterProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+    if (!promoter || promoter.status !== "APPROVED") {
+      return NextResponse.json({ error: "Promoter profile not approved" }, { status: 403 });
+    }
+    const { searchParams } = new URL(req.url);
+    const selectAll = searchParams.get("select") === "all";
+    const result = await EventService.listByPromoter(promoter.id, { selectAll });
+    return NextResponse.json(result);
+  } catch (error) {
+    safeLog.error("Get promoter events error", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (userRole !== 'PROMOTER' && userRole !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
+    const userRole = (session.user as { role?: string }).role;
+    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const validated = eventSchema.parse(body);
-
-    // Get promoter profile
     const promoter = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },
     });
 
-    if (!promoter) {
+    if (!promoter || promoter.status !== "APPROVED") {
       return NextResponse.json(
-        { error: 'Promoter profile not found' },
-        { status: 404 }
+        { error: "Promoter profile not approved" },
+        { status: 403 }
       );
     }
 
-    // Use provided slug or generate from title
-    const slug = (body.slug && typeof body.slug === 'string' && body.slug.trim()) 
-      ? generateSlug(body.slug)
-      : generateSlug(validated.title);
+    const body = await req.json();
+    const data = CreateEventSchema.parse(body);
 
-    // Check if slug exists
-    const existing = await prisma.event.findUnique({
-      where: { slug },
-    });
-
-    if (existing) {
+    const startAt = new Date(data.startAt);
+    const endAt = new Date(data.endAt);
+    if (endAt <= startAt) {
       return NextResponse.json(
-        { error: 'Event with this slug already exists' },
+        { error: "Data de fim deve ser posterior à data de início" },
         { status: 400 }
       );
     }
 
-    // Create event
-    const event = await prisma.event.create({
-      data: {
-        promoterId: promoter.id,
-        title: validated.title,
-        slug,
-        description: validated.description,
-        venue: validated.venue,
-        city: validated.city,
-        startAt: new Date(validated.startAt),
-        endAt: new Date(validated.endAt),
-        coverImage: validated.coverImage || null,
-        status: 'DRAFT',
-      },
-    });
-
-    return NextResponse.json(event);
-  } catch (error: any) {
-    console.error('Error creating event:', error);
-
-    if (error.name === 'ZodError') {
+    if (data.checkinMode === "MULTI" && !data.maxEntries) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: "maxEntries é obrigatório para modo MULTI" },
         { status: 400 }
       );
     }
 
+    if (await EventService.isSlugTaken(data.slug)) {
+      return NextResponse.json(
+        { error: "Já existe um evento com este slug" },
+        { status: 400 }
+      );
+    }
+
+    const bannerUrl = (() => {
+      let url = data.bannerUrl;
+      if (url?.includes("imgur.com")) {
+        if (!url.startsWith("http")) {
+          const match = url.match(/imgur\.com\/([a-zA-Z0-9]+)/);
+          if (match && !url.includes("/a/")) url = `https://i.imgur.com/${match[1]}.jpg`;
+          else url = `https://${url}`;
+        }
+      }
+      return url ?? null;
+    })();
+
+    const event = await EventService.create({
+      promoterId: promoter.id,
+      title: data.title,
+      slug: data.slug,
+      description: data.description,
+      venue: data.venueName,
+      city: data.city,
+      startAt,
+      endAt,
+      bannerUrl,
+      checkinMode: data.checkinMode,
+      maxEntries: data.maxEntries ?? null,
+      checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
+      checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
+    });
+
+    return NextResponse.json(event, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation error", details: error.errors },
+        { status: 400 }
+      );
+    }
+    safeLog.error("Create event error", error);
     return NextResponse.json(
-      { error: 'Failed to create event' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

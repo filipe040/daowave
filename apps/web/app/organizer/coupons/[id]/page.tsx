@@ -26,14 +26,14 @@ export default function EditCouponPage() {
 
   useEffect(() => {
     // Load events
-    fetch("/api/organizer/events?select=all")
+    fetch("/api/promotor/events?select=all")
       .then((res) => res.json())
       .then((data) => {
         if (data.events) setEvents(data.events);
       });
 
     // Load coupon
-    fetch(`/api/organizer/coupons/${couponId}`)
+    fetch(`/api/promotor/coupons/${couponId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.coupon) {
@@ -64,7 +64,7 @@ export default function EditCouponPage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/organizer/coupons/${couponId}`, {
+      const res = await fetch(`/api/promotor/coupons/${couponId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

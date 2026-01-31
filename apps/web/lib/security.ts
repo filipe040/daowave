@@ -30,6 +30,21 @@ export const RATE_LIMITS = {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 100, // 100 check-ins per minute
   },
+  // Promotor check-in (QR verify) - per client
+  promotorCheckin: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 120, // 120 verifies per minute per client
+  },
+  // Admin read (audit-logs, fraud, users/search)
+  adminRead: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 60, // 60 reads per minute per client
+  },
+  // Promotor read (analytics, finance)
+  promotorRead: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 30, // 30 reads per minute per client
+  },
 } as const;
 
 /**

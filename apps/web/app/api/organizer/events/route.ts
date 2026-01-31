@@ -1,9 +1,15 @@
+/**
+ * @deprecated Use /api/promotor/events (canonical). This route is kept as legacy alias.
+ * GET /api/organizer/events - List events for current organizer
+ * POST /api/organizer/events - Create new event
+ */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { safeLog } from "@/lib/security";
+import { EventService } from "@/lib/services/event.service";
 
 // GET /api/organizer/events - List events for current organizer
 export async function GET(req: Request) {
@@ -30,32 +36,8 @@ export async function GET(req: Request) {
       );
     }
 
-    const events = selectAll
-      ? await prisma.event.findMany({
-          where: { promoterId: organizerProfile.id },
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            startAt: true,
-            status: true,
-          },
-        })
-      : await prisma.event.findMany({
-          where: { promoterId: organizerProfile.id },
-          orderBy: { createdAt: "desc" },
-          include: {
-            _count: {
-              select: {
-                tickets: true,
-                orders: { where: { status: "PAID" } },
-              },
-            },
-          },
-        });
-
-    return NextResponse.json(selectAll ? { events } : events);
+    const result = await EventService.listByPromoter(organizerProfile.id, { selectAll });
+    return NextResponse.json(result);
   } catch (error) {
     safeLog.error("Get organizer events error", error);
     return NextResponse.json(
@@ -184,83 +166,39 @@ export async function POST(req: Request) {
     }
 
 
-    // Check slug uniqueness
-    const existingEvent = await prisma.event.findUnique({
-      where: { slug: data.slug },
-    });
-
-    if (existingEvent) {
+    if (await EventService.isSlugTaken(data.slug)) {
       return NextResponse.json(
         { error: "Já existe um evento com este slug" },
         { status: 400 }
       );
     }
 
-    // Create event
-    const eventData: any = {
+    const bannerUrl = (() => {
+      let url = data.bannerUrl;
+      if (url?.includes("imgur.com")) {
+        if (!url.startsWith("http")) {
+          const match = url.match(/imgur\.com\/([a-zA-Z0-9]+)/);
+          if (match && !url.includes("/a/")) url = `https://i.imgur.com/${match[1]}.jpg`;
+          else url = `https://${url}`;
+        }
+      }
+      return url ?? null;
+    })();
+
+    const event = await EventService.create({
       promoterId: organizerProfile.id,
       title: data.title,
       slug: data.slug,
       description: data.description,
-      category: data.category || null,
       venue: data.venueName,
-      address: data.address,
       city: data.city,
       startAt,
       endAt,
-      timezone: data.timezone,
-    };
-
-    // Add check-in fields only if they exist (migration applied)
-    try {
-      // Test if fields exist by trying to query them
-      await prisma.$queryRaw`SELECT checkinMode FROM Event LIMIT 1`.catch(() => {
-        throw new Error("Fields don't exist");
-      });
-      // Fields exist, add them
-      eventData.checkinMode = data.checkinMode;
-      eventData.maxEntries = data.maxEntries || null;
-      eventData.checkinStartAt = data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null;
-      eventData.checkinEndAt = data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null;
-    } catch {
-      // Fields don't exist, skip them
-    }
-
-    const event = await prisma.event.create({
-      data: {
-        ...eventData,
-        capacityTotal: data.capacityTotal || null,
-        ageRestriction: data.ageRestriction || null,
-        refundPolicy: data.refundPolicy || null,
-        cancellationPolicy: data.cancellationPolicy || null,
-        termsText: data.termsText || null,
-        consentRGPD: data.consentRGPD,
-        wheelchairAccess: data.wheelchairAccess,
-        signLanguageSupport: data.signLanguageSupport,
-        accessibleWC: data.accessibleWC,
-        accessibilityNotes: data.accessibilityNotes || null,
-        contactEmail: data.contactEmail,
-        contactPhone: data.contactPhone || null,
-        supportInstructions: data.supportInstructions || null,
-        bannerUrl: (() => {
-          // Normalize imgur URLs
-          let bannerUrl = data.bannerUrl;
-          if (bannerUrl && bannerUrl.includes("imgur.com")) {
-            if (!bannerUrl.startsWith("http")) {
-              // Convert imgur.com/xxx to https://i.imgur.com/xxx.jpg for direct image links
-              const match = bannerUrl.match(/imgur\.com\/([a-zA-Z0-9]+)/);
-              if (match && !bannerUrl.includes("/a/")) {
-                bannerUrl = `https://i.imgur.com/${match[1]}.jpg`;
-              } else {
-                bannerUrl = `https://${bannerUrl}`;
-              }
-            }
-          }
-          return bannerUrl || null;
-        })(),
-        galleryUrls: data.galleryUrls || null,
-        status: "DRAFT",
-      } as any,
+      bannerUrl,
+      checkinMode: data.checkinMode,
+      maxEntries: data.maxEntries ?? null,
+      checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
+      checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
     });
 
     return NextResponse.json(event, { status: 201 });

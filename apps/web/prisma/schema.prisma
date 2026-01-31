@@ -41,16 +41,19 @@ enum OrganizerStatus {
 }
 
 model PromoterProfile {
-  id          String          @id @default(uuid())
-  userId      String          @unique
-  brandName   String
-  vatNumber   String?
-  status      OrganizerStatus @default(PENDING)
+  id           String          @id @default(uuid())
+  userId       String          @unique
+  brandName    String
+  vatNumber    String?
+  status       OrganizerStatus @default(PENDING)
   contactEmail String?
-  createdAt   DateTime        @default(now())
+  score        Int?            // Score/reputação (admin); null = não calculado
+  adminNotes   String?         @db.Text // Notas internas admin
+  createdAt    DateTime        @default(now())
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   events      Event[]
+  payouts     Payout[]
   
   @@index([userId])
 }
@@ -87,14 +90,15 @@ model Event {
   checkinEndAt          DateTime? // Fim da janela de check-in
   maxEntries            Int?     // Máximo de entradas por bilhete (MULTI mode)
 
-  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
-  ticketLots   TicketLot[]
-  orders      Order[]
-  tickets     Ticket[]
-  checkinLogs CheckinLog[]
-  teamMembers EventTeamMember[]
-  coupons     Coupon[]
-  assets      EventAsset[]
+  promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  ticketLots    TicketLot[]
+  orders        Order[]
+  tickets       Ticket[]
+  checkinLogs   CheckinLog[]
+  teamMembers   EventTeamMember[]
+  coupons       Coupon[]
+  assets        EventAsset[]
+  trackingLinks TrackingLink[]
   
   @@index([slug])
   @@index([status])
@@ -121,21 +125,24 @@ model TicketLot {
 }
 
 model Order {
-  id             String      @id @default(uuid())
-  userId         String
-  eventId        String
+  id              String      @id @default(uuid())
+  userId          String
+  eventId         String
   totalCents      Int
   currency        String      @default("EUR")
   status          OrderStatus @default(PENDING)
   paymentProvider String?
   paymentRef      String?
+  buyerName       String?
+  buyerEmail      String?
+  buyerPhone      String?
   createdAt       DateTime    @default(now())
-  
-  user            User        @relation(fields: [userId], references: [id])
-  event           Event       @relation(fields: [eventId], references: [id])
-  items           OrderItem[]
-  tickets         Ticket[]
-  
+
+  user   User   @relation(fields: [userId], references: [id])
+  event  Event  @relation(fields: [eventId], references: [id])
+  items   OrderItem[]
+  tickets Ticket[]
+
   @@index([userId])
   @@index([eventId])
   @@index([status])
@@ -162,7 +169,7 @@ model Ticket {
   userId      String
   ticketLotId String
   code        String   @unique
-  qrPayload   String
+  qrPayload   String   @db.Text
   checkedInAt DateTime?
   checkedInByUserId String?
   createdAt   DateTime @default(now())
@@ -375,4 +382,40 @@ model EventTeamMemberPermission {
   @@unique([memberId, permission])
   @@index([memberId])
   @@index([permission])
+}
+
+// Fase 2 — links de rastreio por evento (marketing)
+model TrackingLink {
+  id        String   @id @default(uuid())
+  eventId   String
+  code      String   // slug/código único por evento (ex: "instagram")
+  label     String?  // etiqueta legível (ex: "Instagram Stories")
+  createdAt DateTime @default(now())
+  
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([eventId, code])
+  @@index([eventId])
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// Fase 2 — pagamentos a promotores
+model Payout {
+  id          String       @id @default(uuid())
+  promoterId  String
+  amountCents Int
+  currency    String       @default("EUR")
+  status      PayoutStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime     @default(now())
+  
+  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  
+  @@index([promoterId])
+  @@index([status])
 }

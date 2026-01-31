@@ -1,2 +1,2 @@
--- Add avatarUrl to User (MySQL: run once; if column already exists, ignore or mark migration as applied)
-ALTER TABLE `User` ADD COLUMN `avatarUrl` VARCHAR(2048) NULL;
+-- Add avatarUrl to User (idempotente: 20260201120000 já pode tê-lo adicionado)
+ALTER TABLE `User` ADD COLUMN IF NOT EXISTS `avatarUrl` VARCHAR(2048) NULL;

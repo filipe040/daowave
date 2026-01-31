@@ -31,10 +31,9 @@ CREATE TABLE IF NOT EXISTS `EventAsset` (
   PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Indexes
+-- Indexes (se a tabela foi criada em 20260128184926, os índices já existem)
 CREATE INDEX IF NOT EXISTS `EventAsset_eventId_idx` ON `EventAsset`(`eventId`);
 CREATE INDEX IF NOT EXISTS `EventAsset_createdAt_idx` ON `EventAsset`(`createdAt`);
 
--- Foreign key
-ALTER TABLE `EventAsset` ADD CONSTRAINT IF NOT EXISTS `EventAsset_eventId_fkey` FOREIGN KEY (`eventId`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- FK EventAsset_eventId_fkey já criada em 20260128184926; não duplicar.
 

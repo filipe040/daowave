@@ -16,3 +16,4 @@ node_modules
 .next
 node_modules
 apps/web/public/uploads/
+apps/web/tests/e2e/.cache/

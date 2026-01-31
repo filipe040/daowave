@@ -199,7 +199,7 @@ export default function ValidatorPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 animate-fade-in">
+    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 animate-fade-in" data-testid="validator-page">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl sm:text-4xl font-semibold text-foreground">Validador de Bilhetes</h1>

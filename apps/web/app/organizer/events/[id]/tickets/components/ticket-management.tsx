@@ -45,7 +45,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
   const refreshData = async () => {
-    const res = await fetch(`/api/organizer/events/${eventId}/tickets`);
+    const res = await fetch(`/api/promotor/events/${eventId}/tickets`);
     const data = await res.json();
     // TODO: Adapt API to return ticketLots structure
     if (data.ticketTypes) {

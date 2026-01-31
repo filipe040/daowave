@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { getPromoterOverview } from "@/lib/services/promoter-overview.service";
 import EventsWorkspace from "../components/events-workspace";
 import AdminDashboardContent from "../components/admin-dashboard-content";
+import { Ticket, CircleCheck, ShoppingBag, CircleDollarSign, TrendingUp, Calendar } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -65,10 +67,40 @@ export default async function PromoterDashboard() {
     );
   }
 
-  const events = await getPromoterEvents(session.user.id);
+  const [overview, events] = await Promise.all([
+    getPromoterOverview(promoter.id),
+    getPromoterEvents(session.user.id),
+  ]);
+
+  const kpis = [
+    { icon: Ticket, value: overview.eventsTotal, label: "Eventos", sub: `${overview.eventsActive} ativos` },
+    { icon: CircleCheck, value: overview.ticketsSold, label: "Bilhetes vendidos", sub: `cap. ${overview.capacityTotal}` },
+    { icon: ShoppingBag, value: overview.ordersPaid, label: "Pedidos pagos", sub: "" },
+    { icon: CircleDollarSign, value: `${(overview.revenueCents / 100).toFixed(2)}€`, label: "Receita total", sub: "" },
+    { icon: TrendingUp, value: `${(overview.salesTodayCents / 100).toFixed(2)}€`, label: "Vendas hoje", sub: "" },
+    { icon: Calendar, value: `${(overview.salesThisWeekCents / 100).toFixed(2)}€`, label: "Vendas esta semana", sub: "" },
+  ];
 
   return (
-    <div className="relative">
+    <div className="relative" data-testid="page-promotor-dashboard">
+      <section className="mx-auto max-w-5xl mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          {kpis.map(({ icon: Icon, value, label, sub }) => (
+            <div
+              key={label}
+              className="flex flex-col rounded-2xl border border-border bg-card/50 p-4 sm:p-5"
+            >
+              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Icon className="h-4 w-4" strokeWidth={1.5} />
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold tabular-nums text-foreground">{value}</div>
+              <div className="text-[12px] sm:text-[13px] text-muted-foreground">{label}</div>
+              {sub ? <div className="text-[11px] text-muted-foreground/80 mt-0.5">{sub}</div> : null}
+            </div>
+          ))}
+        </div>
+      </section>
+
       <div className="mx-auto mb-7 flex max-w-3xl items-center justify-center gap-4">
         <div className="h-px flex-1 bg-border" />
         <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.22em] text-muted-foreground">

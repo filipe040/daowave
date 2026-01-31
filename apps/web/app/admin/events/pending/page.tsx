@@ -116,7 +116,7 @@ export default async function AdminPendingEventsPage() {
                 <div className="flex gap-4 pt-4 border-t border-zinc-700/50">
                   <ApproveEventButton eventId={event.id} />
                   <Link
-                    href={`/organizer/events/${event.id}/edit`}
+                    href={`/promotor/events/${event.id}`}
                     className="px-4 py-2 rounded-xl border border-zinc-700/50 bg-zinc-800/50 text-white hover:bg-zinc-800 transition-colors"
                   >
                     Ver / Editar
