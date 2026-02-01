@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getAdminOverview } from "@/lib/services/admin-overview.service";
+import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -18,34 +19,52 @@ import {
 
 export const dynamic = "force-dynamic";
 
+type EventWithPromoterUser = Prisma.EventGetPayload<{
+  include: {
+    promoter: {
+      include: {
+        user: { select: { name: true; email: true } };
+      };
+    };
+  };
+}>;
+
+const recentEventsQuery = () =>
+  prisma.event.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: {
+      promoter: {
+        include: {
+          user: { select: { name: true, email: true } },
+        },
+      },
+    },
+  });
+
 export default async function AdminDashboardContent() {
   let overview: Awaited<ReturnType<typeof getAdminOverview>>;
   let pendingOrganizers: number;
   let pendingEventsCount: number;
-  let recentEvents: Awaited<ReturnType<typeof prisma.event.findMany>>;
+  let recentEvents: EventWithPromoterUser[];
 
   try {
-    [overview, pendingOrganizers, pendingEventsCount, recentEvents] = await Promise.all([
-      getAdminOverview(),
-      prisma.promoterProfile.count({ where: { status: "PENDING" } }),
-      prisma.event.count({
-        where: {
-          status: "DRAFT",
-          promoter: { user: { role: "PROMOTER" } },
-        },
-      }),
-      prisma.event.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: {
-          promoter: {
-            include: {
-              user: { select: { name: true, email: true } },
-            },
+    const [overviewRes, pendingOrganizersRes, pendingEventsCountRes, recentEventsRes] =
+      await Promise.all([
+        getAdminOverview(),
+        prisma.promoterProfile.count({ where: { status: "PENDING" } }),
+        prisma.event.count({
+          where: {
+            status: "DRAFT",
+            promoter: { user: { role: "PROMOTER" } },
           },
-        },
-      }),
-    ]);
+        }),
+        recentEventsQuery(),
+      ]);
+    overview = overviewRes;
+    pendingOrganizers = pendingOrganizersRes;
+    pendingEventsCount = pendingEventsCountRes;
+    recentEvents = recentEventsRes;
   } catch (err) {
     console.error("[admin-dashboard-content] error:", err);
     overview = {
@@ -267,7 +286,7 @@ export default async function AdminDashboardContent() {
                       </div>
                       <p className="mt-1 text-[13px] text-muted-foreground">
                         {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
-                        {event.promoter?.user?.email && (
+                        {event.promoter?.user?.email != null && (
                           <span className="text-muted-foreground/80"> · {event.promoter.user.email}</span>
                         )}
                       </p>
