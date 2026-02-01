@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function AccountError({
   error,
@@ -15,6 +15,8 @@ export default function AccountError({
     console.error("[account] error:", error);
   }, [error]);
 
+  const linkClass = buttonVariants({ variant: "ghost", size: "sm" });
+
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
       <h2 className="text-lg font-semibold text-foreground">Algo correu mal</h2>
@@ -25,12 +27,12 @@ export default function AccountError({
         <Button onClick={reset} variant="outline" size="sm" data-testid="account-error-retry">
           Tentar novamente
         </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/account">Voltar ao resumo</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/">Ir para início</Link>
-        </Button>
+        <Link href="/account" className={linkClass}>
+          Voltar ao resumo
+        </Link>
+        <Link href="/" className={linkClass}>
+          Ir para início
+        </Link>
       </div>
     </div>
   );
