@@ -58,20 +58,30 @@ export default async function PromoterDashboard() {
     );
   }
 
-  const promoter = await prisma.promoterProfile.findUnique({
-    where: { userId: session.user.id },
-  });
-
-  if (!promoter) {
+  let promoter;
+  let events: Awaited<ReturnType<typeof getPromoterEvents>> = [];
+  try {
+    promoter = await prisma.promoterProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+    if (!promoter) {
+      return (
+        <EmptyStateCard
+          title="Perfil não encontrado"
+          description="Não existe um perfil de promotor associado a esta conta."
+        />
+      );
+    }
+    events = await getPromoterEvents(session.user.id);
+  } catch (err) {
+    console.error("[promotor] page error:", err);
     return (
       <EmptyStateCard
-        title="Perfil não encontrado"
-        description="Não existe um perfil de promotor associado a esta conta."
+        title="Erro ao carregar"
+        description="Não foi possível carregar os dados. Verifica a ligação à base de dados e tenta novamente."
       />
     );
   }
-
-  const events = await getPromoterEvents(session.user.id);
 
   return (
     <div className="min-h-screen bg-background text-foreground">

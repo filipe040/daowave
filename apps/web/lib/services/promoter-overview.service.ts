@@ -70,26 +70,40 @@ export function aggregateEventsToOverview(
   };
 }
 
+const emptyOverview: PromoterOverview = {
+  eventsTotal: 0,
+  eventsActive: 0,
+  ticketsSold: 0,
+  capacityTotal: 0,
+  revenueCents: 0,
+  ordersPaid: 0,
+  salesTodayCents: 0,
+  salesThisWeekCents: 0,
+};
+
 export async function getPromoterOverview(promoterId: string): Promise<PromoterOverview> {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfWeek = new Date(startOfToday);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
 
-  const events = await prisma.event.findMany({
-    where: { promoterId },
-    select: {
-      id: true,
-      status: true,
-      archivedAt: true,
-      ticketLots: { select: { quantityTotal: true, quantitySold: true } },
-      orders: {
-        where: { status: "PAID" },
-        select: { totalCents: true, createdAt: true },
+  try {
+    const events = await prisma.event.findMany({
+      where: { promoterId },
+      select: {
+        id: true,
+        status: true,
+        archivedAt: true,
+        ticketLots: { select: { quantityTotal: true, quantitySold: true } },
+        orders: {
+          where: { status: "PAID" },
+          select: { totalCents: true, createdAt: true },
+        },
       },
-      _count: { select: { tickets: true } },
-    },
-  });
-
-  return aggregateEventsToOverview(events, startOfToday, startOfWeek);
+    });
+    return aggregateEventsToOverview(events, startOfToday, startOfWeek);
+  } catch (err) {
+    console.error("[promoter-overview] getPromoterOverview error:", err);
+    return emptyOverview;
+  }
 }

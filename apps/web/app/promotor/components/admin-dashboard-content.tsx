@@ -19,27 +19,49 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardContent() {
-  const [overview, pendingOrganizers, pendingEventsCount, recentEvents] = await Promise.all([
-    getAdminOverview(),
-    prisma.promoterProfile.count({ where: { status: "PENDING" } }),
-    prisma.event.count({
-      where: {
-        status: "DRAFT",
-        promoter: { user: { role: "PROMOTER" } },
-      },
-    }),
-    prisma.event.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: {
-        promoter: {
-          include: {
-            user: { select: { name: true, email: true } },
+  let overview: Awaited<ReturnType<typeof getAdminOverview>>;
+  let pendingOrganizers: number;
+  let pendingEventsCount: number;
+  let recentEvents: Awaited<ReturnType<typeof prisma.event.findMany>>;
+
+  try {
+    [overview, pendingOrganizers, pendingEventsCount, recentEvents] = await Promise.all([
+      getAdminOverview(),
+      prisma.promoterProfile.count({ where: { status: "PENDING" } }),
+      prisma.event.count({
+        where: {
+          status: "DRAFT",
+          promoter: { user: { role: "PROMOTER" } },
+        },
+      }),
+      prisma.event.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: {
+          promoter: {
+            include: {
+              user: { select: { name: true, email: true } },
+            },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (err) {
+    console.error("[admin-dashboard-content] error:", err);
+    overview = {
+      gmvCents: 0,
+      ordersPaid: 0,
+      ticketsSold: 0,
+      eventsTotal: 0,
+      eventsActive: 0,
+      promotersTotal: 0,
+      promotersApproved: 0,
+    };
+    pendingOrganizers = 0;
+    pendingEventsCount = 0;
+    recentEvents = [];
+  }
+
   const pendingCount = pendingOrganizers + pendingEventsCount;
 
   return (

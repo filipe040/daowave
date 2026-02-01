@@ -25,9 +25,18 @@ export const authOptions: NextAuthOptions = {
 
         // Normalize email to lowercase and trim
         const normalizedEmail = credentials.email.toLowerCase().trim();
-        
+
+        // Select only columns needed for auth (avoids 500 if profile migration not applied)
         const user = await prisma.user.findUnique({
           where: { email: normalizedEmail },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            passwordHash: true,
+            emailVerified: true,
+          },
         });
 
         if (!user) {
@@ -93,13 +102,13 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
 
-        // Check if user exists
+        // Check if user exists (select only base columns for compatibility)
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
+          select: { id: true, name: true, email: true },
         });
 
         if (existingUser) {
-          // Update user info if needed
           if (user.name && user.name !== existingUser.name) {
             await prisma.user.update({
               where: { id: existingUser.id },
@@ -109,15 +118,23 @@ export const authOptions: NextAuthOptions = {
           return true;
         }
 
-        // Create new user
-        await prisma.user.create({
-          data: {
-            email: user.email,
-            name: user.name || null,
-            passwordHash: '', // OAuth users don't have passwords
-            role: 'USER',
-          },
-        });
+        // Create new user (may fail if profile migration not applied; then run migrations)
+        try {
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              name: user.name || null,
+              passwordHash: '',
+              role: 'USER',
+            },
+          });
+        } catch (createErr: unknown) {
+          const msg = (createErr as { message?: string })?.message ?? '';
+          if (msg.includes('Unknown column') || msg.includes("doesn't exist")) {
+            console.error('[auth] OAuth user create failed: run prisma migrate deploy to add User profile columns.');
+          }
+          throw createErr;
+        }
 
         return true;
       }
@@ -137,6 +154,7 @@ export const authOptions: NextAuthOptions = {
         if (user?.email) {
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email },
+            select: { id: true, role: true, email: true, name: true },
           });
           if (dbUser) {
             token.id = dbUser.id;

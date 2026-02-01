@@ -51,26 +51,40 @@ export default async function PromoterDashboard() {
     );
   }
 
-  const promoter = await prisma.promoterProfile.findUnique({
-    where: { userId: session.user.id },
-  });
+  let promoter;
+  let overview: Awaited<ReturnType<typeof getPromoterOverview>>;
+  let events: Awaited<ReturnType<typeof getPromoterEvents>>;
 
-  if (!promoter) {
-    if (userRole === "ADMIN") {
-      return <AdminDashboardContent />;
+  try {
+    promoter = await prisma.promoterProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!promoter) {
+      if (userRole === "ADMIN") {
+        return <AdminDashboardContent />;
+      }
+      return (
+        <EmptyStateCard
+          title="Perfil não encontrado"
+          description="Não existe um perfil de promotor associado a esta conta."
+        />
+      );
     }
+
+    [overview, events] = await Promise.all([
+      getPromoterOverview(promoter.id),
+      getPromoterEvents(session.user.id),
+    ]);
+  } catch (err) {
+    console.error("[promotor/dashboard] page error:", err);
     return (
       <EmptyStateCard
-        title="Perfil não encontrado"
-        description="Não existe um perfil de promotor associado a esta conta."
+        title="Erro ao carregar"
+        description="Não foi possível carregar o dashboard. Verifica a ligação à base de dados e tenta novamente."
       />
     );
   }
-
-  const [overview, events] = await Promise.all([
-    getPromoterOverview(promoter.id),
-    getPromoterEvents(session.user.id),
-  ]);
 
   const kpis = [
     { icon: Ticket, value: overview.eventsTotal, label: "Eventos", sub: `${overview.eventsActive} ativos` },
