@@ -1,7 +1,7 @@
 /**
  * Next.js instrumentation hook
  * Runs once when the server starts
- * 
+ *
  * CRITICAL: This hook does NOT initialize Redis/Queue to prevent connection attempts during build
  * - Only initializes Sentry (lightweight)
  * - init() is called on-demand in API routes that need it (not here)
@@ -13,7 +13,7 @@
  */
 function isBuildPhase(): boolean {
   // CRITICAL: Use ONLY NEXT_PHASE env var - no process.argv (not available in Edge Runtime)
-  return process.env.NEXT_PHASE === "phase-production-build" || 
+  return process.env.NEXT_PHASE === "phase-production-build" ||
          process.env.NEXT_PHASE === "phase-development-build" ||
          process.env.NEXT_PHASE === "phase-export";
 }
@@ -31,12 +31,15 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     try {
       // Initialize Sentry on server (only at runtime, lightweight)
-      // CRITICAL: Check SENTRY_DSN before importing to prevent webpack warnings
-      if (process.env.SENTRY_DSN) {
-        const { initSentry } = await import("./lib/sentry");
-        await initSentry(); // Now async
-      }
-      
+      // CRITICAL: Sentry temporarily disabled to fix build issues
+      // TODO: Re-enable when Sentry configuration is fixed
+      console.log("Sentry initialization skipped during build fix");
+
+      // if (process.env.SENTRY_DSN) {
+      //   const { initSentry } = await import("./lib/sentry");
+      //   await initSentry(); // Now async
+      // }
+
       // CRITICAL: Do NOT call init() here - it would trigger Redis connection
       // init() should be called on-demand in API routes that need it
       // This prevents Redis connection attempts during build/SSG
