@@ -21,7 +21,8 @@ async function getPromoterData(userId: string, userRole: string) {
       return {
         isAdmin: true,
         stats: { totalEvents, totalUsers, totalOrders },
-        events: []
+        events: [],
+        promoter: null
       };
     }
 
@@ -31,7 +32,7 @@ async function getPromoterData(userId: string, userRole: string) {
     });
 
     if (!promoter) {
-      return { isAdmin: false, promoter: null, events: [] };
+      return { isAdmin: false, promoter: null, events: [], stats: undefined };
     }
 
     const events = await prisma.event.findMany({
@@ -52,7 +53,8 @@ async function getPromoterData(userId: string, userRole: string) {
     return {
       isAdmin: false,
       promoter,
-      events
+      events,
+      stats: undefined
     };
   } catch (error) {
     console.error("[dashboard] Error fetching data:", error);
@@ -169,7 +171,7 @@ export default async function PromoterDashboard() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Total de Eventos</dt>
-                      <dd className="text-lg font-medium text-gray-900">{data.stats.totalEvents}</dd>
+                      <dd className="text-lg font-medium text-gray-900">{data.stats?.totalEvents}</dd>
                     </dl>
                   </div>
                 </div>
@@ -189,7 +191,7 @@ export default async function PromoterDashboard() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Total de Utilizadores</dt>
-                      <dd className="text-lg font-medium text-gray-900">{data.stats.totalUsers}</dd>
+                      <dd className="text-lg font-medium text-gray-900">{data.stats?.totalUsers}</dd>
                     </dl>
                   </div>
                 </div>
@@ -209,7 +211,7 @@ export default async function PromoterDashboard() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Pedidos Pagos</dt>
-                      <dd className="text-lg font-medium text-gray-900">{data.stats.totalOrders}</dd>
+                      <dd className="text-lg font-medium text-gray-900">{data.stats?.totalOrders}</dd>
                     </dl>
                   </div>
                 </div>
