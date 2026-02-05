@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
             take: 5,
             orderBy: { createdAt: 'desc' },
             include: {
-              promoterProfile: {
+              promoter: {
                 include: {
                   user: {
                     select: { name: true, email: true }
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
 
           if (promoter) {
             eventsQuery = prisma.event.findMany({
-              where: { promoterProfileId: promoter.id },
+              where: { promoterId: promoter.id },
               take: 5,
               orderBy: { createdAt: 'desc' },
               include: {
@@ -186,22 +186,22 @@ export async function GET(request: NextRequest) {
 
           if (promoter) {
             const [totalEvents, totalTickets, totalOrders, totalRevenue] = await Promise.all([
-              prisma.event.count({ where: { promoterProfileId: promoter.id } }),
+              prisma.event.count({ where: { promoterId: promoter.id } }),
               prisma.ticket.count({
                 where: {
-                  event: { promoterProfileId: promoter.id }
+                  event: { promoterId: promoter.id }
                 }
               }),
               prisma.order.count({
                 where: {
                   status: 'PAID',
-                  event: { promoterProfileId: promoter.id }
+                  event: { promoterId: promoter.id }
                 }
               }),
               prisma.order.aggregate({
                 where: {
                   status: 'PAID',
-                  event: { promoterProfileId: promoter.id }
+                  event: { promoterId: promoter.id }
                 },
                 _sum: { totalAmount: true }
               })

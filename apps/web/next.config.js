@@ -2,7 +2,6 @@
 const nextConfig = {
   // Fix for Next.js 15 clientReferenceManifest error in production
   experimental: {
-    serverComponentsExternalPackages: ['bullmq', 'ioredis'],
     optimizePackageImports: ['lucide-react'],
   },
   // Expose NODE_ENV to client for beta banner
@@ -66,7 +65,6 @@ const nextConfig = {
   // Exclude test files from compilation
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   // Additional production stability fixes
-  swcMinify: true,
   poweredByHeader: false,
   async headers() {
     return [
