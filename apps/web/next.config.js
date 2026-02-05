@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Fix for Next.js 15 clientReferenceManifest error in production
-  experimental: {
-    optimizePackageImports: ['lucide-react'],
-  },
+  // Turbopack configuration for Next.js 15/16 compatibility
+  turbopack: {},
+
   // Expose NODE_ENV to client for beta banner
   env: {
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV || "development",
@@ -18,54 +17,55 @@ const nextConfig = {
   serverExternalPackages: ['bullmq', 'ioredis'],
 
   // Exclude test files from build
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-    }
+  webpack: (config, { isServer, dev }) => {
+    // Only apply webpack config in development or when explicitly needed
+    if (dev || process.env.NEXT_BUILD_WEBPACK === 'true') {
+      if (!isServer) {
+        config.resolve.fallback = {
+          ...config.resolve.fallback,
+          fs: false,
+        };
+      }
 
-    // Mark bullmq and ioredis as external to prevent Redis connection during build
-    // CRITICAL: These packages should NOT be bundled - they try to connect to Redis
-    if (isServer) {
-      // Ignore these packages completely - they're optional and not needed
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'ioredis': false,
-        'bullmq': false,
-      };
+      // Mark bullmq and ioredis as external to prevent Redis connection during build
+      // CRITICAL: These packages should NOT be bundled - they try to connect to Redis
+      if (isServer) {
+        // Ignore these packages completely - they're optional and not needed
+        config.resolve.alias = {
+          ...config.resolve.alias,
+          'ioredis': false,
+          'bullmq': false,
+        };
 
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        'bullmq',
-        'ioredis',
+        config.externals = [
+          ...(Array.isArray(config.externals) ? config.externals : []),
+          'bullmq',
+          'ioredis',
+        ];
+      }
+
+      // Ignore warnings from Sentry/OpenTelemetry (known issue with dynamic imports)
+      config.ignoreWarnings = [
+        {
+          module: /@opentelemetry\/instrumentation/,
+          message: /Critical dependency: the request of a dependency is an expression/,
+        },
+        {
+          module: /@sentry\/opentelemetry/,
+          message: /Critical dependency/,
+        },
       ];
     }
 
-    // Ignore warnings from Sentry/OpenTelemetry (known issue with dynamic imports)
-    config.ignoreWarnings = [
-      {
-        module: /@opentelemetry\/instrumentation/,
-        message: /Critical dependency: the request of a dependency is an expression/,
-      },
-      {
-        module: /@sentry\/opentelemetry/,
-        message: /Critical dependency/,
-      },
-      // DISABLED - Redis completely disabled
-      // {
-      //   module: /bullmq/,
-      //   message: /Critical dependency: the request of a dependency is an expression/,
-      // },
-    ];
-
     return config;
   },
+
   // Exclude test files from compilation
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
+
   // Additional production stability fixes
   poweredByHeader: false,
+
   async headers() {
     return [
       {
