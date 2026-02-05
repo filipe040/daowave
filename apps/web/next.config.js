@@ -54,6 +54,10 @@ const nextConfig = {
           module: /@sentry\/opentelemetry/,
           message: /Critical dependency/,
         },
+        {
+          module: /@opentelemetry\/instrumentation/,
+          message: /Critical dependency: the request of a dependency is an expression/,
+        },
       ];
     }
 
