@@ -10,6 +10,7 @@
     "db:generate": "npx prisma generate",
     "db:migrate:deploy": "npx prisma migrate deploy",
     "db:seed": "npx prisma db seed",
+    "diagnose:db": "node scripts/diagnose-db.js",
     "e2e:prep": "npx prisma migrate deploy && npm run db:seed",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
