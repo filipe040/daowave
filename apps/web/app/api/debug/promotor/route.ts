@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
           debugInfo.dashboardSpecific.promoterProfile = {
             id: promoter.id,
             status: promoter.status,
-            businessName: promoter.businessName,
-            hasPaymentInfo: !!promoter.paypalEmail || !!promoter.mbwayPhoneNumber,
+            brandName: promoter.brandName,
+            hasContactEmail: !!promoter.contactEmail,
           };
         } else if (userRole === 'ADMIN') {
           debugInfo.checks.promoterProfile = '✅ Admin user (no promoter profile needed)';

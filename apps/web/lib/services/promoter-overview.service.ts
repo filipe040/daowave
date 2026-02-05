@@ -89,7 +89,7 @@ export async function getPromoterOverview(promoterId: string): Promise<PromoterO
 
   try {
     const events = await prisma.event.findMany({
-      where: { promoterProfileId: promoterId },
+      where: { promoterId },
       select: {
         id: true,
         status: true,
