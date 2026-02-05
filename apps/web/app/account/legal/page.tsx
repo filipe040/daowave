@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/lib/auth";
 import AccountLegal from "../components/account-legal";
 
 export const dynamic = "force-dynamic";

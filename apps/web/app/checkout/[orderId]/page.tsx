@@ -4,7 +4,7 @@
 
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/config';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { formatCurrency } from '@/lib/utils';
 import { CheckoutForm } from './checkout-form';

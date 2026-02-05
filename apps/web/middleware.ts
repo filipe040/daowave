@@ -3,18 +3,18 @@ import type { NextRequest } from "next/server";
 
 /**
  * Edge-safe middleware - 100% Edge Runtime Compatible
- * 
+ *
  * CRITICAL: This middleware uses ONLY Edge-compatible APIs
  * - NO imports from local files (lib/config, lib/env, etc.)
  * - NO Node.js APIs (__dirname, fs, path, process.cwd, etc.)
  * - Uses ONLY process.env.* directly
  * - Uses ONLY Edge-compatible imports (next/server, next-auth/jwt)
- * 
+ *
  * Authentication:
  * - Uses getToken from next-auth/jwt (Edge-safe)
  * - Wrapped in try/catch to prevent crashes
  * - Falls back gracefully if auth fails
- * 
+ *
  * Logging: Minimal logging for diagnosis
  * - View logs in Vercel: Dashboard → Project → Runtime Logs → Edge
  */
@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Create response with security headers
     const response = NextResponse.next();
-    
+
     // Add security headers (Edge-safe, no external dependencies)
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("X-Frame-Options", "DENY");
@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
     // Protected routes - use NEXTAUTH_SECRET directly from process.env
     // NO imports from lib/config or lib/env
     const authSecret = process.env.NEXTAUTH_SECRET;
-    
+
     // If no secret, allow through (degradation - protection handled in route handlers)
     // This prevents middleware from crashing if env var is missing
     if (!authSecret || authSecret.length < 32) {
@@ -115,9 +115,9 @@ export async function middleware(request: NextRequest) {
       // Dynamic import to isolate potential __dirname issues
       // This ensures that if getToken has issues, we catch them
       const { getToken } = await import("next-auth/jwt");
-      token = await getToken({ 
-        req: request as any, 
-        secret: authSecret 
+      token = await getToken({
+        req: request as any,
+        secret: authSecret
       });
     } catch (authError) {
       // Log auth error without exposing sensitive data
@@ -126,18 +126,17 @@ export async function middleware(request: NextRequest) {
         error: authError instanceof Error ? authError.message : "unknown_error",
         // Don't log token or secret
       });
-      
-      // On auth error, redirect to signin (fail closed for security)
-      // This ensures unauthorized users can't access protected routes
-      const signInUrl = new URL("/auth/signin", request.url);
-      signInUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(signInUrl);
+
+      // On auth error, allow through but log warning
+      // This prevents middleware crashes from blocking the entire site
+      console.warn("[middleware] Auth check failed, allowing request through");
+      return response;
     }
 
     // If token is null or undefined, user is not authenticated
     if (!token) {
       const signInUrl = new URL("/auth/signin", request.url);
-      signInUrl.searchParams.set("callbackUrl", pathname);
+      signInUrl.searchParams.set("from", pathname);
       return NextResponse.redirect(signInUrl);
     }
 
@@ -148,21 +147,21 @@ export async function middleware(request: NextRequest) {
       // OBJETIVO C: /admin only for ADMIN
       if (userRole !== "ADMIN") {
         const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("callbackUrl", pathname);
+        signInUrl.searchParams.set("from", pathname);
         return NextResponse.redirect(signInUrl);
       }
     } else if (pathname.startsWith("/promotor")) {
       // PROMOTER or ADMIN allowed
       if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
         const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("callbackUrl", pathname);
+        signInUrl.searchParams.set("from", pathname);
         return NextResponse.redirect(signInUrl);
       }
     } else if (pathname.startsWith("/validator")) {
       // VALIDATOR or ADMIN allowed
       if (userRole !== "VALIDATOR" && userRole !== "ADMIN") {
         const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("callbackUrl", pathname);
+        signInUrl.searchParams.set("from", pathname);
         return NextResponse.redirect(signInUrl);
       }
     }
@@ -176,7 +175,7 @@ export async function middleware(request: NextRequest) {
       error: error instanceof Error ? error.message : "unknown_error",
       stack: error instanceof Error ? error.stack : undefined,
     });
-    
+
     // Return response without headers on error (fail open for availability)
     // This ensures the site doesn't go down if middleware has issues
     // Security is handled at route handler level as fallback

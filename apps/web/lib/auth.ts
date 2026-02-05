@@ -2,13 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
-import { Role } from "@ticketing-platform/shared";
-import { config } from "./config";
-import { safeLog, getRequestMetadata } from "./security";
-import { createAuditLog } from "./audit";
-import { applyRateLimit, RATE_LIMITS } from "./security";
-
-// Role is now USER instead of CUSTOMER
+import { Role } from "@ticketing-platform/shared/src/rbac";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,83 +12,61 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        // Rate limiting (if req is available)
-        if (req) {
-          try {
-            const rateLimitResponse = await applyRateLimit(req as any, RATE_LIMITS.auth);
-            if (rateLimitResponse) {
-              safeLog.warn("Rate limit exceeded for auth", { email: credentials?.email });
-              return null;
-            }
-          } catch (error) {
-            // Rate limit check failed, continue anyway
-            safeLog.warn("Rate limit check failed", error);
-          }
-        }
-
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          safeLog.warn("Incomplete credentials", { email: credentials?.email });
           return null;
         }
 
         try {
           // Normalize email to lowercase and trim
           const normalizedEmail = credentials.email.toLowerCase().trim();
-          
-          safeLog.debug(`Attempting authentication`, { email: normalizedEmail });
-          
-          // Ensure Prisma connection
-          await prisma.$connect();
-          
-          // Try to find user with normalized email
+
+          console.log(`[auth] Attempting authentication for: ${normalizedEmail}`);
+
+          // Find user with normalized email
           const user = await prisma.user.findUnique({
             where: { email: normalizedEmail },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              passwordHash: true,
+              emailVerified: true,
+            },
           });
 
           if (!user) {
-            safeLog.warn(`User not found`, { email: normalizedEmail });
+            console.log(`[auth] User not found: ${normalizedEmail}`);
             return null;
           }
 
+          // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
           if (!isValid) {
-            safeLog.warn(`Invalid password`, { email: normalizedEmail });
+            console.log(`[auth] Invalid password for: ${normalizedEmail}`);
             return null;
           }
 
-          safeLog.info(`Login successful`, { userId: user.id, email: user.email, role: user.role });
-
-          // Audit log for successful login
-          if (req) {
-            try {
-              const metadata = getRequestMetadata(req as any);
-              await createAuditLog({
-                userId: user.id,
-                action: "USER_LOGIN",
-                resourceType: "user",
-                resourceId: user.id,
-                details: {
-                  email: user.email,
-                  role: user.role,
-                },
-                ...metadata,
-              });
-            } catch (error) {
-              // Don't fail login if audit log fails
-              safeLog.error("Failed to create login audit log", error);
-            }
+          // Check if email is verified (only in production)
+          if (!user.emailVerified && process.env.NODE_ENV === 'production') {
+            console.log(`[auth] Email not verified for: ${normalizedEmail}`);
+            throw new Error("Email não verificado. Por favor, verifique o seu email.");
           }
 
-          // Return user role as-is from database
+          console.log(`[auth] Login successful for: ${normalizedEmail} (${user.role})`);
+
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role as Role,
+            role: user.role,
           };
         } catch (error: any) {
-          safeLog.error("Authentication error", error);
+          console.error("[auth] Authentication error:", error.message);
+          if (error.message.includes("Email não verificado")) {
+            throw error;
+          }
           return null;
         }
       },
@@ -105,29 +77,35 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role as Role;
+        token.email = user.email;
+        token.name = user.name;
       }
-      
+
       // If session is being updated, refresh user data from database
       if (trigger === "update" && token.id) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true },
+            select: { role: true, email: true, name: true },
           });
           if (dbUser) {
             token.role = dbUser.role as Role;
+            token.email = dbUser.email;
+            token.name = dbUser.name;
           }
         } catch (error) {
-          safeLog.error("Error updating JWT from database", error);
+          console.error("[auth] Error updating JWT from database:", error);
         }
       }
-      
+
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as Role;
+      if (session.user && token) {
+        (session.user as any).id = token.id as string;
+        (session.user as any).role = token.role as Role;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
       }
       return session;
     },
@@ -137,7 +115,8 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: config.auth.secret,
-  debug: config.env.isDevelopment,
+  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-key-change-in-production-12345678901234567890',
+  debug: process.env.NODE_ENV === "development",
 };

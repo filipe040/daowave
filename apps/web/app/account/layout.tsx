@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/lib/auth";
 import AccountLayoutClient from "./components/account-layout-client";
 
 export const dynamic = "force-dynamic";

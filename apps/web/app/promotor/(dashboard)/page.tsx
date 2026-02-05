@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPromoterOverview } from "@/lib/services/promoter-overview.service";
 import EventsWorkspace from "../components/events-workspace";
@@ -37,7 +37,13 @@ function EmptyStateCard({ title, description }: { title: string; description: st
 }
 
 export default async function PromoterDashboard() {
-  const session = await getServerSession(authOptions);
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch (err) {
+    console.error("[promotor/dashboard] page getServerSession error:", err);
+    redirect("/promotor/login");
+  }
 
   if (!session?.user) redirect("/promotor/login");
 

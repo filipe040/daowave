@@ -1,4 +1,4 @@
-import type { Role } from "@ticketing-platform/shared";
+import type { Role } from "@ticketing-platform/shared/src/rbac";
 
 declare module "next-auth" {
   interface Session {

@@ -4,7 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
 import { EventService } from "@/lib/services/event.service";

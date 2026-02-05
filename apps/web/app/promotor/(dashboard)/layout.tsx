@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/lib/auth";
 import { canAccessPromoterArea } from "@/lib/auth/permissions";
 import DashboardShell from "../components/dashboard-shell";
 
@@ -9,7 +9,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch (err) {
+    console.error("[promotor/dashboard] layout getServerSession error:", err);
+    redirect("/promotor/login");
+  }
 
   if (!session?.user) {
     redirect("/promotor/login");
