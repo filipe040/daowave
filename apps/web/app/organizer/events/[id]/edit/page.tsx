@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import EventForm from "../../components/event-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditEventPage({
   params,
 }: {
@@ -48,4 +50,3 @@ export default async function EditEventPage({
     </div>
   );
 }
-

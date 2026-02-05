@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { formatCurrency } from '@/lib/utils';
 import { CheckoutForm } from './checkout-form';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getOrder(orderId: string, userId: string) {
   return await prisma.order.findUnique({
@@ -92,7 +92,7 @@ export default async function CheckoutPage({
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">Resumo do Pedido</h2>
-            
+
             <div className="mb-4">
               <h3 className="font-semibold text-slate-900 mb-2">
                 {order.event.title}

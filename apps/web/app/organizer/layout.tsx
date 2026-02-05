@@ -8,6 +8,8 @@ import { Providers } from "../providers";
 import { canAccessOrganizerArea, isAdmin, isPromoter } from "@/lib/auth/permissions";
 import OrganizerDashboardShell from "./components/organizer-dashboard-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function OrganizerLayout({
   children,
 }: {
@@ -96,4 +98,3 @@ export default async function OrganizerLayout({
     </Providers>
   );
 }
-

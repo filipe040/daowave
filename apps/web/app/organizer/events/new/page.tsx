@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Lightbulb } from "lucide-react";
 import EventForm from "../components/event-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewEventPage({
   searchParams,
 }: {
@@ -67,4 +69,3 @@ export default async function NewEventPage({
     </div>
   );
 }
-

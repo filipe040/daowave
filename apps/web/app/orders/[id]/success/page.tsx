@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CheckCircle } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getOrder(orderId: string, userId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },

@@ -8,6 +8,8 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { generateQrCodeDataUrl, generateQrToken } from "@/lib/qr";
 
+export const dynamic = "force-dynamic";
+
 async function getTicket(ticketId: string, userId: string) {
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
