@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fix for Next.js 15 clientReferenceManifest error in production
+  experimental: {
+    serverComponentsExternalPackages: ['bullmq', 'ioredis'],
+    optimizePackageImports: ['lucide-react'],
+  },
   // Expose NODE_ENV to client for beta banner
   env: {
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV || "development",
@@ -31,7 +36,7 @@ const nextConfig = {
         'ioredis': false,
         'bullmq': false,
       };
-      
+
       config.externals = [
         ...(Array.isArray(config.externals) ? config.externals : []),
         'bullmq',
@@ -60,6 +65,9 @@ const nextConfig = {
   },
   // Exclude test files from compilation
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  // Additional production stability fixes
+  swcMinify: true,
+  poweredByHeader: false,
   async headers() {
     return [
       {
