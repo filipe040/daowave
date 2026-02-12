@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Turbopack configuration for Next.js 15/16 compatibility
-  turbopack: {},
 
   // Expose NODE_ENV to client for beta banner
   env: {
