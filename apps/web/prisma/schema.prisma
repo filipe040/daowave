@@ -34,12 +34,14 @@ model User {
 
   orders              Order[]
   tickets             Ticket[]
-  promoterProfile      PromoterProfile?
+  promoterProfile      PromoterProfile? // Deprecated: migrar para OrganizationMember
+  organizations        OrganizationMember[]
   validatorCheckins    CheckinLog[]      @relation("ValidatorCheckins")
   transferFromUser     TransferLog[]      @relation("TransferFromUser")
   transferToUser       TransferLog[]      @relation("TransferToUser")
-  eventTeamMembers     EventTeamMember[]
+  eventTeamMembers     EventTeamMember[] // Deprecated: migrar para OrganizationMember ou EventPermissions
   userSessions        UserSession[]
+  fraudSignals        FraudSignal[]
 
   @@index([email])
   @@index([emailVerificationToken])
@@ -60,12 +62,57 @@ model UserSession {
   @@index([revokedAt])
 }
 
-enum OrganizerStatus {
+// --- ORGANIZATION & RBAC ---
+
+enum OrganizationStatus {
   PENDING
-  APPROVED
+  ACTIVE
+  SUSPENDED
   REJECTED
 }
 
+enum MemberRole {
+  OWNER
+  MANAGER
+  STAFF
+  READ_ONLY
+}
+
+model Organization {
+  id           String             @id @default(uuid())
+  name         String
+  slug         String             @unique
+  vatNumber    String?
+  contactEmail String?
+  status       OrganizationStatus @default(PENDING)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  members      OrganizationMember[]
+  events       Event[]
+  payouts      Payout[]
+  auditLogs    AuditLog[]
+
+  @@index([slug])
+  @@index([status])
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  role           MemberRole   @default(STAFF)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+// Deprecated (Legacy Promoter)
 model PromoterProfile {
   id           String          @id @default(uuid())
   userId       String          @unique
@@ -83,13 +130,21 @@ model PromoterProfile {
   
   @@index([userId])
 }
+enum OrganizerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// --- EVENTS ---
 
 model Event {
   id          String      @id @default(uuid())
-  promoterId  String
+  organizationId String?  // New relation
+  promoterId  String      // Legacy relation (keep for migration)
   title       String
   slug        String       @unique
-  description String
+  description String      @db.Text
   venue       String
   city        String
   startAt     DateTime
@@ -98,25 +153,22 @@ model Event {
   status      EventStatus  @default(DRAFT)
   archivedAt  DateTime?    // Data de arquivamento (null = não arquivado)
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt @default(now())
+
   // Branding & Visual Protocol (Editor de Marca)
   primaryColor        String?  // Cor primária da marca do evento
   secondaryColor      String?  // Cor secundária da marca do evento
   logoUrl             String?  // URL do logo do evento
   bannerUrl           String?  // URL do banner/header do evento
-  fontFamily          String?  // Fonte personalizada (ex: "Inter", "Roboto")
-  // Landing Page customizada
-  landingPageContent  String?  @db.Text // HTML/JSON do conteúdo da landing page customizada
-  useCustomLandingPage Boolean @default(false) // Se deve usar landing page customizada
-  // Badge Designer (Template PDF do bilhete)
-  badgeTemplateImageUrl String? // URL da imagem template do badge/bilhete PDF
-  badgePrefix           String? @default("BADGE") // Prefixo para IDs dos badges gerados
+  
   // Check-in configuration
   checkinMode           String?  @default("SINGLE") // SINGLE, MULTI
   checkinStartAt        DateTime? // Início da janela de check-in
   checkinEndAt          DateTime? // Fim da janela de check-in
-  maxEntries            Int?     // Máximo de entradas por bilhete (MULTI mode)
-
+  
+  organization  Organization? @relation(fields: [organizationId], references: [id])
   promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  
   ticketLots    TicketLot[]
   orders        Order[]
   tickets       Ticket[]
@@ -129,18 +181,21 @@ model Event {
   @@index([slug])
   @@index([status])
   @@index([promoterId])
+  @@index([organizationId])
 }
 
 model TicketLot {
   id            String   @id @default(uuid())
   eventId       String
   name          String
+  description   String?
   priceCents    Int
   currency      String   @default("EUR")
   quantityTotal Int
   quantitySold  Int      @default(0)
   saleStartAt   DateTime
   saleEndAt     DateTime
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -163,6 +218,7 @@ model Order {
   buyerEmail      String?
   buyerPhone      String?
   createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt @default(now())
 
   user   User   @relation(fields: [userId], references: [id])
   event  Event  @relation(fields: [eventId], references: [id])
@@ -196,12 +252,13 @@ model Ticket {
   ticketLotId String
   code        String   @unique
   qrPayload   String   @db.Text
+  status      TicketStatus @default(VALID)
+  
   checkedInAt DateTime?
   checkedInByUserId String?
+  
   createdAt   DateTime @default(now())
-  // Check-in tracking (MULTI mode)
-  entriesUsed Int      @default(0) // Número de entradas já utilizadas
-  lastCheckinAt DateTime? // Última vez que foi usado
+  updatedAt   DateTime @updatedAt @default(now())
   
   order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   event         Event        @relation(fields: [eventId], references: [id])
@@ -216,6 +273,13 @@ model Ticket {
   @@index([userId])
   @@index([ticketLotId])
   @@index([code])
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+  REFUNDED
 }
 
 model EmailLog {
@@ -239,56 +303,81 @@ model EmailLog {
   @@index([to])
   @@index([status])
   @@index([createdAt])
-  @@index([type])
-  @@index([relatedOrderId])
-  @@index([relatedUserId])
 }
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  actorUserId String?
-  action      String
-  entityType  String
-  entityId    String?
-  metaJson    Json?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(uuid())
+  organizationId String?
+  actorUserId    String?
+  action         String
+  entityType     String
+  entityId       String?
+  metaJson       Json?
+  createdAt      DateTime @default(now())
+  
+  organization   Organization? @relation(fields: [organizationId], references: [id])
   
   @@index([actorUserId])
+  @@index([organizationId])
   @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// --- FRAUD & SECURITY ---
+
+model FraudSignal {
+  id          String   @id @default(uuid())
+  userId      String?
+  orderId     String?
+  ticketId    String?
+  type        String   // "multi_account", "card_velocity", "ip_velocity"
+  severity    String   // "low", "medium", "high", "critical"
+  score       Int      // 0-100
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([type])
   @@index([createdAt])
 }
 
 enum Role {
   USER
-  PROMOTER
-  ADMIN
+  PROMOTER // Deprecated: usar OrganizationMember.role
+  ADMIN    // Superadmin
+  VALIDATOR // Deprecated: usar OrganizationMember
 }
 
 enum EventStatus {
   DRAFT
   PUBLISHED
+  CANCELLED
+  ENDED
 }
 
 enum OrderStatus {
   PENDING
   PAID
   CANCELED
+  REFUNDED
 }
 
 enum EventTeamRole {
-  ADMIN      // Acesso total ao evento
-  ORGANIZER  // Organizador principal
-  MANAGER    // Gestor operacional
-  STAFF      // Staff operacional
-  VIEWER     // Apenas visualização
+  ADMIN
+  ORGANIZER
+  MANAGER
+  STAFF
+  VIEWER
 }
 
 enum EventTeamPermission {
-  CREATE_EVENTS     // Criar eventos
-  SELL_TICKETS      // Vender bilhetes
-  VALIDATE_ENTRIES  // Validar entradas
-  VIEW_REPORTS      // Ver relatórios
-  MANAGE_TEAMS      // Gerir equipas
+  CREATE_EVENTS
+  SELL_TICKETS
+  VALIDATE_ENTRIES
+  VIEW_REPORTS
+  MANAGE_TEAMS
 }
 
 model CheckinLog {
@@ -297,9 +386,9 @@ model CheckinLog {
   eventId         String
   validatorUserId String
   deviceId        String?
-  result          String
+  result          String   // "SUCCESS", "INVALID", "ALREADY_USED"
   scannedAt       DateTime @default(now())
-  rawPayloadHash  String
+  rawPayloadHash  String?
   offline         Boolean  @default(false)
   syncedAt        DateTime?
   
@@ -311,7 +400,6 @@ model CheckinLog {
   @@index([eventId])
   @@index([scannedAt])
   @@index([validatorUserId])
-  @@index([offline, syncedAt])
 }
 
 model TransferLog {
@@ -333,8 +421,8 @@ model TransferLog {
 }
 
 enum CouponDiscountType {
-  PERCENTAGE  // Desconto percentual (1-100)
-  FIXED       // Desconto fixo em cêntimos
+  PERCENTAGE
+  FIXED
 }
 
 model Coupon {
@@ -342,8 +430,8 @@ model Coupon {
   eventId       String
   code          String              @unique
   discountType  CouponDiscountType
-  discountValue Int                 // Percentagem (1-100) ou valor em cêntimos
-  maxUses       Int?                // Máximo de utilizações (null = ilimitado)
+  discountValue Int
+  maxUses       Int?
   usedCount     Int                 @default(0)
   isActive      Boolean             @default(true)
   startsAt      DateTime
@@ -355,8 +443,6 @@ model Coupon {
   
   @@index([eventId])
   @@index([code])
-  @@index([isActive])
-  @@index([endsAt])
 }
 
 model EventAsset {
@@ -364,15 +450,14 @@ model EventAsset {
   eventId     String
   filename    String
   name        String?
-  url         String   // URL pública do asset (ex: /uploads/events/{eventId}/{filename})
-  mimeType    String   // image/png, image/jpeg, etc.
-  size        Int      // Tamanho em bytes
+  url         String
+  mimeType    String
+  size        Int
   createdAt   DateTime @default(now())
   
   event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   
   @@index([eventId])
-  @@index([createdAt])
 }
 
 model EventTeamMember {
@@ -394,8 +479,6 @@ model EventTeamMember {
   @@unique([eventId, userId])
   @@index([eventId])
   @@index([userId])
-  @@index([role])
-  @@index([isActive])
 }
 
 model EventTeamMemberPermission {
@@ -407,15 +490,15 @@ model EventTeamMemberPermission {
   
   @@unique([memberId, permission])
   @@index([memberId])
-  @@index([permission])
 }
 
-// Fase 2 — links de rastreio por evento (marketing)
 model TrackingLink {
   id        String   @id @default(uuid())
   eventId   String
-  code      String   // slug/código único por evento (ex: "instagram")
-  label     String?  // etiqueta legível (ex: "Instagram Stories")
+  code      String
+  label     String?
+  clicks    Int      @default(0)
+  conversions Int    @default(0)
   createdAt DateTime @default(now())
   
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -426,22 +509,27 @@ model TrackingLink {
 
 enum PayoutStatus {
   PENDING
+  PROCESSING
   PAID
   FAILED
 }
 
-// Fase 2 — pagamentos a promotores
 model Payout {
-  id          String       @id @default(uuid())
-  promoterId  String
-  amountCents Int
-  currency    String       @default("EUR")
-  status      PayoutStatus @default(PENDING)
-  paidAt      DateTime?
-  createdAt   DateTime     @default(now())
+  id             String       @id @default(uuid())
+  organizationId String?
+  promoterId     String?      // Legacy
+  amountCents    Int
+  currency       String       @default("EUR")
+  status         PayoutStatus @default(PENDING)
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
   
-  promoter    PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  promoter       PromoterProfile? @relation(fields: [promoterId], references: [id], onDelete: Cascade)
   
+  @@index([organizationId])
   @@index([promoterId])
   @@index([status])
 }

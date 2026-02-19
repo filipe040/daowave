@@ -30,12 +30,8 @@ async function getEvent(slug: string) {
       // Branding
       primaryColor: true,
       secondaryColor: true,
-      logoUrl: true,
       bannerUrl: true,
-      fontFamily: true,
-      // Landing Page
-      landingPageContent: true,
-      useCustomLandingPage: true,
+      // Landing Page fields removed (legacy)
       promoter: {
         include: {
           user: {
@@ -80,37 +76,16 @@ export default async function EventPage({
     notFound();
   }
 
-  // Se landing page customizada está ativa e tem conteúdo, renderizar HTML customizado
-  if (event.useCustomLandingPage && event.landingPageContent) {
-    const customHtml = event.landingPageContent
-      .replace(/\{eventTitle\}/g, event.title)
-      .replace(/\{eventDescription\}/g, event.description)
-      .replace(/\{eventDate\}/g, formatDate(event.startAt))
-      .replace(/\{venue\}/g, event.venue)
-      .replace(/\{city\}/g, event.city);
-    
-    return (
-      <div 
-        className="min-h-screen"
-        style={{
-          fontFamily: event.fontFamily || undefined,
-        } as React.CSSProperties}
-        dangerouslySetInnerHTML={{ __html: customHtml }}
-      />
-    );
-  }
-
   // Landing page padrão com branding aplicado
   const primaryColor = event.primaryColor || '#6C2BD9';
   const secondaryColor = event.secondaryColor || '#06B6D4';
-  const fontFamily = event.fontFamily || undefined;
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100"
-      style={{ fontFamily } as React.CSSProperties}
     >
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         :root {
           --event-primary: ${primaryColor};
           --event-secondary: ${secondaryColor};
@@ -142,22 +117,15 @@ export default async function EventPage({
               />
             </div>
           ) : null}
-          
+
           <div className="p-8">
-            {/* Logo se disponível */}
-            {event.logoUrl && (
-              <div className="mb-4">
-                <img src={event.logoUrl} alt={`${event.title} logo`} className="h-16 w-auto object-contain" />
-              </div>
-            )}
-            
-            <h1 
+            <h1
               className="text-4xl font-bold mb-4"
               style={{ color: primaryColor }}
             >
               {event.title}
             </h1>
-            
+
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div>
                 <h2 className="text-xl font-semibold text-slate-900 mb-4">
@@ -166,7 +134,7 @@ export default async function EventPage({
                 <p className="text-slate-600 whitespace-pre-line mb-6">
                   {event.description}
                 </p>
-                
+
                 <div className="space-y-3 text-slate-600">
                   <div className="flex items-start gap-3">
                     <MapPin className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
@@ -176,7 +144,7 @@ export default async function EventPage({
                       <p className="text-sm">{event.city}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <Calendar className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
                     <div>
@@ -189,7 +157,7 @@ export default async function EventPage({
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <TicketSelector event={event} ticketLots={event.ticketLots} />
               </div>

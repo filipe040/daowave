@@ -73,58 +73,39 @@ export async function POST(req: Request) {
             return { success: true, skipped: true, message: "Already synced" };
           }
 
-          // TODO: Add checkinMode to Event model and entriesUsed to Ticket model
-          // if (ticket.event.checkinMode === "SINGLE") {
-          if (true) { // Default to SINGLE mode
-            // TODO: Uncomment when entriesUsed is added to Ticket model
-            // if (ticket.entriesUsed > 0 && log.result === "VALID") {
-            if (false) { // Skip until entriesUsed is added
-              // Conflict: already checked in, but offline log says valid
-              // First check-in wins, so we mark as already used
-              await tx.checkinLog.create({
-                data: {
-                  ticketId: log.ticketId,
-                  eventId: log.eventId,
-                  validatorUserId: userId,
-                  deviceId: log.deviceId,
-                  result: "ALREADY_USED",
-                  scannedAt: new Date(log.scannedAt),
-                  offline: true,
-                  syncedAt: new Date(),
-                  rawPayloadHash: log.rawPayloadHash,
-                },
-              });
-              return { success: true, conflict: true, message: "Already checked in" };
-            }
+          // TODO: Add checkinMode to Event model 
+          // Default to SINGLE mode for now
 
-            // TODO: Uncomment when entriesUsed and lastCheckinAt are added to Ticket model
-            // Apply check-in
-            if (log.result === "VALID") {
-              await tx.ticket.update({
-                where: { id: log.ticketId },
-                data: {
-                  checkedInAt: new Date(log.scannedAt),
-                  checkedInByUserId: userId,
-                  // entriesUsed: 1,
-                  // lastCheckinAt: new Date(log.scannedAt),
-                },
-              });
-            }
-          } else {
-            // MULTI mode - TODO: Add maxEntries to Event model
-            // const maxEntries = ticket.event.maxEntries || 999999;
-            // if (log.result === "VALID" && ticket.entriesUsed < maxEntries) {
-            if (log.result === "VALID") {
-              await tx.ticket.update({
-                where: { id: log.ticketId },
-                data: {
-                  checkedInAt: new Date(log.scannedAt),
-                  checkedInByUserId: userId,
-                  // entriesUsed: { increment: 1 },
-                  // lastCheckinAt: new Date(log.scannedAt),
-                },
-              });
-            }
+          // Check if already checked in
+          if (ticket.checkedInAt) {
+            // Conflict: already checked in, but offline log says valid
+            // First check-in wins, so we mark as already used
+            await tx.checkinLog.create({
+              data: {
+                ticketId: log.ticketId,
+                eventId: log.eventId,
+                validatorUserId: userId,
+                deviceId: log.deviceId,
+                result: "ALREADY_USED",
+                scannedAt: new Date(log.scannedAt),
+                offline: true,
+                syncedAt: new Date(),
+                rawPayloadHash: log.rawPayloadHash,
+              },
+            });
+            return { success: true, conflict: true, message: "Already checked in" };
+          }
+
+          // Apply check-in
+          if (log.result === "VALID") {
+            await tx.ticket.update({
+              where: { id: log.ticketId },
+              data: {
+                checkedInAt: new Date(log.scannedAt),
+                checkedInByUserId: userId,
+                status: 'USED' as any // Force status update
+              },
+            });
           }
 
           // Create synced log

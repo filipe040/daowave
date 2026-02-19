@@ -1,142 +1,138 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import EventsWorkspace from "./components/events-workspace";
-import PromoterHeader from "./components/promoter-header";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Euro, Ticket, Calendar, TrendingUp } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-async function getPromoterEvents(userId: string) {
-  const promoter = await prisma.promoterProfile.findUnique({
-    where: { userId },
-    include: {
-      events: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          _count: { select: { tickets: true, orders: true } },
-        },
-      },
-    },
-  });
-
-  return promoter?.events || [];
+interface Stats {
+    revenue: { total: number };
+    tickets: { sold: number; capacity: number };
+    events: { active: number };
+    orders: { total: number };
 }
 
-function EmptyStateCard({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/35" />
-      </div>
+export default function PromoterDashboardPage() {
+    const [stats, setStats] = useState<Stats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-      <div className="relative flex min-h-screen items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-3xl border border-border bg-card/70 backdrop-blur-2xl p-7 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Estúdio</div>
-          <h1 className="mt-2 text-xl font-semibold text-foreground">{title}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+    useEffect(() => {
+        fetch("/api/promotor/stats")
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch stats");
+                return res.json();
+            })
+            .then((data) => {
+                if (data.empty) {
+                    // Handle empty state (no org)
+                    setStats(null);
+                } else {
+                    setStats(data);
+                }
+            })
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
 
-export default async function PromoterDashboard() {
-  let session;
-  try {
-    session = await getServerSession(authOptions);
-  } catch (err) {
-    console.error("[promotor] getServerSession error:", err);
-    redirect("/promotor/login");
-  }
-
-  if (!session?.user) redirect("/promotor/login");
-
-  const userRole = (session.user as { role?: string }).role;
-  if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-    return (
-      <EmptyStateCard
-        title="Acesso restrito"
-        description="Esta área é exclusiva para promotores e administradores."
-      />
-    );
-  }
-
-  let promoter;
-  let events: Awaited<ReturnType<typeof getPromoterEvents>> = [];
-  try {
-    promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-    if (!promoter) {
-      return (
-        <EmptyStateCard
-          title="Perfil não encontrado"
-          description="Não existe um perfil de promotor associado a esta conta."
-        />
-      );
+    if (loading) {
+        return <div className="p-8 space-y-4">
+            <Skeleton className="h-12 w-[250px]" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+            </div>
+        </div>;
     }
-    events = await getPromoterEvents(session.user.id);
-  } catch (err) {
-    console.error("[promotor] page error:", err);
+
+    if (error) {
+        return <div className="p-8 text-red-500">Erro ao carregar dados: {error}</div>;
+    }
+
+    // Empty State
+    if (!stats) {
+        return (
+            <div className="p-8">
+                <h2 className="text-3xl font-bold tracking-tight mb-4">Bem-vindo</h2>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Comece a sua jornada</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground mb-4">Ainda não tem nenhuma organização configurada.</p>
+                        {/* Button to create org would go here */}
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
     return (
-      <EmptyStateCard
-        title="Erro ao carregar"
-        description="Não foi possível carregar os dados. Verifica a ligação à base de dados e tenta novamente."
-      />
+        <div className="flex-1 space-y-4 p-8 pt-6">
+            <div className="flex items-center justify-between space-y-2">
+                <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
+                        <Euro className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(stats.revenue.total / 100)}
+                        </div>
+
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Bilhetes Vendidos</CardTitle>
+                        <Ticket className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">+{stats.tickets.sold}</div>
+                        <p className="text-xs text-muted-foreground">
+                            de {stats.tickets.capacity} disponíveis
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Eventos Ativos</CardTitle>
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.events.active}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Encomendas</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">+{stats.orders.total}</div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Charts would go here */}
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-4">
+                    <CardHeader>
+                        <CardTitle>Vendas Recentes</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        {/* Recharts Component Placeholder */}
+                        <div className="h-[200px] w-full flex items-center justify-center bg-gray-50 rounded text-muted-foreground">
+                            Gráfico de Vendas
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
-  }
-
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Ambient */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/35" />
-      </div>
-
-      {/* Header */}
-      <PromoterHeader />
-
-      {/* Main */}
-      <main className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-        {/* Eyebrow */}
-        <div className="mx-auto mb-7 flex max-w-3xl items-center justify-center gap-4">
-          <div className="h-px flex-1 bg-border" />
-          <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-            Selecionar ambiente de trabalho
-          </div>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        {/* Titles */}
-        <div className="text-center mb-8 sm:mb-10">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
-            EASYTICKET
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-            Workspace para gestão de experiências, bilhética e operação.
-          </p>
-        </div>
-
-        {/* Workspace */}
-        <EventsWorkspace events={events} />
-
-        {/* Footer (flow, not absolute) */}
-        <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[12px] text-muted-foreground">
-          <div className="flex flex-col">
-            <span>EASYTICKET TERMINAL</span>
-            <span className="text-foreground/50">LIS-HUB-01</span>
-          </div>
-
-          <span className="rounded-full border border-border bg-secondary px-3 py-1 text-[11px]">
-            {userRole}
-          </span>
-        </div>
-      </main>
-    </div>
-  );
 }

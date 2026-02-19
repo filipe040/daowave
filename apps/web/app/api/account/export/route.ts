@@ -50,7 +50,6 @@ export async function GET() {
         orderId: true,
         eventId: true,
         checkedInAt: true,
-        entriesUsed: true,
         createdAt: true,
         event: { select: { title: true, slug: true } },
       },

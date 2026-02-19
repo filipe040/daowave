@@ -143,26 +143,24 @@ export async function middleware(request: NextRequest) {
     // Determine required role based on path
     const userRole = token.role as string | undefined;
 
+    // OBJETIVO C: Role-based protection
     if (pathname.startsWith("/admin")) {
-      // OBJETIVO C: /admin only for ADMIN
       if (userRole !== "ADMIN") {
-        const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("from", pathname);
-        return NextResponse.redirect(signInUrl);
+        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
       }
-    } else if (pathname.startsWith("/promotor")) {
-      // PROMOTER or ADMIN allowed
+    }
+
+    if (pathname.startsWith("/promotor")) {
+      // Allow ADMIN to access promoter dashboard for debugging/support
       if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-        const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("from", pathname);
-        return NextResponse.redirect(signInUrl);
+        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
       }
-    } else if (pathname.startsWith("/validator")) {
-      // VALIDATOR or ADMIN allowed
-      if (userRole !== "VALIDATOR" && userRole !== "ADMIN") {
-        const signInUrl = new URL("/auth/signin", request.url);
-        signInUrl.searchParams.set("from", pathname);
-        return NextResponse.redirect(signInUrl);
+    }
+
+    // Legacy validator route - keep until fully migrated
+    if (pathname.startsWith("/validator")) {
+      if (userRole !== "VALIDATOR" && userRole !== "ADMIN" && userRole !== "PROMOTER") {
+        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
       }
     }
 

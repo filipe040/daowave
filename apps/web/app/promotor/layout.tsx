@@ -1,7 +1,18 @@
-export default function PromotorLayout({
+import { PromoterSidebar } from "@/components/promoter/PromoterSidebar";
+
+export default function PromoterLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="h-full relative">
+      <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-gray-900">
+        <PromoterSidebar />
+      </div>
+      <main className="md:pl-72">
+        {children}
+      </main>
+    </div>
+  );
 }

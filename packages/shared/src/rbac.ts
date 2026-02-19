@@ -1,4 +1,4 @@
-export type Role = "USER" | "PROMOTER" | "ADMIN";
+export type Role = "USER" | "PROMOTER" | "ADMIN" | "VALIDATOR";
 
 export function canAccessAdmin(role: Role) {
   return role === "ADMIN";

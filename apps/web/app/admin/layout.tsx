@@ -1,29 +1,18 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { canAccessAdminArea, isPromoter } from "@/lib/auth/permissions";
-import AdminDashboardShell from "./components/admin-dashboard-shell";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
-export const dynamic = "force-dynamic";
-
-export default async function AdminLayout({
-  children,
+export default function AdminLayout({
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/admin");
-  }
-
-  const role = (session.user as { role?: string }).role;
-
-  if (!canAccessAdminArea(role)) {
-    if (isPromoter(role)) redirect("/promotor");
-    if (role === "USER") redirect("/validator");
-    redirect("/");
-  }
-
-  return <AdminDashboardShell>{children}</AdminDashboardShell>;
+    return (
+        <div className="h-full relative">
+            <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-gray-900">
+                <AdminSidebar />
+            </div>
+            <main className="md:pl-72">
+                {children}
+            </main>
+        </div>
+    );
 }

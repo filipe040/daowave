@@ -91,7 +91,7 @@ export async function POST(req: Request) {
     // Validate dates
     const startAt = new Date(data.startAt);
     const endAt = new Date(data.endAt);
-    
+
     if (endAt <= startAt) {
       return NextResponse.json(
         { error: "Data de fim deve ser posterior à data de início" },
@@ -136,7 +136,6 @@ export async function POST(req: Request) {
         startAt,
         endAt,
         checkinMode: data.checkinMode,
-        maxEntries: data.maxEntries || null,
         checkinStartAt: data.entryWindowStartAt ? new Date(data.entryWindowStartAt) : null,
         checkinEndAt: data.entryWindowEndAt ? new Date(data.entryWindowEndAt) : null,
         bannerUrl: data.bannerUrl || null,

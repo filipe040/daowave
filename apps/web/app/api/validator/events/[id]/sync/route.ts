@@ -58,7 +58,6 @@ export async function GET(
       id: string;
       eventId: string;
       qrNonce: string;
-      entriesUsed: number;
     }>;
 
     // Generate pre-signed tokens for offline validation
@@ -68,7 +67,7 @@ export async function GET(
       eventId: ticket.eventId,
       checkinMode: event.checkinMode,
       maxEntries: event.maxEntries || undefined,
-      entriesUsed: ticket.entriesUsed,
+      entriesUsed: 0, // Deprecated
       qrToken: generateQrToken(ticket.id, ticket.eventId, ticket.qrNonce),
     }));
 

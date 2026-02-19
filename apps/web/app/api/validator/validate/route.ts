@@ -30,7 +30,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Verify event matches if provided
     if (eventId && payload.eid !== eventId) {
       return NextResponse.json({
         valid: false,
@@ -39,49 +38,20 @@ export async function POST(req: Request) {
       });
     }
 
-    // Try to fetch ticket with new fields, fallback if they don't exist
-    let ticket: any;
-    try {
-      ticket = await prisma.ticket.findUnique({
-        where: { id: payload.tid },
-        include: {
-          event: {
-            select: {
-              id: true,
-              title: true,
-              checkinMode: true,
-              checkinStartAt: true,
-              checkinEndAt: true,
-              maxEntries: true,
-            },
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: payload.tid },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            checkinMode: true,
+            checkinStartAt: true,
+            checkinEndAt: true,
           },
         },
-      });
-    } catch (error: any) {
-      // If fields don't exist (migration not applied), try without new fields
-      if (error?.code === "P2025" || error?.message?.includes("Unknown field") || error?.message?.includes("does not exist")) {
-        ticket = await prisma.ticket.findUnique({
-          where: { id: payload.tid },
-          include: {
-            event: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-        });
-        // Add default values for missing fields
-        if (ticket?.event) {
-          ticket.event.checkinMode = null;
-          ticket.event.checkinStartAt = null;
-          ticket.event.checkinEndAt = null;
-          ticket.event.maxEntries = null;
-        }
-      } else {
-        throw error;
-      }
-    }
+      },
+    });
 
     if (!ticket) {
       return NextResponse.json({
@@ -91,26 +61,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (ticket.checkedInAt) {
-      await prisma.checkinLog.create({
-        data: {
-          ticketId: ticket.id,
-          eventId: ticket.eventId,
-          validatorUserId: session.user.id,
-          deviceId,
-          result: "INVALID_STATUS",
-          offline: false,
-          rawPayloadHash: rawHash,
-        },
-      });
-      return NextResponse.json({
-        valid: false,
-        result: "invalid",
-        message: "Bilhete cancelado ou transferido",
-      });
-    }
-
-    // Check validation window (only if fields exist)
+    // Check validation window
     const now = new Date();
     if (ticket.event.checkinStartAt && now < new Date(ticket.event.checkinStartAt)) {
       return NextResponse.json({
@@ -128,178 +79,58 @@ export async function POST(req: Request) {
       });
     }
 
-    // Atomic check-in based on mode
-    const result = await prisma.$transaction(async (tx) => {
-      const current = await tx.ticket.findUnique({
-        where: { id: ticket.id },
+    // Atomic Check-in
+    if (ticket.checkedInAt) {
+      await prisma.checkinLog.create({
+        data: {
+          ticketId: ticket.id,
+          eventId: ticket.eventId,
+          validatorUserId: session.user.id,
+          deviceId,
+          result: "ALREADY_USED",
+          offline: false,
+          rawPayloadHash: rawHash,
+        },
       });
+      return NextResponse.json({
+        valid: false,
+        result: "already_used",
+        message: "Bilhete já utilizado",
+        lastCheckinAt: ticket.checkedInAt,
+      });
+    }
 
-      if (!current) {
-        return { valid: false, result: "invalid", message: "Bilhete não encontrado" };
-      }
-
-      // Get event to check checkinMode (with fallback if fields don't exist)
-      let event: { checkinMode?: string | null; maxEntries?: number | null } | null = null;
-      try {
-        event = await tx.event.findUnique({
-          where: { id: current.eventId },
-          select: {
-            checkinMode: true,
-            maxEntries: true,
-          },
-        });
-      } catch (error: any) {
-        // If fields don't exist (migration not applied), use defaults
-        if (error?.code === "P2025" || error?.message?.includes("Unknown field") || error?.message?.includes("does not exist")) {
-          event = null;
-        } else {
-          throw error;
-        }
-      }
-
-      const checkinMode = (event?.checkinMode as string) || "SINGLE";
-      const maxEntries = event?.maxEntries || 1;
-
-      if (checkinMode === "SINGLE") {
-        // Single entry: check if already checked in
-        if (current.checkedInAt) {
-          await tx.checkinLog.create({
-            data: {
-              ticketId: current.id,
-              eventId: current.eventId,
-              validatorUserId: session.user.id,
-              deviceId,
-              result: "ALREADY_USED",
-              offline: false,
-              rawPayloadHash: rawHash,
-            },
-          });
-          return {
-            valid: false,
-            result: "already_used",
-            message: "Bilhete já utilizado",
-            lastCheckinAt: current.lastCheckinAt,
-          };
-        }
-
-        // Mark as checked in
-        const checkinAt = new Date();
-        const updateData: any = {
-          checkedInAt: checkinAt,
+    await prisma.$transaction([
+      prisma.ticket.update({
+        where: { id: ticket.id },
+        data: {
+          checkedInAt: new Date(),
           checkedInByUserId: session.user.id,
-        };
-        
-        // Try to add new fields (will fail gracefully if migration not applied)
-        try {
-          // Test if fields exist
-          await tx.$queryRaw`SELECT entriesUsed FROM Ticket LIMIT 1`.catch(() => {
-            throw new Error("Fields don't exist");
-          });
-          // Fields exist, add them
-          updateData.entriesUsed = 1;
-          updateData.lastCheckinAt = checkinAt;
-        } catch {
-          // Fields don't exist, skip them
+          status: 'USED'
         }
-        
-        await tx.ticket.update({
-          where: { id: current.id },
-          data: updateData,
-        });
-
-        await tx.checkinLog.create({
-          data: {
-            ticketId: current.id,
-            eventId: current.eventId,
-            validatorUserId: session.user.id,
-            deviceId,
-            result: "VALID",
-            offline: false,
-            rawPayloadHash: rawHash,
-          },
-        });
-
-        return {
-          valid: true,
-          result: "valid",
-          message: "Check-in realizado com sucesso",
-          ticketId: current.id,
-          entriesUsed: 1,
-          maxEntries: 1,
-        };
-      } else {
-        // MULTI mode: check entriesUsed vs maxEntries
-        if (current.entriesUsed >= maxEntries) {
-          await tx.checkinLog.create({
-            data: {
-              ticketId: current.id,
-              eventId: current.eventId,
-              validatorUserId: session.user.id,
-              deviceId,
-              result: "MAX_ENTRIES_REACHED",
-              offline: false,
-              rawPayloadHash: rawHash,
-            },
-          });
-          return {
-            valid: false,
-            result: "max_entries_reached",
-            message: `Bilhete já utilizou todas as entradas (${maxEntries})`,
-            entriesUsed: current.entriesUsed,
-            maxEntries,
-            lastCheckinAt: current.lastCheckinAt,
-          };
+      }),
+      prisma.checkinLog.create({
+        data: {
+          ticketId: ticket.id,
+          eventId: ticket.eventId,
+          validatorUserId: session.user.id,
+          deviceId,
+          result: "VALID",
+          offline: false,
+          rawPayloadHash: rawHash,
         }
+      })
+    ]);
 
-        // Increment entries used
-        const checkinAt = new Date();
-        const updateData: any = {
-          checkedInAt: checkinAt, // Also set for first entry
-          checkedInByUserId: session.user.id,
-        };
-        
-        // Try to add new fields (will fail gracefully if migration not applied)
-        try {
-          // Test if fields exist
-          await tx.$queryRaw`SELECT entriesUsed FROM Ticket LIMIT 1`.catch(() => {
-            throw new Error("Fields don't exist");
-          });
-          // Fields exist, add them
-          updateData.entriesUsed = { increment: 1 };
-          updateData.lastCheckinAt = checkinAt;
-        } catch {
-          // Fields don't exist, skip them
-        }
-        
-        await tx.ticket.update({
-          where: { id: current.id },
-          data: updateData,
-        });
-
-        await tx.checkinLog.create({
-          data: {
-            ticketId: current.id,
-            eventId: current.eventId,
-            validatorUserId: session.user.id,
-            deviceId,
-            result: "VALID",
-            offline: false,
-            rawPayloadHash: rawHash,
-          },
-        });
-
-        return {
-          valid: true,
-          result: "valid",
-          message: "Check-in realizado com sucesso",
-          ticketId: current.id,
-          entriesUsed: current.entriesUsed + 1,
-          maxEntries,
-        };
-      }
+    return NextResponse.json({
+      valid: true,
+      result: "valid",
+      message: "Check-in realizado com sucesso",
+      ticketId: ticket.id,
+      entriesUsed: 1,
+      maxEntries: 1,
     });
 
-    return NextResponse.json(result);
   } catch (error) {
     console.error("Validate error:", error);
     return NextResponse.json(

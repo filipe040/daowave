@@ -71,7 +71,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
     description: initialData?.description || "",
     category: initialData?.category || "",
     status: initialData?.status || "DRAFT",
-    
+
     // Location
     city: initialData?.city || "",
     venueName: initialData?.venueName || (initialData as { venue?: string })?.venue || "",
@@ -79,35 +79,35 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
     startAt: initialData?.startAt ? format(new Date(initialData.startAt), "yyyy-MM-dd'T'HH:mm") : "",
     endAt: initialData?.endAt ? format(new Date(initialData.endAt), "yyyy-MM-dd'T'HH:mm") : "",
     timezone: initialData?.timezone || "Europe/Lisbon",
-    
+
     // Check-in
     checkinMode: initialData?.checkinMode || "SINGLE",
     reentryAllowed: initialData?.reentryAllowed || false,
     maxEntries: initialData?.maxEntries || null,
     entryWindowStartAt: initialData?.entryWindowStartAt ? format(new Date(initialData.entryWindowStartAt), "yyyy-MM-dd'T'HH:mm") : "",
     entryWindowEndAt: initialData?.entryWindowEndAt ? format(new Date(initialData.entryWindowEndAt), "yyyy-MM-dd'T'HH:mm") : "",
-    
+
     // Capacity
     capacityTotal: initialData?.capacityTotal || null,
-    
+
     // Policies
     ageRestriction: initialData?.ageRestriction || null,
     refundPolicy: initialData?.refundPolicy || "",
     cancellationPolicy: initialData?.cancellationPolicy || "",
     termsText: initialData?.termsText || "",
     consentRGPD: initialData?.consentRGPD || false,
-    
+
     // Accessibility
     wheelchairAccess: initialData?.wheelchairAccess || false,
     signLanguageSupport: initialData?.signLanguageSupport || false,
     accessibleWC: initialData?.accessibleWC || false,
     accessibilityNotes: initialData?.accessibilityNotes || "",
-    
+
     // Contact
     contactEmail: initialData?.contactEmail || "",
     contactPhone: initialData?.contactPhone || "",
     supportInstructions: initialData?.supportInstructions || "",
-    
+
     // Media
     bannerUrl: initialData?.bannerUrl || "",
     galleryUrls: initialData?.galleryUrls || [],
@@ -166,7 +166,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       if (!formData.address.trim()) newErrors.address = "Endereço é obrigatório";
       if (!formData.startAt) newErrors.startAt = "Data de início é obrigatória";
       if (!formData.endAt) newErrors.endAt = "Data de fim é obrigatória";
-      
+
       if (formData.startAt && formData.endAt) {
         const start = new Date(formData.startAt);
         const end = new Date(formData.endAt);
@@ -291,7 +291,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       // Success
       setLoading(false);
       setErrors({});
-      
+
       if (isAdminCreate) {
         router.push("/admin/events");
         router.refresh();
@@ -458,13 +458,12 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   // Validation only happens on submit
                   setActiveTab(tab.id);
                 }}
-                className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-medium ${
-                  activeTab === tab.id
-                    ? "border-blue-500 text-blue-400 bg-blue-500/10"
-                    : hasError
+                className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-medium ${activeTab === tab.id
+                  ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                  : hasError
                     ? "border-red-500/50 text-red-400 hover:border-red-500"
                     : "border-transparent text-zinc-400 hover:text-zinc-300 hover:border-zinc-700"
-                }`}
+                  }`}
               >
                 {(() => {
                   const Icon = tab.icon;
@@ -604,9 +603,9 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Rua Exemplo 123, 1000-000 Lisboa"
               />
-                {errors.address && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
-                  <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.address}
-                </p>}
+              {errors.address && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.address}
+              </p>}
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -709,7 +708,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
               {!formData.reentryAllowed && (
                 <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 flex items-center gap-1.5">
                   <Info className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                  <span>Ative "Permitir sair e entrar" para usar modo MULTI</span>
+                  <span>Ative &quot;Permitir sair e entrar&quot; para usar modo MULTI</span>
                 </p>
               )}
             </div>

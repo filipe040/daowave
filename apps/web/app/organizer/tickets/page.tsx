@@ -17,29 +17,24 @@ type TicketRow = {
   createdAt: Date;
   // New fields (optional when DB not migrated)
   entriesUsed?: number;
-  lastCheckinAt?: Date | null;
   ticketLot: { name: string };
   event: {
     id: string;
     title: string;
     slug: string;
     startAt: Date;
-    // New fields (optional when DB not migrated)
-    checkinMode?: string | null;
-    maxEntries?: number | null;
   };
-  // Legacy/unknown fields used by UI (may be absent)
+  // Legacy/unknown fields logic
   attendeeName?: string | null;
   attendeeEmail?: string | null;
 };
 
 function getEntriesUsed(ticket: TicketRow) {
-  if (typeof ticket.entriesUsed === "number") return ticket.entriesUsed;
   return ticket.checkedInAt ? 1 : 0;
 }
 
 function getMaxEntries(ticket: TicketRow) {
-  if (ticket.event?.checkinMode === "MULTI") return ticket.event.maxEntries ?? Infinity;
+  // Default to 1 as we support SINGLE mode only for now
   return 1;
 }
 
@@ -73,8 +68,6 @@ export default async function OrganizerTicketsPage() {
         eventId: true,
         checkedInAt: true,
         createdAt: true,
-        entriesUsed: true,
-        lastCheckinAt: true,
         ticketLot: { select: { name: true } },
         event: {
           select: {
@@ -82,8 +75,6 @@ export default async function OrganizerTicketsPage() {
             title: true,
             slug: true,
             startAt: true,
-            checkinMode: true,
-            maxEntries: true,
           },
         },
       },
@@ -248,11 +239,10 @@ export default async function OrganizerTicketsPage() {
                           </td>
                           <td className="py-3 px-4">
                             <span
-                              className={`text-xs px-2 py-1 rounded ${
-                                !ticket.checkedInAt
-                                  ? "bg-green-500/20 text-green-400"
-                                  : "bg-yellow-500/20 text-yellow-400"
-                              }`}
+                              className={`text-xs px-2 py-1 rounded ${!ticket.checkedInAt
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-yellow-500/20 text-yellow-400"
+                                }`}
                             >
                               {!ticket.checkedInAt
                                 ? "Emitido"
@@ -267,10 +257,10 @@ export default async function OrganizerTicketsPage() {
                             })()}
                           </td>
                           <td className="py-3 px-4 text-sm text-zinc-400">
-                            {(ticket as TicketRow).lastCheckinAt || ticket.checkedInAt
-                              ? format(new Date(((ticket as TicketRow).lastCheckinAt || ticket.checkedInAt) as Date), "dd MMM, HH:mm", {
-                                  locale: pt,
-                                })
+                            {(ticket as TicketRow).checkedInAt
+                              ? format(new Date((ticket as TicketRow).checkedInAt as Date), "dd MMM, HH:mm", {
+                                locale: pt,
+                              })
                               : "-"}
                           </td>
                         </tr>
@@ -290,8 +280,8 @@ export default async function OrganizerTicketsPage() {
       ) : (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
           <div className="mb-4 flex justify-center">
-          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
-        </div>
+            <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+          </div>
           <p className="text-lg text-zinc-400 mb-2">Ainda não há bilhetes emitidos</p>
           <p className="text-sm text-zinc-500">Os bilhetes aparecerão aqui após serem vendidos</p>
         </div>

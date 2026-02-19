@@ -17,7 +17,6 @@ interface TicketItem {
   id: string;
   code: string;
   checkedInAt: string | null;
-  entriesUsed: number;
   lastCheckinAt: string | null;
   createdAt: string;
   event: {
@@ -168,7 +167,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
           const bc = new BroadcastChannel("daowave-session");
           bc.postMessage({ type: "session:update", name: name.trim() || null });
           bc.close();
-        } catch {}
+        } catch { }
       }
     }
     if (pendingAvatarFile) {
@@ -185,7 +184,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
             const bc = new BroadcastChannel("daowave-session");
             bc.postMessage({ type: "session:update", avatarUrl: data.avatarUrl ?? null });
             bc.close();
-          } catch {}
+          } catch { }
         }
       }
     }
@@ -326,7 +325,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
           const bc = new BroadcastChannel("daowave-session");
           bc.postMessage({ type: "session:update", name: name.trim() || null });
           bc.close();
-        } catch {}
+        } catch { }
       }
     } catch (error) {
       setToast({
@@ -388,7 +387,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
           const bc = new BroadcastChannel("daowave-session");
           bc.postMessage({ type: "session:update", avatarUrl: data.avatarUrl ?? null });
           bc.close();
-        } catch {}
+        } catch { }
       }
 
       handleAvatarCancel();
@@ -783,7 +782,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
 
                 <div className="space-y-3">
                   {tickets?.map((t) => {
-                    const used = !!t.checkedInAt || (t.entriesUsed ?? 0) > 0;
+                    const used = !!t.checkedInAt;
 
                     return (
                       <div

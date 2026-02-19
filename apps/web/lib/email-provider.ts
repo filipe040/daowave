@@ -39,12 +39,12 @@ export function getEmailProvider(): EmailProvider {
       return "sendgrid";
     }
   }
-  
+
   // Fallback to SMTP if SMTP is configured
   if (env.SMTP_USER && env.SMTP_PASS) {
     return "smtp";
   }
-  
+
   return "smtp"; // Default
 }
 
@@ -102,7 +102,7 @@ async function sendViaSendGrid(options: SendEmailOptions): Promise<SendEmailResu
     // Dynamic import - @sendgrid/mail is now installed as optional dependency
     // @sendgrid/mail exports MailService as default
     // Using require to avoid TypeScript type checking issues
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line
     const sgMail = require("@sendgrid/mail") as any;
     if (!sgMail || typeof sgMail.setApiKey !== "function") {
       return {
@@ -150,7 +150,7 @@ async function sendViaSendGrid(options: SendEmailOptions): Promise<SendEmailResu
 async function sendViaSMTP(options: SendEmailOptions): Promise<SendEmailResult> {
   try {
     const nodemailer = await import("nodemailer");
-    
+
     const transporter = nodemailer.createTransport({
       host: env.SMTP_HOST || "smtp.gmail.com",
       port: parseInt(env.SMTP_PORT || "587"),

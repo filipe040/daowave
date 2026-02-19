@@ -8,6 +8,7 @@ import type { Event, EventStatus, Prisma } from "@prisma/client";
 
 export type CreateEventInput = {
   promoterId: string;
+  organizationId?: string;
   title: string;
   slug: string;
   description: string;
@@ -77,6 +78,40 @@ export const EventService = {
   },
 
   /**
+   * List events for an organization (paginated).
+   */
+  async getByOrganization(
+    organizationId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{ events: Event[]; total: number; pages: number }> {
+    const skip = (page - 1) * limit;
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where: { organizationId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          _count: {
+            select: {
+              tickets: true,
+              orders: { where: { status: "PAID" } },
+            },
+          },
+        },
+      }),
+      prisma.event.count({ where: { organizationId } }),
+    ]);
+
+    return {
+      events: events as Event[],
+      total,
+      pages: Math.ceil(total / limit),
+    };
+  },
+
+  /**
    * Get a single event by id; optional ownership check (pass promoterId for non-admin).
    */
   async getById(
@@ -107,6 +142,7 @@ export const EventService = {
   async create(input: CreateEventInput): Promise<Event> {
     const data: Prisma.EventCreateInput = {
       promoter: { connect: { id: input.promoterId } },
+      ...(input.organizationId && { organization: { connect: { id: input.organizationId } } }),
       title: input.title,
       slug: input.slug,
       description: input.description,
@@ -138,7 +174,8 @@ export const EventService = {
     if (input.endAt !== undefined) data.endAt = input.endAt;
     if (input.bannerUrl !== undefined) data.bannerUrl = input.bannerUrl;
     if (input.checkinMode !== undefined) data.checkinMode = input.checkinMode;
-    if (input.maxEntries !== undefined) data.maxEntries = input.maxEntries;
+    // maxEntries removed from schema
+    // if (input.maxEntries !== undefined) data.maxEntries = input.maxEntries;
     if (input.checkinStartAt !== undefined) data.checkinStartAt = input.checkinStartAt;
     if (input.checkinEndAt !== undefined) data.checkinEndAt = input.checkinEndAt;
     return prisma.event.update({ where: { id }, data });

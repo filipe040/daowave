@@ -100,8 +100,11 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
         <p className="text-sm text-blue-800">
-          <strong>Modo de Teste:</strong> Este é um pagamento simulado. 
-          Clique em "Confirmar Pagamento" para completar a compra.
+          <strong>Modo de Teste:</strong> Este é um pagamento simulado.
+          Clique em &quot;Confirmar Pagamento&quot; para completar a compra.
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          By clicking &quot;Pay now&quot;, you agree to our &quot;Terms of Service&quot;.
         </p>
       </div>
 

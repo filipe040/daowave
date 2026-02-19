@@ -9,8 +9,6 @@ interface TicketItem {
   id: string;
   code: string;
   checkedInAt: string | null;
-  entriesUsed: number;
-  lastCheckinAt: string | null;
   createdAt: string;
   event: { id: string; title: string; startAt: string; endAt: string; slug: string } | null;
   ticketLot: { id: string; name: string; priceCents: number; currency: string } | null;

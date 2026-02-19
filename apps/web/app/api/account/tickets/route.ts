@@ -17,8 +17,6 @@ export async function GET() {
         id: true,
         code: true,
         checkedInAt: true,
-        entriesUsed: true,
-        lastCheckinAt: true,
         createdAt: true,
         event: {
           select: {

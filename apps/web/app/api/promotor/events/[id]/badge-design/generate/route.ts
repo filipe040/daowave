@@ -34,41 +34,16 @@ export async function POST(
       return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
     }
 
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        promoterId: promoter.id,
-      },
-      select: {
-        badgeTemplateImageUrl: true,
-        badgePrefix: true,
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
-
-    if (!event.badgeTemplateImageUrl) {
-      return NextResponse.json({ error: "Template de badge não configurado" }, { status: 400 });
-    }
-
+    // Badge design fields not yet in schema
     const body = await request.json().catch(() => ({}));
     const quantity = typeof body.quantity === "number" ? body.quantity : 10;
-    const prefix = (body.prefix || event.badgePrefix || "BADGE").trim();
-
-    // TODO: Generate badges using PDF library (pdfkit, puppeteer, etc.)
-    // For now, return success
-    // In production, this would:
-    // 1. Load the template image
-    // 2. Generate PDFs with ticket data overlaid on template
-    // 3. Store PDFs and return download links
+    const prefix = (body.prefix || "BADGE").trim();
 
     return NextResponse.json({
       ok: true,
-      message: `${quantity} badges gerados com sucesso`,
+      message: `${quantity} badges gerados (Simulação - Schema pendente)`,
       prefix,
-      templateUrl: event.badgeTemplateImageUrl,
+      templateUrl: null,
     });
   } catch (error) {
     console.error("[badge-design] generate error:", error);

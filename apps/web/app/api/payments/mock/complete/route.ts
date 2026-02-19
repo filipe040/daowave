@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       include: {
         items: {
           include: {
-              ticketLot: true,
+            ticketLot: true,
           },
         },
       },
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
           // Use session user info for buyer
           const buyerName = session.user.name || "Attendee";
           const buyerEmail = session.user.email || "";
-          
+
           await (tx.ticket.create({
             data: {
               eventId: order.eventId,
@@ -76,7 +76,6 @@ export async function POST(req: Request) {
               attendeeName: buyerName,
               attendeeEmail: buyerEmail,
               qrNonce,
-              entriesUsed: 0,
             } as any,
           }) as Promise<any>);
         }
@@ -94,7 +93,7 @@ export async function POST(req: Request) {
     });
 
     console.log("✅ Mock payment completed for order:", orderId);
-    
+
     // Fetch order again to get user info
     const updatedOrder = await prisma.order.findUnique({
       where: { id: orderId },
@@ -110,14 +109,14 @@ export async function POST(req: Request) {
 
     const recipientEmail = updatedOrder?.user.email;
     console.log(`📧 Email será enviado para: ${recipientEmail || "N/A"}`);
-    
+
     // Send email with tickets (don't await to avoid blocking response)
     sendTicketsEmail(orderId).catch((error) => {
       console.error("❌ Failed to send tickets email:", error);
       // Don't throw - email failure shouldn't break the payment flow
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: "Mock payment completed successfully",
     });
@@ -126,11 +125,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error("Mock payment completion error:", error);
-    
+
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    
+
     return NextResponse.json(
-      { 
+      {
         error: "Failed to complete mock payment",
         message: process.env.NODE_ENV === "development" ? errorMessage : undefined,
       },

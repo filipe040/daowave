@@ -2,7 +2,7 @@ export default function HelpPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-4xl font-bold mb-8">Ajuda</h1>
-      
+
       <div className="space-y-8">
         <section>
           <h2 className="text-2xl font-semibold mb-4">Como Comprar Bilhetes</h2>
@@ -19,7 +19,7 @@ export default function HelpPage() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">Gerir os Meus Bilhetes</h2>
           <p className="text-zinc-300 mb-4">
-            Após fazer login, pode aceder à secção "Meus Bilhetes" para:
+            Após fazer login, pode aceder à secção &quot;Meus Bilhetes&quot; para:
           </p>
           <ul className="list-disc list-inside text-zinc-300 space-y-2">
             <li>Ver todos os seus bilhetes</li>
@@ -31,12 +31,12 @@ export default function HelpPage() {
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">Problemas Comuns</h2>
-          
+
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-purple-400 mb-2">Não recebi o email com os bilhetes</h3>
               <p className="text-zinc-300">
-                Verifique a pasta de spam. Se ainda não encontrar, contacte o suporte com o número da sua encomenda.
+                We&apos;re here to help! If you have any questions, please contact us at <a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a>.
               </p>
             </div>
 
