@@ -20,14 +20,7 @@ interface AdminUser {
     role: UserRole;
     emailVerified: boolean;
     createdAt: string;
-    _count: { orders: number; tickets: number };
-}
-
-interface ApiResponse {
-    data: AdminUser[];
-    total: number;
-    page: number;
-    limit: number;
+    _count: { orders: number };
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -50,14 +43,13 @@ export default function AdminUsersPage() {
     const [data, setData] = useState<AdminUser[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
-    const [role, setRole] = useState<string>("ALL");
+    const [role, setRole] = useState("ALL");
     const [search, setSearch] = useState("");
     const [searchDebounced, setSearchDebounced] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [actioning, setActioning] = useState<string | null>(null);
 
-    // Debounce search
     useEffect(() => {
         const id = setTimeout(() => { setSearchDebounced(search); setPage(1); }, 400);
         return () => clearTimeout(id);
@@ -72,11 +64,11 @@ export default function AdminUsersPage() {
             if (searchDebounced) params.set("q", searchDebounced);
             const res = await fetchWithTimeout(`/api/admin/users?${params}`);
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json: ApiResponse = await res.json();
+            const json = await res.json() as { data: AdminUser[]; total: number };
             setData(json.data);
             setTotal(json.total);
-        } catch (err: any) {
-            setError(err.message ?? "Erro desconhecido");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
         }
@@ -94,13 +86,13 @@ export default function AdminUsersPage() {
                 body: JSON.stringify(body),
             });
             if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error((err as any).error ?? `Erro ${res.status}`);
+                const err = await res.json().catch(() => ({})) as { error?: string };
+                throw new Error(err.error ?? `Erro ${res.status}`);
             }
-            toast.success(action === "ban" ? "Utilizador banido" : "Utilizador promovido a Promotor");
+            toast.success(action === "ban" ? "Utilizador banido" : "Promovido a Promotor");
             await load();
-        } catch (err: any) {
-            toast.error(err.message ?? "Erro na ação");
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro na ação");
         } finally {
             setActioning(null);
         }
@@ -113,15 +105,15 @@ export default function AdminUsersPage() {
             title="Utilizadores"
             subtitle={`${total} utilizador${total !== 1 ? "es" : ""} registados`}
             actions={
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <input
-                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 py-2 w-44 placeholder:text-zinc-500"
+                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 h-9 w-40 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         placeholder="Pesquisar…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 py-2"
+                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 h-9 min-w-[9rem]"
                         value={role}
                         onChange={(e) => { setRole(e.target.value); setPage(1); }}
                     >
@@ -137,7 +129,7 @@ export default function AdminUsersPage() {
             {loading && (
                 <div className="space-y-2">
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <Skeleton key={i} className="h-14 w-full rounded-lg" />
+                        <Skeleton key={i} className="h-14 w-full rounded-xl" />
                     ))}
                 </div>
             )}
@@ -149,72 +141,95 @@ export default function AdminUsersPage() {
             )}
 
             {!loading && !error && data.length > 0 && (
-                <>
-                    <div className="rounded-md border border-zinc-700 overflow-hidden">
-                        <table className="w-full text-sm">
-                            <thead className="bg-zinc-800">
-                                <tr>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Utilizador</th>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Função</th>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Verificado</th>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Ordens</th>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Registado</th>
-                                    <th className="p-3 text-left font-medium text-zinc-400">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data.map((u, i) => (
-                                    <tr key={u.id} className={i % 2 === 0 ? "bg-zinc-900" : "bg-zinc-800/40"}>
-                                        <td className="p-3">
-                                            <div className="font-medium text-white">{u.name ?? "—"}</div>
-                                            <div className="text-xs text-zinc-400">{u.email}</div>
-                                        </td>
-                                        <td className="p-3">
-                                            <Badge variant={ROLE_VARIANTS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
-                                        </td>
-                                        <td className="p-3">
-                                            {u.emailVerified ? (
-                                                <span className="text-emerald-400 text-xs font-medium">✓ Sim</span>
-                                            ) : (
-                                                <span className="text-zinc-500 text-xs">Não</span>
-                                            )}
-                                        </td>
-                                        <td className="p-3 text-zinc-300">{u._count.orders}</td>
-                                        <td className="p-3 text-xs text-zinc-400">
-                                            {new Date(u.createdAt).toLocaleDateString("pt-PT")}
-                                        </td>
-                                        <td className="p-3">
-                                            <div className="flex gap-2">
-                                                {u.role === "USER" && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        disabled={actioning === u.id}
-                                                        onClick={() => handleAction(u.id, "promote")}
-                                                    >
-                                                        Promover
-                                                    </Button>
-                                                )}
-                                                {u.role !== "ADMIN" && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        disabled={actioning === u.id}
-                                                        onClick={() => handleAction(u.id, "ban")}
-                                                    >
-                                                        Ban
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </td>
+                <div className="space-y-4">
+                    {/* Desktop table */}
+                    <div className="hidden lg:block rounded-xl border border-zinc-700/60 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm min-w-[640px]">
+                                <thead className="bg-zinc-800/70">
+                                    <tr>
+                                        {["Utilizador", "Função", "Email verificado", "Ordens", "Registado", "Ações"].map((h) => (
+                                            <th key={h} className="p-3 text-left font-medium text-zinc-400 whitespace-nowrap">{h}</th>
+                                        ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {data.map((u, i) => (
+                                        <tr key={u.id} className={i % 2 === 0 ? "bg-zinc-900/60" : "bg-zinc-800/30"}>
+                                            <td className="p-3">
+                                                <div className="font-medium text-white">{u.name ?? "—"}</div>
+                                                <div className="text-xs text-zinc-400">{u.email}</div>
+                                            </td>
+                                            <td className="p-3">
+                                                <Badge variant={ROLE_VARIANTS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
+                                            </td>
+                                            <td className="p-3">
+                                                {u.emailVerified
+                                                    ? <span className="text-emerald-400 text-xs font-medium">✓ Sim</span>
+                                                    : <span className="text-zinc-500 text-xs">Não</span>}
+                                            </td>
+                                            <td className="p-3 text-zinc-300">{u._count.orders}</td>
+                                            <td className="p-3 text-xs text-zinc-400 whitespace-nowrap">
+                                                {new Date(u.createdAt).toLocaleDateString("pt-PT")}
+                                            </td>
+                                            <td className="p-3">
+                                                <div className="flex gap-2">
+                                                    {u.role === "USER" && (
+                                                        <Button size="sm" variant="outline" disabled={actioning === u.id}
+                                                            onClick={() => handleAction(u.id, "promote")}>
+                                                            Promover
+                                                        </Button>
+                                                    )}
+                                                    {u.role !== "ADMIN" && (
+                                                        <Button size="sm" variant="destructive" disabled={actioning === u.id}
+                                                            onClick={() => handleAction(u.id, "ban")}>
+                                                            Ban
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2">
-                        <p className="text-sm text-zinc-400">Página {page} de {totalPages}</p>
+                    {/* Mobile + tablet cards */}
+                    <div className="lg:hidden space-y-3">
+                        {data.map((u) => (
+                            <div key={u.id} className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <div className="font-medium text-white truncate">{u.name ?? "—"}</div>
+                                        <div className="text-xs text-zinc-400 truncate">{u.email}</div>
+                                    </div>
+                                    <Badge variant={ROLE_VARIANTS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-zinc-400">
+                                    <span>{u.emailVerified ? "✓ Email verificado" : "Email não verificado"}</span>
+                                    <span>{u._count.orders} orden{u._count.orders !== 1 ? "s" : ""}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    {u.role === "USER" && (
+                                        <Button size="sm" variant="outline" disabled={actioning === u.id}
+                                            onClick={() => handleAction(u.id, "promote")}>
+                                            Promover
+                                        </Button>
+                                    )}
+                                    {u.role !== "ADMIN" && (
+                                        <Button size="sm" variant="destructive" disabled={actioning === u.id}
+                                            onClick={() => handleAction(u.id, "ban")}>
+                                            Ban
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-zinc-400">Página {page} de {totalPages} · {total} total</p>
                         <div className="flex gap-2">
                             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                                 <ChevronLeft className="h-4 w-4" />
@@ -224,7 +239,7 @@ export default function AdminUsersPage() {
                             </Button>
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </PageShell>
     );

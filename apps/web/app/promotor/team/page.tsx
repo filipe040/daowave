@@ -13,18 +13,8 @@ interface OrgMember {
     id: string;
     role: "OWNER" | "MANAGER" | "STAFF" | "READ_ONLY";
     createdAt: string;
-    user: {
-        id: string;
-        name: string | null;
-        email: string;
-        avatarUrl: string | null;
-    };
+    user: { id: string; name: string | null; email: string };
     organization: { id: string; name: string };
-}
-
-interface ApiResponse {
-    data: OrgMember[];
-    total: number;
 }
 
 const ROLE_LABELS: Record<OrgMember["role"], string> = {
@@ -52,10 +42,10 @@ export default function PromoterTeamPage() {
         try {
             const res = await fetchWithTimeout("/api/promotor/team");
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json: ApiResponse = await res.json();
+            const json: { data: OrgMember[] } = await res.json();
             setMembers(json.data);
-        } catch (err: any) {
-            setError(err.message ?? "Erro desconhecido");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
         }
@@ -66,12 +56,12 @@ export default function PromoterTeamPage() {
     return (
         <PageShell
             title="Equipa"
-            subtitle="Membros das suas organizações"
+            subtitle={members.length > 0 ? `${members.length} membro${members.length !== 1 ? "s" : ""}` : "Membros das suas organizações"}
         >
             {loading && (
                 <div className="space-y-2">
                     {Array.from({ length: 5 }).map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
                     ))}
                 </div>
             )}
@@ -87,34 +77,55 @@ export default function PromoterTeamPage() {
             )}
 
             {!loading && !error && members.length > 0 && (
-                <div className="rounded-md border border-zinc-700 overflow-hidden">
-                    <table className="w-full text-sm">
-                        <thead className="bg-zinc-800">
-                            <tr>
-                                <th className="p-3 text-left font-medium text-zinc-400">Membro</th>
-                                <th className="p-3 text-left font-medium text-zinc-400">Organização</th>
-                                <th className="p-3 text-left font-medium text-zinc-400">Função</th>
-                                <th className="p-3 text-left font-medium text-zinc-400">Desde</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {members.map((m, i) => (
-                                <tr key={m.id} className={i % 2 === 0 ? "bg-zinc-900" : "bg-zinc-800/40"}>
-                                    <td className="p-3">
-                                        <div className="font-medium text-white">{m.user.name ?? m.user.email}</div>
-                                        <div className="text-xs text-zinc-400">{m.user.email}</div>
-                                    </td>
-                                    <td className="p-3 text-zinc-300">{m.organization.name}</td>
-                                    <td className="p-3">
-                                        <Badge variant={ROLE_VARIANTS[m.role]}>{ROLE_LABELS[m.role]}</Badge>
-                                    </td>
-                                    <td className="p-3 text-xs text-zinc-400">
-                                        {new Date(m.createdAt).toLocaleDateString("pt-PT")}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="space-y-3">
+                    {/* Desktop */}
+                    <div className="hidden sm:block rounded-xl border border-zinc-700/60 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm min-w-[500px]">
+                                <thead className="bg-zinc-800/70">
+                                    <tr>
+                                        {["Membro", "Organização", "Função", "Desde"].map((h) => (
+                                            <th key={h} className="p-3 text-left font-medium text-zinc-400">{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {members.map((m, i) => (
+                                        <tr key={m.id} className={i % 2 === 0 ? "bg-zinc-900/60" : "bg-zinc-800/30"}>
+                                            <td className="p-3">
+                                                <div className="font-medium text-white">{m.user.name ?? m.user.email}</div>
+                                                <div className="text-xs text-zinc-400">{m.user.email}</div>
+                                            </td>
+                                            <td className="p-3 text-zinc-300">{m.organization.name}</td>
+                                            <td className="p-3"><Badge variant={ROLE_VARIANTS[m.role]}>{ROLE_LABELS[m.role]}</Badge></td>
+                                            <td className="p-3 text-xs text-zinc-400 whitespace-nowrap">
+                                                {new Date(m.createdAt).toLocaleDateString("pt-PT")}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="sm:hidden space-y-2">
+                        {members.map((m) => (
+                            <div key={m.id} className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 p-4">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="min-w-0">
+                                        <div className="font-medium text-white truncate">{m.user.name ?? m.user.email}</div>
+                                        <div className="text-xs text-zinc-400 truncate">{m.user.email}</div>
+                                    </div>
+                                    <Badge variant={ROLE_VARIANTS[m.role]}>{ROLE_LABELS[m.role]}</Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-zinc-400">
+                                    <span>{m.organization.name}</span>
+                                    <span>{new Date(m.createdAt).toLocaleDateString("pt-PT")}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </PageShell>

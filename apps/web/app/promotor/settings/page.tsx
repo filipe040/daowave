@@ -5,14 +5,12 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { toast } from "sonner";
+import { Save, Building2 } from "lucide-react";
 
 interface AccountData {
-    brandName: string;
+    brandName: string | null;
     contactEmail: string | null;
     vatNumber: string | null;
     status: string;
@@ -31,17 +29,11 @@ export default function PromoterSettingsPage() {
         try {
             const res = await fetchWithTimeout("/api/promotor/overview");
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json = await res.json();
-            const acc: AccountData = {
-                brandName: json.brandName ?? "",
-                contactEmail: json.contactEmail ?? null,
-                vatNumber: json.vatNumber ?? null,
-                status: json.status ?? "",
-            };
-            setAccount(acc);
-            setBrandName(acc.brandName);
-        } catch (err: any) {
-            setError(err.message ?? "Erro desconhecido");
+            const json = await res.json() as AccountData & { brandName: string };
+            setAccount(json);
+            setBrandName(json.brandName ?? "");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
         }
@@ -58,72 +50,94 @@ export default function PromoterSettingsPage() {
                 body: JSON.stringify({ brandName }),
             });
             if (!res.ok) {
-                const body = await res.json().catch(() => ({}));
+                const body = await res.json().catch(() => ({})) as { error?: string };
                 throw new Error(body.error ?? `Erro ${res.status}`);
             }
-            toast.success("Definições guardadas com sucesso");
+            toast.success("Definições guardadas");
             await load();
-        } catch (err: any) {
-            toast.error(err.message ?? "Erro ao guardar");
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro ao guardar");
         } finally {
             setSaving(false);
         }
     };
 
+    const dirty = account !== null && brandName !== (account.brandName ?? "");
+
     return (
-        <PageShell
-            title="Definições"
-            subtitle="Gerencie o perfil da sua organização"
-        >
-            {loading && (
-                <div className="space-y-4">
-                    <Skeleton className="h-48 w-full rounded-lg" />
-                </div>
-            )}
+        <PageShell title="Definições" subtitle="Gerencie o perfil da sua organização">
+            {loading && <Skeleton className="h-64 w-full rounded-xl" />}
 
             {!loading && error && <ErrorState message={error} onRetry={load} />}
 
             {!loading && !error && account && (
-                <div className="max-w-lg space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-base">Perfil da Organização</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-1">
-                                <Label htmlFor="brandName">Nome da marca</Label>
-                                <Input
+                <div className="max-w-2xl space-y-6">
+                    <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 overflow-hidden">
+                        {/* Card header */}
+                        <div className="flex items-center gap-3 border-b border-zinc-700/60 px-5 py-4">
+                            <Building2 className="h-5 w-5 text-zinc-400" />
+                            <h2 className="font-semibold text-white text-sm">Perfil da Organização</h2>
+                        </div>
+
+                        <div className="p-5 space-y-5">
+                            {/* Brand name */}
+                            <div className="space-y-1.5">
+                                <label htmlFor="brandName" className="text-sm font-medium text-zinc-300">
+                                    Nome da marca
+                                </label>
+                                <input
                                     id="brandName"
                                     value={brandName}
                                     onChange={(e) => setBrandName(e.target.value)}
                                     placeholder="Nome da sua organização"
+                                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                                 />
                             </div>
+
+                            {/* Read-only fields */}
                             {account.contactEmail && (
-                                <div className="space-y-1">
-                                    <Label>Email de contacto</Label>
-                                    <Input value={account.contactEmail} disabled />
-                                    <p className="text-xs text-muted-foreground">
-                                        Para alterar o email de contacto, contacte o suporte.
-                                    </p>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-zinc-300">Email de contacto</label>
+                                    <input
+                                        value={account.contactEmail}
+                                        disabled
+                                        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/50 text-zinc-500 px-3 py-2 text-sm cursor-not-allowed"
+                                    />
+                                    <p className="text-xs text-zinc-500">Para alterar, contacte o suporte.</p>
                                 </div>
                             )}
+
                             {account.vatNumber && (
-                                <div className="space-y-1">
-                                    <Label>NIF</Label>
-                                    <Input value={account.vatNumber} disabled />
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-zinc-300">NIF</label>
+                                    <input
+                                        value={account.vatNumber}
+                                        disabled
+                                        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/50 text-zinc-500 px-3 py-2 text-sm cursor-not-allowed"
+                                    />
                                 </div>
                             )}
-                            <div className="pt-2">
+
+                            {/* Status */}
+                            <div className="flex items-center gap-2 pt-1">
+                                <span className="text-xs text-zinc-400">Estado da conta:</span>
+                                <span className={`text-xs font-medium ${account.status === "APPROVED" ? "text-emerald-400" : "text-amber-400"}`}>
+                                    {account.status === "APPROVED" ? "Aprovada" : account.status}
+                                </span>
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
                                 <Button
                                     onClick={handleSave}
-                                    disabled={saving || !brandName.trim()}
+                                    disabled={saving || !brandName.trim() || !dirty}
+                                    className="flex items-center gap-2"
                                 >
+                                    <Save className="h-4 w-4" />
                                     {saving ? "A guardar…" : "Guardar alterações"}
                                 </Button>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
             )}
         </PageShell>

@@ -5,10 +5,9 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert, AlertTriangle, RefreshCw } from "lucide-react";
+import { ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 
 interface DuplicateCheckin {
@@ -21,14 +20,14 @@ interface AnomalousUser {
     ordersInOneHour: number;
 }
 
-interface ApiResponse {
+interface FraudData {
     duplicateCheckinsByTicket: number;
     duplicateCheckinsSample: DuplicateCheckin[];
     anomalousUsers: AnomalousUser[];
 }
 
 export default function AdminFraudPage() {
-    const [data, setData] = useState<ApiResponse | null>(null);
+    const [data, setData] = useState<FraudData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,10 +37,9 @@ export default function AdminFraudPage() {
         try {
             const res = await fetchWithTimeout("/api/admin/fraud");
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json: ApiResponse = await res.json();
-            setData(json);
-        } catch (err: any) {
-            setError(err.message ?? "Erro desconhecido");
+            setData(await res.json() as FraudData);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
         }
@@ -49,122 +47,100 @@ export default function AdminFraudPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const noIssues =
-        data &&
-        data.duplicateCheckinsByTicket === 0 &&
-        data.anomalousUsers.length === 0;
+    const clean = data && data.duplicateCheckinsByTicket === 0 && data.anomalousUsers.length === 0;
 
     return (
         <PageShell
             title="Anti-Fraude"
-            subtitle="Deteção de padrões suspeitos em tempo real"
+            subtitle="Deteção de padrões suspeitos"
             actions={
                 <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-                    Atualizar
+                    <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                    <span className="ml-2 hidden sm:inline">Atualizar</span>
                 </Button>
             }
         >
             {loading && (
                 <div className="space-y-4">
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-48 w-full" />
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                        <Skeleton className="h-28 rounded-xl" />
+                        <Skeleton className="h-28 rounded-xl" />
+                    </div>
+                    <Skeleton className="h-48 rounded-xl" />
                 </div>
             )}
 
             {!loading && error && <ErrorState message={error} onRetry={load} />}
 
-            {!loading && !error && noIssues && (
+            {!loading && !error && clean && (
                 <EmptyState
-                    icon={ShieldAlert}
-                    title="Sem alertas"
-                    description="Nenhum sinal de fraude detetado. O sistema está limpo."
+                    icon={ShieldCheck}
+                    title="Sistema limpo"
+                    description="Nenhum sinal de fraude detetado."
                 />
             )}
 
-            {!loading && !error && data && !noIssues && (
+            {!loading && !error && data && !clean && (
                 <div className="space-y-6">
                     {/* Summary cards */}
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-                        <Card className={data.duplicateCheckinsByTicket > 0 ? "border-destructive" : ""}>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                                    Check-ins Duplicados
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-destructive">
-                                    {data.duplicateCheckinsByTicket}
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Bilhetes com mais de 1 check-in registado
-                                </p>
-                            </CardContent>
-                        </Card>
+                        {/* Duplicate check-ins */}
+                        <div className={`rounded-xl border p-5 ${data.duplicateCheckinsByTicket > 0 ? "border-red-500/40 bg-red-500/10" : "border-zinc-700/60 bg-zinc-900/60"}`}>
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className={`h-5 w-5 ${data.duplicateCheckinsByTicket > 0 ? "text-red-400" : "text-zinc-500"}`} />
+                                <span className="text-sm font-medium text-zinc-300">Check-ins Duplicados</span>
+                            </div>
+                            <div className={`text-3xl font-bold ${data.duplicateCheckinsByTicket > 0 ? "text-red-400" : "text-zinc-400"}`}>
+                                {data.duplicateCheckinsByTicket}
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-1">Bilhetes com &gt;1 check-in</p>
+                        </div>
 
-                        <Card className={data.anomalousUsers.length > 0 ? "border-destructive" : ""}>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                                    Utilizadores Anómalos
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-destructive">
-                                    {data.anomalousUsers.length}
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    5+ encomendas na mesma hora
-                                </p>
-                            </CardContent>
-                        </Card>
+                        {/* Anomalous users */}
+                        <div className={`rounded-xl border p-5 ${data.anomalousUsers.length > 0 ? "border-red-500/40 bg-red-500/10" : "border-zinc-700/60 bg-zinc-900/60"}`}>
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className={`h-5 w-5 ${data.anomalousUsers.length > 0 ? "text-red-400" : "text-zinc-500"}`} />
+                                <span className="text-sm font-medium text-zinc-300">Utilizadores Anómalos</span>
+                            </div>
+                            <div className={`text-3xl font-bold ${data.anomalousUsers.length > 0 ? "text-red-400" : "text-zinc-400"}`}>
+                                {data.anomalousUsers.length}
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-1">5+ encomendas/hora</p>
+                        </div>
                     </div>
 
-                    {/* Duplicate check-ins sample */}
+                    {/* Duplicate check-in list */}
                     {data.duplicateCheckinsSample.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm">Bilhetes com Check-in Duplicado (amostra)</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2">
-                                    {data.duplicateCheckinsSample.map((d) => (
-                                        <div
-                                            key={d.ticketId}
-                                            className="flex items-center justify-between text-sm border rounded px-3 py-2"
-                                        >
-                                            <span className="font-mono text-xs">{d.ticketId}</span>
-                                            <Badge variant="danger">{d._count.id} check-ins</Badge>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 overflow-hidden">
+                            <div className="px-5 py-3 border-b border-zinc-700/60">
+                                <h2 className="text-sm font-medium text-zinc-300">Bilhetes com check-in duplicado (amostra)</h2>
+                            </div>
+                            <div className="divide-y divide-zinc-700/50">
+                                {data.duplicateCheckinsSample.map((d) => (
+                                    <div key={d.ticketId} className="flex items-center justify-between px-5 py-3">
+                                        <span className="font-mono text-xs text-zinc-400 truncate">{d.ticketId}</span>
+                                        <Badge variant="danger">{d._count.id} check-ins</Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
 
-                    {/* Anomalous users */}
+                    {/* Anomalous user list */}
                     {data.anomalousUsers.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-sm">Utilizadores com Atividade Suspeita</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2">
-                                    {data.anomalousUsers.map((u) => (
-                                        <div
-                                            key={u.userId}
-                                            className="flex items-center justify-between text-sm border rounded px-3 py-2"
-                                        >
-                                            <span className="font-mono text-xs">{u.userId}</span>
-                                            <Badge variant="danger">
-                                                {u.ordersInOneHour} encomendas/hora
-                                            </Badge>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 overflow-hidden">
+                            <div className="px-5 py-3 border-b border-zinc-700/60">
+                                <h2 className="text-sm font-medium text-zinc-300">Utilizadores com atividade suspeita</h2>
+                            </div>
+                            <div className="divide-y divide-zinc-700/50">
+                                {data.anomalousUsers.map((u) => (
+                                    <div key={u.userId} className="flex items-center justify-between px-5 py-3">
+                                        <span className="font-mono text-xs text-zinc-400 truncate">{u.userId}</span>
+                                        <Badge variant="danger">{u.ordersInOneHour} enc./hora</Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
                 </div>
             )}
