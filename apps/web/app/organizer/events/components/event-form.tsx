@@ -980,6 +980,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
               />
               {formData.bannerUrl && (
                 <div className="mt-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={formData.bannerUrl.startsWith("http") ? formData.bannerUrl : `https://${formData.bannerUrl}`}
                     alt="Banner preview"

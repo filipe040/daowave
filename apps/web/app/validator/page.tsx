@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Lock, CheckCircle, AlertTriangle, Ban, XCircle } from "lucide-react";
 
@@ -36,7 +36,7 @@ export default function ValidatorPage() {
   }, []);
 
   // Stop helper
-  const stopScanner = async () => {
+  const stopScanner = useCallback(async () => {
     if (scannerRef.current && isScanningRef.current) {
       try {
         await scannerRef.current.stop();
@@ -51,9 +51,9 @@ export default function ValidatorPage() {
       }
     }
     scannerRef.current = null;
-  };
+  }, []);
 
-  const handleValidate = async (token: string) => {
+  const handleValidate = useCallback(async (token: string) => {
     try {
       const res = await fetch("/api/validator/checkin", {
         method: "POST",
@@ -70,7 +70,7 @@ export default function ValidatorPage() {
       console.error("Validation error:", error);
       setResult({ valid: false, result: "invalid", message: "Erro ao validar bilhete" });
     }
-  };
+  }, [deviceId]);
 
   const handleManualValidate = () => {
     const token = manualCode.trim();
@@ -146,7 +146,7 @@ export default function ValidatorPage() {
     return () => {
       stopScanner();
     };
-  }, [scanning, isSecureContext]);
+  }, [scanning, isSecureContext, handleValidate, stopScanner]);
 
   if (status === "loading") {
     return (
@@ -164,8 +164,8 @@ export default function ValidatorPage() {
       <div className="min-h-screen grid place-items-center px-4">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
           <div className="mb-5 flex justify-center">
-          <Lock className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
-        </div>
+            <Lock className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+          </div>
           <h2 className="mb-2 text-2xl font-semibold text-foreground">Acesso restrito</h2>
           <p className="mb-6 text-sm text-muted-foreground">Esta área é apenas para validadores.</p>
 

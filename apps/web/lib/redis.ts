@@ -6,7 +6,7 @@
 // Check if we're in build phase - CRITICAL for preventing connections
 const isBuildPhase = (): boolean => {
   if (typeof window !== 'undefined') return false; // Client-side
-  
+
   return (
     process.env.NEXT_PHASE === 'phase-production-build' ||
     process.env.NEXT_PHASE === 'phase-development-build' ||
@@ -68,7 +68,7 @@ export const redis = (() => {
 })();
 
 // Default export for compatibility
-export default {
+const redisModule = {
   getRedisConnection,
   getRedis,
   checkRedisConnection,
@@ -76,3 +76,4 @@ export default {
   getRedisConnectionConfig,
   redis: null, // Explicitly null
 };
+export default redisModule;

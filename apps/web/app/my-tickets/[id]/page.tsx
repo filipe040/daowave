@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle } from "lucide-react";
 import { generateQrCodeDataUrl, generateQrToken } from "@/lib/qr";
 
@@ -94,11 +95,10 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
               <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Status</span>
               <div className="mt-2">
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    !ticket.checkedInAt
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "bg-zinc-800 text-zinc-400 border border-zinc-700"
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${!ticket.checkedInAt
+                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                    : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                    }`}
                 >
                   {!ticket.checkedInAt ? (
                     <>
@@ -129,7 +129,14 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           <h2 className="mb-6 text-xl font-bold">Código QR</h2>
           <div className="flex flex-col items-center space-y-6">
             <div className="rounded-xl border-4 border-white bg-white p-4 shadow-2xl">
-              <img src={qrDataUrl} alt="QR Code" className="h-48 w-48 sm:h-56 sm:w-56" />
+              <Image
+                src={qrDataUrl || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="}
+                alt="QR Code"
+                width={224}
+                height={224}
+                className="h-48 w-48 sm:h-56 sm:w-56"
+                unoptimized
+              />
             </div>
             <div className="w-full rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 text-center">
               <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -115,11 +116,10 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
 
       {toast && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            toast.type === "success"
+          className={`rounded-2xl border px-4 py-3 text-sm ${toast.type === "success"
               ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
               : "bg-red-500/10 border-red-500/30 text-red-200"
-          }`}
+            }`}
         >
           {toast.message}
         </div>
@@ -129,10 +129,13 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
         <h2 className="text-lg font-semibold text-foreground mb-4">Código QR</h2>
         {ticket.qrPayload ? (
           <div className="inline-block rounded-xl border border-zinc-700 bg-white p-4">
-            <img
+            <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticket.qrPayload)}`}
               alt="QR do bilhete"
+              width={192}
+              height={192}
               className="h-48 w-48"
+              unoptimized
             />
           </div>
         ) : (

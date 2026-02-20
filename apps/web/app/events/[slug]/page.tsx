@@ -101,10 +101,13 @@ export default async function EventPage({
           {/* Banner customizado ou cover image */}
           {event.bannerUrl ? (
             <div className="relative h-96 w-full">
-              <img
+              <Image
                 src={event.bannerUrl}
                 alt={event.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                unoptimized
+                sizes="100vw"
               />
             </div>
           ) : event.coverImage ? (
