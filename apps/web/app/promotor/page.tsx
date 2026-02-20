@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Euro, Ticket, Calendar, TrendingUp } from "lucide-react";
+import { KpiCard } from "@/components/dashboard/KpiCard";
+import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Euro, Ticket, Calendar, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 
 interface Stats {
     revenue: { total: number };
@@ -12,126 +14,113 @@ interface Stats {
     orders: { total: number };
 }
 
+const fmt = (cents: number) =>
+    new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(cents / 100);
+
 export default function PromoterDashboardPage() {
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+    const load = () => {
+        setLoading(true);
+        setError(null);
         fetch("/api/promotor/stats")
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch stats");
-                return res.json();
-            })
-            .then((data) => {
-                if (data.empty) {
-                    // Handle empty state (no org)
-                    setStats(null);
-                } else {
-                    setStats(data);
-                }
-            })
-            .catch((err) => setError(err.message))
+            .then((res) => { if (!res.ok) throw new Error("Erro ao carregar"); return res.json(); })
+            .then((data) => setStats(data.empty ? null : data))
+            .catch((e: unknown) => setError(e instanceof Error ? e.message : "Erro"))
             .finally(() => setLoading(false));
-    }, []);
+    };
 
-    if (loading) {
-        return <div className="p-8 space-y-4">
-            <Skeleton className="h-12 w-[250px]" />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-            </div>
-        </div>;
-    }
-
-    if (error) {
-        return <div className="p-8 text-red-500">Erro ao carregar dados: {error}</div>;
-    }
-
-    // Empty State
-    if (!stats) {
-        return (
-            <div className="p-8">
-                <h2 className="text-3xl font-bold tracking-tight mb-4">Bem-vindo</h2>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Comece a sua jornada</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground mb-4">Ainda não tem nenhuma organização configurada.</p>
-                        {/* Button to create org would go here */}
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
+    useEffect(() => { load(); }, []);
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-                        <Euro className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(stats.revenue.total / 100)}
-                        </div>
-
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Bilhetes Vendidos</CardTitle>
-                        <Ticket className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">+{stats.tickets.sold}</div>
-                        <p className="text-xs text-muted-foreground">
-                            de {stats.tickets.capacity} disponíveis
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Eventos Ativos</CardTitle>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.events.active}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Encomendas</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">+{stats.orders.total}</div>
-                    </CardContent>
-                </Card>
+        <div className="min-h-full bg-[#f5f5f7]">
+            {/* Header */}
+            <div className="bg-[#f5f5f7] border-b border-gray-200/80 px-6 sm:px-10 py-6">
+                <div className="max-w-6xl mx-auto">
+                    <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Overview</h1>
+                    <p className="mt-0.5 text-sm text-gray-500">Resumo da sua atividade</p>
+                </div>
             </div>
 
-            {/* Charts would go here */}
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>Vendas Recentes</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        {/* Recharts Component Placeholder */}
-                        <div className="h-[200px] w-full flex items-center justify-center bg-gray-50 rounded text-muted-foreground">
-                            Gráfico de Vendas
+            <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8 space-y-8">
+                {loading && (
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} className="h-36 rounded-2xl" />
+                        ))}
+                    </div>
+                )}
+
+                {!loading && error && <ErrorState message={error} onRetry={load} />}
+
+                {!loading && !error && !stats && (
+                    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-10 text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
+                            <Calendar className="w-6 h-6 text-gray-400" strokeWidth={1.5} />
                         </div>
-                    </CardContent>
-                </Card>
+                        <h2 className="text-base font-semibold text-gray-900 mb-1">Comece a sua jornada</h2>
+                        <p className="text-sm text-gray-400 mb-5">Ainda não tem nenhuma organização configurada.</p>
+                        <Link
+                            href="/promotor/events/new"
+                            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+                        >
+                            Criar primeiro evento
+                        </Link>
+                    </div>
+                )}
+
+                {!loading && !error && stats && (
+                    <>
+                        {/* KPI grid */}
+                        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                            <KpiCard
+                                label="Receita Total"
+                                value={fmt(stats.revenue.total)}
+                                icon={Euro}
+                                iconColor="text-emerald-600"
+                            />
+                            <KpiCard
+                                label="Bilhetes Vendidos"
+                                value={stats.tickets.sold}
+                                subtitle={`de ${stats.tickets.capacity} disponíveis`}
+                                icon={Ticket}
+                                iconColor="text-blue-600"
+                            />
+                            <KpiCard
+                                label="Eventos Ativos"
+                                value={stats.events.active}
+                                icon={Calendar}
+                                iconColor="text-purple-600"
+                            />
+                            <KpiCard
+                                label="Encomendas"
+                                value={stats.orders.total}
+                                icon={ShoppingCart}
+                                iconColor="text-orange-600"
+                            />
+                        </div>
+
+                        {/* Quick links */}
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                            {[
+                                { href: "/promotor/events", label: "Ver eventos", desc: "Gerir os seus eventos" },
+                                { href: "/promotor/sales", label: "Ver vendas", desc: "Histórico de encomendas" },
+                                { href: "/promotor/analytics", label: "Analytics", desc: "Receita dos últimos 30 dias" },
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
+                                >
+                                    <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700">{item.label}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+                                </Link>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

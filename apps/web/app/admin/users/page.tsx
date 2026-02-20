@@ -5,8 +5,6 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { toast } from "sonner";
@@ -24,17 +22,13 @@ interface AdminUser {
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
-    USER: "Utilizador",
-    PROMOTER: "Promotor",
-    ADMIN: "Admin",
-    VALIDATOR: "Validador",
+    USER: "Utilizador", PROMOTER: "Promotor", ADMIN: "Admin", VALIDATOR: "Validador",
 };
-
-const ROLE_VARIANTS: Record<UserRole, "default" | "danger" | "success" | "warning" | "muted"> = {
-    ADMIN: "danger",
-    PROMOTER: "success",
-    VALIDATOR: "warning",
-    USER: "muted",
+const ROLE_COLOR: Record<UserRole, string> = {
+    ADMIN: "bg-red-50 text-red-600",
+    PROMOTER: "bg-emerald-50 text-emerald-700",
+    VALIDATOR: "bg-amber-50 text-amber-700",
+    USER: "bg-gray-100 text-gray-500",
 };
 
 const PAGE_LIMIT = 20;
@@ -56,8 +50,7 @@ export default function AdminUsersPage() {
     }, [search]);
 
     const load = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+        setLoading(true); setError(null);
         try {
             const params = new URLSearchParams({ page: String(page), limit: String(PAGE_LIMIT) });
             if (role !== "ALL") params.set("role", role);
@@ -65,13 +58,9 @@ export default function AdminUsersPage() {
             const res = await fetchWithTimeout(`/api/admin/users?${params}`);
             if (!res.ok) throw new Error(`Erro ${res.status}`);
             const json = await res.json() as { data: AdminUser[]; total: number };
-            setData(json.data);
-            setTotal(json.total);
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Erro desconhecido");
-        } finally {
-            setLoading(false);
-        }
+            setData(json.data); setTotal(json.total);
+        } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro"); }
+        finally { setLoading(false); }
     }, [page, role, searchDebounced]);
 
     useEffect(() => { load(); }, [load]);
@@ -91,11 +80,8 @@ export default function AdminUsersPage() {
             }
             toast.success(action === "ban" ? "Utilizador banido" : "Promovido a Promotor");
             await load();
-        } catch (err: unknown) {
-            toast.error(err instanceof Error ? err.message : "Erro na ação");
-        } finally {
-            setActioning(null);
-        }
+        } catch (err: unknown) { toast.error(err instanceof Error ? err.message : "Erro"); }
+        finally { setActioning(null); }
     };
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
@@ -107,13 +93,13 @@ export default function AdminUsersPage() {
             actions={
                 <div className="flex flex-wrap gap-2">
                     <input
-                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 h-9 w-40 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 w-40 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         placeholder="Pesquisar…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                        className="text-sm border border-zinc-700 bg-zinc-900 text-white rounded-md px-3 h-9 min-w-[9rem]"
+                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         value={role}
                         onChange={(e) => { setRole(e.target.value); setPage(1); }}
                     >
@@ -127,116 +113,120 @@ export default function AdminUsersPage() {
             }
         >
             {loading && (
-                <div className="space-y-2">
+                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                        <div key={i} className="px-6 py-4 border-b border-gray-50 last:border-0">
+                            <Skeleton className="h-5 w-2/3" />
+                        </div>
                     ))}
                 </div>
             )}
-
             {!loading && error && <ErrorState message={error} onRetry={load} />}
-
             {!loading && !error && data.length === 0 && (
                 <EmptyState icon={Users} title="Sem utilizadores" description="Nenhum utilizador encontrado." />
             )}
-
             {!loading && !error && data.length > 0 && (
                 <div className="space-y-4">
                     {/* Desktop table */}
-                    <div className="hidden lg:block rounded-xl border border-zinc-700/60 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm min-w-[640px]">
-                                <thead className="bg-zinc-800/70">
-                                    <tr>
-                                        {["Utilizador", "Função", "Email verificado", "Ordens", "Registado", "Ações"].map((h) => (
-                                            <th key={h} className="p-3 text-left font-medium text-zinc-400 whitespace-nowrap">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.map((u, i) => (
-                                        <tr key={u.id} className={i % 2 === 0 ? "bg-zinc-900/60" : "bg-zinc-800/30"}>
-                                            <td className="p-3">
-                                                <div className="font-medium text-white">{u.name ?? "—"}</div>
-                                                <div className="text-xs text-zinc-400">{u.email}</div>
-                                            </td>
-                                            <td className="p-3">
-                                                <Badge variant={ROLE_VARIANTS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
-                                            </td>
-                                            <td className="p-3">
-                                                {u.emailVerified
-                                                    ? <span className="text-emerald-400 text-xs font-medium">✓ Sim</span>
-                                                    : <span className="text-zinc-500 text-xs">Não</span>}
-                                            </td>
-                                            <td className="p-3 text-zinc-300">{u._count.orders}</td>
-                                            <td className="p-3 text-xs text-zinc-400 whitespace-nowrap">
-                                                {new Date(u.createdAt).toLocaleDateString("pt-PT")}
-                                            </td>
-                                            <td className="p-3">
-                                                <div className="flex gap-2">
-                                                    {u.role === "USER" && (
-                                                        <Button size="sm" variant="outline" disabled={actioning === u.id}
-                                                            onClick={() => handleAction(u.id, "promote")}>
-                                                            Promover
-                                                        </Button>
-                                                    )}
-                                                    {u.role !== "ADMIN" && (
-                                                        <Button size="sm" variant="destructive" disabled={actioning === u.id}
-                                                            onClick={() => handleAction(u.id, "ban")}>
-                                                            Ban
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
+                    <div className="hidden lg:block bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-gray-100">
+                                    {["Utilizador", "Função", "Verificado", "Ordens", "Registado", ""].map((h) => (
+                                        <th key={h} className="px-6 py-3.5 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            {h}
+                                        </th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {data.map((u) => (
+                                    <tr key={u.id} className="hover:bg-gray-50/60 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-medium text-gray-900">{u.name ?? "—"}</div>
+                                            <div className="text-xs text-gray-400">{u.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${ROLE_COLOR[u.role]}`}>
+                                                {ROLE_LABELS[u.role]}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {u.emailVerified
+                                                ? <span className="text-emerald-600 text-xs">✓ Sim</span>
+                                                : <span className="text-gray-400 text-xs">Não</span>}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600">{u._count.orders}</td>
+                                        <td className="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">
+                                            {new Date(u.createdAt).toLocaleDateString("pt-PT")}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2 justify-end">
+                                                {u.role === "USER" && (
+                                                    <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "promote")}
+                                                        className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                                                        Promover
+                                                    </button>
+                                                )}
+                                                {u.role !== "ADMIN" && (
+                                                    <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "ban")}
+                                                        className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-40 transition-colors">
+                                                        Ban
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
-                    {/* Mobile + tablet cards */}
+                    {/* Mobile cards */}
                     <div className="lg:hidden space-y-3">
                         {data.map((u) => (
-                            <div key={u.id} className="rounded-xl border border-zinc-700/60 bg-zinc-900/60 p-4 space-y-3">
+                            <div key={u.id} className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
-                                        <div className="font-medium text-white truncate">{u.name ?? "—"}</div>
-                                        <div className="text-xs text-zinc-400 truncate">{u.email}</div>
+                                        <div className="font-medium text-gray-900 truncate">{u.name ?? "—"}</div>
+                                        <div className="text-xs text-gray-400 truncate">{u.email}</div>
                                     </div>
-                                    <Badge variant={ROLE_VARIANTS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${ROLE_COLOR[u.role]}`}>
+                                        {ROLE_LABELS[u.role]}
+                                    </span>
                                 </div>
-                                <div className="flex items-center justify-between text-xs text-zinc-400">
-                                    <span>{u.emailVerified ? "✓ Email verificado" : "Email não verificado"}</span>
-                                    <span>{u._count.orders} orden{u._count.orders !== 1 ? "s" : ""}</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    {u.role === "USER" && (
-                                        <Button size="sm" variant="outline" disabled={actioning === u.id}
-                                            onClick={() => handleAction(u.id, "promote")}>
-                                            Promover
-                                        </Button>
-                                    )}
-                                    {u.role !== "ADMIN" && (
-                                        <Button size="sm" variant="destructive" disabled={actioning === u.id}
-                                            onClick={() => handleAction(u.id, "ban")}>
-                                            Ban
-                                        </Button>
-                                    )}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-400">{u._count.orders} orden{u._count.orders !== 1 ? "s" : ""}</span>
+                                    <div className="flex gap-2">
+                                        {u.role === "USER" && (
+                                            <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "promote")}
+                                                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                                                Promover
+                                            </button>
+                                        )}
+                                        {u.role !== "ADMIN" && (
+                                            <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "ban")}
+                                                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-40 transition-colors">
+                                                Ban
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <p className="text-sm text-zinc-400">Página {page} de {totalPages} · {total} total</p>
-                        <div className="flex gap-2">
-                            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                        <p className="text-sm text-gray-400">Página {page} de {totalPages} · {total} total</p>
+                        <div className="flex items-center gap-1">
+                            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
+                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                            </button>
+                            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}
+                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronRight className="h-4 w-4" />
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>
