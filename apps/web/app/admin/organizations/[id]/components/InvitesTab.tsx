@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Mail, Copy, Check, Clock, Shield } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -28,15 +28,15 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
     const [loading, setLoading] = useState(true);
     const [copying, setCopying] = useState<string | null>(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         const { data, error } = await api.get<Invite[]>(`/api/admin/organizations/${organizationId}/invites`);
         if (error) toast.error(error);
         else setInvites(data || []);
         setLoading(false);
-    };
+    }, [organizationId]);
 
-    useEffect(() => { load(); }, [organizationId]);
+    useEffect(() => { load(); }, [load]);
 
     const handleCopyToken = (invite: Invite) => {
         // In this implementation, tokens are hashed, so we can't get the raw token again

@@ -79,8 +79,8 @@ export async function PUT(
       data: {
         ...(data.name && { name: data.name }),
         ...(data.price !== undefined && { priceCents: data.price }),
-        ...(data.startsAt && { startsAt: new Date(data.startsAt) }),
-        ...(data.endsAt && { endsAt: new Date(data.endsAt) }),
+        ...(data.startsAt && { saleStartAt: new Date(data.startsAt) }),
+        ...(data.endsAt && { saleEndAt: new Date(data.endsAt) }),
         ...(data.stockTotal !== undefined && { quantityTotal: data.stockTotal }),
       },
     });
@@ -91,8 +91,8 @@ export async function PUT(
       await createAuditLog({
         userId: session.user.id,
         action: "TICKET_LOT_PRICE_CHANGED",
-        resourceType: "ticketLot",
-        resourceId: lotId,
+        entityType: "ticketLot",
+        entityId: lotId,
         details: {
           eventId: eventId,
           lotName: currentLot.name,

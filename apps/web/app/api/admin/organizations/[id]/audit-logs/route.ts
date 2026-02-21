@@ -4,9 +4,10 @@ import { requireAuth } from "@/lib/auth/guards";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         if ((session.user as any).role !== "ADMIN") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });

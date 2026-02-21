@@ -53,8 +53,8 @@ export async function POST(
     await createAuditLog({
       userId: session.user.id,
       action: "TICKET_EMAIL_RESENT",
-      resourceType: "ticket",
-      resourceId: ticketId,
+      entityType: "ticket",
+      entityId: ticketId,
       details: { orderId: ticket.orderId, eventId: ticket.eventId },
       ...metadata,
     });

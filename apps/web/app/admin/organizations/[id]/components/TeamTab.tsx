@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Users, Mail, Trash2, Shield } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface TeamMember {
     id: string;
@@ -32,15 +33,15 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         const { data, error } = await api.get<TeamMember[]>(`/api/admin/organizations/${organizationId}/team`);
         if (error) toast.error(error);
         else setMembers(data || []);
         setLoading(false);
-    };
+    }, [organizationId]);
 
-    useEffect(() => { load(); }, [organizationId]);
+    useEffect(() => { load(); }, [load]);
 
     return (
         <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden">
@@ -57,9 +58,9 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         label: "Membro",
                         render: (m) => (
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5">
+                                <div className="relative w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5 overflow-hidden">
                                     {m.user.avatarUrl ? (
-                                        <img src={m.user.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
+                                        <Image src={m.user.avatarUrl} alt={m.user.name || ""} fill className="object-cover" unoptimized />
                                     ) : (
                                         <Users className="h-4 w-4 text-white/20" />
                                     )}

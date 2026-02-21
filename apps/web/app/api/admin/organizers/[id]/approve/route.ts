@@ -31,7 +31,7 @@ export async function POST(
       entityType: "promoter",
       entityId: id,
       details: { brandName: organizer.brandName },
-      ipAddress: metadata.ip,
+      ip: metadata.ip,
       userAgent: metadata.userAgent,
     });
 

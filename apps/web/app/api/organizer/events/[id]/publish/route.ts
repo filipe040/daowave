@@ -69,8 +69,8 @@ export async function POST(
     await createAuditLog({
       userId: session.user.id,
       action: "EVENT_PUBLISH_REQUESTED",
-      resourceType: "event",
-      resourceId: id,
+      entityType: "event",
+      entityId: id,
       details: {
         eventTitle: event.title,
         previousStatus,

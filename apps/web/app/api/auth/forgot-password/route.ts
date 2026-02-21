@@ -97,12 +97,12 @@ export async function POST(req: Request) {
     await createAuditLog({
       userId: user.id,
       action: "PASSWORD_RESET_REQUESTED",
-      resourceType: "user",
-      resourceId: user.id,
+      entityType: "user",
+      entityId: user.id,
       details: {
         email: user.email,
       },
-      ipAddress: metadata.ip,
+      ip: metadata.ip,
       userAgent: metadata.userAgent || undefined,
     });
 

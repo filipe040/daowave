@@ -13,7 +13,8 @@ import {
     ExternalLink,
     Settings,
     Activity,
-    ArrowLeft
+    ArrowLeft,
+    Plus
 } from "lucide-react";
 import { api, Organization } from "@/lib/api-client";
 import { toast } from "sonner";

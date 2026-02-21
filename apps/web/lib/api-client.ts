@@ -66,6 +66,7 @@ export interface Organization {
     slug: string;
     vatNumber?: string;
     status: string;
+    website?: string;
     createdAt: string;
     _count?: {
         members: number;

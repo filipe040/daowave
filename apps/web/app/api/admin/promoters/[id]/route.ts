@@ -93,7 +93,7 @@ export async function PATCH(
       entityType: "promoter",
       entityId: id,
       details: { previousStatus: promoter.status, ...updateData },
-      ipAddress: metadata.ip,
+      ip: metadata.ip,
       userAgent: metadata.userAgent,
     });
 

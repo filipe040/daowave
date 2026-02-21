@@ -7,9 +7,10 @@ import { InviteService } from "@/lib/services/invite.service";
  */
 export async function GET(
     req: NextRequest,
-    { params }: { params: { token: string } }
+    context: { params: Promise<{ token: string }> }
 ) {
     try {
+        const params = await context.params;
         const { valid, invite, error } = await InviteService.validateToken(params.token);
 
         if (!valid || !invite) {

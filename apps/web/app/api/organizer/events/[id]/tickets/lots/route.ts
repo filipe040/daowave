@@ -80,8 +80,8 @@ export async function POST(
     await createAuditLog({
       userId: session.user.id,
       action: "TICKET_LOT_CREATED",
-      resourceType: "ticketLot",
-      resourceId: ticketLot.id,
+      entityType: "ticketLot",
+      entityId: ticketLot.id,
       details: {
         eventId: id,
         name: data.name,

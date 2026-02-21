@@ -54,8 +54,8 @@ export async function GET(
     await createAuditLog({
       userId: session.user.id,
       action: "TICKET_PDF_ACCESSED",
-      resourceType: "ticket",
-      resourceId: ticketId,
+      entityType: "ticket",
+      entityId: ticketId,
       details: {
         eventId: ticket.eventId,
         eventTitle: ticket.event.title,

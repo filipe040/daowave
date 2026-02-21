@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/guards";
 import { z } from "zod";
-import { MemberRole, InviteStatus } from "@prisma/client";
+import { MemberRole } from "@prisma/client";
 import { InviteService } from "@/lib/services/invite.service";
 import { createAuditLog } from "@/lib/audit";
 
@@ -14,15 +14,16 @@ const createInviteSchema = z.object({
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         if ((session.user as any).role !== "ADMIN") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const invites = await prisma.invite.findMany({
+        const invites = await (prisma as any).invite.findMany({
             where: { organizationId: params.id },
             orderBy: { createdAt: "desc" },
         });
@@ -36,9 +37,10 @@ export async function GET(
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         const userId = (session.user as any).id;
 
@@ -59,11 +61,11 @@ export async function POST(
         }
 
         // Check for existing pending invite
-        const existing = await prisma.invite.findFirst({
+        const existing = await (prisma as any).invite.findFirst({
             where: {
                 organizationId: params.id,
                 email: body.email,
-                status: InviteStatus.PENDING,
+                status: "PENDING",
                 expiresAt: { gt: new Date() }
             }
         });

@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { Building2, Check, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import NextImage from "next/image";
 
 interface InviteData {
     id: string;
@@ -107,7 +108,9 @@ export default function InviteAcceptPage() {
                 <div className="flex flex-col items-center text-center">
                     <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center border border-white/5 mb-8 shadow-xl">
                         {invite.organization.logoUrl ? (
-                            <img src={invite.organization.logoUrl} alt="" className="w-full h-full rounded-3xl object-cover" />
+                            <div className="relative w-full h-full rounded-3xl overflow-hidden">
+                                <NextImage src={invite.organization.logoUrl} alt="" fill className="object-cover" unoptimized />
+                            </div>
                         ) : (
                             <Building2 className="h-10 w-10 text-white/40" />
                         )}

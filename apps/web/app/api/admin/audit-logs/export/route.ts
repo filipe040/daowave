@@ -44,7 +44,7 @@ export async function GET(req: Request) {
             where,
             orderBy: { createdAt: "desc" },
             take: 1000,
-        });
+        }) as any[];
 
         const headers = ["ID", "Data", "Ordem/Org", "Ator", "Ação", "Entidade", "Entidade ID", "IP", "User Agent", "Meta"];
         const rows = logs.map(log => [

@@ -60,8 +60,8 @@ export async function POST(
     await createAuditLog({
       userId: session.user.id,
       action: "EVENT_PUBLISHED",
-      resourceType: "event",
-      resourceId: id,
+      entityType: "event",
+      entityId: id,
       details: {
         eventTitle: event.title,
         promoterId: event.promoterId,
@@ -77,7 +77,7 @@ export async function POST(
   } catch (error: any) {
     safeLog.error("Approve event error", error);
     return NextResponse.json(
-      { 
+      {
         error: "Internal server error",
         message: error.message || "Erro desconhecido",
         code: error.code,

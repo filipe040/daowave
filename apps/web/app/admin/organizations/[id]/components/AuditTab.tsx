@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { ShieldAlert, Activity, User, Globe } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -30,15 +30,15 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         const { data, error } = await api.get<AuditLog[]>(`/api/admin/organizations/${organizationId}/audit-logs`);
         if (error) toast.error(error);
         else setLogs(data || []);
         setLoading(false);
-    };
+    }, [organizationId]);
 
-    useEffect(() => { load(); }, [organizationId]);
+    useEffect(() => { load(); }, [load]);
 
     return (
         <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden">

@@ -20,15 +20,16 @@ const updateOrgSchema = z.object({
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         if ((session.user as any).role !== "ADMIN") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const org = await prisma.organization.findUnique({
+        const org = await (prisma as any).organization.findUnique({
             where: { id: params.id },
             include: {
                 _count: {
@@ -50,9 +51,10 @@ export async function GET(
 
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         const userId = (session.user as any).id;
 

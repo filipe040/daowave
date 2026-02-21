@@ -10,9 +10,10 @@ import { createAuditLog } from "@/lib/audit";
  */
 export async function POST(
     req: NextRequest,
-    { params }: { params: { token: string } }
+    context: { params: Promise<{ token: string }> }
 ) {
     try {
+        const params = await context.params;
         const session = await requireAuth();
         const userId = (session.user as any).id;
         const userEmail = session.user.email;
@@ -34,7 +35,7 @@ export async function POST(
         // 3. atomic transaction: Accept invite + Add member + Upgrade user role if needed
         const result = await prisma.$transaction(async (tx) => {
             // a. Mark invite as accepted
-            await tx.invite.update({
+            await (tx as any).invite.update({
                 where: { id: invite.id },
                 data: {
                     status: "ACCEPTED",
@@ -43,7 +44,7 @@ export async function POST(
             });
 
             // b. Add member to organization
-            const member = await tx.organizationMember.upsert({
+            const member = await (tx as any).organizationMember.upsert({
                 where: {
                     organizationId_userId: {
                         organizationId: invite.organizationId,

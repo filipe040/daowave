@@ -69,7 +69,7 @@ export async function POST(
 
     if (recentEmailLog) {
       return NextResponse.json(
-        { 
+        {
           error: "Email já foi enviado recentemente. Por favor, aguarde antes de solicitar novamente.",
           retryAfter: 3600,
         },
@@ -86,8 +86,8 @@ export async function POST(
     await createAuditLog({
       userId: session.user.id,
       action: "TICKET_EMAIL_RESENT",
-      resourceType: "ticket",
-      resourceId: ticketId,
+      entityType: "ticket",
+      entityId: ticketId,
       details: {
         orderId: ticket.orderId,
         eventId: ticket.eventId,
