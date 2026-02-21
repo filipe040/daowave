@@ -12,6 +12,7 @@ import {
     Users,
     QrCode,
     LogOut,
+    Banknote,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -21,6 +22,7 @@ const routes = [
     { label: "Vendas", icon: Ticket, href: "/promotor/sales" },
     { label: "Check-in", icon: QrCode, href: "/promotor/checkin" },
     { label: "Analytics", icon: BarChart3, href: "/promotor/analytics" },
+    { label: "Finanças", icon: Banknote, href: "/promotor/finance" },
     { label: "Equipa", icon: Users, href: "/promotor/team" },
     { label: "Definições", icon: Settings, href: "/promotor/settings" },
 ];

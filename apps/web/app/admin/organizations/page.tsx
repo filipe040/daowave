@@ -1,109 +1,174 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Need to check if this exists or use basic HTML table
-import { Badge } from "@/components/ui/badge"; // Check if exists
-import { Check, X, MoreHorizontal } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { PageShell } from "@/components/dashboard/PageShell";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { ErrorState } from "@/components/dashboard/ErrorState";
+import { Building2, Check, X } from "lucide-react";
+import { getAdminOrganizations, Organization } from "@/lib/api-client";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { toast } from "sonner";
 
-interface Organization {
-    id: string;
-    name: string;
-    slug: string;
-    status: string;
-    members: { role: string; user: { name: string; email: string } }[];
-    _count: { events: number };
-}
+const ORG_STATUS_COLOR: Record<string, string> = {
+    ACTIVE: "bg-emerald-50 text-emerald-700",
+    PENDING: "bg-amber-50 text-amber-700",
+    REJECTED: "bg-red-50 text-red-600",
+    SUSPENDED: "bg-gray-100 text-gray-500",
+};
+
+const ORG_STATUS_LABEL: Record<string, string> = {
+    ACTIVE: "Ativa",
+    PENDING: "Pendente",
+    REJECTED: "Rejeitada",
+    SUSPENDED: "Suspensa",
+};
+
+const PAGE_LIMIT = 20;
 
 export default function AdminOrganizationsPage() {
-    const [orgs, setOrgs] = useState<Organization[]>([]);
+    const [data, setData] = useState<Organization[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [status, setStatus] = useState("ALL");
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [actioning, setActioning] = useState<string | null>(null);
 
-    const fetchOrgs = () => {
-        fetch("/api/admin/organizations")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.data) setOrgs(data.data);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    useEffect(() => {
-        fetchOrgs();
-    }, []);
-
-    const updateStatus = async (id: string, status: string) => {
-        await fetch(`/api/admin/organizations/${id}/approve`, {
-            method: "POST",
-            body: JSON.stringify({ status }),
-            headers: { "Content-Type": "application/json" }
+    const load = useCallback(async () => {
+        setLoading(true); setError(null);
+        const result = await getAdminOrganizations({
+            page,
+            ...(status !== "ALL" && { status }),
         });
-        fetchOrgs();
+        if (result.error || !result.data) setError(result.error ?? "Erro desconhecido");
+        else { setData(result.data.organizations ?? []); setTotal(result.data.total); }
+        setLoading(false);
+    }, [page, status]);
+
+    useEffect(() => { load(); }, [load]);
+
+    const handleApprove = async (id: string) => {
+        setActioning(id);
+        try {
+            const res = await fetchWithTimeout(`/api/admin/organizations/${id}/approve`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "ACTIVE" }),
+            });
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
+            toast.success("Organização aprovada");
+            await load();
+        } catch (err: unknown) { toast.error(err instanceof Error ? err.message : "Erro"); }
+        finally { setActioning(null); }
     };
+
+    const handleReject = async (id: string) => {
+        setActioning(id);
+        try {
+            const res = await fetchWithTimeout(`/api/admin/organizations/${id}/approve`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "REJECTED" }),
+            });
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
+            toast.success("Organização rejeitada");
+            await load();
+        } catch (err: unknown) { toast.error(err instanceof Error ? err.message : "Erro"); }
+        finally { setActioning(null); }
+    };
+
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight">Organizações</h2>
-            </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Todos os Promotores</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {/* Simple Table Fallback if UI component missing */}
-                    <div className="rounded-md border">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-[#111827] text-white h-10">
-                                <tr>
-                                    <th className="px-4">Nome</th>
-                                    <th className="px-4">Owner</th>
-                                    <th className="px-4">Eventos</th>
-                                    <th className="px-4">Status</th>
-                                    <th className="px-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {orgs.map((org) => (
-                                    <tr key={org.id} className="border-b hover:bg-zinc-50">
-                                        <td className="px-4 py-3 font-medium">{org.name} <br /><span className="text-xs text-muted-foreground">{org.slug}</span></td>
-                                        <td className="px-4 py-3">
-                                            {org.members[0]?.user.name} <br />
-                                            <span className="text-xs text-muted-foreground">{org.members[0]?.user.email}</span>
-                                        </td>
-                                        <td className="px-4 py-3">{org._count.events}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${org.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                                    org.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                                                        'bg-red-100 text-red-700'
-                                                }`}>
-                                                {org.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right space-x-2">
-                                            {org.status === 'PENDING' && (
-                                                <>
-                                                    <Button size="sm" variant="outline" className="text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => updateStatus(org.id, 'ACTIVE')}>
-                                                        <Check className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => updateStatus(org.id, 'REJECTED')}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {orgs.length === 0 && !loading && (
-                            <div className="text-center py-10 text-muted-foreground">Nenhuma organização encontrada.</div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        <PageShell
+            title="Organizações"
+            subtitle={`${total} organização${total !== 1 ? "ões" : ""}`}
+            actions={
+                <select
+                    className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                    value={status}
+                    onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+                >
+                    <option value="ALL">Todas</option>
+                    <option value="PENDING">Pendentes</option>
+                    <option value="ACTIVE">Ativas</option>
+                    <option value="REJECTED">Rejeitadas</option>
+                    <option value="SUSPENDED">Suspensas</option>
+                </select>
+            }
+        >
+            {!loading && error ? (
+                <ErrorState message={error} onRetry={load} />
+            ) : (
+                <DataTable<Organization>
+                    keyField="id"
+                    data={data}
+                    loading={loading}
+                    error={error}
+                    onRetry={load}
+                    emptyIcon={Building2}
+                    emptyTitle="Sem organizações"
+                    emptyDescription="Nenhuma organização encontrada."
+                    page={page}
+                    totalPages={totalPages}
+                    total={total}
+                    onPageChange={setPage}
+                    columns={[
+                        {
+                            key: "name",
+                            label: "Nome",
+                            render: (org) => (
+                                <div>
+                                    <div className="font-medium text-gray-900">{org.name}</div>
+                                    <div className="text-xs text-gray-400">{org.slug}</div>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "status",
+                            label: "Estado",
+                            render: (org) => (
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${ORG_STATUS_COLOR[org.status] ?? "bg-gray-100 text-gray-500"}`}>
+                                    {ORG_STATUS_LABEL[org.status] ?? org.status}
+                                </span>
+                            ),
+                        },
+                        {
+                            key: "createdAt",
+                            label: "Criada",
+                            render: (org) => (
+                                <span className="text-xs text-gray-400">
+                                    {new Date(org.createdAt).toLocaleDateString("pt-PT")}
+                                </span>
+                            ),
+                        },
+                    ]}
+                    rowActions={(org) => (
+                        <>
+                            {org.status === "PENDING" && (
+                                <>
+                                    <button
+                                        disabled={actioning === org.id}
+                                        onClick={() => handleApprove(org.id)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-40 transition-colors"
+                                    >
+                                        <Check className="h-3 w-3" />
+                                        Aprovar
+                                    </button>
+                                    <button
+                                        disabled={actioning === org.id}
+                                        onClick={() => handleReject(org.id)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-40 transition-colors"
+                                    >
+                                        <X className="h-3 w-3" />
+                                        Rejeitar
+                                    </button>
+                                </>
+                            )}
+                        </>
+                    )}
+                />
+            )}
+        </PageShell>
     );
 }
