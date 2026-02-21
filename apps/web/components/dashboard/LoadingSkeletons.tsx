@@ -66,3 +66,13 @@ export function PageSkeleton() {
         </div>
     );
 }
+
+export function StatsSkeleton() {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+            <div className="md:col-span-2 h-[300px] bg-white/5 rounded-[32px]" />
+            <div className="h-[300px] bg-white/5 rounded-[32px]" />
+            <div className="col-span-full h-24 bg-white/5 rounded-[24px]" />
+        </div>
+    );
+}

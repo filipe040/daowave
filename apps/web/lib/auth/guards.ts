@@ -23,22 +23,43 @@ export async function requireAuth() {
  */
 export async function requirePromoter() {
     const session = await requireAuth();
-    const userId = (session.user as any).id;
+    const userId = (session.user as any)?.id;
 
-    // 1. Check if user is an ADMIN (can bypass org checks if needed, but usually works within one)
-    const isGlobalAdmin = (session.user as any).role === "ADMIN";
+    if (!userId) {
+        redirect("/auth/signin");
+    }
 
-    // 2. Find the primary organization membership
-    // For now, we take the first active organization. In multi-tenant, we'd use a context/cookie/header.
-    const membership = await prisma.organizationMember.findFirst({
+    // 1. Check if user is an ADMIN (can bypass org checks)
+    const isGlobalAdmin = (session.user as any)?.role === "ADMIN";
+
+    // 2. Find specific organization membership
+    let membership = await prisma.organizationMember.findFirst({
         where: { userId },
         include: { organization: true },
     });
 
+    // 3. Admin Fallback: If admin has no membership, pick first available organization
+    if (!membership && isGlobalAdmin) {
+        const firstOrg = await prisma.organization.findFirst({
+            where: { status: "ACTIVE" },
+            orderBy: { createdAt: "asc" }
+        });
+
+        if (firstOrg) {
+            return {
+                session,
+                userId,
+                orgId: firstOrg.id,
+                organization: firstOrg,
+                role: "OWNER" as MemberRole,
+            };
+        }
+    }
+
     if (!membership && !isGlobalAdmin) {
         // If not a member and not an admin, they can't access /promotor
-        // We redirect to a "Setup Organization" or contact support page
-        redirect("/promotor/setup");
+        // Fallback to a safe landing page or the homepage if setup doesn't exist
+        redirect("/");
     }
 
     return {
@@ -46,7 +67,7 @@ export async function requirePromoter() {
         userId,
         orgId: membership?.organizationId || null,
         organization: membership?.organization,
-        role: membership?.role || (isGlobalAdmin ? "OWNER" : null),
+        role: membership?.role || (isGlobalAdmin ? "OWNER" as MemberRole : null),
     };
 }
 

@@ -7,13 +7,12 @@ import { prisma } from "./prisma";
 
 export interface AuditLogData {
   userId?: string;
+  organizationId?: string;
   action: string;
-  resourceType?: string; // Deprecated, use entityType
-  resourceId?: string; // Deprecated, use entityId
   entityType?: string;
   entityId?: string;
   details?: Record<string, any>;
-  ipAddress?: string;
+  ip?: string;
   userAgent?: string;
 }
 
@@ -22,33 +21,24 @@ export interface AuditLogData {
  */
 export async function createAuditLog(data: AuditLogData): Promise<void> {
   try {
-    // Map to Prisma schema fields
-    const entityType = data.entityType || data.resourceType || "unknown";
-    const entityId = data.entityId || data.resourceId;
-    
-    // Combine all metadata into metaJson
-    const metaJson: Record<string, any> = {};
-    if (data.details) {
-      Object.assign(metaJson, data.details);
-    }
-    if (data.ipAddress) {
-      metaJson.ipAddress = data.ipAddress;
-    }
-    if (data.userAgent) {
-      metaJson.userAgent = data.userAgent;
-    }
-    
+    const entityType = data.entityType || "unknown";
+
+    // metaJson is for additional context not in main columns
+    const metaJson = data.details || {};
+
     await prisma.auditLog.create({
       data: {
         actorUserId: data.userId || null,
+        organizationId: data.organizationId || null,
         action: data.action,
         entityType: entityType,
-        entityId: entityId || null,
+        entityId: data.entityId || null,
         metaJson: Object.keys(metaJson).length > 0 ? metaJson : undefined,
+        ip: data.ip || null,
+        userAgent: data.userAgent || null,
       },
     });
   } catch (error) {
-    // Don't fail the request if audit logging fails
     console.error("Failed to create audit log:", error);
   }
 }
@@ -70,11 +60,11 @@ export async function getAuditLogs(filters: {
     where: {
       ...(filters.userId && { actorUserId: filters.userId }),
       ...(filters.action && { action: filters.action }),
-      ...((filters.entityType || filters.resourceType) && { 
-        entityType: filters.entityType || filters.resourceType 
+      ...((filters.entityType || filters.resourceType) && {
+        entityType: filters.entityType || filters.resourceType
       }),
-      ...((filters.entityId || filters.resourceId) && { 
-        entityId: filters.entityId || filters.resourceId 
+      ...((filters.entityId || filters.resourceId) && {
+        entityId: filters.entityId || filters.resourceId
       }),
     },
     orderBy: { createdAt: "desc" },

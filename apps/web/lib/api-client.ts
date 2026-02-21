@@ -62,9 +62,16 @@ export interface AuditLog {
 export interface Organization {
     id: string;
     name: string;
+    legalName?: string;
     slug: string;
+    vatNumber?: string;
     status: string;
     createdAt: string;
+    _count?: {
+        members: number;
+        events: number;
+        invites?: number;
+    };
 }
 
 export interface FinanceData {
@@ -89,8 +96,20 @@ export async function getAuditLogs(params: any) {
 }
 
 export async function getAdminOrganizations(params: any) {
-    const searchParams = new URLSearchParams(params);
-    return api.get<{ organizations: Organization[]; total: number }>(`/api/admin/organizations?${searchParams.toString()}`);
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value));
+        }
+    });
+    return api.get<{
+        organizations: Organization[];
+        pagination: { total: number; pages: number; page: number; limit: number }
+    }>(`/api/admin/organizations?${searchParams.toString()}`);
+}
+
+export async function createOrganization(data: Partial<Organization>) {
+    return api.post<Organization>("/api/admin/organizations", data);
 }
 
 export async function getPromoterFinance() {

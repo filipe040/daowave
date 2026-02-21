@@ -13,6 +13,7 @@ import {
     QrCode,
     LogOut,
     Banknote,
+    Layers,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -35,19 +36,24 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
     const pathname = usePathname();
 
     return (
-        <div className="flex flex-col h-full bg-white border-r border-gray-200/80">
-            {/* Logo */}
-            <div className="px-5 pt-6 pb-4 border-b border-gray-100">
-                <Link href="/promotor" onClick={onNavClick} className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        D
+        <div className="flex flex-col h-full bg-black/40 backdrop-blur-xl border-r border-white/5 shadow-2xl">
+            {/* Logo Section */}
+            <div className="px-8 pt-10 pb-8 flex items-center justify-between">
+                <Link href="/promotor" onClick={onNavClick} className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-white to-white/80 p-[1px] shadow-lg shadow-white/5 group-hover:scale-105 transition-all">
+                        <div className="w-full h-full rounded-[15px] bg-black flex items-center justify-center">
+                            <Layers className="w-5 h-5 text-white" strokeWidth={2.5} />
+                        </div>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">Dashboard</span>
+                    <div>
+                        <span className="text-[13px] font-black text-white uppercase tracking-[0.2em] leading-none block">DAOwave</span>
+                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1 block">Promotor</span>
+                    </div>
                 </Link>
             </div>
 
-            {/* Nav */}
-            <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            {/* Navigation */}
+            <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto no-scrollbar">
                 {routes.map((route) => {
                     const active = route.exact
                         ? pathname === route.href
@@ -59,30 +65,35 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                             href={route.href}
                             onClick={onNavClick}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150",
+                                "flex items-center gap-3 px-4 py-3 rounded-[18px] text-[13px] font-bold transition-all duration-300 group",
                                 active
-                                    ? "bg-gray-100 text-gray-900"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                    ? "bg-white text-black shadow-xl shadow-white/5 scale-[1.02]"
+                                    : "text-white/40 hover:text-white hover:bg-white/5"
                             )}
                         >
                             <route.icon
-                                className={cn("h-4 w-4 shrink-0", active ? "text-gray-900" : "text-gray-400")}
-                                strokeWidth={active ? 2 : 1.75}
+                                className={cn(
+                                    "h-4.5 w-4.5 transition-transform duration-300",
+                                    active ? "text-black scale-110" : "text-white/20 group-hover:text-white group-hover:scale-110"
+                                )}
+                                strokeWidth={active ? 2.5 : 2}
                             />
-                            {route.label}
+                            <span className="tracking-tight">{route.label}</span>
                         </Link>
                     );
                 })}
             </nav>
 
-            {/* Footer */}
-            <div className="px-3 pb-5 border-t border-gray-100 pt-3">
+            {/* User / Footer Section */}
+            <div className="px-4 pb-10 pt-6 border-t border-white/5 bg-black/20">
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-3 px-3 py-2 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-150"
+                    className="flex items-center gap-3 px-4 py-4 w-full rounded-2xl text-[13px] font-bold text-white/40 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border border-transparent transition-all duration-300 group"
                 >
-                    <LogOut className="h-4 w-4 text-gray-400" strokeWidth={1.75} />
-                    Sair
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                        <LogOut className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+                    </div>
+                    <span className="tracking-tight">Terminar Sessão</span>
                 </button>
             </div>
         </div>
