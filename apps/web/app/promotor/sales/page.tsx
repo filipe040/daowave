@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { PageShell } from "@/components/dashboard/PageShell";
-import { EmptyState } from "@/components/dashboard/EmptyState";
-import { ErrorState } from "@/components/dashboard/ErrorState";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { ShoppingCart, Download, Search, Filter, Eye } from "lucide-react";
+import Link from "next/link";
+import { api } from "@/lib/api-client";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
 
 type OrderStatus = "PENDING" | "PAID" | "CANCELED" | "REFUNDED";
 
@@ -22,184 +23,183 @@ interface Order {
     _count: { tickets: number };
 }
 
-interface ApiResponse {
-    data: Order[];
-    total: number;
-    page: number;
-    limit: number;
-}
-
-const STATUS_LABELS: Record<OrderStatus, string> = {
-    PENDING: "Pendente",
-    PAID: "Pago",
-    CANCELED: "Cancelado",
-    REFUNDED: "Reembolsado",
-};
-
-const STATUS_COLOR: Record<OrderStatus, string> = {
-    PAID: "bg-emerald-50 text-emerald-700",
-    PENDING: "bg-amber-50 text-amber-700",
-    CANCELED: "bg-red-50 text-red-600",
-    REFUNDED: "bg-gray-100 text-gray-500",
+const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> = {
+    PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    PENDING: { label: "Pendente", className: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+    CANCELED: { label: "Cancelado", className: "bg-red-500/10 text-red-400 border-red-500/20" },
+    REFUNDED: { label: "Refunded", className: "bg-white/5 text-white/30 border-white/10" },
 };
 
 const fmt = (cents: number, currency = "EUR") =>
     new Intl.NumberFormat("pt-PT", { style: "currency", currency }).format(cents / 100);
 
-const PAGE_LIMIT = 20;
+const PAGE_SIZE = 15;
 
 export default function PromoterSalesPage() {
-    const [data, setData] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
-    const [status, setStatus] = useState("ALL");
+    const [totalPages, setTotalPages] = useState(1);
+    const [statusFilter, setStatusFilter] = useState("ALL");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState("");
 
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
-        try {
-            const params = new URLSearchParams({ page: String(page), limit: String(PAGE_LIMIT) });
-            if (status !== "ALL") params.set("status", status);
-            const res = await fetchWithTimeout(`/api/promotor/sales?${params}`);
-            if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json: ApiResponse = await res.json();
-            setData(json.data);
-            setTotal(json.total);
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Erro desconhecido");
-        } finally {
-            setLoading(false);
+        const params = new URLSearchParams({
+            page: String(page),
+            limit: String(PAGE_SIZE),
+            status: statusFilter
+        });
+
+        const { data, error: apiErr } = await api.get<{ data: Order[]; total: number }>(
+            `/api/promotor/sales?${params.toString()}`
+        );
+
+        if (apiErr) {
+            setError(apiErr);
+        } else {
+            setOrders(data?.data ?? []);
+            setTotal(data?.total ?? 0);
+            setTotalPages(Math.ceil((data?.total ?? 0) / PAGE_SIZE));
         }
-    }, [page, status]);
+        setLoading(false);
+    }, [page, statusFilter]);
 
     useEffect(() => { load(); }, [load]);
 
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
-
-    const filterSelect = (
-        <select
-            className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
-            value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-        >
-            <option value="ALL">Todos os estados</option>
-            <option value="PAID">Pagos</option>
-            <option value="PENDING">Pendentes</option>
-            <option value="CANCELED">Cancelados</option>
-            <option value="REFUNDED">Reembolsados</option>
-        </select>
-    );
+    const handleExport = () => {
+        // Logic for CSV export would go here
+        alert("A exportação de dados será implementada brevemente.");
+    };
 
     return (
         <PageShell
             title="Vendas"
-            subtitle={total > 0 ? `${total} encomenda${total !== 1 ? "s" : ""}` : "Histórico de encomendas"}
-            actions={filterSelect}
+            subtitle={total > 0 ? `Tens ${total} encomenda${total !== 1 ? "s" : ""} registadas.` : "Histórico detalhado de faturamento e encomendas."}
+            actions={
+                <button
+                    onClick={handleExport}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5"
+                >
+                    <Download className="w-4 h-4" />
+                    Exportar CSV
+                </button>
+            }
         >
-            {loading && (
-                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="px-6 py-4 border-b border-gray-100 last:border-0">
-                            <Skeleton className="h-5 w-3/4" />
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {!loading && error && <ErrorState message={error} onRetry={load} />}
-
-            {!loading && !error && data.length === 0 && (
-                <EmptyState
-                    icon={ShoppingCart}
-                    title="Sem vendas"
-                    description="Ainda não há encomendas para os seus eventos."
-                />
-            )}
-
-            {!loading && !error && data.length > 0 && (
-                <div className="space-y-4">
-                    {/* Desktop table */}
-                    <div className="hidden md:block bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-100">
-                                    {["Comprador", "Evento", "Bilhetes", "Total", "Estado", "Data"].map((h) => (
-                                        <th key={h} className="px-6 py-3.5 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {data.map((order) => (
-                                    <tr key={order.id} className="hover:bg-gray-50/60 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{order.buyerName ?? "—"}</div>
-                                            <div className="text-xs text-gray-400">{order.buyerEmail ?? ""}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-600 max-w-[200px] truncate">{order.event.title}</td>
-                                        <td className="px-6 py-4 text-gray-600 text-center">{order._count.tickets}</td>
-                                        <td className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">{fmt(order.totalCents, order.currency)}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_COLOR[order.status]}`}>
-                                                {STATUS_LABELS[order.status]}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">
-                                            {new Date(order.createdAt).toLocaleDateString("pt-PT")}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            <div className="space-y-8 pb-20">
+                {/* Search & Filters */}
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div className="relative w-full md:max-w-md group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/60 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Pesquisar por comprador, email ou evento..."
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all text-sm"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
 
-                    {/* Mobile cards */}
-                    <div className="md:hidden space-y-3">
-                        {data.map((order) => (
-                            <div key={order.id} className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0">
-                                        <div className="font-medium text-gray-900 truncate">{order.buyerName ?? "—"}</div>
-                                        <div className="text-xs text-gray-400 truncate">{order.buyerEmail ?? ""}</div>
-                                    </div>
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${STATUS_COLOR[order.status]}`}>
-                                        {STATUS_LABELS[order.status]}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-gray-500 truncate">{order.event.title}</p>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-400">{order._count.tickets} bilhete{order._count.tickets !== 1 ? "s" : ""}</span>
-                                    <span className="font-semibold text-gray-900">{fmt(order.totalCents, order.currency)}</span>
-                                </div>
-                            </div>
+                    <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+                        <Filter className="w-4 h-4 text-white/20 shrink-0" />
+                        {["ALL", "PAID", "PENDING", "CANCELED"].map((s) => (
+                            <button
+                                key={s}
+                                onClick={() => { setStatusFilter(s); setPage(1); }}
+                                className={`px-4 py-2 rounded-xl text-[12px] font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${statusFilter === s
+                                    ? "bg-white text-black border-white"
+                                    : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10"
+                                    }`}
+                            >
+                                {s === "ALL" ? "Todos" : s === "PAID" ? "Pagos" : s === "PENDING" ? "Pendentes" : "Cancelados"}
+                            </button>
                         ))}
                     </div>
-
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-400">Página {page} de {totalPages} · {total} total</p>
-                        <div className="flex items-center gap-1">
-                            <button
-                                disabled={page <= 1}
-                                onClick={() => setPage((p) => p - 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-gray-200/80"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            <button
-                                disabled={page >= totalPages}
-                                onClick={() => setPage((p) => p + 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-gray-200/80"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
                 </div>
-            )}
+
+                <DataTable<Order>
+                    keyField="id"
+                    data={orders.filter(o =>
+                    (o.buyerName?.toLowerCase().includes(search.toLowerCase()) ||
+                        o.buyerEmail?.toLowerCase().includes(search.toLowerCase()) ||
+                        o.event.title.toLowerCase().includes(search.toLowerCase()))
+                    )}
+                    loading={loading}
+                    error={error}
+                    onRetry={load}
+                    emptyIcon={ShoppingCart}
+                    emptyTitle="Nenhuma venda encontrada"
+                    emptyDescription="Ainda não tens encomendas registadas ou não existem resultados para os filtros selecionados."
+                    page={page}
+                    totalPages={totalPages}
+                    total={total}
+                    onPageChange={setPage}
+                    columns={[
+                        {
+                            key: "buyerName",
+                            label: "Comprador",
+                            render: (o) => (
+                                <div className="min-w-0 py-1">
+                                    <div className="font-bold text-white uppercase tracking-tight truncate">{o.buyerName || "Cliente"}</div>
+                                    <div className="text-[12px] text-white/30 truncate">{o.buyerEmail || ""}</div>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "event",
+                            label: "Evento / Bilhetes",
+                            render: (o) => (
+                                <div className="min-w-0">
+                                    <div className="text-[13px] font-medium text-white/60 truncate">{o.event.title}</div>
+                                    <div className="text-[11px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
+                                        {o._count.tickets} BILHETE{o._count.tickets !== 1 ? "S" : ""}
+                                    </div>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "totalCents",
+                            label: "Total",
+                            render: (o) => (
+                                <span className="font-black text-white">{fmt(o.totalCents, o.currency)}</span>
+                            ),
+                        },
+                        {
+                            key: "status",
+                            label: "Estado",
+                            render: (o) => {
+                                const config = STATUS_CONFIG[o.status] || STATUS_CONFIG.PENDING;
+                                return (
+                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${config.className}`}>
+                                        {config.label}
+                                    </span>
+                                );
+                            },
+                        },
+                        {
+                            key: "createdAt",
+                            label: "Data",
+                            render: (o) => (
+                                <div className="text-[12px] font-medium text-white/40 tabular-nums">
+                                    {format(new Date(o.createdAt), "dd/MM/yyyy HH:mm", { locale: pt })}
+                                </div>
+                            ),
+                        },
+                    ]}
+                    rowActions={(o) => (
+                        <Link
+                            href={`/promotor/sales/${o.id}`}
+                            className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                            title="Ver Detalhes"
+                        >
+                            <Eye className="w-4 h-4" />
+                        </Link>
+                    )}
+                />
+            </div>
         </PageShell>
     );
 }

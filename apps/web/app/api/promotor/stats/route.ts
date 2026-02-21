@@ -1,42 +1,42 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { AnalyticsService } from "@/lib/services/analytics";
-import { OrganizationService } from "@/lib/services/organization";
 import { NextRequest } from "next/server";
+import { requirePromoter } from "@/lib/auth/guards";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     try {
-        const token = await getToken({ req });
-        if (!token || !token.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        // Get selected organization from header or query, default to first user org
-        let orgId = req.nextUrl.searchParams.get("orgId");
+        // Use the professional guard
+        const { orgId } = await requirePromoter();
 
         if (!orgId) {
-            const userOrgs = await OrganizationService.getUserOrganizations(token.id as string);
-            if (userOrgs.length > 0) {
-                orgId = userOrgs[0].id;
-            } else {
-                // No organization yet
-                return NextResponse.json({
-                    empty: true,
-                    message: "No organization found"
-                });
-            }
+            return NextResponse.json({
+                empty: true,
+                message: "No organization found"
+            });
         }
 
-        // TODO: Verify user is member of orgId (OrganizationService.isMember...)
-
-        const [stats, chart] = await Promise.all([
-            AnalyticsService.getPromoterStats(orgId),
-            AnalyticsService.getSalesChart(orgId)
+        const [stats, chart, recentEvents] = await Promise.all([
+            AnalyticsService.getDetailedStats(orgId),
+            AnalyticsService.getSalesHistory(orgId, 30),
+            prisma.event.findMany({
+                where: { organizationId: orgId, archivedAt: null },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    startAt: true,
+                    city: true,
+                    _count: { select: { tickets: true } }
+                }
+            })
         ]);
 
-        return NextResponse.json({ ...stats, chart });
+        return NextResponse.json({ ...stats, chart, recentEvents });
 
     } catch (error) {
         console.error("[Promoter Stats] Error:", error);

@@ -7,19 +7,19 @@ interface ErrorStateProps {
 
 export function ErrorState({ message = "Ocorreu um erro inesperado.", onRetry }: ErrorStateProps) {
     return (
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm">
-            <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-5">
-                    <AlertCircle className="w-6 h-6 text-amber-500" strokeWidth={1.5} />
+        <div className="bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-red-500/20 shadow-2xl">
+            <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
+                <div className="w-20 h-20 rounded-[28px] bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8">
+                    <AlertCircle className="w-8 h-8 text-red-400" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-1">Algo correu mal</h3>
-                <p className="text-sm text-gray-400 max-w-xs">{message}</p>
+                <h3 className="text-xl font-bold text-white tracking-tight mb-2">Algo correu mal</h3>
+                <p className="text-sm text-red-400/60 max-w-[320px] leading-relaxed mb-8">{message}</p>
                 {onRetry && (
                     <button
                         onClick={onRetry}
-                        className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5"
                     >
-                        <RefreshCw className="w-3.5 h-3.5" />
+                        <RefreshCw className="w-4 h-4" />
                         Tentar novamente
                     </button>
                 )}

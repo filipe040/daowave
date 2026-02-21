@@ -3,13 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { DataTable } from "@/components/dashboard/DataTable";
-import { EmptyState } from "@/components/dashboard/EmptyState";
-import { ErrorState } from "@/components/dashboard/ErrorState";
-import { Calendar, Plus, ExternalLink, Building2, Pencil } from "lucide-react";
+import { Calendar, Plus, ExternalLink, Edit3, MapPin, Ticket, ShoppingCart, Search } from "lucide-react";
 import Link from "next/link";
-import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { api } from "@/lib/api-client";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
 
-interface Org { id: string; name: string; role: string }
 interface Event {
     id: string;
     title: string;
@@ -21,190 +20,165 @@ interface Event {
     _count: { tickets: number; orders: number };
 }
 
-const STATUS_COLOR: Record<string, string> = {
-    PUBLISHED: "bg-emerald-50 text-emerald-700 ring-emerald-200/60",
-    DRAFT: "bg-amber-50 text-amber-700 ring-amber-200/60",
-    ARCHIVED: "bg-gray-100 text-gray-500 ring-gray-200/60",
-    CANCELLED: "bg-red-50 text-red-600 ring-red-200/60",
-};
-const STATUS_LABEL: Record<string, string> = {
-    PUBLISHED: "Publicado",
-    DRAFT: "Rascunho",
-    ARCHIVED: "Arquivado",
-    CANCELLED: "Cancelado",
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+    PUBLISHED: { label: "Ativo", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    DRAFT: { label: "Rascunho", className: "bg-white/5 text-white/40 border-white/10" },
+    ARCHIVED: { label: "Arquivado", className: "bg-gray-500/10 text-gray-400 border-gray-500/20" },
+    CANCELLED: { label: "Cancelado", className: "bg-red-500/10 text-red-400 border-red-500/20" },
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export default function PromoterEventsPage() {
-    const [orgs, setOrgs] = useState<Org[]>([]);
-    const [orgId, setOrgId] = useState("");
     const [events, setEvents] = useState<Event[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const [loadingOrgs, setLoadingOrgs] = useState(true);
-    const [loadingEvents, setLoadingEvents] = useState(false);
-    const [orgError, setOrgError] = useState<string | null>(null);
-    const [eventError, setEventError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState("");
 
-    const loadOrgs = useCallback(async () => {
-        setLoadingOrgs(true); setOrgError(null);
-        try {
-            const res = await fetchWithTimeout("/api/promotor/organizations");
-            if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json = await res.json() as { data: Org[] };
-            const data = json.data ?? [];
-            setOrgs(data);
-            if (data.length === 1) setOrgId(data[0].id);
-        } catch (err: unknown) { setOrgError(err instanceof Error ? err.message : "Erro"); }
-        finally { setLoadingOrgs(false); }
-    }, []);
-
-    const loadEvents = useCallback(async () => {
-        if (!orgId) return;
-        setLoadingEvents(true); setEventError(null);
-        try {
-            const res = await fetchWithTimeout(`/api/promotor/events?orgId=${orgId}&page=${page}&limit=${PAGE_SIZE}`);
-            if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json = await res.json() as { events?: Event[]; total?: number; pages?: number };
-            setEvents(json.events ?? []);
-            setTotal(json.total ?? 0);
-            setTotalPages(Math.max(1, json.pages ?? 1));
-        } catch (err: unknown) { setEventError(err instanceof Error ? err.message : "Erro"); }
-        finally { setLoadingEvents(false); }
-    }, [orgId, page]);
-
-    useEffect(() => { loadOrgs(); }, [loadOrgs]);
-    useEffect(() => {
-        if (orgId) {
-            setPage(1);
-            setEvents([]);
+    const load = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        const { data, error: apiErr } = await api.get<{ events?: Event[]; total?: number; pages?: number }>(
+            `/api/promotor/events?page=${page}&limit=${PAGE_SIZE}`
+        );
+        if (apiErr) {
+            setError(apiErr);
+        } else {
+            setEvents(data?.events ?? []);
+            setTotal(data?.total ?? 0);
+            setTotalPages(data?.pages ?? 1);
         }
-    }, [orgId]);
-    useEffect(() => { if (orgId) loadEvents(); }, [orgId, page, loadEvents]);
+        setLoading(false);
+    }, [page]);
 
-    const subtitle = total > 0
-        ? `${total} evento${total !== 1 ? "s" : ""}`
-        : "Gerir os seus eventos";
+    useEffect(() => { load(); }, [load]);
 
-    const createBtn = orgId ? (
-        <Link
-            href={`/promotor/events/new?orgId=${orgId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-        >
-            <Plus className="h-4 w-4" />
-            Novo evento
-        </Link>
-    ) : null;
-
-    if (!loadingOrgs && orgError) return <PageShell title="Eventos"><ErrorState message={orgError} onRetry={loadOrgs} /></PageShell>;
-
-    if (!loadingOrgs && orgs.length === 0) return (
-        <PageShell title="Eventos">
-            <EmptyState
-                icon={Building2}
-                title="Sem organização"
-                description="Para criar eventos precisa de pertencer a uma organização. Contacte o administrador da plataforma."
-            />
-        </PageShell>
+    // Filter events based on search (local filtering for smoother UX, can be moved to API later)
+    const filteredEvents = events.filter(e =>
+        e.title.toLowerCase().includes(search.toLowerCase()) ||
+        e.city.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <PageShell title="Eventos" subtitle={subtitle} actions={createBtn}>
-            {/* Org selector — only visible when >1 org */}
-            {!loadingOrgs && orgs.length > 1 && (
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">Organização</label>
-                    <select
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10 min-w-0"
-                        value={orgId}
-                        onChange={(e) => setOrgId(e.target.value)}
-                    >
-                        <option value="">Selecionar…</option>
-                        {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-                    </select>
-                </div>
-            )}
-
-            <DataTable<Event>
-                keyField="id"
-                data={events}
-                loading={loadingOrgs || (!!orgId && loadingEvents)}
-                error={eventError}
-                onRetry={loadEvents}
-                emptyIcon={Calendar}
-                emptyTitle="Sem eventos"
-                emptyDescription={orgId
-                    ? "Ainda não criou nenhum evento para esta organização."
-                    : "Selecione uma organização para ver os eventos."}
-                page={page}
-                totalPages={totalPages}
-                total={total}
-                onPageChange={total > PAGE_SIZE ? setPage : undefined}
-                columns={[
-                    {
-                        key: "title",
-                        label: "Evento",
-                        render: (e) => (
-                            <div className="min-w-0">
-                                <div className="font-medium text-gray-900 truncate">{e.title}</div>
-                                <div className="text-xs text-gray-400 truncate">
-                                    {e.venue}{e.city ? `, ${e.city}` : ""}
-                                </div>
-                            </div>
-                        ),
-                    },
-                    {
-                        key: "startAt",
-                        label: "Data",
-                        render: (e) => (
-                            <span className="text-sm text-gray-500 whitespace-nowrap">
-                                {new Date(e.startAt).toLocaleDateString("pt-PT")}
-                            </span>
-                        ),
-                    },
-                    {
-                        key: "status",
-                        label: "Estado",
-                        render: (e) => (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ring-1 ring-inset ${STATUS_COLOR[e.status] ?? "bg-gray-100 text-gray-500 ring-gray-200/60"}`}>
-                                {STATUS_LABEL[e.status] ?? e.status}
-                            </span>
-                        ),
-                    },
-                    {
-                        key: "tickets",
-                        label: "Bilhetes",
-                        render: (e) => <span className="text-sm font-medium text-gray-700">{e._count.tickets}</span>,
-                    },
-                    {
-                        key: "orders",
-                        label: "Vendas",
-                        render: (e) => <span className="text-sm text-gray-500">{e._count.orders}</span>,
-                    },
-                ]}
-                rowActions={(e) => (
-                    <div className="flex items-center gap-1.5">
-                        <Link
-                            href={`/promotor/events/${e.id}`}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
-                        >
-                            <Pencil className="h-3 w-3" />
-                            Editar
-                        </Link>
-                        <a
-                            href={`/events/${e.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
-                        >
-                            <ExternalLink className="h-3 w-3" />
-                            Ver
-                        </a>
+        <PageShell
+            title="Eventos"
+            subtitle={total > 0 ? `Tens ${total} evento${total !== 1 ? 's' : ''} registados na tua organização.` : "Gere os teus eventos e monitoriza as vendas de bilhetes."}
+            actions={
+                <Link
+                    href="/promotor/events/new"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5"
+                >
+                    <Plus className="w-4 h-4" />
+                    Novo Evento
+                </Link>
+            }
+        >
+            <div className="space-y-8">
+                {/* Filters/Search Bar */}
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="relative w-full sm:max-w-md group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/60 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Pesquisar eventos por nome ou cidade..."
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all text-sm"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
-                )}
-            />
+                </div>
+
+                <DataTable<Event>
+                    keyField="id"
+                    data={filteredEvents}
+                    loading={loading}
+                    error={error}
+                    onRetry={load}
+                    emptyIcon={Calendar}
+                    emptyTitle="Nenhum evento encontrado"
+                    emptyDescription="Ainda não criaste eventos ou não existem resultados para a tua pesquisa."
+                    page={page}
+                    totalPages={totalPages}
+                    total={total}
+                    onPageChange={setPage}
+                    columns={[
+                        {
+                            key: "title",
+                            label: "Evento",
+                            render: (e) => (
+                                <div className="flex items-center gap-4 py-1">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center shrink-0">
+                                        <span className="text-[9px] font-black text-white/30 uppercase leading-none">{format(new Date(e.startAt), "MMM", { locale: pt })}</span>
+                                        <span className="text-base font-black text-white">{format(new Date(e.startAt), "dd")}</span>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="font-bold text-white uppercase tracking-tight truncate group-hover:text-emerald-400 transition-colors">{e.title}</div>
+                                        <div className="flex items-center gap-1.5 text-[12px] text-white/30 mt-0.5">
+                                            <MapPin className="w-3 h-3" />
+                                            <span className="truncate">{e.city}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "status",
+                            label: "Estado",
+                            render: (e) => {
+                                const config = STATUS_CONFIG[e.status] ?? STATUS_CONFIG.DRAFT;
+                                return (
+                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${config.className}`}>
+                                        {config.label}
+                                    </span>
+                                );
+                            },
+                        },
+                        {
+                            key: "tickets",
+                            label: "Bilhetes",
+                            render: (e) => (
+                                <div className="flex items-center gap-2">
+                                    <Ticket className="w-4 h-4 text-white/20" />
+                                    <span className="text-sm font-bold text-white/80">{e._count.tickets}</span>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: "orders",
+                            label: "Vendas",
+                            render: (e) => (
+                                <div className="flex items-center gap-2">
+                                    <ShoppingCart className="w-4 h-4 text-white/20" />
+                                    <span className="text-sm font-bold text-white/80">{e._count.orders}</span>
+                                </div>
+                            ),
+                        },
+                    ]}
+                    rowActions={(e) => (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/promotor/events/${e.id}/edit`}
+                                className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                                title="Editar Evento"
+                            >
+                                <Edit3 className="w-4 h-4" />
+                            </Link>
+                            <a
+                                href={`/events/${e.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                                title="Ver Página Pública"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                            </a>
+                        </div>
+                    )}
+                />
+            </div>
         </PageShell>
     );
 }

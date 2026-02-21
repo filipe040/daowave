@@ -5,6 +5,7 @@ import { EventService } from "@/lib/services/event.service";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { requirePromoter } from "@/lib/auth/guards";
 
 const createEventSchema = z.object({
   title: z.string().min(3, "Título demasiado curto"),
@@ -18,32 +19,21 @@ const createEventSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const { orgId } = await requirePromoter();
 
-  const orgId = req.nextUrl.searchParams.get("orgId");
-  if (!orgId) return NextResponse.json({ error: "Organization ID required" }, { status: 400 });
-
-  const role = (session.user as { role?: string }).role;
-
-  // Permission check: ADMIN can see any org; PROMOTER must be a member
-  if (role !== "ADMIN") {
-    const membership = await prisma.organizationMember.findFirst({
-      where: {
-        organizationId: orgId,
-        userId: session.user.id,
-        role: { in: ["OWNER", "MANAGER"] },
-      },
-    });
-    if (!membership) {
-      return NextResponse.json({ error: "Sem permissão para esta organização" }, { status: 403 });
+    if (!orgId) {
+      return NextResponse.json({ events: [], total: 0, pages: 0 });
     }
+
+    const page = Number(req.nextUrl.searchParams.get("page")) || 1;
+    const data = await EventService.getByOrganization(orgId, page);
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("[Get Events] Error:", error);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const page = Number(req.nextUrl.searchParams.get("page")) || 1;
-  const data = await EventService.getByOrganization(orgId, page);
-
-  return NextResponse.json(data);
 }
 
 export async function POST(req: NextRequest) {
