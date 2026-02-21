@@ -1,102 +1,198 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Calendar, MapPin, MoreHorizontal } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { PageShell } from "@/components/dashboard/PageShell";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { ErrorState } from "@/components/dashboard/ErrorState";
+import { Calendar, Plus, ExternalLink, Building2 } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+
+interface Org { id: string; name: string; role: string }
 
 interface Event {
     id: string;
     title: string;
+    slug: string;
     startAt: string;
-    status: string;
     venue: string;
-    _count: {
-        tickets: number;
-        orders: number;
-    };
+    city: string;
+    status: string;
+    _count: { tickets: number; orders: number };
 }
 
-export default function EventsPage() {
-    const [events, setEvents] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
+const EVENT_STATUS_COLOR: Record<string, string> = {
+    PUBLISHED: "bg-emerald-50 text-emerald-700",
+    DRAFT: "bg-amber-50 text-amber-700",
+    ARCHIVED: "bg-gray-100 text-gray-500",
+    CANCELLED: "bg-red-50 text-red-600",
+};
 
-    useEffect(() => {
-        fetch("/api/promotor/events")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.events) setEvents(data.events);
-            })
-            .finally(() => setLoading(false));
+const EVENT_STATUS_LABEL: Record<string, string> = {
+    PUBLISHED: "Publicado",
+    DRAFT: "Rascunho",
+    ARCHIVED: "Arquivado",
+    CANCELLED: "Cancelado",
+};
+
+const PAGE = 1;
+
+export default function PromoterEventsPage() {
+    const [orgs, setOrgs] = useState<Org[]>([]);
+    const [orgId, setOrgId] = useState<string>("");
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loadingOrgs, setLoadingOrgs] = useState(true);
+    const [loadingEvents, setLoadingEvents] = useState(false);
+    const [orgError, setOrgError] = useState<string | null>(null);
+    const [eventError, setEventError] = useState<string | null>(null);
+
+    // 1. Load organizations
+    const loadOrgs = useCallback(async () => {
+        setLoadingOrgs(true); setOrgError(null);
+        try {
+            const res = await fetchWithTimeout("/api/promotor/organizations");
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
+            const json = await res.json() as { data: Org[] };
+            setOrgs(json.data ?? []);
+            if (json.data?.length === 1) setOrgId(json.data[0].id);  // auto-select if single
+        } catch (err: unknown) { setOrgError(err instanceof Error ? err.message : "Erro"); }
+        finally { setLoadingOrgs(false); }
     }, []);
 
+    // 2. Load events for selected org
+    const loadEvents = useCallback(async () => {
+        if (!orgId) return;
+        setLoadingEvents(true); setEventError(null);
+        try {
+            const res = await fetchWithTimeout(`/api/promotor/events?orgId=${orgId}&page=${PAGE}`);
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
+            const json = await res.json() as { events?: Event[] };
+            setEvents(json.events ?? []);
+        } catch (err: unknown) { setEventError(err instanceof Error ? err.message : "Erro"); }
+        finally { setLoadingEvents(false); }
+    }, [orgId]);
+
+    useEffect(() => { loadOrgs(); }, [loadOrgs]);
+    useEffect(() => { if (orgId) loadEvents(); }, [orgId, loadEvents]);
+
+    const createBtn = orgId ? (
+        <Link
+            href={`/promotor/events/new?orgId=${orgId}`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+        >
+            <Plus className="h-4 w-4" />
+            Novo evento
+        </Link>
+    ) : null;
+
+    // ── No orgs state ──
+    if (!loadingOrgs && !orgError && orgs.length === 0) {
+        return (
+            <PageShell title="Eventos">
+                <EmptyState
+                    icon={Building2}
+                    title="Sem organização"
+                    description="Para criar eventos precisa de pertencer a uma organização. Contacte o administrador da plataforma."
+                />
+            </PageShell>
+        );
+    }
+
+    // ── Org error ──
+    if (!loadingOrgs && orgError) {
+        return (
+            <PageShell title="Eventos">
+                <ErrorState message={orgError} onRetry={loadOrgs} />
+            </PageShell>
+        );
+    }
+
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight">Eventos</h2>
-                <Link href="/promotor/events/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Criar Evento
-                    </Button>
-                </Link>
-            </div>
+        <PageShell title="Eventos" subtitle="Gerir os seus eventos" actions={createBtn}>
+            {/* Org selector — shown only if >1 org */}
+            {orgs.length > 1 && (
+                <div className="flex items-center gap-3 mb-4">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Organização</label>
+                    <select
+                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        value={orgId}
+                        onChange={(e) => setOrgId(e.target.value)}
+                    >
+                        <option value="">Selecionar…</option>
+                        {orgs.map((o) => (
+                            <option key={o.id} value={o.id}>{o.name}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Os seus eventos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="text-center py-10">A carregar...</div>
-                    ) : events.length === 0 ? (
-                        <div className="text-center py-10 text-muted-foreground">
-                            Não tem eventos criados.
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {events.map((event) => (
-                                <div
-                                    key={event.id}
-                                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-zinc-50 transition"
-                                >
-                                    <div className="flex items-center space-x-4">
-                                        <div className="h-12 w-12 rounded bg-zinc-100 flex items-center justify-center">
-                                            <Calendar className="h-6 w-6 text-zinc-500" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold">{event.title}</h3>
-                                            <div className="flex items-center text-sm text-muted-foreground">
-                                                <Calendar className="mr-1 h-3 w-3" />
-                                                {format(new Date(event.startAt), "PPP", { locale: pt })}
-                                                <MapPin className="ml-3 mr-1 h-3 w-3" />
-                                                {event.venue}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center space-x-6">
-                                        <div className="text-right">
-                                            <div className="text-sm font-medium">{event._count.tickets} bilhetes</div>
-                                            <div className="text-xs text-muted-foreground">{event._count.orders} encomendas</div>
-                                        </div>
-                                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${event.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
-                                                event.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                                            }`}>
-                                            {event.status}
-                                        </div>
-                                        <Button variant="ghost" size="sm">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+            {/* Events table */}
+            <DataTable<Event>
+                keyField="id"
+                data={events}
+                loading={loadingOrgs || (!!orgId && loadingEvents)}
+                error={eventError}
+                onRetry={loadEvents}
+                emptyIcon={Calendar}
+                emptyTitle="Sem eventos"
+                emptyDescription="Ainda não criou nenhum evento para esta organização."
+                columns={[
+                    {
+                        key: "title",
+                        label: "Evento",
+                        render: (e) => (
+                            <div>
+                                <div className="font-medium text-gray-900">{e.title}</div>
+                                <div className="text-xs text-gray-400">{e.venue}, {e.city}</div>
+                            </div>
+                        ),
+                    },
+                    {
+                        key: "startAt",
+                        label: "Data",
+                        render: (e) => (
+                            <span className="text-sm text-gray-500 whitespace-nowrap">
+                                {new Date(e.startAt).toLocaleDateString("pt-PT")}
+                            </span>
+                        ),
+                    },
+                    {
+                        key: "status",
+                        label: "Estado",
+                        render: (e) => (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${EVENT_STATUS_COLOR[e.status] ?? "bg-gray-100 text-gray-500"}`}>
+                                {EVENT_STATUS_LABEL[e.status] ?? e.status}
+                            </span>
+                        ),
+                    },
+                    {
+                        key: "tickets",
+                        label: "Bilhetes",
+                        render: (e) => (
+                            <span className="text-sm text-gray-700 font-medium">{e._count.tickets}</span>
+                        ),
+                    },
+                    {
+                        key: "orders",
+                        label: "Encomendas",
+                        render: (e) => (
+                            <span className="text-sm text-gray-500">{e._count.orders}</span>
+                        ),
+                    },
+                ]}
+                rowActions={(e) => (
+                    <a
+                        href={`/events/${e.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                        <ExternalLink className="h-3 w-3" />
+                        Ver
+                    </a>
+                )}
+            />
+        </PageShell>
     );
 }
