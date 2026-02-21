@@ -67,7 +67,7 @@ export async function requirePromoter() {
         userId,
         orgId: membership?.organizationId || null,
         organization: membership?.organization,
-        role: membership?.role || (isGlobalAdmin ? "OWNER" as MemberRole : null),
+        role: membership?.role || (isGlobalAdmin ? MemberRole.PROMOTER_OWNER : null),
     };
 }
 

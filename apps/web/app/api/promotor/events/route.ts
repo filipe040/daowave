@@ -49,13 +49,13 @@ export async function POST(req: NextRequest) {
     const json = await req.json();
     const body = createEventSchema.parse(json);
 
-    // If orgId provided: validate access (non-ADMIN must be OWNER or MANAGER)
+    // If orgId provided: validate access (non-ADMIN must have managerial roles)
     if (body.orgId && role !== "ADMIN") {
       const membership = await prisma.organizationMember.findFirst({
         where: {
           organizationId: body.orgId,
           userId: session.user.id,
-          role: { in: ["OWNER", "MANAGER"] },
+          role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] },
         },
       });
       if (!membership) {
