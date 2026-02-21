@@ -12,7 +12,7 @@ model User {
   name                            String?
   avatarUrl                       String?   @db.VarChar(2048)
   email                           String    @unique
-  passwordHash                    String
+  passwordHash                    String?   // nullable for OAuth-only users
   role                            Role      @default(USER)
   emailVerified                   Boolean   @default(false)
   emailVerificationToken          String?   @unique
@@ -43,6 +43,8 @@ model User {
   userSessions        UserSession[]
   fraudSignals        FraudSignal[]
 
+  accounts            Account[]
+
   @@index([email])
   @@index([emailVerificationToken])
 }
@@ -60,6 +62,26 @@ model UserSession {
 
   @@index([userId])
   @@index([revokedAt])
+}
+
+// OAuth provider accounts (Google, Apple)
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String   // "google" | "apple"
+  providerAccountId String   // sub from provider
+  email             String?  @db.VarChar(512) // may be privaterelay for Apple HME
+  accessToken       String?  @db.Text
+  refreshToken      String?  @db.Text
+  idToken           String?  @db.Text
+  expiresAt         Int?
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([provider, email])
 }
 
 // --- ORGANIZATION & RBAC ---
