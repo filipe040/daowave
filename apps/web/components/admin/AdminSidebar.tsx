@@ -17,7 +17,7 @@ import { signOut } from "next-auth/react";
 
 const routes = [
     { label: "Overview", icon: LayoutDashboard, href: "/admin", exact: true },
-    { label: "Promotores", icon: Building2, href: "/admin/promoters" },
+    { label: "Organizações", icon: Building2, href: "/admin/organizations" },
     { label: "Eventos", icon: Calendar, href: "/admin/events" },
     { label: "Utilizadores", icon: Users, href: "/admin/users" },
     { label: "Anti-Fraude", icon: ShieldAlert, href: "/admin/fraud" },

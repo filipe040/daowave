@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { PageShell } from "@/components/dashboard/PageShell";
-import { KpiGridSkeleton } from "@/components/dashboard/LoadingSkeletons";
-import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Euro, Ticket, Calendar, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 
 interface Stats {
     revenue: { total: number };
@@ -25,89 +22,106 @@ export default function PromoterDashboardPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const load = useCallback(async () => {
-        setLoading(true); setError(null);
-        try {
-            const res = await fetchWithTimeout("/api/promotor/stats");
-            if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const data = await res.json() as Stats & { empty?: boolean };
-            setStats(data.empty ? null : data);
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Erro ao carregar");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const load = () => {
+        setLoading(true);
+        setError(null);
+        fetch("/api/promotor/stats")
+            .then((res) => { if (!res.ok) throw new Error("Erro ao carregar"); return res.json(); })
+            .then((data) => setStats(data.empty ? null : data))
+            .catch((e: unknown) => setError(e instanceof Error ? e.message : "Erro"))
+            .finally(() => setLoading(false));
+    };
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { load(); }, []);
 
     return (
-        <PageShell title="Overview" subtitle="Resumo da sua atividade">
-            {loading && <KpiGridSkeleton count={4} />}
-            {!loading && error && <ErrorState message={error} onRetry={load} />}
-            {!loading && !error && !stats && (
-                <EmptyState
-                    icon={Calendar}
-                    title="Comece a sua jornada"
-                    description="Ainda não tem nenhuma atividade registada. Crie o seu primeiro evento."
-                    action={
+        <div className="min-h-full bg-[#f5f5f7]">
+            {/* Header */}
+            <div className="bg-[#f5f5f7] border-b border-gray-200/80 px-6 sm:px-10 py-6">
+                <div className="max-w-6xl mx-auto">
+                    <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Overview</h1>
+                    <p className="mt-0.5 text-sm text-gray-500">Resumo da sua atividade</p>
+                </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8 space-y-8">
+                {loading && (
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} className="h-36 rounded-2xl" />
+                        ))}
+                    </div>
+                )}
+
+                {!loading && error && <ErrorState message={error} onRetry={load} />}
+
+                {!loading && !error && !stats && (
+                    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-10 text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
+                            <Calendar className="w-6 h-6 text-gray-400" strokeWidth={1.5} />
+                        </div>
+                        <h2 className="text-base font-semibold text-gray-900 mb-1">Comece a sua jornada</h2>
+                        <p className="text-sm text-gray-400 mb-5">Ainda não tem nenhuma organização configurada.</p>
                         <Link
                             href="/promotor/events/new"
                             className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
                         >
                             Criar primeiro evento
                         </Link>
-                    }
-                />
-            )}
-            {!loading && !error && stats && (
-                <div className="space-y-6">
-                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                        <KpiCard
-                            label="Receita Total"
-                            value={fmt(stats.revenue.total)}
-                            icon={Euro}
-                            iconColor="text-emerald-600"
-                        />
-                        <KpiCard
-                            label="Bilhetes Vendidos"
-                            value={stats.tickets.sold}
-                            subtitle={`de ${stats.tickets.capacity} disponíveis`}
-                            icon={Ticket}
-                            iconColor="text-blue-600"
-                        />
-                        <KpiCard
-                            label="Eventos Ativos"
-                            value={stats.events.active}
-                            icon={Calendar}
-                            iconColor="text-purple-600"
-                        />
-                        <KpiCard
-                            label="Encomendas"
-                            value={stats.orders.total}
-                            icon={ShoppingCart}
-                            iconColor="text-orange-600"
-                        />
                     </div>
+                )}
 
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                        {[
-                            { href: "/promotor/events", label: "Ver eventos", desc: "Gerir os seus eventos" },
-                            { href: "/promotor/sales", label: "Ver vendas", desc: "Histórico de encomendas" },
-                            { href: "/promotor/analytics", label: "Analytics", desc: "Receita dos últimos 30 dias" },
-                        ].map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
-                            >
-                                <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700">{item.label}</p>
-                                <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </PageShell>
+                {!loading && !error && stats && (
+                    <>
+                        {/* KPI grid */}
+                        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                            <KpiCard
+                                label="Receita Total"
+                                value={fmt(stats.revenue.total)}
+                                icon={Euro}
+                                iconColor="text-emerald-600"
+                            />
+                            <KpiCard
+                                label="Bilhetes Vendidos"
+                                value={stats.tickets.sold}
+                                subtitle={`de ${stats.tickets.capacity} disponíveis`}
+                                icon={Ticket}
+                                iconColor="text-blue-600"
+                            />
+                            <KpiCard
+                                label="Eventos Ativos"
+                                value={stats.events.active}
+                                icon={Calendar}
+                                iconColor="text-purple-600"
+                            />
+                            <KpiCard
+                                label="Encomendas"
+                                value={stats.orders.total}
+                                icon={ShoppingCart}
+                                iconColor="text-orange-600"
+                            />
+                        </div>
+
+                        {/* Quick links */}
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                            {[
+                                { href: "/promotor/events", label: "Ver eventos", desc: "Gerir os seus eventos" },
+                                { href: "/promotor/sales", label: "Ver vendas", desc: "Histórico de encomendas" },
+                                { href: "/promotor/analytics", label: "Analytics", desc: "Receita dos últimos 30 dias" },
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
+                                >
+                                    <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700">{item.label}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+                                </Link>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
     );
 }
