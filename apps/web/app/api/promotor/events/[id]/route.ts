@@ -17,12 +17,12 @@ const updateEventSchema = z.object({
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const token = await getToken({ req });
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!token) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   // TODO: Check ownership/permission
 
   const event = await EventService.getById(params.id);
-  if (!event) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!event) return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
 
   return NextResponse.json(event);
 }
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const token = await getToken({ req });
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!token) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   try {
     const json = await req.json();
@@ -50,6 +50,6 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

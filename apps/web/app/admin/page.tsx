@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
         <div className="min-h-full bg-[#f5f5f7]">
             <div className="bg-[#f5f5f7] border-b border-gray-200/80 px-6 sm:px-10 py-6">
                 <div className="max-w-6xl mx-auto">
-                    <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Admin Overview</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Visão Geral</h1>
                     <p className="mt-0.5 text-sm text-gray-500">Visão geral da plataforma</p>
                 </div>
             </div>
@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
                         {/* Quick nav */}
                         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                             {[
-                                { href: "/admin/users", label: "Utilizadores", desc: "Gerir contas e roles" },
+                                { href: "/admin/users", label: "Utilizadores", desc: "Gerir contas e funções" },
                                 { href: "/admin/events", label: "Eventos", desc: "Aprovar e gerir eventos" },
                                 { href: "/admin/fraud", label: "Anti-Fraude", desc: "Deteção de padrões suspeitos" },
                                 { href: "/admin/system", label: "Sistema", desc: "Logs e erros recentes" },

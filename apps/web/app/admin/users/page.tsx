@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
                                                 {u.role !== "ADMIN" && (
                                                     <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "ban")}
                                                         className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-40 transition-colors">
-                                                        Ban
+                                                        Bloquear
                                                     </button>
                                                 )}
                                             </div>
@@ -207,7 +207,7 @@ export default function AdminUsersPage() {
                                         {u.role !== "ADMIN" && (
                                             <button disabled={actioning === u.id} onClick={() => handleAction(u.id, "ban")}
                                                 className="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-40 transition-colors">
-                                                Ban
+                                                Bloquear
                                             </button>
                                         )}
                                     </div>

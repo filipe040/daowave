@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/organizer", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/organizer", label: "Visão Geral", icon: LayoutDashboard },
   { href: "/organizer/events", label: "Eventos", icon: Calendar },
   { href: "/organizer/sales", label: "Vendas", icon: DollarSign },
   { href: "/organizer/tickets", label: "Bilhetes", icon: Ticket },
   { href: "/organizer/coupons", label: "Cupões", icon: Tags },
-  { href: "/organizer/templates", label: "Templates", icon: FileText },
+  { href: "/organizer/templates", label: "Modelos", icon: FileText },
   { href: "/organizer/account", label: "Conta", icon: Settings },
 ];
 
@@ -84,11 +84,10 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
                       ? "bg-white/10 text-white font-semibold"
                       : "text-zinc-400 hover:bg-white/5 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
                   <span className="text-sm font-medium">{item.label}</span>

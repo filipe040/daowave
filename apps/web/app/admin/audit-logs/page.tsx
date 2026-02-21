@@ -75,7 +75,7 @@ export default function AdminAuditLogsPage() {
 
     return (
         <PageShell
-            title="Audit Logs"
+            title="Registos de Auditoria"
             subtitle={`${total} registo${total !== 1 ? "s" : ""} de auditoria`}
             actions={filters}
         >

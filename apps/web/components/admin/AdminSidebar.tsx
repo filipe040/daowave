@@ -16,13 +16,13 @@ import {
 import { signOut } from "next-auth/react";
 
 const routes = [
-    { label: "Overview", icon: LayoutDashboard, href: "/admin", exact: true },
+    { label: "Visão Geral", icon: LayoutDashboard, href: "/admin", exact: true },
     { label: "Organizações", icon: Building2, href: "/admin/organizations" },
     { label: "Eventos", icon: Calendar, href: "/admin/events" },
     { label: "Utilizadores", icon: Users, href: "/admin/users" },
     { label: "Anti-Fraude", icon: ShieldAlert, href: "/admin/fraud" },
     { label: "Sistema", icon: Monitor, href: "/admin/system" },
-    { label: "Audit Logs", icon: ScrollText, href: "/admin/audit-logs" },
+    { label: "Registos de Auditoria", icon: ScrollText, href: "/admin/audit-logs" },
 ];
 
 export function AdminSidebar() {
