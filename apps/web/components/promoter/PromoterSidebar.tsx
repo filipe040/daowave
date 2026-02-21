@@ -42,7 +42,7 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                     <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         D
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">Daowave</span>
+                    <span className="text-sm font-semibold text-gray-900">Dashboard</span>
                 </Link>
             </div>
 

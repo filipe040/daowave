@@ -76,7 +76,7 @@ export default function EventsSearch({ cities = [], initialSearch = "", initialC
           type="text"
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder="SEARCH EVENTS..."
+          placeholder="Pesquisar eventos..."
           className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-10 sm:px-12 py-3 sm:py-4 text-white placeholder-zinc-500 focus:outline-none focus:border-pink-500/50 transition-colors uppercase text-xs sm:text-sm md:text-base"
         />
       </div>
@@ -84,14 +84,14 @@ export default function EventsSearch({ cities = [], initialSearch = "", initialC
       {/* City Filter */}
       <div className="relative bg-zinc-900 border border-zinc-800 rounded-lg min-w-[140px] sm:min-w-[160px]">
         <div className="absolute left-3 sm:left-4 top-1.5 sm:top-2 text-[10px] sm:text-xs text-zinc-500 uppercase tracking-wider pointer-events-none">
-          CITY
+          Cidade
         </div>
         <select
           value={city}
           onChange={(e) => handleCityChange(e.target.value)}
           className="w-full bg-transparent border-0 rounded-lg px-3 sm:px-4 pt-5 sm:pt-6 pb-3 sm:pb-4 text-white focus:outline-none focus:ring-0 appearance-none cursor-pointer pr-8 sm:pr-10 uppercase text-xs sm:text-sm md:text-base font-bold"
         >
-          <option value="ALL PORTUGAL" className="bg-zinc-900 text-white">ALL PORTUGAL</option>
+          <option value="ALL PORTUGAL" className="bg-zinc-900 text-white">Todo Portugal</option>
           {cityOptions.map((cityName) => (
             <option key={cityName} value={cityName} className="bg-zinc-900 text-white">
               {cityName}
@@ -119,14 +119,14 @@ export default function EventsSearch({ cities = [], initialSearch = "", initialC
       {/* Category Filter */}
       <div className="relative bg-zinc-900 border border-zinc-800 rounded-lg min-w-[140px] sm:min-w-[160px]">
         <div className="absolute left-3 sm:left-4 top-1.5 sm:top-2 text-[10px] sm:text-xs text-zinc-500 uppercase tracking-wider pointer-events-none">
-          CATEGORY
+          Categoria
         </div>
         <select
           value={category}
           onChange={(e) => handleCategoryChange(e.target.value)}
           className="w-full bg-transparent border-0 rounded-lg px-3 sm:px-4 pt-5 sm:pt-6 pb-3 sm:pb-4 text-white focus:outline-none focus:ring-0 appearance-none cursor-pointer pr-8 sm:pr-10 uppercase text-xs sm:text-sm md:text-base font-bold"
         >
-          <option value="ALL STYLES" className="bg-zinc-900">ALL STYLES</option>
+          <option value="ALL STYLES" className="bg-zinc-900">Todos os Estilos</option>
           {/* Add categories when category field is added to Event model */}
         </select>
         <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-zinc-400">

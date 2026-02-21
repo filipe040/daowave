@@ -126,21 +126,21 @@ export default function NavClient() {
               href="/events"
               className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
-              DISCOVER
+              DESCOBRIR
             </Link>
             {session && (
               <Link
                 href="/my-tickets"
                 className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
               >
-                MY TICKETS
+                MEUS BILHETES
               </Link>
             )}
             <Link
               href="/help"
               className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
-              HELP
+              AJUDA
             </Link>
           </nav>
 
@@ -153,7 +153,7 @@ export default function NavClient() {
                       href="/promotor"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
                     >
-                      PROMOTER
+                      PROMOTOR
                     </Link>
                   )}
                   {role === "ADMIN" && (
@@ -169,7 +169,7 @@ export default function NavClient() {
                     onClick={handleSignOut}
                     className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   >
-                    LOG OUT
+                    SAIR
                   </button>
                 </div>
 
@@ -194,7 +194,7 @@ export default function NavClient() {
                   href="/auth/signin"
                   className="hidden md:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
                 >
-                  LOG IN
+                  ENTRAR
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -227,7 +227,7 @@ export default function NavClient() {
               onClick={() => setMobileMenuOpen(false)}
               className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
             >
-              DISCOVER
+              DESCOBRIR
             </Link>
             {session ? (
               <>
@@ -236,7 +236,7 @@ export default function NavClient() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                 >
-                  MY TICKETS
+                  MEUS BILHETES
                 </Link>
                 {role === "PROMOTER" && (
                   <Link
@@ -244,7 +244,7 @@ export default function NavClient() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                   >
-                    PROMOTER
+                    PROMOTOR
                   </Link>
                 )}
                 {role === "ADMIN" && (
@@ -261,7 +261,7 @@ export default function NavClient() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                 >
-                  HELP
+                  AJUDA
                 </Link>
                 <button
                   onClick={() => {
@@ -270,7 +270,7 @@ export default function NavClient() {
                   }}
                   className="w-full bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors mt-4"
                 >
-                  LOG OUT
+                  SAIR
                 </button>
               </>
             ) : (
@@ -280,14 +280,14 @@ export default function NavClient() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                 >
-                  HELP
+                  AJUDA
                 </Link>
                 <Link
                   href="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors text-center mt-4"
                 >
-                  LOG IN
+                  ENTRAR
                 </Link>
               </>
             )}
