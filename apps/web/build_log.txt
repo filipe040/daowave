@@ -1,0 +1,27 @@
+
+> my-v0-project@0.1.0 build
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/@prisma/client in 70ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+   ▲ Next.js 15.5.11
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ⚠ Mismatching @next/swc version, detected: 15.5.7 while Next.js is on 15.5.11. Please ensure these match
+ ✓ Compiled successfully in 3.7s
+   Linting and checking validity of types ...
+npm error Lifecycle script `build` failed with error:
+npm error code 130
+npm error path /Users/santos/Documents/App_bilheteira/apps/web
+npm error workspace my-v0-project@0.1.0
+npm error location /Users/santos/Documents/App_bilheteira/apps/web
+npm error command failed
+npm error command sh -c prisma generate && next build

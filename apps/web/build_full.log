@@ -1,0 +1,223 @@
+
+> my-v0-project@0.1.0 build
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/@prisma/client in 73ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+   ▲ Next.js 15.5.11
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ⚠ Mismatching @next/swc version, detected: 15.5.7 while Next.js is on 15.5.11. Please ensure these match
+ ✓ Compiled successfully in 3.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/62) ...
+   Generating static pages (15/62) 
+   Generating static pages (30/62) 
+   Generating static pages (46/62) 
+ ✓ Generating static pages (62/62)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                               Size  First Load JS
+┌ ƒ /                                                  2.22 kB         113 kB
+├ ○ /_not-found                                          411 B         103 kB
+├ ƒ /account                                             198 B         106 kB
+├ ƒ /account/legal                                      2.9 kB         122 kB
+├ ƒ /account/notifications                             2.54 kB         113 kB
+├ ƒ /account/orders                                    1.21 kB         112 kB
+├ ƒ /account/profile                                   5.64 kB         120 kB
+├ ƒ /account/security                                  3.16 kB         114 kB
+├ ƒ /account/tickets                                   2.29 kB         116 kB
+├ ƒ /account/tickets/[id]                              3.44 kB         122 kB
+├ ƒ /admin                                             3.19 kB         117 kB
+├ ƒ /admin/audit-logs                                   4.2 kB         106 kB
+├ ƒ /admin/events                                      3.71 kB         119 kB
+├ ƒ /admin/fraud                                       3.35 kB         114 kB
+├ ƒ /admin/organizations                               4.01 kB         111 kB
+├ ƒ /admin/system                                       2.9 kB         113 kB
+├ ƒ /admin/users                                        4.1 kB         119 kB
+├ ƒ /api/account/avatar                                  411 B         103 kB
+├ ƒ /api/account/avatar/serve/[userId]/[filename]        411 B         103 kB
+├ ƒ /api/account/export                                  411 B         103 kB
+├ ƒ /api/account/legal/delete                            411 B         103 kB
+├ ƒ /api/account/legal/export                            411 B         103 kB
+├ ƒ /api/account/notifications                           411 B         103 kB
+├ ƒ /api/account/orders                                  411 B         103 kB
+├ ƒ /api/account/password                                411 B         103 kB
+├ ƒ /api/account/profile                                 411 B         103 kB
+├ ƒ /api/account/sessions                                411 B         103 kB
+├ ƒ /api/account/sessions/revoke                         411 B         103 kB
+├ ƒ /api/account/sessions/revoke-all                     411 B         103 kB
+├ ƒ /api/account/tickets                                 411 B         103 kB
+├ ƒ /api/account/tickets/[id]                            411 B         103 kB
+├ ƒ /api/account/tickets/[id]/resend                     411 B         103 kB
+├ ƒ /api/account/tickets/[id]/transfer/initiate          411 B         103 kB
+├ ƒ /api/account/tickets/transfer                        411 B         103 kB
+├ ƒ /api/admin/audit-logs                                411 B         103 kB
+├ ƒ /api/admin/events                                    411 B         103 kB
+├ ƒ /api/admin/events/[id]/approve                       411 B         103 kB
+├ ƒ /api/admin/finance                                   411 B         103 kB
+├ ƒ /api/admin/fraud                                     411 B         103 kB
+├ ƒ /api/admin/organizations                             411 B         103 kB
+├ ƒ /api/admin/organizations/[id]/approve                411 B         103 kB
+├ ƒ /api/admin/organizers/[id]/approve                   411 B         103 kB
+├ ƒ /api/admin/organizers/[id]/reject                    411 B         103 kB
+├ ƒ /api/admin/organizers/register                       411 B         103 kB
+├ ƒ /api/admin/overview                                  411 B         103 kB
+├ ƒ /api/admin/promoters                                 411 B         103 kB
+├ ƒ /api/admin/promoters/[id]                            411 B         103 kB
+├ ƒ /api/admin/stats                                     411 B         103 kB
+├ ƒ /api/admin/system/errors                             411 B         103 kB
+├ ƒ /api/admin/users                                     411 B         103 kB
+├ ƒ /api/admin/users/[id]                                411 B         103 kB
+├ ƒ /api/admin/users/[id]/promote-to-organizer           411 B         103 kB
+├ ƒ /api/admin/users/search                              411 B         103 kB
+├ ƒ /api/admin/verify-user/[userId]                      411 B         103 kB
+├ ƒ /api/auth/[...nextauth]                              411 B         103 kB
+├ ƒ /api/auth/forgot-password                            411 B         103 kB
+├ ƒ /api/auth/login-notification                         411 B         103 kB
+├ ƒ /api/auth/refresh-session                            411 B         103 kB
+├ ƒ /api/auth/reset-password                             411 B         103 kB
+├ ƒ /api/auth/signup                                     411 B         103 kB
+├ ƒ /api/auth/verify-email                               411 B         103 kB
+├ ƒ /api/checkin/scan                                    411 B         103 kB
+├ ƒ /api/checkin/sign                                    411 B         103 kB
+├ ƒ /api/checkout                                        411 B         103 kB
+├ ƒ /api/checkout/[orderId]/confirm                      411 B         103 kB
+├ ƒ /api/checkout/[orderId]/customer-info                411 B         103 kB
+├ ƒ /api/checkout/create                                 411 B         103 kB
+├ ƒ /api/checkout/create-payment-intent                  411 B         103 kB
+├ ƒ /api/events                                          411 B         103 kB
+├ ƒ /api/events/[slug]                                   411 B         103 kB
+├ ƒ /api/health                                          411 B         103 kB
+├ ƒ /api/organizer/account                               411 B         103 kB
+├ ƒ /api/organizer/coupons                               411 B         103 kB
+├ ƒ /api/organizer/coupons/[id]                          411 B         103 kB
+├ ƒ /api/organizer/events                                411 B         103 kB
+├ ƒ /api/organizer/events/[id]                           411 B         103 kB
+├ ƒ /api/organizer/events/[id]/publish                   411 B         103 kB
+├ ƒ /api/organizer/events/[id]/tickets                   411 B         103 kB
+├ ƒ /api/organizer/events/[id]/tickets/lots              411 B         103 kB
+├ ƒ /api/organizer/events/[id]/tickets/lots/[lotId]      411 B         103 kB
+├ ƒ /api/organizer/events/[id]/tickets/types             411 B         103 kB
+├ ƒ /api/organizer/events/[id]/tickets/types/[typeId]    411 B         103 kB
+├ ƒ /api/payments/[provider]/create                      411 B         103 kB
+├ ƒ /api/payments/confirm                                411 B         103 kB
+├ ƒ /api/payments/mock/complete                          411 B         103 kB
+├ ƒ /api/payments/webhook/[provider]                     411 B         103 kB
+├ ƒ /api/promotor/account                                411 B         103 kB
+├ ƒ /api/promotor/analytics                              411 B         103 kB
+├ ƒ /api/promotor/checkin/verify                         411 B         103 kB
+├ ƒ /api/promotor/coupons                                411 B         103 kB
+├ ƒ /api/promotor/coupons/[id]                           411 B         103 kB
+├ ƒ /api/promotor/events                                 411 B         103 kB
+├ ƒ /api/promotor/events/[id]                            411 B         103 kB
+├ ƒ /api/promotor/events/[id]/archive                    411 B         103 kB
+├ ƒ /api/promotor/events/[id]/assets/[assetId]           411 B         103 kB
+├ ƒ /api/promotor/events/[id]/assets/upload              411 B         103 kB
+├ ƒ /api/promotor/events/[id]/badge-design               411 B         103 kB
+├ ƒ /api/promotor/events/[id]/badge-design/generate      411 B         103 kB
+├ ƒ /api/promotor/events/[id]/badge-design/upload        411 B         103 kB
+├ ƒ /api/promotor/events/[id]/branding                   411 B         103 kB
+├ ƒ /api/promotor/events/[id]/checkin/scan               411 B         103 kB
+├ ƒ /api/promotor/events/[id]/checkins                   411 B         103 kB
+├ ƒ /api/promotor/events/[id]/publish                    411 B         103 kB
+├ ƒ /api/promotor/events/[id]/sales                      411 B         103 kB
+├ ƒ /api/promotor/events/[id]/settings                   411 B         103 kB
+├ ƒ /api/promotor/events/[id]/teams                      411 B         103 kB
+├ ƒ /api/promotor/events/[id]/teams/[memberId]           411 B         103 kB
+├ ƒ /api/promotor/events/[id]/ticket-lots                411 B         103 kB
+├ ƒ /api/promotor/events/[id]/tickets                    411 B         103 kB
+├ ƒ /api/promotor/events/[id]/tickets/lots               411 B         103 kB
+├ ƒ /api/promotor/events/[id]/tickets/types              411 B         103 kB
+├ ƒ /api/promotor/events/[id]/tracking-links             411 B         103 kB
+├ ƒ /api/promotor/events/[id]/tracking-links/[code]      411 B         103 kB
+├ ƒ /api/promotor/finance                                411 B         103 kB
+├ ƒ /api/promotor/organizations                          411 B         103 kB
+├ ƒ /api/promotor/overview                               411 B         103 kB
+├ ƒ /api/promotor/sales                                  411 B         103 kB
+├ ƒ /api/promotor/stats                                  411 B         103 kB
+├ ƒ /api/promotor/team                                   411 B         103 kB
+├ ƒ /api/stats                                           411 B         103 kB
+├ ƒ /api/tickets                                         411 B         103 kB
+├ ƒ /api/tickets/[id]                                    411 B         103 kB
+├ ƒ /api/tickets/[id]/pdf                                411 B         103 kB
+├ ƒ /api/tickets/[id]/resend                             411 B         103 kB
+├ ƒ /api/tickets/[id]/transfer                           411 B         103 kB
+├ ƒ /api/tickets/[id]/transfer/initiate                  411 B         103 kB
+├ ƒ /api/validator/checkin                               411 B         103 kB
+├ ƒ /api/validator/events                                411 B         103 kB
+├ ƒ /api/validator/events/[id]/sync                      411 B         103 kB
+├ ƒ /api/validator/sync                                  411 B         103 kB
+├ ƒ /api/validator/validate                              411 B         103 kB
+├ ƒ /api/webhooks/stripe                                 411 B         103 kB
+├ ƒ /auth/callback                                       411 B         103 kB
+├ ○ /auth/forgot-password                              2.19 kB         108 kB
+├ ○ /auth/reset-password                               3.09 kB         109 kB
+├ ○ /auth/signin                                       5.67 kB         128 kB
+├ ○ /auth/signup                                       4.08 kB         118 kB
+├ ○ /auth/verify-email                                  2.5 kB         108 kB
+├ ○ /checkout                                          7.84 kB         110 kB
+├ ƒ /checkout/[orderId]                                2.47 kB         113 kB
+├ ○ /checkout/customer-info                            2.73 kB         114 kB
+├ ○ /checkout/mock                                     1.98 kB         104 kB
+├ ○ /contact                                             411 B         103 kB
+├ ƒ /eventos/[cidade]                                    180 B         111 kB
+├ ƒ /events                                              198 B         106 kB
+├ ƒ /events/[slug]                                      2.9 kB         118 kB
+├ ○ /faq                                                 198 B         106 kB
+├ ○ /help                                                411 B         103 kB
+├ ƒ /home                                                180 B         111 kB
+├ ƒ /my-tickets                                          180 B         111 kB
+├ ƒ /my-tickets/[id]                                   1.89 kB         118 kB
+├ ƒ /orders/[id]/success                                 198 B         106 kB
+├ ƒ /organizer                                           198 B         106 kB
+├ ƒ /organizer/account                                 2.26 kB         105 kB
+├ ƒ /organizer/coupons                                   198 B         106 kB
+├ ƒ /organizer/coupons/[id]                            2.33 kB         108 kB
+├ ƒ /organizer/coupons/new                              2.2 kB         108 kB
+├ ƒ /organizer/events                                    198 B         106 kB
+├ ƒ /organizer/events/[id]/edit                          125 B         117 kB
+├ ƒ /organizer/events/[id]/tickets                     4.86 kB         117 kB
+├ ƒ /organizer/events/new                                125 B         117 kB
+├ ƒ /organizer/sales                                     411 B         103 kB
+├ ƒ /organizer/templates                                 198 B         106 kB
+├ ƒ /organizer/tickets                                   411 B         103 kB
+├ ○ /politica-reembolsos                                 198 B         106 kB
+├ ○ /privacy                                             198 B         106 kB
+├ ƒ /promotor                                          3.42 kB         109 kB
+├ ƒ /promotor/analytics                                3.66 kB         114 kB
+├ ƒ /promotor/checkin                                  4.13 kB         106 kB
+├ ƒ /promotor/events                                   4.76 kB         110 kB
+├ ƒ /promotor/events/[id]                              3.92 kB         114 kB
+├ ƒ /promotor/events/new                                3.7 kB         114 kB
+├ ƒ /promotor/finance                                   4.5 kB         107 kB
+├ ƒ /promotor/login                                    3.25 kB         118 kB
+├ ƒ /promotor/sales                                    3.84 kB         114 kB
+├ ƒ /promotor/settings                                 2.97 kB         118 kB
+├ ƒ /promotor/team                                     3.17 kB         114 kB
+├ ƒ /promotor/test                                       411 B         103 kB
+├ ○ /sobre-nos                                           198 B         106 kB
+├ ○ /terms                                             1.03 kB         115 kB
+├ ƒ /ticket/[ticketId]                                   486 B         108 kB
+└ ○ /validator                                         3.84 kB         118 kB
++ First Load JS shared by all                           102 kB
+  ├ chunks/18-14e6895f59bfbbff.js                        46 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js                54.2 kB
+  └ other shared chunks (total)                        2.02 kB
+
+
+ƒ Middleware                                           55.4 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

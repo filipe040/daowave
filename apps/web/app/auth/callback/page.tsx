@@ -12,8 +12,9 @@ import { redirect } from "next/navigation";
 export default async function AuthCallbackPage({
     searchParams,
 }: {
-    searchParams: { from?: string };
+    searchParams: Promise<{ from?: string }>;
 }) {
+    const { from } = await searchParams;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -33,7 +34,6 @@ export default async function AuthCallbackPage({
     if (role === "PROMOTER") redirect("/promotor");
 
     // Default: go where they came from, fallback to home
-    const from = searchParams?.from;
     if (from && from.startsWith("/") && !from.startsWith("/auth")) {
         redirect(from);
     }

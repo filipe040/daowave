@@ -32,6 +32,13 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Utilizador não encontrado" }, { status: 404 });
     }
 
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: "Esta conta utiliza login social (Google/Apple) e não tem palavra-passe definida." },
+        { status: 400 }
+      );
+    }
+
     const valid = await bcrypt.compare(data.currentPassword, user.passwordHash);
     if (!valid) {
       return NextResponse.json(

@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
             teamId: process.env.APPLE_TEAM_ID,
             privateKey: process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
             keyId: process.env.APPLE_PRIVATE_KEY_ID,
-          },
+          } as any,
         }),
       ]
       : []),
@@ -169,7 +169,7 @@ export const authOptions: NextAuthOptions = {
       if (!account || account.type === "credentials") return true;
 
       const provider = account.provider; // "google" | "apple"
-      const providerAccountId = account.providerUserId ?? account.providerAccountId ?? user.id;
+      const providerAccountId = (account.providerUserId ?? account.providerAccountId ?? (user as any).id) as string;
 
       // Determine the real email (Apple may hide it)
       const rawEmail =
@@ -199,7 +199,7 @@ export const authOptions: NextAuthOptions = {
             expiresAt: account.expires_at,
           });
           // Inject id so jwt callback can load the role
-          user.id = existingAccount.userId;
+          (user as any).id = existingAccount.userId;
 
           await createAuditLog({
             userId: existingAccount.userId,
@@ -233,7 +233,7 @@ export const authOptions: NextAuthOptions = {
             idToken: account.id_token,
             expiresAt: account.expires_at,
           });
-          user.id = dbUser.id;
+          (user as any).id = dbUser.id;
 
           await createAuditLog({
             userId: dbUser.id,
@@ -256,7 +256,7 @@ export const authOptions: NextAuthOptions = {
               name,
               emailVerified: !isHiddenEmail, // Google emails are pre-verified
               role: "USER",
-              // passwordHash is null — OAuth users don't need a password
+              passwordHash: null as any, // Explicitly null for OAuth-only users
             },
           });
 
@@ -271,7 +271,7 @@ export const authOptions: NextAuthOptions = {
             expiresAt: account.expires_at,
           });
 
-          user.id = newUser.id;
+          (user as any).id = newUser.id;
           (user as any).requiresEmailUpdate = isHiddenEmail;
 
           await createAuditLog({
@@ -299,7 +299,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, trigger }) {
       // First sign-in: user object is present
       if (user) {
-        token.id = user.id;
+        token.id = (user as any).id;
         token.email = user.email;
         token.name = user.name;
         token.provider = account?.provider ?? "credentials";
