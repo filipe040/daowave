@@ -5,7 +5,7 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { Calendar, Plus, ExternalLink, Building2 } from "lucide-react";
+import { Calendar, Plus, ExternalLink, Building2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 
@@ -22,10 +22,10 @@ interface Event {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-    PUBLISHED: "bg-emerald-50 text-emerald-700",
-    DRAFT: "bg-amber-50 text-amber-700",
-    ARCHIVED: "bg-gray-100 text-gray-500",
-    CANCELLED: "bg-red-50 text-red-600",
+    PUBLISHED: "bg-emerald-50 text-emerald-700 ring-emerald-200/60",
+    DRAFT: "bg-amber-50 text-amber-700 ring-amber-200/60",
+    ARCHIVED: "bg-gray-100 text-gray-500 ring-gray-200/60",
+    CANCELLED: "bg-red-50 text-red-600 ring-red-200/60",
 };
 const STATUS_LABEL: Record<string, string> = {
     PUBLISHED: "Publicado",
@@ -34,10 +34,15 @@ const STATUS_LABEL: Record<string, string> = {
     CANCELLED: "Cancelado",
 };
 
+const PAGE_SIZE = 20;
+
 export default function PromoterEventsPage() {
     const [orgs, setOrgs] = useState<Org[]>([]);
     const [orgId, setOrgId] = useState("");
     const [events, setEvents] = useState<Event[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
     const [loadingOrgs, setLoadingOrgs] = useState(true);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [orgError, setOrgError] = useState<string | null>(null);
@@ -60,16 +65,28 @@ export default function PromoterEventsPage() {
         if (!orgId) return;
         setLoadingEvents(true); setEventError(null);
         try {
-            const res = await fetchWithTimeout(`/api/promotor/events?orgId=${orgId}&page=1`);
+            const res = await fetchWithTimeout(`/api/promotor/events?orgId=${orgId}&page=${page}&limit=${PAGE_SIZE}`);
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json = await res.json() as { events?: Event[] };
+            const json = await res.json() as { events?: Event[]; total?: number; pages?: number };
             setEvents(json.events ?? []);
+            setTotal(json.total ?? 0);
+            setTotalPages(Math.max(1, json.pages ?? 1));
         } catch (err: unknown) { setEventError(err instanceof Error ? err.message : "Erro"); }
         finally { setLoadingEvents(false); }
-    }, [orgId]);
+    }, [orgId, page]);
 
     useEffect(() => { loadOrgs(); }, [loadOrgs]);
-    useEffect(() => { if (orgId) loadEvents(); }, [orgId, loadEvents]);
+    useEffect(() => {
+        if (orgId) {
+            setPage(1);
+            setEvents([]);
+        }
+    }, [orgId]);
+    useEffect(() => { if (orgId) loadEvents(); }, [orgId, page, loadEvents]);
+
+    const subtitle = total > 0
+        ? `${total} evento${total !== 1 ? "s" : ""}`
+        : "Gerir os seus eventos";
 
     const createBtn = orgId ? (
         <Link
@@ -94,12 +111,13 @@ export default function PromoterEventsPage() {
     );
 
     return (
-        <PageShell title="Eventos" subtitle="Gerir os seus eventos" actions={createBtn}>
-            {orgs.length > 1 && (
-                <div className="flex items-center gap-3 mb-4">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Organização</label>
+        <PageShell title="Eventos" subtitle={subtitle} actions={createBtn}>
+            {/* Org selector — only visible when >1 org */}
+            {!loadingOrgs && orgs.length > 1 && (
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">Organização</label>
                     <select
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10 min-w-0"
                         value={orgId}
                         onChange={(e) => setOrgId(e.target.value)}
                     >
@@ -117,15 +135,23 @@ export default function PromoterEventsPage() {
                 onRetry={loadEvents}
                 emptyIcon={Calendar}
                 emptyTitle="Sem eventos"
-                emptyDescription="Ainda não criou nenhum evento para esta organização."
+                emptyDescription={orgId
+                    ? "Ainda não criou nenhum evento para esta organização."
+                    : "Selecione uma organização para ver os eventos."}
+                page={page}
+                totalPages={totalPages}
+                total={total}
+                onPageChange={total > PAGE_SIZE ? setPage : undefined}
                 columns={[
                     {
                         key: "title",
                         label: "Evento",
                         render: (e) => (
-                            <div>
-                                <div className="font-medium text-gray-900">{e.title}</div>
-                                <div className="text-xs text-gray-400">{e.venue}{e.city ? `, ${e.city}` : ""}</div>
+                            <div className="min-w-0">
+                                <div className="font-medium text-gray-900 truncate">{e.title}</div>
+                                <div className="text-xs text-gray-400 truncate">
+                                    {e.venue}{e.city ? `, ${e.city}` : ""}
+                                </div>
                             </div>
                         ),
                     },
@@ -142,7 +168,7 @@ export default function PromoterEventsPage() {
                         key: "status",
                         label: "Estado",
                         render: (e) => (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_COLOR[e.status] ?? "bg-gray-100 text-gray-500"}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ring-1 ring-inset ${STATUS_COLOR[e.status] ?? "bg-gray-100 text-gray-500 ring-gray-200/60"}`}>
                                 {STATUS_LABEL[e.status] ?? e.status}
                             </span>
                         ),
@@ -154,20 +180,29 @@ export default function PromoterEventsPage() {
                     },
                     {
                         key: "orders",
-                        label: "Encomendas",
+                        label: "Vendas",
                         render: (e) => <span className="text-sm text-gray-500">{e._count.orders}</span>,
                     },
                 ]}
                 rowActions={(e) => (
-                    <a
-                        href={`/events/${e.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
-                    >
-                        <ExternalLink className="h-3 w-3" />
-                        Ver
-                    </a>
+                    <div className="flex items-center gap-1.5">
+                        <Link
+                            href={`/promotor/events/${e.id}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
+                        >
+                            <Pencil className="h-3 w-3" />
+                            Editar
+                        </Link>
+                        <a
+                            href={`/events/${e.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors"
+                        >
+                            <ExternalLink className="h-3 w-3" />
+                            Ver
+                        </a>
+                    </div>
                 )}
             />
         </PageShell>

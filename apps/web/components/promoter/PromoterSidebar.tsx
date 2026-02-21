@@ -27,18 +27,22 @@ const routes = [
     { label: "Definições", icon: Settings, href: "/promotor/settings" },
 ];
 
-export function PromoterSidebar() {
+interface PromoterSidebarProps {
+    onNavClick?: () => void;
+}
+
+export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
     const pathname = usePathname();
 
     return (
         <div className="flex flex-col h-full bg-white border-r border-gray-200/80">
             {/* Logo */}
             <div className="px-5 pt-6 pb-4 border-b border-gray-100">
-                <Link href="/promotor" className="flex items-center gap-2.5">
+                <Link href="/promotor" onClick={onNavClick} className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        T
+                        D
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">Promotor</span>
+                    <span className="text-sm font-semibold text-gray-900">Daowave</span>
                 </Link>
             </div>
 
@@ -53,6 +57,7 @@ export function PromoterSidebar() {
                         <Link
                             key={route.href}
                             href={route.href}
+                            onClick={onNavClick}
                             className={cn(
                                 "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150",
                                 active

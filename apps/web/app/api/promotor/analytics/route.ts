@@ -1,6 +1,7 @@
 /**
  * GET /api/promotor/analytics — vendas por dia (opcional: eventId, from, to)
- * Query: eventId?, from (ISO date), to (ISO date). Default: últimos 30 dias do promotor
+ * Query: eventId?, from (ISO date), to (ISO date). Default: últimos 30 dias
+ * Scoped to orgs where the user is OWNER or MANAGER.
  */
 
 import { NextResponse } from "next/server";
@@ -26,16 +27,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-    if (!promoter || promoter.status !== "APPROVED") {
-      return NextResponse.json(
-        { error: "Promoter profile not found or not approved" },
-        { status: 403 }
-      );
-    }
-
     const { searchParams } = new URL(req.url);
     const eventId = searchParams.get("eventId");
     const fromParam = searchParams.get("from");
@@ -46,12 +37,49 @@ export async function GET(req: Request) {
       ? new Date(fromParam)
       : new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    if (eventId && role === "PROMOTER") {
+    // Scope: organizations where user is OWNER or MANAGER
+    const memberships = await prisma.organizationMember.findMany({
+      where: {
+        userId: session.user.id,
+        role: { in: ["OWNER", "MANAGER"] },
+      },
+      select: { organizationId: true },
+    });
+    const orgIds = memberships.map((m) => m.organizationId);
+
+    // Also check promoterProfile for legacy promoter-scoped events
+    const promoter = await prisma.promoterProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    // Build event scope
+    const eventScope =
+      eventId
+        ? { id: eventId }
+        : {
+          OR: [
+            ...(promoter ? [{ promoterId: promoter.id }] : []),
+            ...(orgIds.length > 0 ? [{ organizationId: { in: orgIds } }] : []),
+          ],
+        };
+
+    if (!promoter && orgIds.length === 0) {
+      return NextResponse.json({ data: [], from: from.toISOString(), to: to.toISOString() });
+    }
+
+    // Verify the eventId belongs to this user if specified
+    if (eventId) {
       const event = await prisma.event.findFirst({
-        where: { id: eventId, promoterId: promoter.id },
+        where: {
+          id: eventId,
+          OR: [
+            ...(promoter ? [{ promoterId: promoter.id }] : []),
+            ...(orgIds.length > 0 ? [{ organizationId: { in: orgIds } }] : []),
+          ],
+        },
       });
       if (!event) {
-        return NextResponse.json({ error: "Event not found" }, { status: 404 });
+        return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
       }
     }
 
@@ -59,9 +87,7 @@ export async function GET(req: Request) {
       where: {
         status: "PAID",
         createdAt: { gte: from, lte: to },
-        event: eventId
-          ? { id: eventId, promoterId: promoter.id }
-          : { promoterId: promoter.id },
+        event: eventScope,
       },
       select: { totalCents: true, createdAt: true },
     });
@@ -80,9 +106,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ data, from: from.toISOString(), to: to.toISOString() });
   } catch (error) {
     safeLog.error("Promoter analytics error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
