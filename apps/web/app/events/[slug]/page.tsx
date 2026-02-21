@@ -119,7 +119,7 @@ export default async function EventPage({
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100"
+      className="min-h-screen bg-black text-white"
     >
       <script
         type="application/ld+json"
@@ -137,74 +137,113 @@ export default async function EventPage({
         .bg-event-secondary { background-color: ${secondaryColor}; }
         .border-event-primary { border-color: ${primaryColor}; }
       ` }} />
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+
+      {/* Background illumination */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div
+          className="absolute -top-[10%] -right-[10%] h-[500px] w-[500px] rounded-full blur-[120px] opacity-20"
+          style={{ backgroundColor: primaryColor }}
+        />
+        <div
+          className="absolute bottom-[10%] -left-[10%] h-[400px] w-[400px] rounded-full blur-[100px] opacity-10"
+          style={{ backgroundColor: secondaryColor }}
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-20">
+        <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
           {/* Banner customizado ou cover image */}
           {event.bannerUrl ? (
-            <div className="relative h-96 w-full">
+            <div className="relative h-64 sm:h-96 w-full group">
               <Image
                 src={event.bannerUrl}
                 alt={event.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 unoptimized
                 sizes="100vw"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             </div>
           ) : event.coverImage ? (
-            <div className="relative h-96 w-full">
+            <div className="relative h-64 sm:h-96 w-full group">
               <Image
                 src={event.coverImage}
                 alt={event.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                sizes="100vw"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             </div>
-          ) : null}
+          ) : (
+            <div className="h-40 bg-gradient-to-br from-white/10 to-white/5" />
+          )}
 
-          <div className="p-8">
-            <h1
-              className="text-4xl font-bold mb-4"
-              style={{ color: primaryColor }}
-            >
-              {event.title}
-            </h1>
-
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="p-6 sm:p-10 md:p-16">
+            <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_380px]">
               <div>
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">
-                  Sobre o Evento
-                </h2>
-                <p className="text-slate-600 whitespace-pre-line mb-6">
-                  {event.description}
-                </p>
+                <div
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest mb-6"
+                  style={{ borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}10`, color: primaryColor }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: primaryColor }} />
+                  Evento de {event.promoter?.brandName || 'Promotor'}
+                </div>
 
-                <div className="space-y-3 text-slate-600">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
-                    <div>
-                      <p className="font-semibold">Local</p>
-                      <p>{event.venue}</p>
-                      <p className="text-sm">{event.city}</p>
-                    </div>
-                  </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white tracking-tight leading-[1.1]">
+                  {event.title}
+                </h1>
 
-                  <div className="flex items-start gap-3">
-                    <Calendar className="mt-0.5 h-6 w-6 shrink-0 text-slate-500" strokeWidth={1.5} />
-                    <div>
-                      <p className="font-semibold">Data e Hora</p>
-                      <p>{formatDate(event.startAt)}</p>
-                      {event.endAt && (
-                        <p className="text-sm">até {formatDate(event.endAt)}</p>
-                      )}
+                <div className="space-y-8 mb-12">
+                  <section>
+                    <h2 className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
+                    <p className="text-white/60 text-[16px] leading-[1.6] whitespace-pre-line">
+                      {event.description}
+                    </p>
+                  </section>
+
+                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                    <div className="flex items-start gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                        <MapPin className="h-5 w-5 text-white/50" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Localização</p>
+                        <p className="text-white/90 font-medium">{event.venue}</p>
+                        <p className="text-sm text-white/50">{event.city}</p>
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                        <Calendar className="h-5 w-5 text-white/50" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Data e Hora</p>
+                        <p className="text-white/90 font-medium">{formatDate(event.startAt)}</p>
+                        {event.endAt && (
+                          <p className="text-sm text-white/50">até {formatDate(event.endAt)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
 
-              <div>
-                <TicketSelector event={event} ticketLots={event.ticketLots} />
-              </div>
+              <aside className="relative">
+                <div className="sticky top-24">
+                  <TicketSelector event={event as any} ticketLots={event.ticketLots as any} />
+
+                  {/* Trust Footer */}
+                  <div className="mt-6 text-center">
+                    <p className="text-[11px] text-white/30 flex items-center justify-center gap-2">
+                      <span className="h-1 w-1 rounded-full bg-emerald-500" />
+                      Pagamento seguro via MB WAY / Cartão
+                    </p>
+                  </div>
+                </div>
+              </aside>
             </div>
           </div>
         </div>

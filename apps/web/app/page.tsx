@@ -125,19 +125,19 @@ export default async function Home({
           <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-white/3 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] text-white/60 backdrop-blur-xl mb-6">
+        <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] text-white/60 backdrop-blur-xl mb-8">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="uppercase tracking-wider">Plataforma de bilhetes</span>
           </div>
 
-          <h1 className="text-[38px] sm:text-[52px] md:text-[64px] font-semibold tracking-tight text-white leading-[1.05]">
+          <h1 className="text-[42px] sm:text-[60px] md:text-[72px] lg:text-[84px] font-bold tracking-tight text-white leading-[1.02] mb-6">
             A tua próxima
             <br />
             <span className="text-white/60">experiência começa aqui.</span>
           </h1>
 
-          <p className="mt-5 text-[15px] sm:text-[16px] text-white/50 max-w-xl mx-auto leading-relaxed">
+          <p className="mt-5 text-[16px] sm:text-[18px] text-white/50 max-w-2xl mx-auto leading-relaxed">
             Descobre eventos em Portugal, compra em segundos e entra com QR code.
             Simples. Rápido. Seguro.
           </p>
@@ -156,7 +156,7 @@ export default async function Home({
               Ver eventos <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/promotor/login"
+              href="/auth/signin"
               className={cn(
                 "inline-flex items-center justify-center rounded-full",
                 "border border-white/15 bg-white/5 px-6 py-3.5",
@@ -175,26 +175,26 @@ export default async function Home({
         <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 gap-4 sm:gap-8 text-center mb-8">
             <div>
-              <div className="text-[28px] sm:text-[38px] font-semibold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
                 +{stats.totalTickets.toLocaleString("pt-PT")}
               </div>
-              <div className="mt-1.5 text-[11px] sm:text-[12px] uppercase tracking-wider text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
                 Bilhetes vendidos
               </div>
             </div>
             <div>
-              <div className="text-[28px] sm:text-[38px] font-semibold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
                 +{stats.totalEvents}
               </div>
-              <div className="mt-1.5 text-[11px] sm:text-[12px] uppercase tracking-wider text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
                 Eventos realizados
               </div>
             </div>
             <div>
-              <div className="text-[28px] sm:text-[38px] font-semibold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
                 +{stats.totalPromoters}
               </div>
-              <div className="mt-1.5 text-[11px] sm:text-[12px] uppercase tracking-wider text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
                 Promotores ativos
               </div>
             </div>
@@ -312,10 +312,10 @@ export default async function Home({
       )}
 
       {/* ── COMO FUNCIONA ───────────────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16 border-b border-white/8">
-        <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Simples como deve ser</div>
-          <h2 className="text-[22px] sm:text-[28px] font-semibold text-white/90 mb-10 sm:mb-14">
+      <section className="py-16 sm:py-24 border-b border-white/8">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="text-[11px] uppercase tracking-wider text-white/40 mb-3">Simples como deve ser</div>
+          <h2 className="text-[28px] sm:text-[36px] font-bold text-white/95 mb-12 sm:mb-20">
             Como funciona
           </h2>
 
@@ -485,13 +485,13 @@ export default async function Home({
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  href="/promotor/login"
+                  href="/auth/signin"
                   className={cn(
                     "inline-flex items-center justify-center gap-2 rounded-full",
                     "bg-white px-6 py-3.5",
                     "text-[14px] font-semibold text-black",
                     "shadow-[0_8px_32px_rgba(255,255,255,.18)]",
-                    "transition-all hover:shadow-[0_8px_40px_rgba(255,255,255,.28)]"
+                    "transition-all hover:shadow-[0_8px_40px_rgba(255,255,255,.28)] hover:scale-105"
                   )}
                 >
                   Aceder ao painel <ArrowRight className="h-4 w-4" />

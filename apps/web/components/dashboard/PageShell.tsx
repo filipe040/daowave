@@ -9,16 +9,16 @@ interface PageShellProps {
 
 export function PageShell({ title, subtitle, actions, children }: PageShellProps) {
     return (
-        <div className="min-h-full bg-[#f5f5f7]">
+        <div className="min-h-full bg-transparent">
             {/* Page header */}
-            <div className="bg-[#f5f5f7] border-b border-gray-200/80 px-6 sm:px-10 py-6">
-                <div className="max-w-6xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="bg-white/[0.02] border-b border-white/10 px-6 sm:px-10 py-8">
+                <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                        <h1 className="text-2xl font-semibold text-gray-900 tracking-tight truncate">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight truncate">
                             {title}
                         </h1>
                         {subtitle && (
-                            <p className="mt-0.5 text-sm text-gray-500">{subtitle}</p>
+                            <p className="mt-1 text-[14px] text-white/50">{subtitle}</p>
                         )}
                     </div>
                     {actions && (
@@ -30,7 +30,7 @@ export function PageShell({ title, subtitle, actions, children }: PageShellProps
             </div>
 
             {/* Page content */}
-            <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8 space-y-6">
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8 space-y-8">
                 {children}
             </div>
         </div>

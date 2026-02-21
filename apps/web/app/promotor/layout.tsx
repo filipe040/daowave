@@ -19,5 +19,8 @@ export default async function PromoterLayout({
     redirect("/");
   }
 
+  // Redirect legacy /promotor paths to /organizer
+  redirect("/organizer");
+
   return <PromoterLayoutClient>{children}</PromoterLayoutClient>;
 }

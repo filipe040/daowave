@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -19,14 +22,11 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.toLowerCase().trim() }),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Erro ao solicitar recuperação");
-      }
+      if (!res.ok) throw new Error(data.error || "Erro ao solicitar recuperação");
 
       setSuccess(true);
     } catch (err: any) {
@@ -37,23 +37,29 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
-        <div className="mx-auto max-w-md">
-          <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl text-center">
-            <div className="mb-6 flex justify-center"><Mail className="h-16 w-16 text-green-400" strokeWidth={1.5} /></div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-4 text-green-400">Email enviado!</h1>
-            <p className="text-zinc-400 mb-2">
-              Enviámos um email para <strong className="text-white">{email}</strong> com instruções para recuperar a sua palavra-passe.
-            </p>
-            <p className="text-sm text-zinc-500 mt-4">
-              Verifique a sua caixa de entrada e a pasta de spam.
-            </p>
-            <Link
-              href="/auth/signin"
-              className="mt-6 inline-block text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-            >
-              Voltar para login
-            </Link>
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12">
+        <div className="w-full max-w-[400px] text-center">
+          <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="mx-auto flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <Mail className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-lg sm:text-xl font-bold text-white uppercase tracking-tight">Email enviado!</h1>
+              <p className="text-[13px] sm:text-[14px] text-white/50 leading-relaxed px-2 sm:px-4">
+                Enviámos instruções de recuperação para <span className="text-white font-medium">{email}</span>.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-white/5">
+              <p className="text-[11px] sm:text-[12px] text-white/30 mb-6">
+                Verifique a sua caixa de entrada e a pasta de spam.
+              </p>
+              <Link
+                href="/auth/signin"
+                className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3 text-[13px] sm:text-[14px] font-bold text-black hover:bg-white/90 transition-all font-sans"
+              >
+                Voltar ao Login
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -61,65 +67,66 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
-      <div className="mx-auto max-w-md">
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-8 md:p-10 lg:p-12 shadow-xl">
-          <div className="mb-8 md:mb-10 text-center space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              Recuperar palavra-passe
-            </h1>
-            <p className="text-base md:text-lg text-zinc-400">
-              Digite o seu email e enviaremos instruções para recuperar a sua conta
-            </p>
+    <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 overflow-x-hidden">
+      {/* Background glow */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-white/5 blur-[120px]" />
+      </div>
+
+      <div className="mb-8 text-center w-full max-w-[400px]">
+        <Link href="/auth/signin" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
+          <ArrowLeft className="h-4 w-4" /> Voltar ao Login
+        </Link>
+        <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight uppercase">Recuperar Conta</h1>
+        <p className="mt-2 text-[13px] sm:text-[14px] text-white/45">Insira o seu email para receber instruções</p>
+      </div>
+
+      <div className="w-full max-w-[400px]">
+        {error && (
+          <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-[12px] sm:text-[13px] text-red-400">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm md:text-base text-red-400">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
-            <div>
-              <label htmlFor="email" className="mb-3 block text-base md:text-lg font-semibold text-zinc-300">
-                Email
-              </label>
-              <input
+        <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl font-sans">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="block text-[10px] sm:text-[11px] uppercase tracking-wider text-white/40 ml-1">
+                Endereço de Email
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-zinc-700/50 bg-zinc-900/50 px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                placeholder="Email"
+                placeholder="exemplo@email.com"
+                className="h-11 sm:h-12 rounded-xl sm:rounded-2xl border-white/10 bg-white/5 text-[13px] sm:text-[14px] text-white placeholder:text-white/20 focus-visible:ring-white/20 px-4"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 md:px-8 py-4 md:py-5 text-base md:text-lg font-bold text-white shadow-lg shadow-purple-500/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95"
+              className="w-full h-11 sm:h-12 rounded-full text-[13px] sm:text-[14px] font-bold bg-white text-black hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  A enviar...
-                </span>
-              ) : (
-                "Enviar instruções"
-              )}
-            </button>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {loading ? "A enviar..." : "Enviar instruções"}
+            </Button>
           </form>
-
-          <div className="mt-6 md:mt-8 text-center">
-            <Link href="/auth/signin" className="text-sm md:text-base text-purple-400 hover:text-purple-300 font-semibold transition-colors">
-              ← Voltar para login
-            </Link>
-          </div>
         </div>
       </div>
     </div>
   );
 }
 
+export default function ForgotPasswordPage() {
+  return (
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-white/10" /></div>}>
+        <ForgotPasswordContent />
+      </Suspense>
+    </div>
+  );
+}

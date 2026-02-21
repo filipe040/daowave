@@ -29,19 +29,19 @@ export function AdminSidebar() {
     const pathname = usePathname();
 
     return (
-        <div className="flex flex-col h-full bg-white border-r border-gray-200/80">
+        <div className="flex flex-col h-full bg-black/95 backdrop-blur-xl border-r border-white/10">
             {/* Logo */}
-            <div className="px-5 pt-6 pb-4 border-b border-gray-100">
-                <Link href="/admin" className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="px-6 pt-8 pb-6 border-b border-white/5">
+                <Link href="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                    <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-black text-xs font-bold shrink-0 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                         A
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">Admin</span>
+                    <span className="text-[15px] font-bold text-white tracking-tight uppercase">Dashboard Admin</span>
                 </Link>
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
                 {routes.map((route) => {
                     const active = route.exact
                         ? pathname === route.href
@@ -52,30 +52,30 @@ export function AdminSidebar() {
                             key={route.href}
                             href={route.href}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150",
+                                "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                                 active
-                                    ? "bg-gray-100 text-gray-900"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                    ? "bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                                    : "text-white/40 hover:bg-white/5 hover:text-white/80"
                             )}
                         >
                             <route.icon
-                                className={cn("h-4 w-4 shrink-0", active ? "text-gray-900" : "text-gray-400")}
-                                strokeWidth={active ? 2 : 1.75}
+                                className={cn("h-4.5 w-4.5 shrink-0", active ? "text-white" : "text-white/30")}
+                                strokeWidth={active ? 2 : 1.5}
                             />
-                            {route.label}
+                            <span className="tracking-wide">{route.label}</span>
                         </Link>
                     );
                 })}
             </nav>
 
             {/* Footer */}
-            <div className="px-3 pb-5 border-t border-gray-100 pt-3">
+            <div className="px-4 pb-8 border-t border-white/5 pt-4">
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-3 px-3 py-2 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-150"
+                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
                 >
-                    <LogOut className="h-4 w-4 text-gray-400" strokeWidth={1.75} />
-                    Sair
+                    <LogOut className="h-4.5 w-4.5 text-white/30 group-hover:text-red-400" strokeWidth={1.5} />
+                    <span>Sair</span>
                 </button>
             </div>
         </div>

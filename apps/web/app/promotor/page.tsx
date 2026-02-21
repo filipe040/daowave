@@ -52,8 +52,8 @@ export default function PromoterDashboardPage() {
                     description="Ainda não tem atividade registada. Crie o seu primeiro evento."
                     action={
                         <Link
-                            href="/promotor/events/new"
-                            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+                            href="/organizer/events/new"
+                            className="inline-flex items-center px-6 py-3 rounded-full text-sm font-bold bg-white text-black hover:bg-white/90 transition-all shadow-xl shadow-white/5"
                         >
                             Criar primeiro evento
                         </Link>
@@ -61,22 +61,22 @@ export default function PromoterDashboardPage() {
                 />
             )}
             {!loading && !error && stats && (
-                <div className="space-y-6">
+                <div className="space-y-10">
                     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                        <KpiCard label="Receita Total" value={fmt(stats.revenue.total)} icon={Euro} iconColor="text-emerald-600" />
-                        <KpiCard label="Bilhetes Vendidos" value={stats.tickets.sold} subtitle={`de ${stats.tickets.capacity} disponíveis`} icon={Ticket} iconColor="text-blue-600" />
-                        <KpiCard label="Eventos Ativos" value={stats.events.active} icon={Calendar} iconColor="text-purple-600" />
-                        <KpiCard label="Encomendas" value={stats.orders.total} icon={ShoppingCart} iconColor="text-orange-600" />
+                        <KpiCard label="Receita Total" value={fmt(stats.revenue.total)} icon={Euro} iconColor="text-emerald-400" />
+                        <KpiCard label="Bilhetes Vendidos" value={stats.tickets.sold} subtitle={`de ${stats.tickets.capacity} disponíveis`} icon={Ticket} iconColor="text-blue-400" />
+                        <KpiCard label="Eventos Ativos" value={stats.events.active} icon={Calendar} iconColor="text-purple-400" />
+                        <KpiCard label="Encomendas" value={stats.orders.total} icon={ShoppingCart} iconColor="text-orange-400" />
                     </div>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                         {[
-                            { href: "/promotor/events", label: "Ver eventos", desc: "Gerir os seus eventos" },
-                            { href: "/promotor/sales", label: "Ver vendas", desc: "Histórico de encomendas" },
-                            { href: "/promotor/analytics", label: "Analytics", desc: "Receita dos últimos 30 dias" },
+                            { href: "/organizer/events", label: "Ver eventos", desc: "Gerir os seus eventos" },
+                            { href: "/organizer/sales", label: "Ver vendas", desc: "Histórico de encomendas" },
+                            { href: "/organizer/analytics", label: "Analytics", desc: "Receita dos últimos 30 dias" },
                         ].map((item) => (
-                            <Link key={item.href} href={item.href} className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 group">
-                                <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700">{item.label}</p>
-                                <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+                            <Link key={item.href} href={item.href} className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 group shadow-xl">
+                                <p className="text-sm font-bold text-white group-hover:text-white tracking-wide uppercase">{item.label}</p>
+                                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{item.desc}</p>
                             </Link>
                         ))}
                     </div>

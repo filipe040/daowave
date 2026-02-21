@@ -4,7 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef, Suspense } from "react";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ const OAUTH_ERRORS: Record<string, string> = {
   Default: "Erro ao entrar. Por favor, tente novamente.",
 };
 
-// ── Google SVG Icon ────────────────────────────────────────────────────────
+// ── Icons ──────────────────────────────────────────────────────────────────
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -47,8 +47,6 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
-// ── Apple SVG Icon ─────────────────────────────────────────────────────────
-
 function AppleIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -57,24 +55,11 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-// ── Role-based redirect helper ─────────────────────────────────────────────
-
-function getRoleRedirect(role: string | undefined, from: string): string {
-  if (role === "ADMIN") return "/admin";
-  if (role === "PROMOTER") return "/promotor";
-  // If the `from` param is a safe destination, use it; otherwise home
-  if (from && from !== "/" && !from.startsWith("/admin") && !from.startsWith("/promotor")) {
-    return from;
-  }
-  return "/";
-}
-
-// ── Main SignIn UI ─────────────────────────────────────────────────────────
+// ── Main UI ────────────────────────────────────────────────────────────────
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { update: updateSession } = useSession();
 
   const [credLoading, setCredLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
@@ -90,23 +75,17 @@ function SignInContent() {
   const emailNotVerified = searchParams.get("email_not_verified") === "true";
   const rawError = searchParams.get("error");
 
-  // Translate OAuth error codes from NextAuth
   useEffect(() => {
-    if (rawError) {
-      setError(OAUTH_ERRORS[rawError] ?? OAUTH_ERRORS.Default);
-    }
+    if (rawError) setError(OAUTH_ERRORS[rawError] ?? OAUTH_ERRORS.Default);
   }, [rawError]);
 
-  // Clear timeout on unmount
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
 
-  // ── OAuth button handler ─────────────────────────────────────────────────
   const handleOAuth = async (provider: "google" | "apple") => {
     setError(null);
     setOauthTimeout(null);
     setOauthLoading(provider);
 
-    // 8-second fallback: if OAuth popup/redirect hangs, show friendly message
     timeoutRef.current = setTimeout(() => {
       setOauthLoading(null);
       setOauthTimeout(provider);
@@ -116,9 +95,6 @@ function SignInContent() {
       await signIn(provider, {
         callbackUrl: from === "/" ? "/auth/callback" : from,
       });
-      // If we get here without redirect (unlikely), clear loading
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setOauthLoading(null);
     } catch {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setOauthLoading(null);
@@ -126,7 +102,6 @@ function SignInContent() {
     }
   };
 
-  // ── Credentials form handler ─────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCredLoading(true);
@@ -138,7 +113,6 @@ function SignInContent() {
 
     try {
       const result = await signIn("credentials", { email, password, redirect: false });
-
       if (result?.error) {
         setError(
           result.error === "CredentialsSignin"
@@ -148,239 +122,214 @@ function SignInContent() {
               : `Erro: ${result.error}`
         );
         setCredLoading(false);
-        return;
-      }
-
-      await updateSession();
-      await new Promise((r) => setTimeout(r, 300));
-
-      try {
-        const res = await fetch("/api/auth/session");
-        const data = await res.json();
-        router.push(getRoleRedirect(data?.user?.role, from));
-        router.refresh();
-      } catch {
-        router.push("/");
+      } else {
+        router.push(from);
         router.refresh();
       }
     } catch {
-      setError("Erro ao fazer login. Tente novamente.");
+      setError("Erro ao processar login.");
       setCredLoading(false);
     }
   };
 
-  const anyLoading = credLoading || oauthLoading !== null;
+  const anyLoading = credLoading || !!oauthLoading;
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[400px]">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black overflow-x-hidden">
+      {/* Background glow from Home */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-white/5 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-white/3 blur-3xl opacity-50" />
+      </div>
 
-        {/* Logo mark */}
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center">
-            <div className="grid grid-cols-2 gap-1">
-              <span className="h-2 w-2 rounded-sm bg-white/80" />
-              <span className="h-2 w-2 rounded-sm bg-white/80" />
-              <span className="h-2 w-2 rounded-sm bg-white/80" />
-              <span className="h-2 w-2 rounded-sm bg-white/80" />
-            </div>
-          </div>
-          <h1 className="text-[22px] font-semibold text-white tracking-tight">Entrar na Daowave</h1>
-          <p className="text-[13px] text-white/45 text-center">
-            Aceda à sua conta para gerir bilhetes e eventos.
-          </p>
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 sm:px-6">
+
+        {/* Header / Logo */}
+        <div className="mb-8 text-center w-full max-w-[400px]">
+          <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
+            <ArrowLeft className="h-4 w-4" /> Voltar ao início
+          </Link>
+          <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight uppercase">EasyTicket</h1>
+          <p className="mt-2 text-[13px] sm:text-[14px] text-white/45">Entre na sua conta para continuar</p>
         </div>
 
-        {/* Status banners */}
-        {verified && (
-          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-green-500/25 bg-green-500/10 px-4 py-3 text-[13px] text-green-400">
-            <CheckCircle className="h-4 w-4 shrink-0" />
-            Email verificado com sucesso! Pode agora entrar.
-          </div>
-        )}
-        {emailNotVerified && (
-          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-[13px] text-amber-400">
-            <XCircle className="h-4 w-4 shrink-0" />
-            O seu email ainda não foi verificado. Verifique a sua caixa de entrada.
-          </div>
-        )}
-        {registered && (
-          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-green-500/25 bg-green-500/10 px-4 py-3 text-[13px] text-green-400">
-            <CheckCircle className="h-4 w-4 shrink-0" />
-            Conta criada! Verifique o email para ativar a conta.
-          </div>
-        )}
-        {passwordReset && (
-          <div className="mb-5 flex items-center gap-2 rounded-2xl border border-green-500/25 bg-green-500/10 px-4 py-3 text-[13px] text-green-400">
-            <CheckCircle className="h-4 w-4 shrink-0" />
-            Palavra-passe redefinida com sucesso!
-          </div>
-        )}
-        {error && (
-          <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-[13px] text-red-400">
-            {error}
-          </div>
-        )}
-        {oauthTimeout && (
-          <div className="mb-5 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-[13px] text-amber-400">
-            A ligação com {oauthTimeout === "apple" ? "a Apple" : "o Google"} está a demorar.{" "}
-            <button
-              className="underline underline-offset-2 hover:text-amber-300"
-              onClick={() => { setOauthTimeout(null); handleOAuth(oauthTimeout); }}
-            >
-              Tentar novamente
-            </button>
-          </div>
-        )}
+        <div className="w-full max-w-[400px]">
+          {/* Notifications */}
+          {verified && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-emerald-400">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              Email verificado! Já pode entrar.
+            </div>
+          )}
+          {emailNotVerified && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-amber-400">
+              <XCircle className="h-4 w-4 shrink-0" />
+              Email não verificado. Verifique o seu email.
+            </div>
+          )}
+          {registered && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-emerald-400">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              Conta criada! Verifique o seu email.
+            </div>
+          )}
+          {passwordReset && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-emerald-400">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              Palavra-passe redefinida!
+            </div>
+          )}
+          {error && (
+            <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-red-400">
+              {error}
+            </div>
+          )}
+          {oauthTimeout && (
+            <div className="mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-[12px] sm:text-[13px] text-amber-400">
+              A ligação com {oauthTimeout === "apple" ? "a Apple" : "o Google"} está a demorar.{" "}
+              <button
+                className="underline underline-offset-2 hover:text-amber-300"
+                onClick={() => { setOauthTimeout(null); handleOAuth(oauthTimeout); }}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
 
-        {/* Card */}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-7 shadow-2xl space-y-4">
+          {/* Main Card */}
+          <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
 
-          {/* Apple OAuth — first by Apple HIG convention */}
-          <button
-            id="signin-apple"
-            onClick={() => handleOAuth("apple")}
-            disabled={anyLoading}
-            className="relative w-full flex items-center justify-center gap-2.5 rounded-2xl bg-white px-5 py-3 text-[14px] font-semibold text-black transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {oauthLoading === "apple" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <AppleIcon className="h-4 w-4" />
-            )}
-            {oauthLoading === "apple" ? "A ligar..." : "Continuar com Apple"}
-          </button>
+            <div className="space-y-3 sm:space-y-4">
+              {/* Apple OAuth */}
+              <button
+                id="signin-apple"
+                onClick={() => handleOAuth("apple")}
+                disabled={anyLoading}
+                className="relative w-full flex items-center justify-center gap-3 rounded-full bg-white px-6 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-bold text-black transition-all hover:bg-white/95 hover:shadow-[0_8px_32px_rgba(255,255,255,0.2)] active:scale-[0.98] disabled:opacity-50"
+              >
+                {oauthLoading === "apple" ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-black" />
+                ) : (
+                  <AppleIcon className="h-4 w-4" />
+                )}
+                {oauthLoading === "apple" ? "A ligar..." : "Continuar com Apple"}
+              </button>
 
-          {/* Google OAuth */}
-          <button
-            id="signin-google"
-            onClick={() => handleOAuth("google")}
-            disabled={anyLoading}
-            className="relative w-full flex items-center justify-center gap-2.5 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-[14px] font-medium text-white transition-all hover:bg-white/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {oauthLoading === "google" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <GoogleIcon className="h-4 w-4" />
-            )}
-            {oauthLoading === "google" ? "A ligar..." : "Continuar com Google"}
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3 py-1">
-            <span className="flex-1 border-t border-white/10" />
-            <span className="text-[11px] uppercase tracking-wider text-white/30">ou com email</span>
-            <span className="flex-1 border-t border-white/10" />
-          </div>
-
-          {/* Email / Password form */}
-          <form id="signin-form" onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <Label htmlFor="email" className="block text-[12px] uppercase tracking-wider text-white/40 mb-1.5">
-                Email
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="email@exemplo.com"
-                className="h-11 rounded-xl border-white/15 bg-white/5 text-[14px] text-white placeholder:text-white/25 focus-visible:ring-white/20"
-              />
+              {/* Google OAuth */}
+              <button
+                id="signin-google"
+                onClick={() => handleOAuth("google")}
+                disabled={anyLoading}
+                className="relative w-full flex items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold text-white transition-all hover:bg-white/10 hover:border-white/25 active:scale-[0.98] disabled:opacity-50"
+              >
+                {oauthLoading === "google" ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                ) : (
+                  <GoogleIcon className="h-4 w-4" />
+                )}
+                {oauthLoading === "google" ? "A ligar..." : "Continuar com Google"}
+              </button>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <Label htmlFor="password" className="text-[12px] uppercase tracking-wider text-white/40">
-                  Palavra-passe
+            <div className="flex items-center gap-4 py-5 sm:py-6">
+              <span className="flex-1 border-t border-white/10" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-bold">ou email</span>
+              <span className="flex-1 border-t border-white/10" />
+            </div>
+
+            {/* Email / Password Form */}
+            <form id="signin-form" onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="block text-[10px] sm:text-[11px] uppercase tracking-wider text-white/40 ml-1">
+                  Endereço de Email
                 </Label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-[12px] text-white/40 hover:text-white/70 transition"
-                >
-                  Esqueceu-se?
-                </Link>
-              </div>
-              <div className="relative">
                 <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="h-11 pr-11 rounded-xl border-white/15 bg-white/5 text-[14px] text-white placeholder:text-white/25 focus-visible:ring-white/20"
+                  placeholder="exemplo@email.com"
+                  className="h-11 sm:h-12 rounded-xl sm:rounded-2xl border-white/10 bg-white/5 text-[13px] sm:text-[14px] text-white placeholder:text-white/20 focus-visible:ring-white/20 px-4"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition"
-                  aria-label={showPassword ? "Ocultar palavra-passe" : "Mostrar palavra-passe"}
-                >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
               </div>
-            </div>
 
-            <Button
-              id="signin-submit"
-              type="submit"
-              disabled={anyLoading}
-              className="w-full h-11 rounded-xl text-[14px] font-semibold bg-white text-black hover:bg-white/90 transition-all disabled:opacity-50 mt-1"
-            >
-              {credLoading ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  A entrar...
-                </span>
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between ml-1">
+                  <Label htmlFor="password" className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/40">
+                    Palavra-passe
+                  </Label>
+                  <Link href="/auth/forgot-password" title="Recuperar palavra-passe" className="text-[10px] sm:text-[11px] text-white/30 hover:text-white transition-colors">
+                    Esqueceu-se?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    className="h-11 sm:h-12 pr-12 rounded-xl sm:rounded-2xl border-white/10 bg-white/5 text-[13px] sm:text-[14px] text-white placeholder:text-white/20 focus-visible:ring-white/20 px-4"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                  >
+                    {showPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18" /></svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                id="signin-submit"
+                type="submit"
+                disabled={anyLoading}
+                className="w-full h-11 sm:h-12 rounded-full mt-2 text-[13px] sm:text-[14px] font-bold bg-white text-black hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50"
+              >
+                {credLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    A entrar...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+            </form>
+          </div>
+
+          <div className="mt-8 text-center space-y-4">
+            <p className="text-[13px] sm:text-[14px] text-white/40">
+              Não tem conta?{" "}
+              <Link href="/auth/signup" className="text-white hover:text-white/80 font-bold transition-all underline underline-offset-4">
+                Criar conta gratuita
+              </Link>
+            </p>
+
+            <p className="text-[10px] sm:text-[11px] text-white/20 leading-relaxed px-6">
+              Ao entrar, aceita os nossos{" "}
+              <Link href="/terms" className="underline hover:text-white/40">Termos</Link>{" "}
+              e a nossa{" "}
+              <Link href="/privacy" className="underline hover:text-white/40">Política de Privacidade</Link>.
+            </p>
+          </div>
         </div>
-
-        <p className="mt-6 text-center text-[13px] text-white/40">
-          Ainda não tem conta?{" "}
-          <Link href="/auth/signup" className="text-white/70 hover:text-white font-medium transition">
-            Criar conta
-          </Link>
-        </p>
-
-        <p className="mt-4 text-center text-[11px] text-white/20 leading-relaxed px-4">
-          Ao continuar, aceita os nossos{" "}
-          <Link href="/terms" className="underline underline-offset-2 hover:text-white/40">
-            Termos
-          </Link>{" "}
-          e{" "}
-          <Link href="/privacy" className="underline underline-offset-2 hover:text-white/40">
-            Política de Privacidade
-          </Link>
-          .
-        </p>
       </div>
     </div>
   );
 }
-
-// ── Page Export ────────────────────────────────────────────────────────────
 
 export default function SignInPage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-black flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-white/30" />
+          <Loader2 className="h-8 w-8 animate-spin text-white/10" />
         </div>
       }
     >

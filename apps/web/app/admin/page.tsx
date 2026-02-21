@@ -35,30 +35,30 @@ export default function AdminDashboardPage() {
     useEffect(() => { load(); }, []);
 
     return (
-        <div className="min-h-full bg-[#f5f5f7]">
-            <div className="bg-[#f5f5f7] border-b border-gray-200/80 px-6 sm:px-10 py-6">
-                <div className="max-w-6xl mx-auto">
-                    <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Visão Geral</h1>
-                    <p className="mt-0.5 text-sm text-gray-500">Visão geral da plataforma</p>
+        <div className="min-h-full bg-transparent">
+            <div className="bg-white/[0.02] border-b border-white/10 px-6 sm:px-10 py-8">
+                <div className="max-w-7xl mx-auto">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight uppercase">Visão Geral</h1>
+                    <p className="mt-1 text-[14px] text-zinc-400">Estado global da plataforma</p>
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-6 sm:px-10 py-8 space-y-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 py-10 space-y-10">
                 {loading && (
                     <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-                        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)}
+                        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl bg-white/5" />)}
                     </div>
                 )}
                 {!loading && error && <ErrorState message={error} onRetry={load} />}
                 {!loading && !error && stats && (
                     <>
                         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-                            <KpiCard label="GMV Total" value={fmt(stats.gmv)} icon={Euro} iconColor="text-emerald-600" />
-                            <KpiCard label="Utilizadores" value={stats.users} icon={Users} iconColor="text-blue-600" />
-                            <KpiCard label="Organizações" value={stats.activeOrganizations} icon={Building2} iconColor="text-purple-600" />
-                            <KpiCard label="Eventos" value={stats.events} icon={Calendar} iconColor="text-orange-600" />
+                            <KpiCard label="GMV Total" value={fmt(stats.gmv)} icon={Euro} iconColor="text-emerald-400" />
+                            <KpiCard label="Utilizadores" value={stats.users} icon={Users} iconColor="text-blue-400" />
+                            <KpiCard label="Organizações" value={stats.activeOrganizations} icon={Building2} iconColor="text-purple-400" />
+                            <KpiCard label="Eventos" value={stats.events} icon={Calendar} iconColor="text-orange-400" />
                             <div className="col-span-2 sm:col-span-1">
-                                <KpiCard label="Encomendas" value={stats.orders} icon={ShoppingCart} iconColor="text-gray-600" />
+                                <KpiCard label="Encomendas" value={stats.orders} icon={ShoppingCart} iconColor="text-zinc-400" />
                             </div>
                         </div>
 
@@ -73,10 +73,10 @@ export default function AdminDashboardPage() {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
+                                    className="bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 group shadow-xl"
                                 >
-                                    <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700">{item.label}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+                                    <p className="text-sm font-bold text-white group-hover:text-white tracking-wide uppercase">{item.label}</p>
+                                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{item.desc}</p>
                                 </Link>
                             ))}
                         </div>

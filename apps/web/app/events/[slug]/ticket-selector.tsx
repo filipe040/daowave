@@ -102,19 +102,19 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
 
   if (ticketLots.length === 0) {
     return (
-      <div className="bg-slate-50 rounded-lg p-6 text-center">
-        <p className="text-slate-500">Nenhum lote disponível no momento.</p>
+      <div className="bg-white/5 backdrop-blur-xl rounded-[24px] border border-white/10 p-8 text-center">
+        <p className="text-white/40 text-sm">Nenhum lote disponível no momento.</p>
       </div>
     );
   }
 
   return (
-    <div data-testid="event-ticket-selector" className="bg-slate-50 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-slate-900 mb-6">
-        Selecionar Bilhetes
+    <div data-testid="event-ticket-selector" className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 p-6 sm:p-8 shadow-2xl">
+      <h2 className="text-xl font-bold text-white tracking-tight mb-8">
+        Escolher Bilhetes
       </h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-8">
         {ticketLots.map((lot) => {
           const quantity = quantities[lot.id] || 0;
           const available = lot.quantityTotal - lot.quantitySold;
@@ -122,44 +122,44 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
           return (
             <div
               key={lot.id}
-              className="bg-white rounded-lg p-4 border border-slate-200"
+              className="bg-white/[0.03] rounded-2xl p-5 border border-white/5 transition-colors hover:bg-white/[0.05]"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-slate-900">{lot.name}</h3>
-                  <p className="text-2xl font-bold text-blue-600 mt-1">
+              <div className="flex items-start justify-between mb-4">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-white tracking-wide truncate">{lot.name}</h3>
+                  <p className="text-2xl font-bold text-white mt-1">
                     {formatCurrency(lot.priceCents, lot.currency)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-500">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] uppercase font-bold text-white/40 tracking-wider">
                     {available} disponíveis
-                  </p>
+                  </div>
                 </div>
               </div>
 
               {available > 0 ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <button
                     onClick={() => updateQuantity(lot.id, -1)}
                     disabled={quantity === 0}
-                    className="w-10 h-10 rounded-lg border border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+                    className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-xl"
                   >
                     −
                   </button>
-                  <span className="w-12 text-center font-semibold">
+                  <span className="w-8 text-center font-bold text-lg text-white">
                     {quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(lot.id, 1)}
                     disabled={quantity >= available}
-                    className="w-10 h-10 rounded-lg border border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+                    className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-xl font-bold"
                   >
                     +
                   </button>
                 </div>
               ) : (
-                <p className="text-sm text-red-600 font-semibold">
+                <p className="text-[12px] font-bold text-red-500/80 uppercase tracking-widest bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-center">
                   Esgotado
                 </p>
               )}
@@ -169,10 +169,13 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
       </div>
 
       {totalItems > 0 && (
-        <div className="border-t border-slate-300 pt-4 mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-slate-600">Total ({totalItems} bilhetes)</span>
-            <span className="text-2xl font-bold text-slate-900">
+        <div className="border-t border-white/10 pt-6 mb-8">
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <p className="text-[11px] font-bold text-white/30 uppercase tracking-[0.2em]">Total</p>
+              <p className="text-sm text-white/50">{totalItems} bilhetes selecionados</p>
+            </div>
+            <span className="text-3xl font-bold text-white tracking-tight">
               {formatCurrency(totalCents)}
             </span>
           </div>
@@ -182,9 +185,10 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
       {checkoutError && (
         <div
           data-testid="checkout-error"
-          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+          className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400 font-medium leading-relaxed"
           role="alert"
         >
+          <p className="font-bold uppercase tracking-wider text-[10px] mb-1">Falha no checkout</p>
           {checkoutError}
         </div>
       )}
@@ -194,7 +198,7 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         data-testid="btn-continue-checkout"
         onClick={handleCheckout}
         disabled={totalItems === 0 || loading}
-        className="w-full"
+        className="w-full h-14 rounded-2xl bg-white text-black font-bold text-[15px] hover:bg-white/90 shadow-[0_12px_40px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5"
         size="lg"
       >
         {loading ? 'A processar...' : 'Continuar para Pagamento'}

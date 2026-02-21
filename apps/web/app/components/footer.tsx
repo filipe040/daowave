@@ -81,13 +81,13 @@ export default function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a href="/promotor" className="text-white/55 hover:text-white transition">
+                  <a href="/organizer" className="text-white/55 hover:text-white transition">
                     Área do promotor
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/promotor/events/new"
+                    href="/organizer/events/new"
                     className="text-white/55 hover:text-white transition"
                   >
                     Criar evento

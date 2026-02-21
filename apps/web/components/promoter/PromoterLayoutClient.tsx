@@ -10,7 +10,7 @@ export function PromoterLayoutClient({ children }: { children: React.ReactNode }
     const closeSidebar = () => setSidebarOpen(false);
 
     return (
-        <div className="h-full flex bg-[#f5f5f7]">
+        <div className="h-full flex bg-black">
             {/* Desktop sidebar */}
             <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-30">
                 <PromoterSidebar />
@@ -19,7 +19,7 @@ export function PromoterLayoutClient({ children }: { children: React.ReactNode }
             {/* Mobile overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden"
                     onClick={closeSidebar}
                     aria-hidden="true"
                 />
@@ -33,20 +33,26 @@ export function PromoterLayoutClient({ children }: { children: React.ReactNode }
             </div>
 
             {/* Main content */}
-            <div className="flex-1 md:pl-64 flex flex-col min-h-screen">
+            <div className="flex-1 md:pl-64 flex flex-col min-h-screen relative overflow-hidden">
+                {/* Background glow */}
+                <div className="pointer-events-none fixed inset-0 z-0">
+                    <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-white/[0.02] blur-[120px]" />
+                    <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-white/[0.01] blur-[100px]" />
+                </div>
+
                 {/* Mobile header */}
-                <div className="md:hidden flex items-center gap-3 px-4 h-14 bg-white border-b border-gray-200/80 shadow-sm sticky top-0 z-20">
+                <div className="md:hidden flex items-center gap-4 px-6 h-16 bg-black/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-20">
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                        className="p-2 rounded-xl text-white/70 hover:bg-white/10 hover:text-white transition-all"
                         aria-label={sidebarOpen ? "Fechar menu" : "Abrir menu"}
                     >
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
-                    <span className="text-sm font-semibold text-gray-900">Daowave Promotor</span>
+                    <span className="text-[15px] font-bold text-white tracking-tight uppercase">Promotor</span>
                 </div>
 
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 relative z-10">{children}</main>
             </div>
         </div>
     );

@@ -150,7 +150,7 @@ export default function NavClient() {
                 <div className="hidden md:flex items-center gap-4">
                   {role === "PROMOTER" && (
                     <Link
-                      href="/promotor"
+                      href="/organizer"
                       className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
                     >
                       PROMOTOR
@@ -240,7 +240,7 @@ export default function NavClient() {
                 </Link>
                 {role === "PROMOTER" && (
                   <Link
-                    href="/promotor"
+                    href="/organizer"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
                   >
