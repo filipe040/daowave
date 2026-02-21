@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle } from "lucide-react";
 import { generateQrCodeDataUrl, generateQrToken } from "@/lib/qr";
+import { TicketTransferButton } from "./ticket-transfer-button";
 
 export const dynamic = "force-dynamic";
 
@@ -151,6 +152,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             >
               📥 Descarregar PDF
             </a>
+            <TicketTransferButton ticketId={ticket.id} ticketStatus={ticket.status} />
           </div>
         </div>
       </div>

@@ -21,10 +21,10 @@ export default function Footer() {
 
                 <div className="min-w-0">
                   <h3 className="text-base md:text-lg font-semibold tracking-wide text-white/90">
-                    EasyTicket
+                    Daowave
                   </h3>
                   <p className="text-[11px] md:text-xs uppercase tracking-wider text-white/40">
-                    Bilhética & acesso
+                    Bilhética &amp; acesso
                   </p>
                 </div>
               </div>
@@ -96,23 +96,27 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Support */}
             <div>
               <h4 className="text-sm font-semibold text-white/85">Suporte</h4>
               <ul className="mt-4 space-y-2 text-sm">
                 <li>
-                  <a href="/contact" className="text-white/55 hover:text-white transition">
-                    Contacto
+                  <a href="/sobre-nos" className="text-white/55 hover:text-white transition">
+                    Sobre Nós
                   </a>
                 </li>
                 <li>
-                  <a href="/terms" className="text-white/55 hover:text-white transition">
-                    Termos e condições
+                  <a href="/faq" className="text-white/55 hover:text-white transition">
+                    Perguntas Frequentes
                   </a>
                 </li>
                 <li>
-                  <a href="/privacy" className="text-white/55 hover:text-white transition">
-                    Privacidade
+                  <a href="/politica-reembolsos" className="text-white/55 hover:text-white transition">
+                    Política de Reembolsos
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:suporte@daowave.pt" className="text-white/55 hover:text-white transition">
+                    suporte@daowave.pt
                   </a>
                 </li>
               </ul>
@@ -124,7 +128,7 @@ export default function Footer() {
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-white/45">
-              © {year} EasyTicket. Todos os direitos reservados.
+              © {year} Daowave. Todos os direitos reservados.
             </p>
 
             <div className="flex items-center gap-2">

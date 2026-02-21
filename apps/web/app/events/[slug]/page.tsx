@@ -80,10 +80,51 @@ export default async function EventPage({
   const primaryColor = event.primaryColor || '#6C2BD9';
   const secondaryColor = event.secondaryColor || '#06B6D4';
 
+  // JSON-LD Schema.org Event structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description,
+    startDate: event.startAt.toISOString(),
+    endDate: event.endAt.toISOString(),
+    location: {
+      "@type": "Place",
+      name: event.venue,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: event.city,
+        addressCountry: "PT",
+      },
+    },
+    image: event.coverImage || event.bannerUrl || undefined,
+    organizer: event.promoter
+      ? { "@type": "Organization", name: event.promoter.brandName }
+      : undefined,
+    offers:
+      event.ticketLots.length > 0
+        ? event.ticketLots.map((lot) => ({
+          "@type": "Offer",
+          name: lot.name,
+          price: (lot.priceCents / 100).toFixed(2),
+          priceCurrency: lot.currency,
+          availability:
+            lot.quantitySold < lot.quantityTotal
+              ? "https://schema.org/InStock"
+              : "https://schema.org/SoldOut",
+          url: `https://tickets.daowave.pt/events/${event.slug}`,
+        }))
+        : undefined,
+  };
+
   return (
     <div
       className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <style dangerouslySetInnerHTML={{
         __html: `
         :root {
