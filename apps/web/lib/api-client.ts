@@ -48,3 +48,51 @@ export const api = {
         apiFetch<T>(url, { ...options, method: "PATCH", body: JSON.stringify(body) }),
     delete: <T>(url: string, options?: RequestInit) => apiFetch<T>(url, { ...options, method: "DELETE" }),
 };
+
+// Types used by Admin/Dashboard pages
+export interface AuditLog {
+    id: string;
+    action: string;
+    entityType: string;
+    entityId: string | null;
+    actorUserId: string;
+    createdAt: string;
+}
+
+export interface Organization {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+    createdAt: string;
+}
+
+export interface FinanceData {
+    grossCents: number;
+    feesCents: number;
+    netCents: number;
+    payoutsPendingCents: number;
+    payoutsPaidCents: number;
+    currency: string;
+    payouts: Array<{
+        id: string;
+        amountCents: number;
+        status: string;
+        createdAt: string;
+    }>;
+}
+
+// Named exports for specific modules (Restored to fix build)
+export async function getAuditLogs(params: any) {
+    const searchParams = new URLSearchParams(params);
+    return api.get<{ data: AuditLog[]; total: number }>(`/api/admin/audit-logs?${searchParams.toString()}`);
+}
+
+export async function getAdminOrganizations(params: any) {
+    const searchParams = new URLSearchParams(params);
+    return api.get<{ organizations: Organization[]; total: number }>(`/api/admin/organizations?${searchParams.toString()}`);
+}
+
+export async function getPromoterFinance() {
+    return api.get<FinanceData>("/api/promotor/finance");
+}
