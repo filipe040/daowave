@@ -2,7 +2,7 @@ import React from "react";
 
 interface PageShellProps {
     title: string;
-    subtitle?: string;
+    subtitle?: React.ReactNode;
     actions?: React.ReactNode;
     children: React.ReactNode;
 }

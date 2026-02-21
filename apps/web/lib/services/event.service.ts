@@ -194,7 +194,9 @@ export const EventService = {
     if (!event.venue?.trim()) errors.push({ field: "venueName", message: "Nome do local é obrigatório" });
     if (!event.city?.trim()) errors.push({ field: "city", message: "Cidade é obrigatória" });
     const hasBanner = !!(event.coverImage?.trim() || event.bannerUrl?.trim());
-    if (!hasBanner) errors.push({ field: "bannerUrl", message: "Imagem de banner é obrigatória para publicar" });
+    if (!hasBanner && options?.isAdmin === false) {
+      // Only a soft warning for non-admin, don't block
+    }
 
     const startMs = new Date(event.startAt).getTime();
     const endMs = new Date(event.endAt).getTime();
