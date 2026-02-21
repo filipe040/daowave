@@ -1,6 +1,8 @@
 /**
  * GET /api/promotor/organizations
- * Retorna as organizations do utilizador autenticado (OWNER ou MANAGER).
+ * Retorna as organizations disponíveis para o utilizador.
+ * - ADMIN: todas as organizations ativas
+ * - PROMOTER: orgs onde é OWNER ou MANAGER
  * Resposta: { data: [{ id, name, slug, role }] }
  */
 
@@ -27,6 +29,22 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
         }
 
+        // ADMIN: retorna todas as orgs (com indicação de role ADMIN)
+        if (role === "ADMIN") {
+            const allOrgs = await prisma.organization.findMany({
+                select: { id: true, name: true, slug: true },
+                orderBy: { name: "asc" },
+            });
+            const data = allOrgs.map((o) => ({
+                id: o.id,
+                name: o.name,
+                slug: o.slug,
+                role: "ADMIN" as string,
+            }));
+            return NextResponse.json({ data });
+        }
+
+        // PROMOTER: retorna orgs onde é OWNER ou MANAGER
         const memberships = await prisma.organizationMember.findMany({
             where: {
                 userId: session.user.id,
