@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import EventsSearch from "./components/events-search";
+import PromoterLink from "./components/PromoterLink";
 import { CITIES_PT } from "./constants/cities";
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Ticket, Users, Zap } from "lucide-react";
 
@@ -155,8 +156,7 @@ export default async function Home({
             >
               Ver eventos <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              href="/auth/signin"
+            <PromoterLink
               className={cn(
                 "inline-flex items-center justify-center rounded-full",
                 "border border-white/15 bg-white/5 px-6 py-3.5",
@@ -165,7 +165,7 @@ export default async function Home({
               )}
             >
               Sou promotor
-            </Link>
+            </PromoterLink>
           </div>
         </div>
       </section>
@@ -484,8 +484,7 @@ export default async function Home({
                 check-in num só lugar.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  href="/auth/signin"
+                <PromoterLink
                   className={cn(
                     "inline-flex items-center justify-center gap-2 rounded-full",
                     "bg-white px-6 py-3.5",
@@ -495,7 +494,7 @@ export default async function Home({
                   )}
                 >
                   Aceder ao painel <ArrowRight className="h-4 w-4" />
-                </Link>
+                </PromoterLink>
                 <Link
                   href="/sobre-nos"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all"

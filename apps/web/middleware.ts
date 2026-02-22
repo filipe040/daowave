@@ -151,9 +151,11 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith("/promotor")) {
-      // Allow ADMIN to access promoter dashboard for debugging/support
-      if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
+      // Only require authentication here — the requirePromoter() server guard
+      // checks OrganizationMember membership and handles role-based redirects.
+      // Users may have system role 'USER' while still being org promoters.
+      if (!token) {
+        return NextResponse.redirect(new URL("/auth/signin?from=/promotor", request.url));
       }
     }
 
