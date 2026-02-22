@@ -59,11 +59,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve promoter profile id (needed for EventService.create)
-    const promoter = await prisma.promoterProfile.findUnique({
+    let promoter = await prisma.promoterProfile.findUnique({
       where: { userId: (session.user as any).id },
     });
 
-    if (!promoter && !body.orgId) {
+    // If missing, create one automatically for organization members or admins
+    if (!promoter && (body.orgId || orgId || globalRole === "ADMIN")) {
+      promoter = await prisma.promoterProfile.create({
+        data: {
+          userId: (session.user as any).id,
+          brandName: (session.user as any).name || "Provedor de Eventos",
+          status: "APPROVED",
+        },
+      });
+    }
+
+    if (!promoter) {
       return NextResponse.json(
         { error: "Precisa de um perfil de promotor ou de selecionar uma organização para criar eventos." },
         { status: 422 }
@@ -78,8 +89,8 @@ export async function POST(req: NextRequest) {
       city: body.city,
       startAt: body.startAt,
       endAt: body.endAt,
-      organizationId: (body.orgId || orgId) ?? undefined, // Use context orgId if not provided
-      promoterId: promoter?.id ?? (session.user as any).id, // fallback to userId for admin
+      organizationId: (body.orgId || orgId) ?? undefined,
+      promoterId: promoter.id,
     });
 
     return NextResponse.json(event);
