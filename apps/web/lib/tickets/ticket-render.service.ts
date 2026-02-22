@@ -28,20 +28,53 @@ export const TicketRenderService = {
       },
     });
 
-    if (!ticket || !ticket.event.organizationId) {
-      throw new Error("Ticket or organization not found");
+    if (!ticket) {
+      throw new Error("Ticket not found");
     }
 
-    // Find ACTIVE template for org
-    const activeTemplate = await prisma.organizationTicketTemplate.findFirst({
-      where: {
-        organizationId: ticket.event.organizationId,
-        status: TicketTemplateStatus.ACTIVE,
-      },
-    });
+    let activeTemplate = null;
+
+    if (ticket.event.organizationId) {
+      // Find ACTIVE template for org
+      activeTemplate = await prisma.organizationTicketTemplate.findFirst({
+        where: {
+          organizationId: ticket.event.organizationId,
+          status: TicketTemplateStatus.ACTIVE,
+        },
+      });
+    }
 
     if (!activeTemplate) {
-      throw new Error("No active ticket template found for organization");
+      // Create a fallback snapshot
+      const defaultTheme: ThemeJson = {
+        brand: { logoUrl: "", tagline: "" },
+        colors: {
+          bg: "#ffffff",
+          card: "#ffffff",
+          text: "#111111",
+          primary: "#19c37d",
+          muted: "#666666",
+        },
+        typography: { fontFamily: "Inter" },
+        qr: { size: "M", label: "Validar na entrada" },
+        blocks: {
+          showBuyerName: true,
+          showOrderId: true,
+          showTicketType: true,
+          showTerms: true,
+          showSupport: true,
+        },
+        footer: { supportUrl: "", supportEmail: "" },
+      };
+
+      return prisma.ticketRenderSnapshot.create({
+        data: {
+          ticketId,
+          templateId: "fallback-template",
+          templateVersion: 1,
+          themeJsonSnapshot: defaultTheme as any,
+        },
+      });
     }
 
     // Create snapshot
