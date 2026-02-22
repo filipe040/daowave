@@ -49,22 +49,22 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">
+        <div className="rounded-2xl border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-200">
           {error}
         </div>
       )}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
+      <div className="rounded-3xl border border-white/10 bg-black/40 p-5 p-px overflow-hidden">
         <PaymentElement />
       </div>
       <button
         type="submit"
         disabled={!stripe || loading}
-        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95"
+        className="w-full rounded-full bg-white px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            A processar pagamento...
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+            A processar…
           </span>
         ) : (
           "Confirmar pagamento"
@@ -77,7 +77,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   let clientSecret = searchParams.get("payment_intent");
-  
+
   // Fallback to sessionStorage if not in URL
   if (!clientSecret && typeof window !== "undefined") {
     clientSecret = sessionStorage.getItem("payment_intent");
@@ -86,15 +86,15 @@ function CheckoutContent() {
   if (!clientSecret) {
     return (
       <div className="mx-auto max-w-2xl px-4 sm:px-0">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
+        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-12 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
           <div className="mb-4 flex justify-center">
-          <AlertTriangle className="h-14 w-14 text-amber-400" strokeWidth={1.5} />
-        </div>
-          <p className="text-lg font-semibold text-zinc-300 mb-2">Sessão de pagamento inválida</p>
-          <p className="text-sm text-zinc-500 mb-6">A sua sessão expirou ou é inválida.</p>
+            <AlertTriangle className="h-14 w-14 text-amber-400" strokeWidth={1.5} />
+          </div>
+          <p className="text-xl font-semibold text-white/92 mb-2">Sessão de pagamento inválida</p>
+          <p className="text-[15px] text-white/55 mb-8">A sua sessão expirou ou é inválida.</p>
           <a
             href="/events"
-            className="inline-block rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+            className="inline-block rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-black transition-all hover:scale-[1.03] active:scale-[0.98] shadow-[0_8px_32px_rgba(255,255,255,.18)]"
           >
             Voltar aos eventos
           </a>
@@ -104,12 +104,12 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold">Checkout</h1>
-        <p className="text-base text-zinc-400">Complete o seu pagamento de forma segura</p>
+    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 mb-24">
+      <div className="mb-8 space-y-2 text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold text-white/92">Checkout</h1>
+        <p className="text-base text-white/55">Complete o seu pagamento de forma segura</p>
       </div>
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8 backdrop-blur-sm shadow-2xl shadow-black/50">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)]">
         <Elements
           stripe={stripePromise}
           options={{
@@ -117,13 +117,13 @@ function CheckoutContent() {
             appearance: {
               theme: "night",
               variables: {
-                colorPrimary: "#3b82f6",
-                colorBackground: "#18181b",
-                colorText: "#fafafa",
+                colorPrimary: "#ffffff",
+                colorBackground: "#09090b",
+                colorText: "#ffffff",
                 colorDanger: "#ef4444",
                 fontFamily: "system-ui, sans-serif",
                 spacingUnit: "4px",
-                borderRadius: "8px",
+                borderRadius: "16px",
               },
             },
           }}
@@ -138,11 +138,9 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
-        <div className="mb-8 space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold">Checkout</h1>
-          <p className="text-base text-zinc-400">A carregar...</p>
-        </div>
+      <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 text-center">
+        <h1 className="text-3xl font-bold text-white/92">Checkout</h1>
+        <p className="mt-2 text-sm text-white/55">A carregar interface segura...</p>
       </div>
     }>
       <CheckoutContent />

@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Lock, CheckCircle, AlertTriangle, Ban, XCircle, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ValidateResult {
   valid: boolean;
@@ -171,10 +172,10 @@ export default function ValidatorPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen grid place-items-center px-4">
-        <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-sm">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-foreground" />
-          <p className="text-sm text-muted-foreground">A carregar…</p>
+      <div className="min-h-screen grid place-items-center px-4 bg-black">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-white/20 border-t-white" />
+          <p className="text-sm text-white/55">A carregar segurança…</p>
         </div>
       </div>
     );
@@ -182,18 +183,17 @@ export default function ValidatorPage() {
 
   if (!session || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
     return (
-      <div className="min-h-screen grid place-items-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+      <div className="min-h-screen grid place-items-center px-4 bg-black">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
           <div className="mb-5 flex justify-center">
-            <Lock className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+            <Lock className="h-16 w-16 text-white/30" strokeWidth={1.5} />
           </div>
-          <h2 className="mb-2 text-2xl font-semibold text-foreground">Acesso restrito</h2>
-          <p className="mb-6 text-sm text-muted-foreground">Esta área é apenas para validadores.</p>
+          <h2 className="mb-2 text-2xl font-semibold text-white/92">Acesso restrito</h2>
+          <p className="mb-8 text-[15px] text-white/55">Esta área é reservada a validadores autorizados.</p>
 
           <Link
             href="/auth/signin"
-            className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center justify-center w-full rounded-full bg-white px-6 py-4 text-[15px] font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98]"
           >
             Iniciar sessão
           </Link>
@@ -204,156 +204,163 @@ export default function ValidatorPage() {
 
   const getResultStyles = () => {
     if (!result) return "";
-    if (result.valid) return "border-emerald-500/40 bg-emerald-500/10 text-foreground";
-    if (result.result === "already_used") return "border-amber-500/40 bg-amber-500/10 text-foreground";
-    if (result.result === "cancelled") return "border-slate-500/40 bg-slate-500/10 text-foreground";
-    return "border-rose-500/40 bg-rose-500/10 text-foreground";
+    if (result.valid) return "border-emerald-500/40 bg-emerald-500/15 text-emerald-100";
+    if (result.result === "already_used") return "border-amber-500/40 bg-amber-500/15 text-amber-100";
+    if (result.result === "cancelled") return "border-white/20 bg-white/10 text-white/90";
+    return "border-rose-500/40 bg-rose-500/15 text-rose-100";
   };
 
   const ResultIcon = () => {
     if (!result) return null;
-    const size = "h-14 w-14 sm:h-16 sm:w-16";
-    if (result.valid) return <CheckCircle className={`${size} text-emerald-500 mx-auto`} strokeWidth={1.5} />;
-    if (result.result === "already_used") return <AlertTriangle className={`${size} text-amber-500 mx-auto`} strokeWidth={1.5} />;
-    if (result.result === "cancelled") return <Ban className={`${size} text-slate-500 mx-auto`} strokeWidth={1.5} />;
-    return <XCircle className={`${size} text-rose-500 mx-auto`} strokeWidth={1.5} />;
+    const size = "h-16 w-16 sm:h-20 sm:w-20";
+    if (result.valid) return <CheckCircle className={`${size} text-emerald-400 mx-auto`} strokeWidth={1.5} />;
+    if (result.result === "already_used") return <AlertTriangle className={`${size} text-amber-400 mx-auto`} strokeWidth={1.5} />;
+    if (result.result === "cancelled") return <Ban className={`${size} text-white/50 mx-auto`} strokeWidth={1.5} />;
+    return <XCircle className={`${size} text-rose-400 mx-auto`} strokeWidth={1.5} />;
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 animate-fade-in" data-testid="validator-page">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl sm:text-4xl font-semibold text-foreground">Validador de Bilhetes</h1>
-        <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-          Escaneie o QR do bilhete ou valide pelo código manual.
-        </p>
-      </div>
-
-      {/* Result */}
-      {result && (
-        <div
-          className={`rounded-2xl border p-6 sm:p-8 text-center shadow-sm animate-slide-up ${getResultStyles()}`}
-          role="status"
-          aria-live="polite"
-        >
-          <div className="mb-3 flex justify-center"><ResultIcon /></div>
-          <p className="text-lg sm:text-xl font-semibold">{result.message}</p>
-
-          <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-            {result.lastCheckinAt && (
-              <p>Check-in: {new Date(result.lastCheckinAt).toLocaleString("pt-PT")}</p>
-            )}
-            {typeof result.entriesUsed === "number" && <p>Entradas utilizadas: {result.entriesUsed}</p>}
-          </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:p-12 animate-fade-in" data-testid="validator-page">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="text-[11px] uppercase tracking-wider text-white/45">Operações</div>
+          <h1 className="mt-2 text-3xl sm:text-4xl font-semibold text-white/92">Validador de Bilhetes</h1>
+          <p className="mt-2 text-[15px] sm:text-base text-white/60">
+            Escaneie o QR ou valide o bilhete manualmente.
+          </p>
         </div>
-      )}
 
-      {/* Body */}
-      <div className="space-y-4">
-        {/* Camera error */}
-        {cameraError && (
-          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5">
-            <div className="mb-1 text-sm font-semibold text-foreground">Atenção: câmara indisponível</div>
-            <p className="text-sm text-muted-foreground">{cameraError}</p>
-
-            {!isSecureContext && (
-              <div className="mt-4 rounded-xl border border-border bg-card p-4">
-                <p className="text-sm font-semibold text-foreground">Nota técnica (HTTPS)</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Em mobile, a câmara exige HTTPS. Em produção, garante SSL no domínio. Para já, usa a entrada manual.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Scanner */}
-        {scanning && !cameraError && (
-          <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-            <div id="reader" className="mx-auto max-w-sm"></div>
-
-            <button
-              onClick={async () => {
-                await stopScanner();
-                setScanning(false);
-                setCameraError(null);
-              }}
-              className="mt-5 w-full rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground border border-border
-                         transition-colors hover:bg-secondary/80
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              Parar scanner
-            </button>
-          </div>
-        )}
-
-        {/* Start scanner */}
-        {!scanning && (
-          <button
-            onClick={() => {
-              setCameraError(null);
-              setScanning(true);
-            }}
-            disabled={typeof window !== "undefined" && !isSecureContext}
-            className="w-full rounded-2xl bg-primary px-6 py-4 text-base sm:text-lg font-semibold text-primary-foreground shadow-sm
-                       transition-colors hover:bg-primary/90
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        {/* Result */}
+        {result && (
+          <div
+            className={`rounded-3xl border p-8 sm:p-10 text-center backdrop-blur-3xl shadow-[0_18px_60px_rgba(0,0,0,.45)] animate-slide-up ${getResultStyles()}`}
+            role="status"
+            aria-live="polite"
           >
-            Iniciar scanner {typeof window !== "undefined" && !isSecureContext ? "(requer HTTPS)" : ""}
-          </button>
-        )}
+            <div className="mb-4 flex justify-center"><ResultIcon /></div>
+            <p className="text-xl sm:text-2xl font-bold tracking-tight">{result.message}</p>
 
-        {/* Tip / Fallback for Local Network Testing */}
-        {!isSecureContext && (
-          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 shadow-sm">
-            <h3 className="mb-2 text-sm font-semibold text-amber-800">Câmara Direta Indisponível (HTTPS Necessário)</h3>
-            <p className="mb-4 text-sm text-amber-700">
-              Caso esteja a testar noutra rede local via telemóvel, o Safari/Chrome bloqueia a câmara direta.<br />
-              Em alternativa, tire uma foto do bilhete QR clicando aqui:
-            </p>
-
-            <label className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-600 px-6 py-4 text-sm sm:text-base font-semibold text-white shadow-sm transition-colors ${parsingFile ? 'opacity-70' : 'hover:bg-amber-700'}`}>
-              <Upload className="h-5 w-5" />
-              {parsingFile ? "A analisar imagem…" : "Tirar Foto ao QR Code"}
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleFileUpload}
-                disabled={parsingFile}
-              />
-            </label>
-            <div id="reader" style={{ display: "none" }}></div>
+            <div className="mt-4 space-y-1.5 text-[14px] opacity-80">
+              {result.lastCheckinAt && (
+                <p>Check-in em: {new Date(result.lastCheckinAt).toLocaleString("pt-PT")}</p>
+              )}
+              {typeof result.entriesUsed === "number" && <p>Entradas utilizadas: {result.entriesUsed}</p>}
+            </div>
           </div>
         )}
 
-        {/* Manual */}
-        <div className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Validar por código
-          </h2>
+        {/* Body */}
+        <div className="space-y-4">
+          {/* Camera error */}
+          {cameraError && (
+            <div className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-6 backdrop-blur-xl">
+              <div className="mb-1 text-[15px] font-semibold text-amber-500">Atenção: câmara indisponível</div>
+              <p className="text-[14px] text-amber-200/80">{cameraError}</p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={manualCode}
-              onChange={(e) => setManualCode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleManualValidate()}
-              placeholder="Colar código do bilhete…"
-              className="flex-1 rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            />
+              {!isSecureContext && (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-black/40 p-5">
+                  <p className="text-[13px] font-semibold text-white/90">Nota técnica (HTTPS)</p>
+                  <p className="mt-1 text-[13px] text-white/55 leading-relaxed">
+                    Em mobile, o acesso à câmara requer HTTPS. Use a entrada manual ou o upload de imagem abaixo.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
+          {/* Scanner view */}
+          {scanning && !cameraError && (
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_18px_60px_rgba(0,0,0,.45)] backdrop-blur-2xl">
+              <div id="reader" className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-black/60"></div>
+
+              <button
+                onClick={async () => {
+                  await stopScanner();
+                  setScanning(false);
+                  setCameraError(null);
+                }}
+                className="mt-6 w-full rounded-full bg-white/10 px-6 py-4 text-[15px] font-semibold text-white border border-white/20
+                           transition-all hover:bg-white/20 active:scale-[0.98]
+                           focus:outline-none focus:ring-2 focus:ring-white/30"
+              >
+                Parar scanner
+              </button>
+            </div>
+          )}
+
+          {/* Start scanner */}
+          {!scanning && (
             <button
-              onClick={handleManualValidate}
-              className="rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground border border-border
-                         transition-colors hover:bg-secondary/80
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              onClick={() => {
+                setCameraError(null);
+                setScanning(true);
+              }}
+              disabled={typeof window !== "undefined" && !isSecureContext}
+              className="w-full rounded-full bg-white px-6 py-4 sm:py-5 text-[15px] sm:text-lg font-bold text-black shadow-lg shadow-white/10
+                         transition-all hover:bg-white/90 active:scale-[0.98]
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         focus:outline-none focus:ring-2 focus:ring-white/30"
             >
-              Validar
+              Iniciar scanner da câmara
             </button>
+          )}
+
+          {/* Tip / Fallback for Local Network Testing */}
+          {!isSecureContext && (
+            <div className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-6 backdrop-blur-xl shadow-sm mt-4">
+              <h3 className="mb-2 text-[15px] font-semibold text-amber-500">Acesso Local Limitado</h3>
+              <p className="mb-5 text-[14px] text-amber-200/80 leading-relaxed">
+                As políticas de segurança restringem o uso da câmara nativa.
+                Tire uma foto ao código QR e selecione o ficheiro abaixo:
+              </p>
+
+              <label className={cn(
+                "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/20 px-6 py-4 text-[15px] font-bold text-amber-200 shadow-[0_8px_32px_rgba(245,158,11,.15)] transition-all",
+                parsingFile ? "opacity-60 cursor-not-allowed" : "hover:bg-amber-500/30 active:scale-[0.98]"
+              )}>
+                <Upload className="h-5 w-5" />
+                {parsingFile ? "A analisar imagem…" : "Selecionar Foto / Código QR"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={parsingFile}
+                />
+              </label>
+              <div id="reader" style={{ display: "none" }}></div>
+            </div>
+          )}
+
+          {/* Manual input */}
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)] mt-4">
+            <h2 className="mb-5 text-[11px] font-semibold uppercase tracking-wider text-white/45">
+              Validar por código
+            </h2>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleManualValidate()}
+                placeholder="Exemplo: C8F9K..."
+                className="flex-1 rounded-2xl border border-white/10 bg-black/40 px-5 py-4 text-[15px] font-mono uppercase text-white placeholder:text-white/30 placeholder:font-sans placeholder:capitalize
+                           focus:outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 transition-all"
+              />
+
+              <button
+                onClick={handleManualValidate}
+                disabled={!manualCode.trim()}
+                className="rounded-full bg-white/10 px-8 py-4 text-[15px] font-bold text-white border border-white/20
+                           transition-all hover:bg-white/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+                           focus:outline-none focus:ring-2 focus:ring-white/30"
+              >
+                Validar
+              </button>
+            </div>
           </div>
         </div>
       </div>

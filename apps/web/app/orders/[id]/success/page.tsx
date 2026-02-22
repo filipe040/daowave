@@ -46,34 +46,34 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in" data-testid="page-order-success">
-      <div className="rounded-2xl border border-green-500/30 bg-gradient-to-br from-green-500/10 to-green-500/5 p-8 sm:p-12 text-center backdrop-blur-sm">
-        <div className="mb-6 flex justify-center"><CheckCircle className="h-16 w-16 text-green-400 animate-pulse-slow" strokeWidth={1.5} /></div>
-        <h1 className="mb-3 text-3xl sm:text-4xl font-bold">Pagamento concluído!</h1>
-        <p className="mb-8 text-lg text-zinc-300">
-          Os seus bilhetes foram emitidos com sucesso e enviados para o seu email.
+    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in py-16" data-testid="page-order-success">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+        <div className="mb-6 flex justify-center"><CheckCircle className="h-20 w-20 text-emerald-400" strokeWidth={1.5} /></div>
+        <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-white/92">Pagamento concluído!</h1>
+        <p className="mb-8 text-lg text-white/60">
+          Os teus bilhetes foram emitidos com sucesso e enviados para o teu email.
         </p>
-        <div className="mx-auto mb-8 w-fit rounded-xl border border-green-500/30 bg-green-500/10 px-6 py-4">
-          <p className="text-sm font-medium text-green-400 uppercase tracking-wide mb-1">
+        <div className="mx-auto mb-10 w-fit rounded-2xl border border-white/10 bg-white/5 px-8 py-5">
+          <p className="text-xs font-medium text-white/40 uppercase tracking-[0.1em] mb-1">
             Bilhetes emitidos
           </p>
-          <p className="text-4xl font-bold text-green-400">{order.tickets.length}</p>
+          <p className="text-4xl font-bold text-white/90">{order.tickets.length}</p>
         </div>
-      </div>
 
-      <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-        <Link
-          href="/my-tickets"
-          className="rounded-xl bg-white px-6 py-3 text-center text-sm font-bold text-zinc-950 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20 active:scale-95"
-        >
-          Ver os meus bilhetes
-        </Link>
-        <Link
-          href={`/events/${order.event.slug}`}
-          className="rounded-xl border-2 border-zinc-700 bg-zinc-900/50 px-6 py-3 text-center text-sm font-bold transition-all hover:border-zinc-600 hover:bg-zinc-800 hover:scale-105 active:scale-95"
-        >
-          Voltar ao evento
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/my-tickets"
+            className="rounded-full bg-white px-8 py-4 text-center text-[15px] font-bold text-black shadow-[0_8px_32px_rgba(255,255,255,.18)] transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-[0.98]"
+          >
+            Ver os meus bilhetes
+          </Link>
+          <Link
+            href={`/events/${order.event.slug}`}
+            className="rounded-full border border-white/20 bg-white/5 px-8 py-4 text-center text-[15px] font-bold text-white/90 transition-all hover:border-white/30 hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Voltar ao evento
+          </Link>
+        </div>
       </div>
     </div>
   );
