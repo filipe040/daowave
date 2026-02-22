@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
 import { z } from "zod";
+import { sendTicketsEmail } from "@/lib/email-service";
 
 const confirmSchema = z.object({
     eventId: z.string().uuid(),
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
             include: { ticketLot: true }
         });
 
-        const totalCents = confirmedHolds.reduce((acc, hold) => acc + (hold.ticketLot.priceCents * hold.qty), 0);
+        const totalCents = confirmedHolds.reduce((acc: number, hold: any) => acc + (hold.ticketLot.priceCents * hold.qty), 0);
 
         // 3. Create Order
         // For MVP assuming anonymous checkout assigns to a system guest user or tries to find by email
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
                 paidAt: new Date(),
                 // Group items
                 items: {
-                    create: confirmedHolds.map(h => ({
+                    create: confirmedHolds.map((h: any) => ({
                         ticketLotId: h.ticketLotId,
                         quantity: h.qty,
                         unitPriceCents: h.ticketLot.priceCents
@@ -125,6 +126,12 @@ export async function POST(req: Request) {
                 data: { qrPayload: payload }
             });
         }
+
+        // Send email with tickets attached
+        // Execute asynchronously so user doesn't wait
+        sendTicketsEmail(order.id).catch((err) => {
+            console.error("[Checkout] Error asynchronously sending tickets email:", err);
+        });
 
         return NextResponse.json({ success: true, orderId: order.id });
 

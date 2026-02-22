@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Lock, CheckCircle, AlertTriangle, Ban, XCircle } from "lucide-react";
+import { Lock, CheckCircle, AlertTriangle, Ban, XCircle, Upload } from "lucide-react";
 
 interface ValidateResult {
   valid: boolean;
@@ -21,6 +21,7 @@ export default function ValidatorPage() {
   const [manualCode, setManualCode] = useState("");
   const [deviceId] = useState(() => `device-${Math.random().toString(36).slice(2, 11)}`);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [parsingFile, setParsingFile] = useState(false);
   const scannerRef = useRef<any>(null);
   const isScanningRef = useRef(false);
 
@@ -77,6 +78,26 @@ export default function ValidatorPage() {
     if (!token) return;
     handleValidate(token);
     setManualCode("");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setParsingFile(true);
+    setCameraError(null);
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      const html5QrCode = new Html5Qrcode("reader");
+      const result = await html5QrCode.scanFile(file, true);
+      handleValidate(result);
+    } catch (err: any) {
+      console.error("Error parsing QR from image:", err);
+      setCameraError("Não foi possível ler um QR Code na imagem. Tende aproximar o bilhete e evite reflexos.");
+    } finally {
+      setParsingFile(false);
+      e.target.value = "";
+    }
   };
 
   useEffect(() => {
@@ -283,12 +304,28 @@ export default function ValidatorPage() {
           </button>
         )}
 
-        {/* Tip */}
+        {/* Tip / Fallback for Local Network Testing */}
         {!isSecureContext && (
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">
-              Dica: se estiveres em HTTP, usa a entrada manual. Para ativar a câmara em mobile, serve a app em HTTPS.
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 shadow-sm">
+            <h3 className="mb-2 text-sm font-semibold text-amber-800">Câmara Direta Indisponível (HTTPS Necessário)</h3>
+            <p className="mb-4 text-sm text-amber-700">
+              Caso esteja a testar noutra rede local via telemóvel, o Safari/Chrome bloqueia a câmara direta.<br />
+              Em alternativa, tire uma foto do bilhete QR clicando aqui:
             </p>
+
+            <label className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-600 px-6 py-4 text-sm sm:text-base font-semibold text-white shadow-sm transition-colors ${parsingFile ? 'opacity-70' : 'hover:bg-amber-700'}`}>
+              <Upload className="h-5 w-5" />
+              {parsingFile ? "A analisar imagem…" : "Tirar Foto ao QR Code"}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={parsingFile}
+              />
+            </label>
+            <div id="reader" style={{ display: "none" }}></div>
           </div>
         )}
 

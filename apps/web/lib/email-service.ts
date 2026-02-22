@@ -522,18 +522,54 @@ export async function sendLoginNotificationEmail(
   });
 }
 
-/**
- * Send tickets email (wrapper for queue system)
- * DISABLED - Redis/Queue completely disabled
- * This function would queue the email job, but queue is disabled
- */
 export async function sendTicketsEmail(orderId: string): Promise<void> {
-  // Queue disabled - Redis completely disabled for Vercel deployment
-  // In production, you may want to send email directly here instead of queuing
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Email] Queue disabled - sendTicketsEmail skipped');
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        event: {
+          include: {
+            organization: true,
+          }
+        },
+        user: true,
+        tickets: true,
+      }
+    });
+
+    if (!order || !order.user || !order.event) {
+      safeLog.error("Missing data for ticket email", { orderId });
+      return;
+    }
+
+    const { user, event, tickets } = order;
+
+    // Build variables
+    const variables = {
+      name: user.name || "Cliente",
+      eventTitle: event.title,
+      eventDate: event.startAt ? new Date(event.startAt).toLocaleString("pt-PT") : "Data a anunciar",
+      venueName: event.venue || "Local a anunciar",
+      address: event.city || "",
+      ticketCount: tickets.length,
+      downloadLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://7eventickets.pt"}/my-tickets`, // Updated to generic tickets page.
+    };
+
+    const res = await sendTemplate({
+      to: user.email,
+      templateId: "ticket-delivery",
+      variables,
+      idempotencyKey: `ticket-delivery-${orderId}`
+    });
+
+    if (!res.success) {
+      safeLog.error("Failed to send ticket delivery email", { orderId, error: res.error });
+    } else {
+      safeLog.info("Ticket delivery email sent", { orderId, messageId: res.messageId });
+    }
+  } catch (error: any) {
+    safeLog.error("Error generating/sending ticket email", { orderId, error: error.message });
   }
-  return;
 }
 
 /**
