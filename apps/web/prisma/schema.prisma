@@ -239,6 +239,38 @@ enum OrganizerStatus {
   REJECTED
 }
 
+// --- ADVANCED TICKETING SYSTEM ---
+
+enum TicketTypeStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum TicketLotStatus {
+  ACTIVE
+  PAUSED
+  SOLD_OUT
+  ARCHIVED
+}
+
+enum HoldStatus {
+  ACTIVE
+  RELEASED
+  CONVERTED
+}
+
+enum SeatStatus {
+  AVAILABLE
+  SOLD
+  BLOCKED
+}
+
+enum SeatMapType {
+  THEATER
+  TABLES
+}
+
 // --- EVENTS ---
 
 model Event {
@@ -273,6 +305,11 @@ model Event {
   promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
   
   ticketLots    TicketLot[]
+  ticketTypes   TicketType[]
+  seatMaps      SeatMap[]
+  inventoryHolds InventoryHold[]
+  seatHolds      SeatHold[]
+  seats         Seat[]
   orders        Order[]
   tickets       Ticket[]
   checkinLogs   CheckinLog[]
@@ -299,13 +336,120 @@ model TicketLot {
   saleStartAt   DateTime
   saleEndAt     DateTime
   isActive      Boolean  @default(true)
+  
+  // -- NEW ADVANCED TICKETING FIELDS --
+  ticketTypeId  String?
+  capacity      Int             @default(0)
+  soldCount     Int             @default(0)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  status        TicketLotStatus @default(ACTIVE)
+  perUserLimit  Int?
+
   createdAt     DateTime @default(now())
   
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType    TicketType? @relation(fields: [ticketTypeId], references: [id], onDelete: SetNull)
   orderItems     OrderItem[]
   tickets       Ticket[]
+  holds         InventoryHold[]
   
   @@index([eventId])
+  @@index([ticketTypeId])
+}
+
+// --- ADVANCED TICKETING MODELS ---
+
+model TicketType {
+  id           String           @id @default(uuid())
+  eventId      String
+  name         String
+  description  String?
+  status       TicketTypeStatus @default(ACTIVE)
+  perUserLimit Int?
+  requiresSeat Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt @default(now())
+
+  event        Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketLots   TicketLot[]
+  seats        Seat[]
+
+  @@index([eventId])
+}
+
+model InventoryHold {
+  id          String     @id @default(uuid())
+  eventId     String
+  ticketLotId String
+  userId      String?    
+  qty         Int
+  expiresAt   DateTime
+  status      HoldStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketLot   TicketLot  @relation(fields: [ticketLotId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([ticketLotId])
+  @@index([expiresAt])
+}
+
+model SeatMap {
+  id          String      @id @default(uuid())
+  eventId     String
+  name        String
+  type        SeatMapType @default(THEATER)
+  version     Int         @default(1)
+  publishedAt DateTime?
+  configJson  Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt @default(now())
+
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seats       Seat[]
+
+  @@index([eventId])
+}
+
+model Seat {
+  id           String     @id @default(uuid())
+  seatMapId    String
+  eventId      String
+  ticketTypeId String?
+  section      String
+  row          String
+  number       String
+  label        String?
+  status       SeatStatus @default(AVAILABLE)
+
+  seatMap      SeatMap    @relation(fields: [seatMapId], references: [id], onDelete: Cascade)
+  event        Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType   TicketType? @relation(fields: [ticketTypeId], references: [id])
+  holds        SeatHold[]
+  tickets      Ticket[]
+
+  @@unique([seatMapId, section, row, number])
+  @@index([eventId])
+  @@index([ticketTypeId])
+}
+
+model SeatHold {
+  id        String     @id @default(uuid())
+  seatId    String
+  eventId   String
+  userId    String?
+  expiresAt DateTime
+  status    HoldStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+
+  seat      Seat       @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([seatId])
+  @@index([eventId])
+  @@index([expiresAt])
 }
 
 model Order {
@@ -357,6 +501,7 @@ model Ticket {
   eventId     String
   userId      String
   ticketLotId String
+  seatId      String?
   code        String   @unique
   qrPayload   String   @db.Text
   status      TicketStatus @default(VALID)
@@ -371,6 +516,7 @@ model Ticket {
   event         Event        @relation(fields: [eventId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
   ticketLot     TicketLot    @relation(fields: [ticketLotId], references: [id])
+  seat          Seat?        @relation(fields: [seatId], references: [id], onDelete: SetNull)
   checkinLogs   CheckinLog[]
   transferFrom  TransferLog?  @relation("TransferFrom")
   transferTo    TransferLog?  @relation("TransferTo")

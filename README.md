@@ -163,6 +163,17 @@ Após `db:seed`, pode testar:
 - **MULTI**: Múltiplas entradas até maxEntries (ou ilimitado se null)
 - Janela de validação opcional (checkinStartAt, checkinEndAt)
 
+### Advanced Ticketing & Lotação (Novo)
+A plataforma previne garantidamente o *overselling* através de reservas atómicas (`InventoryHold`) que expiram automaticamente.
+Adicionalmente, permite gestão de lugares mapeados ("Lugares Marcados"):
+- **Importação via CSV**: Promotores constroem mapas de salas enviando um `.csv`.
+- **Formato OBRIGATÓRIO do CSV**: O cabeçalho tem de incluir `section,row,number,label,ticketType`.
+    - `section`: Setor ou Sala (Ex: Balcão 1)
+    - `row`: Fila (Ex: A)
+    - `number`: Número da cadeira (Ex: 12)
+    - `label`: Nome amigável ao cliente (Ex: Balcão 1 - Fila A - 12)
+    - `ticketType`: Nome exato da `Categoria Geral` previamente criada (Ex: VIP)
+
 ## 🔐 Sistema de QR Code
 
 Cada bilhete possui um QR code assinado com HMAC-SHA256:

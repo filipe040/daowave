@@ -1,51 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Loader2, Ticket } from 'lucide-react';
+
+interface TicketType {
+  id: string;
+  name: string;
+  description: string | null;
+  requiresSeat: boolean;
+  perUserLimit: number | null;
+  minPriceCents: number | null;
+  lots: TicketLot[];
+}
 
 interface TicketLot {
   id: string;
   name: string;
   priceCents: number;
-  currency: string;
-  quantityTotal: number;
-  quantitySold: number;
+  available: number;
+  isAvailable: boolean;
+  perUserLimit: number | null;
 }
 
 interface Event {
   id: string;
   title: string;
+  slug: string;
 }
 
 interface TicketSelectorProps {
   event: Event;
-  ticketLots: TicketLot[];
+  ticketLots: any[]; // Legacy fallback
 }
 
-export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
+export function TicketSelector({ event }: TicketSelectorProps) {
   const router = useRouter();
+  const [types, setTypes] = useState<TicketType[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const updateQuantity = (lotId: string, delta: number) => {
+  useEffect(() => {
+    fetch(`/api/events/${event.slug}/tickets`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.ticketTypes) {
+          setTypes(data.ticketTypes);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingData(false));
+  }, [event.slug]);
+
+  const updateQuantity = (lotId: string, delta: number, available: number, perUserLimit: number | null) => {
     setQuantities((prev) => {
       const current = prev[lotId] || 0;
-      const lot = ticketLots.find((l) => l.id === lotId);
-      const available = lot ? lot.quantityTotal - lot.quantitySold : 0;
-      const newValue = Math.max(0, Math.min(available, current + delta));
+      const limit = perUserLimit ? Math.min(perUserLimit, available) : available;
+      const newValue = Math.max(0, Math.min(limit, current + delta));
       return { ...prev, [lotId]: newValue };
     });
   };
 
   const totalItems = Object.values(quantities).reduce((a, b) => a + b, 0);
-  const totalCents = ticketLots.reduce((sum, lot) => {
-    return sum + (quantities[lot.id] || 0) * lot.priceCents;
-  }, 0);
 
-  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // Calculate total price based on selected quantities mapping to lot priceCents
+  const totalCents = types.reduce((sum, type) => {
+    let typeSum = 0;
+    type.lots.forEach(lot => {
+      typeSum += (quantities[lot.id] || 0) * lot.priceCents;
+    });
+    return sum + typeSum;
+  }, 0);
 
   const handleCheckout = async (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -53,25 +83,17 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
 
     const items = Object.entries(quantities)
       .filter(([_, qty]) => qty > 0)
-      .map(([lotId, quantity]) => ({ ticketLotId: lotId, quantity }));
+      .map(([lotId, quantity]) => ({ ticketLotId: lotId, qty: quantity }));
 
-    if (items.length === 0 || items.every((i) => i.quantity === 0)) {
+    if (items.length === 0) {
       setCheckoutError('Selecione pelo menos um bilhete.');
       return;
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      const invalid = items.find((item) => !UUID_REGEX.test(item.ticketLotId));
-      if (invalid) {
-        const msg = `ticketLotId must be TicketLot.id (UUID). Got: "${invalid.ticketLotId}". Check that event.ticketLots include id.`;
-        setCheckoutError(msg);
-        return;
-      }
-    }
-
-    setLoading(true);
+    setLoadingCheckout(true);
     try {
-      const response = await fetch('/api/checkout/create', {
+      // 1. Hold the tickets
+      const holdRes = await fetch('/api/checkout/hold', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,27 +102,50 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         }),
       });
 
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setCheckoutError((body.error as string) || `Erro ${response.status} ao processar checkout`);
+      const body = await holdRes.json().catch(() => ({}));
+      if (!holdRes.ok) {
+        setCheckoutError(body.error || `Erro ${holdRes.status} ao reservar bilhetes`);
         return;
       }
 
-      const orderId = body.orderId;
-      if (!orderId) {
-        setCheckoutError('Resposta do servidor sem orderId');
+      const holds = body.holds;
+      // In a real implementation this would proceed to capturing payment information.
+      // For MVP without full stripe integration, we will automatically finalize checkout create
+
+      const orderRes = await fetch('/api/checkout/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: event.id,
+          items: items.map(i => ({ ticketLotId: i.ticketLotId, quantity: i.qty })) // Legacy order compatibility
+        })
+      });
+
+      const orderBody = await orderRes.json().catch(() => ({}));
+      if (!orderRes.ok) {
+        setCheckoutError(orderBody.error || "Erro ao criar pedido");
         return;
       }
-      router.push(`/checkout/${orderId}`);
+
+      router.push(`/checkout/${orderBody.orderId}`);
     } catch (error) {
       console.error('Checkout error:', error);
       setCheckoutError('Erro ao processar checkout');
     } finally {
-      setLoading(false);
+      setLoadingCheckout(false);
     }
   };
 
-  if (ticketLots.length === 0) {
+  if (loadingData) {
+    return (
+      <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 p-12 text-center flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 text-white/50 animate-spin mb-4" />
+        <p className="text-white/40 text-sm font-medium">A procurar bilhetes...</p>
+      </div>
+    );
+  }
+
+  if (types.length === 0) {
     return (
       <div className="bg-white/5 backdrop-blur-xl rounded-[24px] border border-white/10 p-8 text-center">
         <p className="text-white/40 text-sm">Nenhum lote disponível no momento.</p>
@@ -114,58 +159,75 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         Escolher Bilhetes
       </h2>
 
-      <div className="space-y-4 mb-8">
-        {ticketLots.map((lot) => {
-          const quantity = quantities[lot.id] || 0;
-          const available = lot.quantityTotal - lot.quantitySold;
-
-          return (
-            <div
-              key={lot.id}
-              className="bg-white/[0.03] rounded-2xl p-5 border border-white/5 transition-colors hover:bg-white/[0.05]"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="min-w-0">
-                  <h3 className="font-bold text-white tracking-wide truncate">{lot.name}</h3>
-                  <p className="text-2xl font-bold text-white mt-1">
-                    {formatCurrency(lot.priceCents, lot.currency)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] uppercase font-bold text-white/40 tracking-wider">
-                    {available} disponíveis
-                  </div>
-                </div>
-              </div>
-
-              {available > 0 ? (
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => updateQuantity(lot.id, -1)}
-                    disabled={quantity === 0}
-                    className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-xl"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center font-bold text-lg text-white">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(lot.id, 1)}
-                    disabled={quantity >= available}
-                    className="w-11 h-11 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-xl font-bold"
-                  >
-                    +
-                  </button>
-                </div>
-              ) : (
-                <p className="text-[12px] font-bold text-red-500/80 uppercase tracking-widest bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-center">
-                  Esgotado
-                </p>
+      <div className="space-y-6 mb-8">
+        {types.map((type) => (
+          <div key={type.id} className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Ticket className="h-4 w-4 text-white/50" />
+              <h3 className="font-bold text-white text-sm uppercase tracking-widest">{type.name}</h3>
+              {type.requiresSeat && (
+                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-200 border border-amber-500/30 rounded-md">Lugares Marcados</span>
               )}
             </div>
-          );
-        })}
+
+            {type.description && <p className="text-xs text-white/50 mb-3">{type.description}</p>}
+
+            <div className="space-y-3">
+              {type.lots.map((lot) => {
+                const quantity = quantities[lot.id] || 0;
+                const available = lot.available;
+
+                return (
+                  <div
+                    key={lot.id}
+                    className="bg-white/[0.03] rounded-2xl p-4 border border-white/5 transition-colors hover:bg-white/[0.05]"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-white tracking-wide truncate text-sm">{lot.name}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-lg font-bold text-white">
+                            {formatCurrency(lot.priceCents, "EUR")}
+                          </p>
+                          {available > 0 && available <= 20 && (
+                            <span className="text-[10px] font-bold uppercase text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full ring-1 ring-amber-400/20">Quase a esgotar</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      {available > 0 && lot.isAvailable ? (
+                        <div className="flex items-center gap-3 shrink-0">
+                          <button
+                            onClick={() => updateQuantity(lot.id, -1, available, type.perUserLimit || lot.perUserLimit)}
+                            disabled={quantity === 0}
+                            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-lg"
+                          >
+                            −
+                          </button>
+                          <span className="w-6 text-center font-bold text-base text-white">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() => updateQuantity(lot.id, 1, available, type.perUserLimit || lot.perUserLimit)}
+                            disabled={quantity >= available || (!!(type.perUserLimit || lot.perUserLimit) && quantity >= (type.perUserLimit || lot.perUserLimit || 0))}
+                            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-lg font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1 text-center shrink-0">
+                          Esgotado
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {totalItems > 0 && (
@@ -197,11 +259,11 @@ export function TicketSelector({ event, ticketLots }: TicketSelectorProps) {
         type="button"
         data-testid="btn-continue-checkout"
         onClick={handleCheckout}
-        disabled={totalItems === 0 || loading}
+        disabled={totalItems === 0 || loadingCheckout}
         className="w-full h-14 rounded-2xl bg-white text-black font-bold text-[15px] hover:bg-white/90 shadow-[0_12px_40px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5"
         size="lg"
       >
-        {loading ? 'A processar...' : 'Continuar para Pagamento'}
+        {loadingCheckout ? 'A processar...' : 'Continuar para Pagamento'}
       </Button>
     </div>
   );

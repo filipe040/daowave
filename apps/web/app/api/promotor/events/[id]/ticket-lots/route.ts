@@ -1,84 +1,77 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { TicketLotService } from "@/lib/services/ticket-lot.service";
 import { requirePromoter } from "@/lib/auth/guards";
-import { EventService } from "@/lib/services/event.service";
+import { safeLog } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  request: Request,
+export async function GET(
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { orgId, session } = await requirePromoter();
-    const globalRole = (session.user as any).role;
+    await requirePromoter();
     const { id: eventId } = await params;
 
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-    });
+    const lots = await TicketLotService.getByEvent(eventId);
+    return NextResponse.json({ ticketLots: lots });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+}
 
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { session, role } = await requirePromoter();
+    const globalRole = (session.user as any).role;
+
+    // RBAC check
+    if (globalRole !== "ADMIN" && !["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string)) {
+      return NextResponse.json({ error: "Permissões insuficientes." }, { status: 403 });
     }
 
-    // Permission check: ADMIN bypasses; 
-    // PROMOTER must be in the org or be the legacy owner
-    if (globalRole !== "ADMIN") {
-      const isInOrg = event.organizationId === orgId;
+    const { id: eventId } = await params;
+    const body = await req.json().catch(() => ({}));
 
-      let ownsViaProfile = false;
-      if (!isInOrg) {
-        const promoterProfile = await EventService.getPromoterProfile(session.user.id);
-        ownsViaProfile = promoterProfile ? event.promoterId === promoterProfile.id : false;
-      }
-
-      if (!isInOrg && !ownsViaProfile) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-    }
-
-    const body = await request.json().catch(() => ({}));
-    const { title, nominalValue, quantity, saleStartAt, saleEndAt } = body;
-
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
+    // Backwards compatible parsing
+    const name = body.name || body.title;
+    if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json({ error: "Nome da categoria é obrigatório" }, { status: 400 });
     }
 
-    const priceCents = Math.round((parseFloat(nominalValue || "0") || 0) * 100);
+    const priceCents = body.priceCents ?? Math.round((parseFloat(body.nominalValue || "0") || 0) * 100);
     if (priceCents < 0) {
       return NextResponse.json({ error: "Valor não pode ser negativo" }, { status: 400 });
     }
 
-    // Default dates: sale starts now, ends at event end date
-    const startDate = saleStartAt ? new Date(saleStartAt) : new Date();
-    const endDate = saleEndAt ? new Date(saleEndAt) : event.endAt;
-
-    if (endDate <= startDate) {
-      return NextResponse.json({ error: "Data de fim deve ser posterior à data de início" }, { status: 400 });
-    }
-
-    const quantityTotal = parseInt(quantity || "100") || 100;
-    if (quantityTotal <= 0) {
+    const capacity = body.capacity ?? (parseInt(body.quantity || "100") || 100);
+    if (capacity <= 0) {
       return NextResponse.json({ error: "Quantidade deve ser positiva" }, { status: 400 });
     }
 
-    const ticketLot = await prisma.ticketLot.create({
-      data: {
-        eventId,
-        name: title.trim(),
-        priceCents,
-        currency: "EUR",
-        quantityTotal,
-        quantitySold: 0,
-        saleStartAt: startDate,
-        saleEndAt: endDate,
-      },
+    const startsAt = body.startsAt ? new Date(body.startsAt) : (body.saleStartAt ? new Date(body.saleStartAt) : new Date());
+    const endsAt = body.endsAt ? new Date(body.endsAt) : (body.saleEndAt ? new Date(body.saleEndAt) : undefined);
+
+    const newLot = await TicketLotService.create(eventId, {
+      name: name.trim(),
+      description: body.description,
+      priceCents,
+      capacity,
+      startsAt,
+      endsAt,
+      status: body.status || "ACTIVE",
+      perUserLimit: body.perUserLimit ? parseInt(body.perUserLimit) : undefined,
+      ticketTypeId: body.ticketTypeId
     });
 
-    return NextResponse.json({ ok: true, ticketLot }, { status: 201 });
-  } catch (error) {
+    safeLog.info("ticket_lot.created", { eventId, lotId: newLot.id, capacity: newLot.capacity });
+
+    return NextResponse.json({ ok: true, ticketLot: newLot, success: true }, { status: 201 });
+  } catch (error: any) {
     console.error("[ticket-lots] POST error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Erro interno" }, { status: 500 });
   }
 }

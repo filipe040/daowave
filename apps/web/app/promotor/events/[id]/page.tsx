@@ -156,13 +156,21 @@ export default function PromoterEventDetailPage() {
                 </span>
             }
             actions={
-                <Link
-                    href={orgId ? `/promotor/events?orgId=${orgId}` : "/promotor/events"}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    Voltar
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href={`/promotor/events/${id}/bilhetes`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm"
+                    >
+                        Gestão de Bilhetes \u0026 Lotação
+                    </Link>
+                    <Link
+                        href={orgId ? `/promotor/events?orgId=${orgId}` : "/promotor/events"}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        Voltar
+                    </Link>
+                </div>
             }
         >
             <div className="max-w-2xl space-y-4">
