@@ -1,4 +1,14 @@
-import { PrismaClient, MemberRole, EventStatus, TicketStatus, OrganizationStatus, TicketTemplateStatus, TicketTemplateLayout } from "@prisma/client";
+import {
+  PrismaClient,
+  MemberRole,
+  EventStatus,
+  TicketStatus,
+  OrganizationStatus,
+  TicketTemplateStatus,
+  TicketTemplateLayout,
+  Role,
+  OrganizerStatus
+} from "@prisma/client";
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -27,7 +37,7 @@ async function main() {
       email: "admin@daowave.pt",
       name: "Super Admin",
       passwordHash: pw,
-      role: "ADMIN",
+      role: Role.ADMIN,
       emailVerified: true,
       onboardingComplete: true
     },
@@ -76,7 +86,7 @@ async function main() {
       email: "owner@soundrepublic.pt",
       name: "Ricardo Owner",
       passwordHash: pw,
-      role: "PROMOTER",
+      role: Role.PROMOTER,
       emailVerified: true,
       onboardingComplete: true
     },
@@ -89,7 +99,7 @@ async function main() {
       email: "manager@soundrepublic.pt",
       name: "Sérgio Manager",
       passwordHash: pw,
-      role: "PROMOTER",
+      role: Role.PROMOTER,
       emailVerified: true,
       onboardingComplete: true
     },
@@ -102,7 +112,7 @@ async function main() {
     create: {
       userId: owner.id,
       brandName: "Sound Republic",
-      status: "APPROVED",
+      status: OrganizerStatus.APPROVED,
       contactEmail: "booking@soundrepublic.pt"
     },
   });

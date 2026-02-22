@@ -5,12 +5,16 @@ interface ApiResponse<T> {
     error: string | null;
 }
 
+export interface ApiOptions extends RequestInit {
+    timeout?: number;
+}
+
 /**
  * api-client: Wrapper tipado para chamadas à API do Dashboard
  */
 export async function apiFetch<T>(
     url: string,
-    options: RequestInit = {}
+    options: ApiOptions = {}
 ): Promise<ApiResponse<T>> {
     try {
         const res = await fetchWithTimeout(url, {
@@ -41,12 +45,12 @@ export async function apiFetch<T>(
 }
 
 export const api = {
-    get: <T>(url: string, options?: RequestInit) => apiFetch<T>(url, { ...options, method: "GET" }),
-    post: <T>(url: string, body: any, options?: RequestInit) =>
+    get: <T>(url: string, options?: ApiOptions) => apiFetch<T>(url, { ...options, method: "GET" }),
+    post: <T>(url: string, body: any, options?: ApiOptions) =>
         apiFetch<T>(url, { ...options, method: "POST", body: JSON.stringify(body) }),
-    patch: <T>(url: string, body: any, options?: RequestInit) =>
+    patch: <T>(url: string, body: any, options?: ApiOptions) =>
         apiFetch<T>(url, { ...options, method: "PATCH", body: JSON.stringify(body) }),
-    delete: <T>(url: string, options?: RequestInit) => apiFetch<T>(url, { ...options, method: "DELETE" }),
+    delete: <T>(url: string, options?: ApiOptions) => apiFetch<T>(url, { ...options, method: "DELETE" }),
 };
 
 // Types used by Admin/Dashboard pages

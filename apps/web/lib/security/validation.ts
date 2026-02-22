@@ -50,3 +50,17 @@ export const checkoutConfirmSchema = z.object({
   buyerPhone: z.string().optional(),
   paymentMock: z.boolean().optional(),
 });
+
+export const manualSaleSchema = z.object({
+  eventId: z.string().uuid(),
+  ticketLotId: z.string().uuid(),
+  quantity: z.number().int().positive().max(100),
+  paymentMethod: z.enum(['MBWAY', 'CASH', 'BANK', 'OTHER']),
+  paidNow: z.boolean(),
+  reference: z.string().max(100).optional(),
+  notes: z.string().max(500).optional(),
+  customerName: z.string().max(100).optional(),
+  customerEmail: z.string().email().optional().or(z.literal('')),
+  customerPhone: z.string().max(32).optional(),
+  idempotencyKey: z.string().max(64).optional(),
+});
