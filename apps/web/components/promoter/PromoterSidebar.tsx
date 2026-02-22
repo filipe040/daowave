@@ -24,6 +24,7 @@ const routes = [
     { label: "Check-in", icon: QrCode, href: "/promotor/checkin" },
     { label: "Analytics", icon: BarChart3, href: "/promotor/analytics" },
     { label: "Finanças", icon: Banknote, href: "/promotor/finance" },
+    { label: "Design Bilhetes", icon: Layers, href: "/promotor/settings/tickets" },
     { label: "Equipa", icon: Users, href: "/promotor/team" },
     { label: "Definições", icon: Settings, href: "/promotor/settings" },
 ];

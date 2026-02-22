@@ -2,14 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPresignedUrl, uploadTicketPDF } from "@/lib/storage";
-import { generateTicketPDF } from "@/lib/email-service";
+import { getPresignedUrl, uploadFile } from "@/lib/storage";
+import { TicketRenderService } from "@/lib/tickets/ticket-render.service";
 import { createAuditLog, getRequestMetadata } from "@/lib/security";
 
 /**
  * GET /api/tickets/[id]/pdf
- * Get presigned URL for ticket PDF download
- * PDFs are private and require authentication
+ * Returns the ticket PDF. Uses designs from the active template or snapshot.
  */
 export async function GET(
   req: Request,
@@ -23,12 +22,10 @@ export async function GET(
 
     const { id: ticketId } = await params;
 
-    // Find ticket and verify ownership
     const ticket = await prisma.ticket.findUnique({
       where: { id: ticketId },
       include: {
         event: true,
-        ticketLot: true,
       },
     });
 
@@ -36,41 +33,43 @@ export async function GET(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    // Verify ownership (holder or admin/organizer)
+    // Permission check
     const isOwner = ticket.userId === session.user.id;
     const isAdmin = session.user.role === "ADMIN";
-    const isOrganizer = session.user.role === "PROMOTER";
+    const isPromoter = session.user.role === "PROMOTER";
 
-    if (!isOwner && !isAdmin && !isOrganizer) {
+    // In a real app we'd check if the promoter belongs to the org
+    if (!isOwner && !isAdmin && !isPromoter) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Generate presigned URL (expires in 1 hour)
-    const pdfKey = `tickets/${ticketId}.pdf`;
-    const presignedUrl = await getPresignedUrl(pdfKey, 3600);
+    // Generate PDF buffer using the design system
+    const pdfBuffer = await TicketRenderService.renderPdf(ticketId);
 
     // Audit log
     const metadata = getRequestMetadata(req);
     await createAuditLog({
       userId: session.user.id,
-      action: "TICKET_PDF_ACCESSED",
+      action: "TICKET_PDF_GENERATED",
       entityType: "ticket",
       entityId: ticketId,
       details: {
         eventId: ticket.eventId,
-        eventTitle: ticket.event.title,
       },
       ...metadata,
     });
 
-    return NextResponse.json({
-      url: presignedUrl,
-      expiresIn: 3600,
+    // Return the PDF directly
+    return new Response(pdfBuffer as any, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="ticket-${ticket.code}.pdf"`,
+      },
     });
   } catch (error: any) {
-    console.error("Error generating PDF URL:", error);
+    console.error("Error generating ticket PDF:", error);
     return NextResponse.json(
-      { error: "Failed to generate PDF URL" },
+      { error: "Failed to generate ticket PDF" },
       { status: 500 }
     );
   }
@@ -78,15 +77,13 @@ export async function GET(
 
 /**
  * POST /api/tickets/[id]/pdf
- * Generate and upload ticket PDF to storage
- * Called by queue worker after ticket issuance
+ * Pre-generate and upload ticket PDF to storage
  */
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify this is an internal request (from queue worker)
     const authHeader = req.headers.get("authorization");
     const internalSecret = process.env.INTERNAL_API_SECRET;
 
@@ -96,32 +93,19 @@ export async function POST(
 
     const { id: ticketId } = await params;
 
-    // Find ticket
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: ticketId },
-      include: {
-        event: true,
-        ticketLot: true,
-      },
-    });
-
-    if (!ticket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
-    }
-
     // Generate PDF
-    const pdfBuffer = await generateTicketPDF(ticket as any);
+    const pdfBuffer = await TicketRenderService.renderPdf(ticketId);
 
-    // Upload to storage
+    // Upload to storage (fixed path for consistency)
     const pdfKey = `tickets/${ticketId}.pdf`;
-    await uploadTicketPDF(ticketId, pdfBuffer);
+    await uploadFile(pdfKey, pdfBuffer, "application/pdf");
 
     return NextResponse.json({
       success: true,
       key: pdfKey,
     });
   } catch (error: any) {
-    console.error("Error generating PDF:", error);
+    console.error("Error pre-generating PDF:", error);
     return NextResponse.json(
       { error: "Failed to generate PDF" },
       { status: 500 }

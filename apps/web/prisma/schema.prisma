@@ -127,8 +127,75 @@ model Organization {
   auditLogs    AuditLog[]
   invites      Invite[]
 
+  ticketTemplates      OrganizationTicketTemplate[]
+  ticketTemplateAssets TicketTemplateAsset[]
+
   @@index([slug])
   @@index([status])
+}
+
+// --- TICKET DESIGN SYSTEM ---
+
+enum TicketTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum TicketTemplateLayout {
+  A4_CLASSIC
+  HORIZONTAL_QR_RIGHT
+  MOBILE_PASS
+}
+
+enum TicketTemplateAssetType {
+  LOGO
+  BACKGROUND
+  STAMP
+}
+
+model OrganizationTicketTemplate {
+  id             String               @id @default(uuid())
+  organizationId String
+  name           String
+  status         TicketTemplateStatus @default(DRAFT)
+  layout         TicketTemplateLayout @default(A4_CLASSIC)
+  themeJson      Json
+  version        Int                  @default(1)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TicketTemplateAsset {
+  id             String                  @id @default(uuid())
+  organizationId String
+  type           TicketTemplateAssetType
+  url            String                  @db.VarChar(2048)
+  metaJson       Json?
+  createdAt      DateTime                @default(now())
+
+  organization   Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model TicketRenderSnapshot {
+  id                String   @id @default(uuid())
+  ticketId          String   @unique
+  templateId        String
+  templateVersion   Int
+  themeJsonSnapshot Json
+  renderedAt        DateTime @default(now())
+
+  ticket            Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
 }
 
 model OrganizationMember {
@@ -302,6 +369,7 @@ model Ticket {
   checkinLogs   CheckinLog[]
   transferFrom  TransferLog?  @relation("TransferFrom")
   transferTo    TransferLog?  @relation("TransferTo")
+  renderSnapshot TicketRenderSnapshot?
   
   @@index([orderId])
   @@index([eventId])

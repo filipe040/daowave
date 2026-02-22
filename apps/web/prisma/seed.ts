@@ -1,4 +1,4 @@
-import { PrismaClient, MemberRole, EventStatus, TicketStatus, OrganizationStatus } from "@prisma/client";
+import { PrismaClient, MemberRole, EventStatus, TicketStatus, OrganizationStatus, TicketTemplateStatus, TicketTemplateLayout } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -121,10 +121,12 @@ async function main() {
   });
 
   // 6. Create Events for Sound Republic
-  const event = await prisma.event.create({
-    data: {
+  const event = await prisma.event.upsert({
+    where: { slug: "sr-opening-2025" },
+    update: {},
+    create: {
       organizationId: soundRepublic.id,
-      promoterId: profile.id, // Corrected: Use profile.id instead of owner.id
+      promoterId: profile.id,
       title: "Sound Republic Opening Night",
       slug: "sr-opening-2025",
       description: "A grande abertura da temporada.",
@@ -139,6 +141,70 @@ async function main() {
 
   console.log(`✅ Organizações e membros criados.`);
   console.log(`✅ Evento criado: ${event.title}`);
+
+  // 7. Create Ticket Templates for Sound Republic
+  console.log("🎨 A criar templates de bilhetes...");
+  const activeTemplate = await prisma.organizationTicketTemplate.create({
+    data: {
+      organizationId: soundRepublic.id,
+      name: "Classic Sound Republic",
+      status: TicketTemplateStatus.ACTIVE,
+      layout: TicketTemplateLayout.A4_CLASSIC,
+      version: 1,
+      themeJson: {
+        brand: { logoUrl: "", tagline: "Sound Republic - Feel the Rhythm" },
+        colors: {
+          bg: "#ffffff",
+          card: "#ffffff",
+          text: "#111111",
+          primary: "#1982c4",
+          muted: "#666666",
+        },
+        typography: { fontFamily: "Inter" },
+        qr: { size: "M", label: "Validar na entrada" },
+        blocks: {
+          showBuyerName: true,
+          showOrderId: true,
+          showTicketType: true,
+          showTerms: true,
+          showSupport: true,
+        },
+        footer: { supportUrl: "https://soundrepublic.pt", supportEmail: "ajuda@soundrepublic.pt" },
+      },
+    },
+  });
+
+  await prisma.organizationTicketTemplate.create({
+    data: {
+      organizationId: soundRepublic.id,
+      name: "Draft Horizontal",
+      status: TicketTemplateStatus.DRAFT,
+      layout: TicketTemplateLayout.HORIZONTAL_QR_RIGHT,
+      version: 1,
+      themeJson: {
+        brand: { logoUrl: "", tagline: "" },
+        colors: {
+          bg: "#f8f9fa",
+          card: "#ffffff",
+          text: "#212529",
+          primary: "#6a4c93",
+          muted: "#6c757d",
+        },
+        typography: { fontFamily: "Poppins" },
+        qr: { size: "L", label: "Scanner below" },
+        blocks: {
+          showBuyerName: true,
+          showOrderId: false,
+          showTicketType: true,
+          showTerms: true,
+          showSupport: false,
+        },
+        footer: { supportUrl: "", supportEmail: "" },
+      },
+    },
+  });
+
+  console.log(`✅ Templates de bilhetes criados. Ativo: ${activeTemplate.name}`);
   console.log(`\n📧 Credenciais:`);
   console.log(`  Admin: admin@daowave.pt / password123`);
   console.log(`  Owner: owner@soundrepublic.pt / password123`);
