@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { Building2, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import NextImage from "next/image";
+import { useSession, signIn } from "next-auth/react";
 
 interface InviteData {
     id: string;
@@ -19,6 +20,7 @@ interface InviteData {
 }
 
 function InviteAcceptContent() {
+    const { data: session, status } = useSession();
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get("token");
@@ -50,9 +52,15 @@ function InviteAcceptContent() {
 
     const handleAccept = async () => {
         if (!token) return;
+
+        if (status === "unauthenticated") {
+            signIn(undefined, { callbackUrl: window.location.href });
+            return;
+        }
+
         setAccepting(true);
         try {
-            const { data, error: apiError } = await api.post<any>(`/api/invites/${token}/accept`, {});
+            const { error: apiError } = await api.post<any>(`/api/invites/${token}/accept`, {});
             if (apiError) {
                 toast.error(apiError);
             } else {
@@ -66,11 +74,11 @@ function InviteAcceptContent() {
         }
     };
 
-    if (loading) {
+    if (loading || status === "loading") {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
                 <Loader2 className="h-8 w-8 text-white/20 animate-spin mb-4" />
-                <p className="text-white/40 font-medium">A validar convite...</p>
+                <p className="text-white/40 font-medium">A carregar...</p>
             </div>
         );
     }
@@ -95,13 +103,13 @@ function InviteAcceptContent() {
         );
     }
 
+    const emailMismatch = session?.user?.email && session.user.email.toLowerCase() !== invite.email.toLowerCase();
+
     return (
         <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-            {/* Animated Background Elements */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
             <div className="relative w-full max-w-md bg-black/40 backdrop-blur-3xl border border-white/5 rounded-[40px] p-10 shadow-2xl overflow-hidden">
-                {/* Decoration */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.03] rounded-bl-[100px] pointer-events-none border-l border-b border-white/5" />
 
                 <div className="flex flex-col items-center text-center">
@@ -130,20 +138,32 @@ function InviteAcceptContent() {
                     </p>
 
                     <div className="w-full space-y-4">
-                        <button
-                            disabled={accepting}
-                            onClick={handleAccept}
-                            className="w-full h-14 bg-white text-black rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5"
-                        >
-                            {accepting ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                <>
-                                    Aceitar Convite
-                                    <ArrowRight className="h-4 w-4" strokeWidth={3} />
-                                </>
-                            )}
-                        </button>
+                        {emailMismatch ? (
+                            <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-[13px] text-rose-500 font-medium">
+                                Este convite foi para <strong>{invite.email}</strong>, mas está logado como <strong>{session?.user?.email}</strong>.
+                                <button
+                                    onClick={() => signIn(undefined, { callbackUrl: window.location.href })}
+                                    className="block w-full mt-3 py-2 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-colors"
+                                >
+                                    Trocar de Conta
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                disabled={accepting}
+                                onClick={handleAccept}
+                                className="w-full h-14 bg-white text-black rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5"
+                            >
+                                {accepting ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <>
+                                        {status === "unauthenticated" ? "Login para Aceitar" : "Aceitar Convite"}
+                                        <ArrowRight className="h-4 w-4" strokeWidth={3} />
+                                    </>
+                                )}
+                            </button>
+                        )}
 
                         <p className="text-[11px] font-bold text-white/20 uppercase tracking-[0.2em]">
                             Ao aceitar, concorda com os termos de promotor

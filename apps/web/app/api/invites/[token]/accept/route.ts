@@ -25,10 +25,11 @@ export async function POST(
             return NextResponse.json({ error: error || "Convite inválido" }, { status: 400 });
         }
 
-        // 2. Security Check: Email must match (or be very flexible, but usually must match)
-        if (invite.email !== userEmail) {
+        // 2. Security Check: Email must match
+        if (invite.email.toLowerCase() !== userEmail?.toLowerCase()) {
+            console.warn(`[Invite Acceptance] Email mismatch: invited ${invite.email}, but logged in as ${userEmail}`);
             return NextResponse.json({
-                error: "Este convite foi enviado para outro email. Por favor, faça login com a conta correta."
+                error: `Este convite foi enviado para ${invite.email}, mas você está logado como ${userEmail}.`
             }, { status: 403 });
         }
 
@@ -87,8 +88,11 @@ export async function POST(
         });
 
         return NextResponse.json({ success: true, organizationId: invite.organizationId });
-    } catch (error) {
-        console.error("[Invite Acceptance POST]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("[Invite Acceptance POST] FATAL ERROR:", error);
+        return NextResponse.json({
+            error: error.message || "Internal Server Error",
+            details: process.env.NODE_ENV === "development" ? error.stack : undefined
+        }, { status: 500 });
     }
 }

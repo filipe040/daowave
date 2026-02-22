@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import ConditionalNav from "./components/conditional-nav";
 import { BetaBanner } from "./components/beta-banner";
 import ConditionalFooter from "./components/conditional-footer";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "EasyTicket - Marketplace de Bilhética",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-[hsl(var(--background))] text-foreground antialiased">
         <Providers>
           <div className="min-h-screen flex flex-col">
+            <Toaster position="top-center" richColors />
             <BetaBanner />
             <ConditionalNav />
             <main className="flex-1 min-w-0 w-full overflow-x-auto">{children}</main>
