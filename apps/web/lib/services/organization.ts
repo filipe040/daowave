@@ -29,7 +29,7 @@ export class OrganizationService {
                 data: {
                     organizationId: org.id,
                     userId: data.userId,
-                    role: MemberRole.OWNER,
+                    role: MemberRole.PROMOTER_OWNER,
                 },
             });
 

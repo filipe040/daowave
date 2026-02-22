@@ -40,10 +40,37 @@ const ROLE_PERMISSIONS: Record<SystemRole | OrganizationRole, Permission[]> = {
         // Admins implicitly have access to everything, handled in logic
     ],
     USER: [], // Basic users have no special permissions
-    PROMOTER: [], // Legacy role, mapped to OrganizationRole typically
-    VALIDATOR: [], // Legacy role
+    PROMOTER: [], // System-level promoter role
+    VALIDATOR: [], // System-level validator role
 
-    // Organization Roles
+    // Organization / Promoter Member Roles
+    PROMOTER_OWNER: [
+        Permission.VIEW_ORG_DASHBOARD,
+        Permission.MANAGE_ORG_SETTINGS,
+        Permission.MANAGE_ORG_MEMBERS,
+        Permission.CREATE_EVENT,
+        Permission.EDIT_EVENT,
+        Permission.PUBLISH_EVENT,
+        Permission.DELETE_EVENT,
+        Permission.VIEW_SALES,
+        Permission.MANAGE_TICKETS,
+        Permission.SCAN_TICKETS,
+    ],
+    PROMOTER_MANAGER: [
+        Permission.VIEW_ORG_DASHBOARD,
+        Permission.CREATE_EVENT,
+        Permission.EDIT_EVENT,
+        Permission.PUBLISH_EVENT,
+        Permission.VIEW_SALES,
+        Permission.MANAGE_TICKETS,
+        Permission.SCAN_TICKETS,
+    ],
+    PROMOTER_STAFF: [
+        Permission.VIEW_ORG_DASHBOARD,
+        Permission.SCAN_TICKETS, // Primary role for staff on-site
+    ],
+
+    // Legacy roles (kept for DB migration compatibility)
     OWNER: [
         Permission.VIEW_ORG_DASHBOARD,
         Permission.MANAGE_ORG_SETTINGS,
@@ -67,12 +94,12 @@ const ROLE_PERMISSIONS: Record<SystemRole | OrganizationRole, Permission[]> = {
     ],
     STAFF: [
         Permission.VIEW_ORG_DASHBOARD,
-        Permission.SCAN_TICKETS, // Primary role for staff on-site
+        Permission.SCAN_TICKETS,
     ],
     READ_ONLY: [
         Permission.VIEW_ORG_DASHBOARD,
         Permission.VIEW_SALES,
-    ]
+    ],
 };
 
 /**

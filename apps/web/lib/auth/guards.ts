@@ -51,7 +51,7 @@ export async function requirePromoter() {
                 userId,
                 orgId: firstOrg.id,
                 organization: firstOrg,
-                role: "OWNER" as MemberRole,
+                role: MemberRole.PROMOTER_OWNER,
             };
         }
     }

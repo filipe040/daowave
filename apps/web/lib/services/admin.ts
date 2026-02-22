@@ -47,7 +47,7 @@ export class AdminService {
                 take: limit,
                 include: {
                     members: {
-                        where: { role: 'OWNER' },
+                        where: { role: { in: ['OWNER', 'PROMOTER_OWNER'] } },
                         include: { user: { select: { name: true, email: true } } }
                     },
                     _count: { select: { events: true } }

@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
-import { Building2, Check, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Building2, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import NextImage from "next/image";
 
 interface InviteData {
@@ -19,7 +18,7 @@ interface InviteData {
     expiresAt: string;
 }
 
-export default function InviteAcceptPage() {
+function InviteAcceptContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get("token");
@@ -153,5 +152,18 @@ export default function InviteAcceptPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function InviteAcceptPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+                <Loader2 className="h-8 w-8 text-white/20 animate-spin mb-4" />
+                <p className="text-white/40 font-medium">A carregar...</p>
+            </div>
+        }>
+            <InviteAcceptContent />
+        </Suspense>
     );
 }
