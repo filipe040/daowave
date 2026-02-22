@@ -343,3 +343,32 @@ export function getTicketTransferTemplate(variables: {
     text: `Olá ${variables.recipientName},\n\n${variables.senderName} transferiu um bilhete para ${variables.eventTitle}.\nAceitar: ${variables.acceptUrl}`,
   };
 }
+
+/**
+ * Organization Invite Template
+ */
+export function getOrganizationInviteTemplate(variables: {
+  organizationName: string;
+  acceptUrl: string;
+  expiresIn?: string;
+}): { subject: string; html: string; text: string } {
+  const content = `
+    <p>Olá,</p>
+    <p>Foi convidado para se juntar à organização <strong>${variables.organizationName}</strong> na DãoWave!</p>
+    <p>Como membro, poderá gerir eventos, bilhetes e consultar analytics da organização.</p>
+    <p>Para aceitar este convite, clique no botão abaixo:</p>
+    <p style="text-align: center;">
+      <a href="${variables.acceptUrl}" class="button">Aceitar Convite</a>
+    </p>
+    <p>Ou copie e cole este link no seu navegador:</p>
+    <p style="word-break: break-all; color: #667eea;">${variables.acceptUrl}</p>
+    ${variables.expiresIn ? `<p style="font-size: 12px; color: #666;">Este convite expira em ${variables.expiresIn}.</p>` : ""}
+    <p>Se não esperava este convite, pode ignorar este email com segurança.</p>
+  `;
+
+  return {
+    subject: `Convite para a organização ${variables.organizationName} - DãoWave`,
+    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
+    text: `Olá,\n\nFoi convidado para a organização ${variables.organizationName}.\nAceitar convite: ${variables.acceptUrl}`,
+  };
+}

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { MemberRole } from "@prisma/client";
 import { InviteService } from "@/lib/services/invite.service";
 import { createAuditLog } from "@/lib/audit";
+import { EmailService } from "@/lib/email-service";
 
 const createInviteSchema = z.object({
     email: z.string().email("Email inválido"),
@@ -81,6 +82,8 @@ export async function POST(
             expiresInHours: body.expiresInHours,
         });
 
+        const inviteLink = `${process.env.APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'}/invites/accept?token=${rawToken}`;
+
         await createAuditLog({
             userId,
             organizationId: params.id,
@@ -92,9 +95,22 @@ export async function POST(
             userAgent: req.headers.get("user-agent") || undefined,
         });
 
-        // In a real app, we'd send the email here. 
-        // For this project, we return the rawToken so the Admin can share the link manually if needed.
-        const inviteLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/invites/accept?token=${rawToken}`;
+        // Send invitation email
+        try {
+            await EmailService.sendTemplate({
+                to: body.email,
+                templateId: "invite-organization",
+                variables: {
+                    organizationName: org.name,
+                    acceptUrl: inviteLink,
+                    expiresIn: `${body.expiresInHours} horas`
+                },
+                idempotencyKey: `invite-org-${params.id}-${body.email}-${invite.id}`
+            });
+        } catch (emailError) {
+            console.error("[Admin Invites POST] Failed to send email:", emailError);
+            // We don't fail the request if email fails, as the link is still returned
+        }
 
         return NextResponse.json({
             ...invite,

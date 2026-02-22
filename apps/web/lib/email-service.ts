@@ -8,20 +8,22 @@ import { prisma } from "./prisma";
 import { getEmailConfig, maskEmail, hashEmail } from "./config/email";
 import { safeLog } from "./security";
 import crypto from "crypto";
-import { 
-  getTicketEmailTemplate, 
-  getOrderConfirmationEmailTemplate, 
-  getPasswordResetEmailTemplate, 
-  getVerifyEmailTemplate, 
-  getTicketTransferTemplate 
+import {
+  getTicketEmailTemplate,
+  getOrderConfirmationEmailTemplate,
+  getPasswordResetEmailTemplate,
+  getVerifyEmailTemplate,
+  getTicketTransferTemplate,
+  getOrganizationInviteTemplate
 } from "./email-templates-transactional";
 
-export type EmailTemplate = 
+export type EmailTemplate =
   | "verify-email"
   | "reset-password"
   | "order-confirmed"
   | "ticket-delivery"
-  | "ticket-transfer";
+  | "ticket-transfer"
+  | "invite-organization";
 
 export interface SendTemplateOptions {
   to: string;
@@ -66,14 +68,14 @@ function getResendClient(): Resend {
     if (!config.resendApiKey) {
       throw new Error("RESEND_API_KEY is not configured");
     }
-    
+
     // Trim whitespace and remove quotes if present
     const cleanApiKey = config.resendApiKey.trim().replace(/^["']|["']$/g, '');
-    
+
     if (!cleanApiKey.startsWith('re_')) {
       throw new Error(`Invalid RESEND_API_KEY format. Expected key starting with "re_", got: ${cleanApiKey.substring(0, 10)}...`);
     }
-    
+
     resendClient = new Resend(cleanApiKey);
   }
   return resendClient;
@@ -107,7 +109,7 @@ async function checkIdempotency(
       },
       orderBy: { createdAt: "desc" },
     });
-    
+
     // If found, check if idempotencyKey matches (if meta exists)
     if (existing && existing.meta && typeof existing.meta === 'object' && 'idempotencyKey' in existing.meta) {
       if ((existing.meta as any).idempotencyKey === idempotencyKey) {
@@ -144,7 +146,7 @@ async function createEmailLog(
   relatedUserId?: string
 ) {
   const toHash = await hashEmail(to);
-  
+
   try {
     return await prisma.emailLog.create({
       data: {
@@ -209,10 +211,10 @@ async function updateEmailLog(
   } catch (error: any) {
     // If EmailLog table doesn't exist, just log the warning
     // This is OK - the email may still have been sent
-    safeLog.warn("EmailLog table not found, skipping email log update", { 
+    safeLog.warn("EmailLog table not found, skipping email log update", {
       emailLogId,
       status,
-      error: error.message 
+      error: error.message
     });
   }
 }
@@ -222,7 +224,7 @@ async function updateEmailLog(
  */
 export async function sendTemplate(options: SendTemplateOptions): Promise<SendEmailResult> {
   const config = getEmailConfig();
-  
+
   if (!config.enabled) {
     safeLog.warn("Emails are disabled", { template: options.templateId, to: maskEmail(options.to) });
     const log = await createEmailLog(
@@ -314,6 +316,13 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
         expiresIn?: string;
       }));
       break;
+    case "invite-organization":
+      ({ subject, html, text } = getOrganizationInviteTemplate(options.variables as {
+        organizationName: string;
+        acceptUrl: string;
+        expiresIn?: string;
+      }));
+      break;
     default:
       throw new Error(`Unknown template: ${options.templateId}`);
   }
@@ -331,7 +340,7 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
 
   try {
     const client = getResendClient();
-    
+
     // Prepare attachments
     const attachments = options.attachments?.map((att) => ({
       filename: att.filename,
@@ -351,7 +360,7 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
 
     if (result.error) {
       await updateEmailLog(emailLog.id, "FAILED", undefined, result.error.message, 1);
-      
+
       // Log detalhado do erro para debug
       safeLog.error("Email send failed", {
         template: options.templateId,
@@ -362,13 +371,13 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
         // Não logar a API key completa por segurança
         apiKeyPrefix: config.resendApiKey?.substring(0, 10) || 'missing',
       });
-      
+
       // Mensagem mais útil para o utilizador
       let errorMessage = result.error.message;
       if (result.error.message?.includes('invalid') || result.error.message?.includes('API key')) {
         errorMessage = `API key inválida. Verifique se a RESEND_API_KEY está correta e ativa no Resend Dashboard. Erro: ${result.error.message}`;
       }
-      
+
       return {
         success: false,
         emailLogId: emailLog.id,
@@ -408,7 +417,7 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
  */
 export async function sendHtml(options: SendHtmlOptions): Promise<SendEmailResult> {
   const config = getEmailConfig();
-  
+
   if (!config.enabled) {
     safeLog.warn("Emails are disabled", { to: maskEmail(options.to) });
     const log = await createEmailLog(options.to, options.subject, null, options.idempotencyKey);
@@ -446,7 +455,7 @@ export async function sendHtml(options: SendHtmlOptions): Promise<SendEmailResul
 
   try {
     const client = getResendClient();
-    
+
     const attachments = options.attachments?.map((att) => ({
       filename: att.filename,
       content: att.content instanceof Buffer ? att.content.toString("base64") : att.content,
