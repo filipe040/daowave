@@ -1,11 +1,7 @@
-/**
- * GET /api/promotor/events/[id]/tickets — List ticket lots for event (canonical).
- */
-
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requirePromoter } from "@/lib/auth/guards";
+import { EventService } from "@/lib/services/event.service";
 
 export const dynamic = "force-dynamic";
 
@@ -13,42 +9,43 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
+  try {
+    const { orgId, session } = await requirePromoter();
+    const globalRole = (session.user as any).role;
+    const { id } = await params;
 
-  if (!session || ((session.user as { role?: string }).role !== "PROMOTER" && (session.user as { role?: string }).role !== "ADMIN")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
-  let organizerProfile: { id: string } | null = null;
-  if ((session.user as { role?: string }).role === "PROMOTER") {
-    const profile = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: {
+        ticketLots: {
+          orderBy: { saleStartAt: "asc" },
+        },
+      },
     });
 
-    if (!profile) {
-      return NextResponse.json({ error: "Promoter not found" }, { status: 404 });
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
-    organizerProfile = profile;
+
+    // Permission check: ADMIN bypasses; 
+    // PROMOTER must be in the org or be the legacy owner
+    if (globalRole !== "ADMIN") {
+      const isInOrg = event.organizationId === orgId;
+
+      let ownsViaProfile = false;
+      if (!isInOrg) {
+        const promoterProfile = await EventService.getPromoterProfile(session.user.id);
+        ownsViaProfile = promoterProfile ? event.promoterId === promoterProfile.id : false;
+      }
+
+      if (!isInOrg && !ownsViaProfile) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
+    }
+
+    return NextResponse.json({ ticketLots: event.ticketLots });
+  } catch (error) {
+    console.error("[Get Event Tickets] Error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const event = await prisma.event.findUnique({
-    where: { id },
-    include: {
-      ticketLots: {
-        orderBy: { saleStartAt: "asc" },
-      },
-    },
-  });
-
-  if (!event) {
-    return NextResponse.json({ error: "Event not found" }, { status: 404 });
-  }
-
-  if ((session.user as { role?: string }).role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  }
-
-  return NextResponse.json({ ticketLots: event.ticketLots });
 }

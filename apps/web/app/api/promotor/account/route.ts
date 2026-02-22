@@ -3,10 +3,9 @@
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { requirePromoter } from "@/lib/auth/guards";
 
 const UpdateAccountSchema = z.object({
   brandName: z.string().min(1, "Nome da marca é obrigatório"),
@@ -17,15 +16,7 @@ export const dynamic = "force-dynamic";
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string }).role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { session } = await requirePromoter();
 
     const organizerProfile = await prisma.promoterProfile.findUnique({
       where: { userId: session.user.id },

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { requirePromoter } from "@/lib/auth/guards";
+import { EventService } from "@/lib/services/event.service";
 
 export const dynamic = "force-dynamic";
 
@@ -27,35 +27,33 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
+    const { orgId, session } = await requirePromoter();
+    const globalRole = (session.user as any).role;
     const { id: eventId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
 
-    if (!promoter && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    // Verify event ownership (admins can edit any event)
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
-      },
+    // Load the event
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
     });
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    // Permission check: ADMIN bypasses; 
+    // PROMOTER must be in the org or be the legacy owner
+    if (globalRole !== "ADMIN") {
+      const isInOrg = event.organizationId === orgId;
+
+      let ownsViaProfile = false;
+      if (!isInOrg) {
+        const promoterProfile = await EventService.getPromoterProfile(session.user.id);
+        ownsViaProfile = promoterProfile ? event.promoterId === promoterProfile.id : false;
+      }
+
+      if (!isInOrg && !ownsViaProfile) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const body = await request.json().catch(() => ({}));

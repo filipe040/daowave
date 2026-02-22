@@ -4,10 +4,10 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { CheckinService } from '@/lib/services/checkin.service';
 import { applyRateLimit, RATE_LIMITS, safeLog } from '@/lib/security';
+import { requirePromoter } from '@/lib/auth/guards';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,21 +16,8 @@ export async function POST(request: Request) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    const { session, role: memberRole, orgId } = await requirePromoter();
     const userRole = (session.user as { role?: string }).role ?? '';
-    if (userRole !== 'PROMOTER' && userRole !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const { qrCode, eventId, deviceId } = body;

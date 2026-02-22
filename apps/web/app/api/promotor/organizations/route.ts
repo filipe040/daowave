@@ -25,9 +25,6 @@ export async function GET(req: Request) {
         }
 
         const role = (session.user as { role?: string }).role;
-        if (role !== "PROMOTER" && role !== "ADMIN") {
-            return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-        }
 
         // ADMIN: retorna todas as orgs (com indicação de role ADMIN)
         if (role === "ADMIN") {
@@ -44,11 +41,11 @@ export async function GET(req: Request) {
             return NextResponse.json({ data });
         }
 
-        // PROMOTER: retorna orgs onde é OWNER ou MANAGER
+        // PROMOTER: retorna orgs onde é OWNER ou MANAGER (incluindo novos cargos)
         const memberships = await prisma.organizationMember.findMany({
             where: {
                 userId: session.user.id,
-                role: { in: ["OWNER", "MANAGER"] },
+                role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] },
             },
             select: {
                 role: true,

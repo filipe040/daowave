@@ -4,7 +4,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import type { Event, EventStatus, Prisma } from "@prisma/client";
+import type { Event, EventStatus, Prisma, PromoterProfile } from "@prisma/client";
 
 export type CreateEventInput = {
   promoterId: string;
@@ -231,5 +231,14 @@ export const EventService = {
       },
     });
     return !!existing;
+  },
+
+  /**
+   * Helper to get promoter profile by userId (legacy).
+   */
+  async getPromoterProfile(userId: string): Promise<PromoterProfile | null> {
+    return prisma.promoterProfile.findUnique({
+      where: { userId },
+    });
   },
 };

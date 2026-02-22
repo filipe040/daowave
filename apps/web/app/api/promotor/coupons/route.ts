@@ -1,13 +1,7 @@
-/**
- * GET /api/promotor/coupons — List coupons (canonical).
- * POST /api/promotor/coupons — Create coupon (canonical).
- */
-
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { requirePromoter } from "@/lib/auth/guards";
 
 const CouponSchema = z.object({
   eventId: z.string().uuid(),
@@ -35,22 +29,11 @@ const CouponSchema = z.object({
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || (session.user as { role?: string }).role !== "PROMOTER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    const organizer = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
+    const { orgId } = await requirePromoter();
 
-    if (!organizer || organizer.status !== "APPROVED") {
-      return NextResponse.json(
-        { error: "Promoter not approved" },
-        { status: 403 }
-      );
+    if (!orgId) {
+      return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
     }
 
     const body = await req.json();
@@ -59,51 +42,41 @@ export async function POST(req: Request) {
     const event = await prisma.event.findFirst({
       where: {
         id: data.eventId,
-        promoterId: organizer.id,
+        organizationId: orgId,
       },
     });
 
     if (!event) {
       return NextResponse.json(
-        { error: "Event not found or access denied" },
+        { error: "Evento não encontrado ou acesso negado." },
         { status: 404 }
       );
     }
 
-    try {
-      const existingCoupon = await prisma.coupon.findUnique({
-        where: { code: data.code },
-      });
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: { code: data.code },
+    });
 
-      if (existingCoupon) {
-        return NextResponse.json(
-          { error: "Código já existe" },
-          { status: 400 }
-        );
-      }
-
-      const coupon = await prisma.coupon.create({
-        data: {
-          eventId: data.eventId,
-          code: data.code,
-          discountType: data.discountType,
-          discountValue: data.discountValue,
-          maxUses: data.maxUses,
-          startsAt: new Date(data.startsAt),
-          endsAt: new Date(data.endsAt),
-        },
-      });
-
-      return NextResponse.json({ coupon }, { status: 201 });
-    } catch (error: any) {
-      if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
-        return NextResponse.json(
-          { error: "Funcionalidade de cupões não disponível. Por favor, execute a migração do Prisma." },
-          { status: 503 }
-        );
-      }
-      throw error;
+    if (existingCoupon) {
+      return NextResponse.json(
+        { error: "Código já existe" },
+        { status: 400 }
+      );
     }
+
+    const coupon = await prisma.coupon.create({
+      data: {
+        eventId: data.eventId,
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        maxUses: data.maxUses,
+        startsAt: new Date(data.startsAt),
+        endsAt: new Date(data.endsAt),
+      },
+    });
+
+    return NextResponse.json({ coupon }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -111,53 +84,26 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
     console.error("Error creating coupon:", error);
     return NextResponse.json(
-      { error: "Failed to create coupon" },
+      { error: "Erro ao criar cupão" },
       { status: 500 }
     );
   }
 }
 
-export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || (session.user as { role?: string }).role !== "PROMOTER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const organizer = await prisma.promoterProfile.findUnique({
-    where: { userId: session.user.id },
-  });
-
-  if (!organizer) {
-    return NextResponse.json({ error: "Promoter not found" }, { status: 404 });
-  }
-
-  let coupons: Array<{
-    id: string;
-    eventId: string;
-    code: string;
-    discountType: string;
-    discountValue: number;
-    maxUses: number | null;
-    usedCount: number;
-    isActive: boolean;
-    startsAt: Date;
-    endsAt: Date;
-    createdAt: Date;
-    updatedAt: Date;
-    event: {
-      title: string;
-      slug: string;
-    };
-  }> = [];
+export async function GET() {
   try {
-    coupons = await prisma.coupon.findMany({
+    const { orgId } = await requirePromoter();
+
+    if (!orgId) {
+      return NextResponse.json({ coupons: [] });
+    }
+
+    const coupons = await prisma.coupon.findMany({
       where: {
         event: {
-          promoterId: organizer.id,
+          organizationId: orgId,
         },
       },
       include: {
@@ -170,14 +116,10 @@ export async function GET(req: Request) {
       },
       orderBy: { createdAt: "desc" },
     });
-  } catch (error: any) {
-    if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
-      console.warn("Coupon table not found. Please run Prisma migration.");
-      coupons = [];
-    } else {
-      throw error;
-    }
-  }
 
-  return NextResponse.json({ coupons });
+    return NextResponse.json({ coupons });
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    return NextResponse.json({ coupons: [] });
+  }
 }

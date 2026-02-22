@@ -1,14 +1,9 @@
-/**
- * GET /api/promotor/events/[id]/sales — vendas do evento com paginação e filtros
- * Query: page, limit, status (PAID|PENDING|CANCELED)
- */
-
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { safeLog } from "@/lib/security";
 import type { OrderStatus } from "@prisma/client";
+import { requirePromoter } from "@/lib/auth/guards";
+import { EventService } from "@/lib/services/event.service";
 
 export const dynamic = "force-dynamic";
 
@@ -17,40 +12,40 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const role = (session.user as { role?: string }).role;
-    if (role !== "PROMOTER" && role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
+    const { orgId, session } = await requirePromoter();
+    const globalRole = (session.user as any).role;
     const { id: eventId } = await params;
+
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
     const statusParam = searchParams.get("status");
     const status: OrderStatus | null =
       statusParam === "PAID" || statusParam === "PENDING" || statusParam === "CANCELED"
-        ? statusParam
+        ? (statusParam as OrderStatus)
         : null;
 
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { promoterId: true },
+      select: { promoterId: true, organizationId: true },
     });
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    if (role === "PROMOTER") {
-      const promoter = await prisma.promoterProfile.findUnique({
-        where: { userId: session.user.id },
-      });
-      if (!promoter || event.promoterId !== promoter.id) {
+    // Permission check: ADMIN bypasses; 
+    // PROMOTER must be in the org or be the legacy owner
+    if (globalRole !== "ADMIN") {
+      const isInOrg = event.organizationId === orgId;
+
+      let ownsViaProfile = false;
+      if (!isInOrg) {
+        const promoterProfile = await EventService.getPromoterProfile(session.user.id);
+        ownsViaProfile = promoterProfile ? event.promoterId === promoterProfile.id : false;
+      }
+
+      if (!isInOrg && !ownsViaProfile) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
