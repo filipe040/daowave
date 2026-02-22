@@ -14,6 +14,7 @@ import {
     LogOut,
     Banknote,
     Layers,
+    CircleDollarSign,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -22,6 +23,7 @@ const routes = [
     { label: "Eventos", icon: Calendar, href: "/promotor/events" },
     { label: "Vendas", icon: Ticket, href: "/promotor/sales" },
     { label: "Check-in", icon: QrCode, href: "/promotor/checkin" },
+    { label: "Venda Manual (POS)", icon: CircleDollarSign, href: "/promotor/sales/manual" },
     { label: "Analytics", icon: BarChart3, href: "/promotor/analytics" },
     { label: "Finanças", icon: Banknote, href: "/promotor/finance" },
     { label: "Design Bilhetes", icon: Layers, href: "/promotor/settings/tickets" },

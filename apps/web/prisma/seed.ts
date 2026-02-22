@@ -9,6 +9,7 @@ import {
   Role,
   OrganizerStatus
 } from "@prisma/client";
+// Triggering IDE refresh for Prisma types
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -150,7 +151,7 @@ async function main() {
   });
 
   console.log(`✅ Organizações e membros criados.`);
-  console.log(`✅ Evento criado: ${event.title}`);
+  console.log(`✅ Evento criado: ${event.title} `);
 
   // 7. Create Ticket Templates for Sound Republic
   console.log("🎨 A criar templates de bilhetes...");
@@ -214,9 +215,9 @@ async function main() {
     },
   });
 
-  console.log(`✅ Templates de bilhetes criados. Ativo: ${activeTemplate.name}`);
-  console.log(`\n📧 Credenciais:`);
-  console.log(`  Admin: admin@daowave.pt / password123`);
+  console.log(`✅ Templates de bilhetes criados.Ativo: ${activeTemplate.name} `);
+  console.log(`\n📧 Credenciais: `);
+  console.log(`  Admin: admin @daowave.pt / password123`);
   console.log(`  Owner: owner@soundrepublic.pt / password123`);
   console.log(`  Manager: manager@soundrepublic.pt / password123`);
 }

@@ -6,6 +6,30 @@ import { safeLog } from "@/lib/security";
 export const dynamic = "force-dynamic";
 
 /**
+ * GET /api/promotor/ticket-templates/[id]
+ */
+export async function GET(
+    req: NextRequest,
+    props: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { orgId } = await requirePromoter();
+        const { id } = await props.params;
+
+        const template = await TicketTemplateService.getById(id);
+        if (!template || template.organizationId !== orgId) {
+            return NextResponse.json({ error: "Template not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(template);
+    } catch (error: any) {
+        if (error.digest?.includes("NEXT_REDIRECT")) throw error;
+        safeLog.error("Error fetching ticket template", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+/**
  * PATCH /api/promotor/ticket-templates/[id]
  * Update a ticket template
  */

@@ -8,9 +8,22 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
+    "paths": {
+      "@prisma/client": [
+        "../../node_modules/@prisma/client"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    },
     "outDir": "./dist-seed",
     "noEmit": true
   },
-  "include": ["prisma/seed.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "prisma/seed.ts",
+    "../../node_modules/@prisma/client/index.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
