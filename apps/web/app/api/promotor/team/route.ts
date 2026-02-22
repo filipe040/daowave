@@ -47,13 +47,12 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const { session, orgId } = await requirePromoter();
+        const { session, orgId, role: actorRole } = await requirePromoter();
 
         if (!orgId) {
             return NextResponse.json({ error: "Contexto de organização não encontrado." }, { status: 400 });
         }
-        const actorRole = (session.user as any).roleInOrg; // Current role in organization
-        const canInvite = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(actorRole);
+        const canInvite = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(actorRole as string);
 
         if (!canInvite) {
             return NextResponse.json({ error: "Permissões insuficientes para convidar membros." }, { status: 403 });
