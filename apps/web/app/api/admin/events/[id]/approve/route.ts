@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+export const dynamic = "force-dynamic";
+
+async function handleApprove(
+  req: NextRequest,
+  params: { id: string }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +16,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     // Find the event
     const event = await prisma.event.findUnique({
@@ -36,13 +38,6 @@ export async function POST(
     if (event.status !== "DRAFT") {
       return NextResponse.json(
         { error: "Apenas eventos em rascunho podem ser aprovados" },
-        { status: 400 }
-      );
-    }
-
-    if (event.promoter.user.role !== "PROMOTER") {
-      return NextResponse.json(
-        { error: "Apenas eventos de promotores precisam de aprovação" },
         { status: 400 }
       );
     }
@@ -87,3 +82,12 @@ export async function POST(
   }
 }
 
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  return handleApprove(req, { id });
+}
+
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  return handleApprove(req, { id });
+}

@@ -62,12 +62,15 @@ export default function AdminEventsPage() {
     const handleApprove = async (id: string) => {
         setActioning(id);
         try {
-            const res = await fetchWithTimeout(`/api/admin/events/${id}/approve`, { method: "PATCH" });
+            const res = await fetchWithTimeout(`/api/admin/events/${id}/approve`, { method: "POST" });
             if (!res.ok) throw new Error(`Erro ${res.status}`);
             toast.success("Evento publicado");
             await load();
-        } catch (err: unknown) { toast.error(err instanceof Error ? err.message : "Erro"); }
-        finally { setActioning(null); }
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro");
+        } finally {
+            setActioning(null);
+        }
     };
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));

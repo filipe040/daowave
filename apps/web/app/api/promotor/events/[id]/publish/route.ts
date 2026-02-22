@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { safeLog } from "@/lib/security";
 import { EventService } from "@/lib/services/event.service";
@@ -7,13 +7,13 @@ import { requirePromoter } from "@/lib/auth/guards";
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
     const { session, orgId } = await requirePromoter();
     const globalRole = (session.user as any).role;
-    const { id } = await params;
+    const { id } = await props.params;
 
     // Load the event
     const event = await prisma.event.findUnique({
