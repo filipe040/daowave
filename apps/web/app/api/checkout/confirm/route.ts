@@ -118,12 +118,23 @@ export async function POST(req: Request) {
 
         // Generate QR Payloads for signing
         const createdTickets = await prisma.ticket.findMany({ where: { orderId: order.id } });
+        const { signQrPayload } = await import("@ticketing-platform/shared");
+        const QR_SECRET = process.env.QR_SECRET || "change-me-in-production";
+
         for (const t of createdTickets) {
-            // Simplification: In a real environment, we use a signed JWT representing the QR payload.
-            const payload = JSON.stringify({ id: t.id, code: t.code, eventId: t.eventId });
+            const qrNonce = crypto.randomBytes(8).toString("hex");
+            const payload = {
+                v: 1 as const,
+                tid: t.id,
+                eid: parsed.eventId,
+                n: qrNonce,
+                iat: Math.floor(Date.now() / 1000),
+            };
+            const qrPayload = signQrPayload(payload, QR_SECRET);
+
             await prisma.ticket.update({
                 where: { id: t.id },
-                data: { qrPayload: payload }
+                data: { qrPayload, qrNonce } as any
             });
         }
 

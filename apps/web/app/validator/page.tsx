@@ -116,11 +116,13 @@ export default function ValidatorPage() {
           window.location.protocol === "https:" ||
           window.location.hostname === "localhost" ||
           window.location.hostname === "127.0.0.1" ||
+          window.location.hostname.startsWith("192.168.") ||
+          window.location.hostname.startsWith("10.") ||
           window.isSecureContext;
 
         if (!currentIsSecure && !isSecureContext) {
           const currentUrl = window.location.href;
-          throw new Error(`Acesso à câmara requer HTTPS. Aceda via: ${currentUrl.replace("http:", "https:")}`);
+          throw new Error(`Acesso à câmara requer contexto seguro. Pode não funcionar neste endereço: ${currentUrl}`);
         }
 
         const { Html5Qrcode } = await import("html5-qrcode");
@@ -128,20 +130,8 @@ export default function ValidatorPage() {
         scannerRef.current = scanner;
         isScanningRef.current = false;
 
-        // Permission check
-        try {
-          await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        } catch (permError: any) {
-          if (permError?.name === "NotAllowedError") {
-            throw new Error(
-              "Permissão para usar a câmara foi negada. Ative o acesso à câmara nas definições do browser."
-            );
-          }
-          if (permError?.name === "NotFoundError") {
-            throw new Error("Nenhuma câmara encontrada. Verifique se o dispositivo tem câmara.");
-          }
-          throw permError;
-        }
+        // Skip exact Permission check here because Html5Qrcode handles permissions inside
+        // start() natively anyway, avoiding double-prompts or crashes on some browsers
 
         await scanner.start(
           { facingMode: "environment" },
