@@ -33,7 +33,10 @@ export default function ValidatorPage() {
     if (typeof window === "undefined") return;
     const isHttps = window.location.protocol === "https:";
     const isLocalhost =
-      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.startsWith("192.168.") ||
+      window.location.hostname.startsWith("10.");
     setIsSecureContext(isHttps || isLocalhost || window.isSecureContext);
   }, []);
 
@@ -109,7 +112,7 @@ export default function ValidatorPage() {
 
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
-          throw new Error("Este browser não suporta acesso à câmara. Use Chrome, Safari ou Firefox.");
+          throw new Error("O seu browser bloqueou o acesso à câmara porque não está a usar HTTPS ou Safari/Chrome atualizados.");
         }
 
         const currentIsSecure =

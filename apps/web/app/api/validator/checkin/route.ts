@@ -33,18 +33,21 @@ export async function POST(req: Request) {
     const rawHash = crypto.createHash("sha256").update(token).digest("hex");
     const payload = verifyQrTokenShared(token, QR_SECRET);
 
-    if (!payload) {
-      return NextResponse.json({
-        valid: false,
-        result: "invalid",
-        message: "Assinatura inválida",
+    let ticket;
+
+    if (payload) {
+      ticket = await prisma.ticket.findUnique({
+        where: { id: payload.tid },
+        include: { event: true },
+      });
+    } else {
+      // Fallback: search by ticket code (manual validation)
+      const code = token.trim().toUpperCase();
+      ticket = await prisma.ticket.findFirst({
+        where: { code },
+        include: { event: true },
       });
     }
-
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: payload.tid },
-      include: { event: true },
-    });
 
     if (!ticket) {
       return NextResponse.json({
