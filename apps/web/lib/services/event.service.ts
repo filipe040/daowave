@@ -93,6 +93,7 @@ export const EventService = {
         skip,
         take: limit,
         include: {
+          ticketLots: true,
           _count: {
             select: {
               tickets: true,
