@@ -118,20 +118,22 @@ export async function POST(req: Request) {
     // Send order confirmation email
     const emailConfig = getEmailConfig();
 
-    await EmailService.sendTemplate({
-      to: order.user.email,
-      templateId: "order-confirmed",
-      variables: {
-        name: order.user.name || "Utilizador",
-        orderId: order.id,
-        eventTitle: order.event.title,
-        total: (order.totalCents / 100).toFixed(2),
-        currency: order.currency,
-      },
-      idempotencyKey: `order-confirmed-${order.id}`,
-    }).catch((error) => {
+    try {
+      await EmailService.sendTemplate({
+        to: order.user.email,
+        templateId: "order-confirmed",
+        variables: {
+          name: order.user.name || "Utilizador",
+          orderId: order.id,
+          eventTitle: order.event.title,
+          total: (order.totalCents / 100).toFixed(2),
+          currency: order.currency,
+        },
+        idempotencyKey: `order-confirmed-${order.id}`,
+      });
+    } catch (error) {
       console.error("Error sending order confirmation email:", error);
-    });
+    }
 
     // Send ticket delivery email (uses event branding from Protocolo Visual when set)
     const ev = order.event as {
@@ -143,29 +145,31 @@ export async function POST(req: Request) {
       secondaryColor?: string | null;
       bannerUrl?: string | null;
     };
-    await EmailService.sendTemplate({
-      to: order.user.email,
-      templateId: "ticket-delivery",
-      variables: {
-        name: order.user.name || "Utilizador",
-        eventTitle: ev.title,
-        eventDate: ev.startAt.toLocaleString("pt-PT"),
-        venueName: ev.venue,
-        address: `${ev.venue}, ${ev.city}`,
-        ticketCount: tickets.length,
-        branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null)
-          ? {
-            primaryColor: ev.primaryColor ?? undefined,
-            secondaryColor: ev.secondaryColor ?? undefined,
-            bannerUrl: ev.bannerUrl ?? undefined,
-            headerTitle: "O teu bilhete",
-          }
-          : undefined,
-      },
-      idempotencyKey: `ticket-delivery-${order.id}`,
-    }).catch((error) => {
+    try {
+      await EmailService.sendTemplate({
+        to: order.user.email,
+        templateId: "ticket-delivery",
+        variables: {
+          name: order.user.name || "Utilizador",
+          eventTitle: ev.title,
+          eventDate: ev.startAt.toLocaleString("pt-PT"),
+          venueName: ev.venue,
+          address: `${ev.venue}, ${ev.city}`,
+          ticketCount: tickets.length,
+          branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null)
+            ? {
+              primaryColor: ev.primaryColor ?? undefined,
+              secondaryColor: ev.secondaryColor ?? undefined,
+              bannerUrl: ev.bannerUrl ?? undefined,
+              headerTitle: "O teu bilhete",
+            }
+            : undefined,
+        },
+        idempotencyKey: `ticket-delivery-${order.id}`,
+      });
+    } catch (error) {
       console.error("Error sending ticket email:", error);
-    });
+    }
 
     console.log(`Order ${orderId} paid, ${tickets.length} tickets issued`);
   } else if (event.type === "payment_intent.payment_failed") {

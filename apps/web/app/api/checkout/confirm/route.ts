@@ -139,10 +139,13 @@ export async function POST(req: Request) {
         }
 
         // Send email with tickets attached
-        // Execute asynchronously so user doesn't wait
-        sendTicketsEmail(order.id).catch((err) => {
-            console.error("[Checkout] Error asynchronously sending tickets email:", err);
-        });
+        // Await this to ensure Vercel serverless function does not terminate before the email is sent
+        try {
+            await sendTicketsEmail(order.id);
+        } catch (err) {
+            console.error("[Checkout] Error sending tickets email:", err);
+            // We don't fail the checkout if email fails, but we awaited it
+        }
 
         return NextResponse.json({ success: true, orderId: order.id });
 
