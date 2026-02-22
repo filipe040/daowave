@@ -5,7 +5,7 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, ExternalLink, Edit } from "lucide-react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { toast } from "sonner";
 
@@ -165,8 +165,12 @@ export default function AdminEventsPage() {
                                                     </button>
                                                 )}
                                                 <a href={`/events/${ev.slug}`} target="_blank" rel="noopener noreferrer"
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" title="Ver Página">
                                                     <ExternalLink className="h-3.5 w-3.5" />
+                                                </a>
+                                                <a href={`/promotor/events/${ev.id}`}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" title="Editar Evento">
+                                                    <Edit className="h-3.5 w-3.5" />
                                                 </a>
                                             </div>
                                         </td>
@@ -202,8 +206,12 @@ export default function AdminEventsPage() {
                                             </button>
                                         )}
                                         <a href={`/events/${ev.slug}`} target="_blank" rel="noopener noreferrer"
-                                            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                                            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" title="Ver Página">
                                             <ExternalLink className="h-3.5 w-3.5" />
+                                        </a>
+                                        <a href={`/promotor/events/${ev.id}`}
+                                            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" title="Editar Evento">
+                                            <Edit className="h-3.5 w-3.5" />
                                         </a>
                                     </div>
                                 </div>

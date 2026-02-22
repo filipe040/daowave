@@ -11,7 +11,7 @@ export async function POST(
 ) {
     try {
         const { session, role } = await requirePromoter();
-        const canManage = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string);
+        const canManage = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string) || (session.user as any).role === "ADMIN";
 
         if (!canManage) {
             return NextResponse.json({ error: "Permissões insuficientes para importar mapas de lugares." }, { status: 403 });

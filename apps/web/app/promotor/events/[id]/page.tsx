@@ -128,6 +128,27 @@ export default function PromoterEventDetailPage() {
         }
     };
 
+    const handleUnpublish = async () => {
+        setPublishing(true);
+        try {
+            const res = await fetchWithTimeout(`/api/promotor/events/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "DRAFT" }),
+            });
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({})) as { error?: string };
+                throw new Error(body.error ?? "Erro ao reverter para rascunho");
+            }
+            toast.success("Evento revertido para rascunho!");
+            await load();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro ao reverter");
+        } finally {
+            setPublishing(false);
+        }
+    };
+
     if (loading) return (
         <PageShell title="Evento">
             <div className="max-w-2xl animate-pulse space-y-3">
@@ -215,17 +236,28 @@ export default function PromoterEventDetailPage() {
                 )}
 
                 {isPublished && (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" strokeWidth={1.75} />
-                        <p className="text-sm text-emerald-700 font-medium">Evento público e visível ao público</p>
-                        <a
-                            href={`/events/${event.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="ml-auto text-xs text-emerald-600 hover:text-emerald-800 underline shrink-0"
-                        >
-                            Ver página
-                        </a>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                        <div className="flex items-center gap-3">
+                            <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" strokeWidth={1.75} />
+                            <p className="text-sm text-emerald-700 font-medium">Evento publicado e visível</p>
+                        </div>
+                        <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0 ml-8 sm:ml-0">
+                            <a
+                                href={`/events/${event.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium px-4 py-2 text-center w-full sm:w-auto rounded-lg border border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 transition-colors"
+                            >
+                                Ver página
+                            </a>
+                            <button
+                                onClick={handleUnpublish}
+                                disabled={publishing}
+                                className="text-xs font-medium px-4 py-2 text-center w-full sm:w-auto rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 disabled:opacity-40 transition-colors"
+                            >
+                                {publishing ? "Aguarde…" : "Meter em Rascunho"}
+                            </button>
+                        </div>
                     </div>
                 )}
 

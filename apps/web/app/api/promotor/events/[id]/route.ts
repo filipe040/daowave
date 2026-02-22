@@ -21,8 +21,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   const event = await EventService.getById(params.id);
   if (!event) return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
 
+  const isGlobalAdmin = (session.user as any)?.role === "ADMIN";
+
   // Ownership check
-  if (event.organizationId !== orgId) {
+  if (!isGlobalAdmin && event.organizationId !== orgId) {
     // If not matching orgId, check if legacy owner/manager
     const promoter = await EventService.getPromoterProfile((session.user as any).id);
     if (!promoter || event.promoterId !== promoter.id) {
@@ -41,8 +43,10 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     const eventBefore = await EventService.getById(params.id);
     if (!eventBefore) return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
 
+    const isGlobalAdmin = (session.user as any)?.role === "ADMIN";
+
     // Ownership check (only OWNER/MANAGER of that org can edit)
-    if (eventBefore.organizationId !== orgId) {
+    if (!isGlobalAdmin && eventBefore.organizationId !== orgId) {
       const promoter = await EventService.getPromoterProfile((session.user as any).id);
       if (!promoter || eventBefore.promoterId !== promoter.id) {
         return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
