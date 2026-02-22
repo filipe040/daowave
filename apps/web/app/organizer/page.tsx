@@ -24,7 +24,7 @@ export default async function OrganizerDashboard() {
   }
 
   const [overview, recentEvents] = await Promise.all([
-    getPromoterOverview(organizerProfile.id),
+    getPromoterOverview({ promoterId: organizerProfile.id }),
     prisma.event.findMany({
       where: { promoterId: organizerProfile.id },
       orderBy: { createdAt: "desc" },
@@ -66,7 +66,7 @@ export default async function OrganizerDashboard() {
           <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsTotal}</div>
           <div className="text-sm md:text-base text-zinc-400">Total de Eventos</div>
         </div>
-        
+
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
             <CircleCheck className="h-6 w-6" strokeWidth={1.5} />
@@ -74,7 +74,7 @@ export default async function OrganizerDashboard() {
           <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsActive}</div>
           <div className="text-sm md:text-base text-zinc-400">Publicados</div>
         </div>
-        
+
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
             <FileText className="h-6 w-6" strokeWidth={1.5} />
@@ -82,7 +82,7 @@ export default async function OrganizerDashboard() {
           <div className="text-4xl md:text-5xl font-bold mb-2">{draftEvents}</div>
           <div className="text-sm md:text-base text-zinc-400">Rascunhos</div>
         </div>
-        
+
         <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-400">
             <CircleDollarSign className="h-6 w-6" strokeWidth={1.5} />
@@ -106,7 +106,7 @@ export default async function OrganizerDashboard() {
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        
+
         {recentEvents.length === 0 ? (
           <div className="text-center py-12 md:py-16">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-zinc-500">
@@ -134,11 +134,10 @@ export default async function OrganizerDashboard() {
                       {event.title}
                     </h3>
                     <span
-                      className={`text-xs md:text-sm px-3 py-1 rounded-lg ${
-                        event.status === "PUBLISHED"
+                      className={`text-xs md:text-sm px-3 py-1 rounded-lg ${event.status === "PUBLISHED"
                           ? "bg-green-500/20 text-green-400 border border-green-500/30"
                           : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                      }`}
+                        }`}
                     >
                       {event.status === "PUBLISHED" ? "Publicado" : "Rascunho"}
                     </span>

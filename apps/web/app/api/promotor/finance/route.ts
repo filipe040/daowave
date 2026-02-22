@@ -1,12 +1,7 @@
-/**
- * GET /api/promotor/finance — receita bruta, payouts e resumo financeiro do promotor
- */
-
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
+import { requirePromoter } from "@/lib/auth/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -15,30 +10,24 @@ export async function GET(req: Request) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { orgId } = await requirePromoter();
 
-    const role = (session.user as { role?: string }).role;
-    if (role !== "PROMOTER" && role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-    if (!promoter || promoter.status !== "APPROVED") {
-      return NextResponse.json(
-        { error: "Promoter profile not found or not approved" },
-        { status: 403 }
-      );
+    if (!orgId) {
+      return NextResponse.json({
+        grossCents: 0,
+        currency: "EUR",
+        feesCents: 0,
+        netCents: 0,
+        payoutsPaidCents: 0,
+        payoutsPendingCents: 0,
+        payouts: [],
+      });
     }
 
     const orders = await prisma.order.findMany({
       where: {
         status: "PAID",
-        event: { promoterId: promoter.id },
+        event: { organizationId: orgId },
       },
       select: { totalCents: true, currency: true },
     });
@@ -47,7 +36,7 @@ export async function GET(req: Request) {
     const currency = orders[0]?.currency ?? "EUR";
 
     const payouts = await prisma.payout.findMany({
-      where: { promoterId: promoter.id },
+      where: { organizationId: orgId },
       orderBy: { createdAt: "desc" },
       take: 50,
     });

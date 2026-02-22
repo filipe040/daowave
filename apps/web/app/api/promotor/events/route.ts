@@ -37,24 +37,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const role = (session.user as { role?: string }).role;
-  if (role !== "PROMOTER" && role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { session, role: memberRole, orgId } = await requirePromoter();
+  const globalRole = (session.user as any).role;
 
   try {
     const json = await req.json();
     const body = createEventSchema.parse(json);
 
     // If orgId provided: validate access (non-ADMIN must have managerial roles)
-    if (body.orgId && role !== "ADMIN") {
+    if (body.orgId && globalRole !== "ADMIN") {
       const membership = await prisma.organizationMember.findFirst({
         where: {
           organizationId: body.orgId,
-          userId: session.user.id,
+          userId: (session.user as any).id,
           role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] },
         },
       });
@@ -65,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // Resolve promoter profile id (needed for EventService.create)
     const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: (session.user as any).id },
     });
 
     if (!promoter && !body.orgId) {
@@ -83,8 +78,8 @@ export async function POST(req: NextRequest) {
       city: body.city,
       startAt: body.startAt,
       endAt: body.endAt,
-      organizationId: body.orgId,
-      promoterId: promoter?.id ?? session.user.id, // fallback to userId for admin
+      organizationId: (body.orgId || orgId) ?? undefined, // Use context orgId if not provided
+      promoterId: promoter?.id ?? (session.user as any).id, // fallback to userId for admin
     });
 
     return NextResponse.json(event);

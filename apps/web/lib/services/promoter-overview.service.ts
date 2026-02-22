@@ -81,7 +81,12 @@ const emptyOverview: PromoterOverview = {
   salesThisWeekCents: 0,
 };
 
-export async function getPromoterOverview(promoterId: string): Promise<PromoterOverview> {
+export async function getPromoterOverview(params: {
+  promoterId?: string;
+  organizationId?: string;
+}): Promise<PromoterOverview> {
+  const { promoterId, organizationId } = params;
+
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfWeek = new Date(startOfToday);
@@ -89,7 +94,12 @@ export async function getPromoterOverview(promoterId: string): Promise<PromoterO
 
   try {
     const events = await prisma.event.findMany({
-      where: { promoterId },
+      where: {
+        OR: [
+          ...(promoterId ? [{ promoterId }] : []),
+          ...(organizationId ? [{ organizationId }] : []),
+        ],
+      },
       select: {
         id: true,
         status: true,

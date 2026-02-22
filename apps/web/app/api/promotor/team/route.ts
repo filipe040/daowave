@@ -1,12 +1,7 @@
-/**
- * GET /api/promotor/team — membros das organizações onde o user é OWNER ou MANAGER
- */
-
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
+import { requirePromoter } from "@/lib/auth/guards";
 
 export const dynamic = "force-dynamic";
 
@@ -15,34 +10,15 @@ export async function GET(req: Request) {
     if (rateLimitRes) return rateLimitRes;
 
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { orgId } = await requirePromoter();
 
-        const role = (session.user as { role?: string }).role;
-        if (role !== "PROMOTER" && role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
-        // Find organizations where this user is OWNER or MANAGER
-        const myMemberships = await prisma.organizationMember.findMany({
-            where: {
-                userId: session.user.id,
-                role: { in: ["OWNER", "MANAGER"] },
-            },
-            select: { organizationId: true },
-        });
-
-        const orgIds = myMemberships.map((m) => m.organizationId);
-
-        if (orgIds.length === 0) {
+        if (!orgId) {
             return NextResponse.json({ data: [], total: 0 });
         }
 
-        // Fetch all members of those organizations (org-level, not per-event)
+        // Fetch all members of that organization (org-level, not per-event)
         const members = await prisma.organizationMember.findMany({
-            where: { organizationId: { in: orgIds } },
+            where: { organizationId: orgId },
             orderBy: [{ organization: { name: "asc" } }, { role: "asc" }],
             select: {
                 id: true,
