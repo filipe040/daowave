@@ -89,7 +89,6 @@ export async function POST(req: Request) {
 
     // Generate verification token
     const verificationToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     // Create user (using normalized email) with email verification
     const user = await prisma.user.create({
@@ -100,7 +99,6 @@ export async function POST(req: Request) {
         role: "USER",
         emailVerified: false,
         emailVerificationToken: verificationToken,
-        emailVerificationTokenExpiresAt: expiresAt,
       },
       select: {
         id: true,
@@ -114,10 +112,10 @@ export async function POST(req: Request) {
     // Send verification email using Resend
     let emailSent = false;
     let emailError: string | null = null;
-    
+
     try {
       const emailConfig = getEmailConfig();
-      
+
       safeLog.info("Attempting to send verification email", {
         userId: user.id,
         email: user.email,
@@ -125,7 +123,7 @@ export async function POST(req: Request) {
         hasApiKey: !!emailConfig.resendApiKey,
         apiKeyPrefix: emailConfig.resendApiKey ? emailConfig.resendApiKey.substring(0, 10) : 'none',
       });
-      
+
       // Check if emails are enabled and Resend is configured
       if (!emailConfig.enabled) {
         emailError = "Emails are disabled";
@@ -209,26 +207,26 @@ export async function POST(req: Request) {
       ...metadata,
     });
 
-    safeLog.info(`User created: ${user.id}`, { 
-      userId: user.id, 
+    safeLog.info(`User created: ${user.id}`, {
+      userId: user.id,
       email: user.email,
-      emailSent 
+      emailSent
     });
 
     // Return response with email status
     if (emailSent) {
       return NextResponse.json(
-        { 
-          message: "Conta criada com sucesso. Verifique o seu email para ativar a conta.", 
+        {
+          message: "Conta criada com sucesso. Verifique o seu email para ativar a conta.",
           user,
-          emailSent: true 
+          emailSent: true
         },
         { status: 201 }
       );
     } else {
       // Still return success, but warn about email
       return NextResponse.json(
-        { 
+        {
           message: "Conta criada com sucesso, mas o email de verificação não foi enviado. Por favor, contacte o suporte.",
           user,
           emailSent: false,

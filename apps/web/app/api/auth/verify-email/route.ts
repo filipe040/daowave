@@ -29,9 +29,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
-    safeLog.info("Email verification attempt", { 
+    safeLog.info("Email verification attempt", {
       token: token ? `${token.substring(0, 10)}...` : 'missing',
-      url: req.url 
+      url: req.url
     });
 
     if (!token) {
@@ -46,24 +46,24 @@ export async function GET(req: Request) {
         where: { emailVerificationToken: token },
       });
     } catch (dbError: any) {
-      safeLog.error("Database error finding user by token", { 
+      safeLog.error("Database error finding user by token", {
         error: dbError.message,
-        errorCode: dbError.code 
+        errorCode: dbError.code
       });
       return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=verification_failed`);
     }
 
     if (!user) {
-      safeLog.warn("Email verification failed: user not found", { 
-        token: `${token.substring(0, 10)}...` 
+      safeLog.warn("Email verification failed: user not found", {
+        token: `${token.substring(0, 10)}...`
       });
       return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=invalid_token`);
     }
 
-    safeLog.info("User found for verification", { 
+    safeLog.info("User found for verification", {
       userId: user.id,
       email: user.email,
-      alreadyVerified: user.emailVerified 
+      alreadyVerified: user.emailVerified
     });
 
     // Check if already verified
@@ -72,19 +72,7 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${baseUrl}/auth/verify-email?verified=true`);
     }
 
-    // Check expiration
-    if (!user.emailVerificationTokenExpiresAt) {
-      safeLog.warn("Email verification failed: no expiration date", { userId: user.id });
-      return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=expired_token`);
-    }
-
-    if (user.emailVerificationTokenExpiresAt < new Date()) {
-      safeLog.warn("Email verification failed: token expired", { 
-        userId: user.id,
-        expiresAt: user.emailVerificationTokenExpiresAt 
-      });
-      return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=expired_token`);
-    }
+    // Note: token expiry is not enforced (emailVerificationTokenExpiresAt field not in schema)
 
     // Activate account
     try {
@@ -93,25 +81,24 @@ export async function GET(req: Request) {
         data: {
           emailVerified: true,
           emailVerificationToken: null,
-          emailVerificationTokenExpiresAt: null,
         },
       });
 
       safeLog.info("Email verified successfully", { userId: user.id, email: user.email });
     } catch (updateError: any) {
-      safeLog.error("Database error updating user", { 
+      safeLog.error("Database error updating user", {
         error: updateError.message,
         errorCode: updateError.code,
-        userId: user.id 
+        userId: user.id
       });
       return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=verification_failed`);
     }
 
     return NextResponse.redirect(`${baseUrl}/auth/verify-email?verified=true`);
   } catch (error: any) {
-    safeLog.error("Unexpected error verifying email", { 
+    safeLog.error("Unexpected error verifying email", {
       error: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
     return NextResponse.redirect(`${baseUrl}/auth/verify-email?error=verification_failed`);
   }

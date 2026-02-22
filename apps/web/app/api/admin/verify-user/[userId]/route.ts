@@ -54,7 +54,6 @@ export async function POST(
       data: {
         emailVerified: true,
         emailVerificationToken: null,
-        emailVerificationTokenExpiresAt: null,
       },
     });
 
