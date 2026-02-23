@@ -62,17 +62,17 @@ export default function PromoterSettingsPage() {
             {!loading && error && <ErrorState message={error} onRetry={load} />}
             {!loading && !error && account && (
                 <div className="max-w-xl space-y-4">
-                    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <div className="bg-white/[0.03] backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
                         {/* Section header */}
-                        <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
-                            <Building2 className="h-4 w-4 text-gray-400" strokeWidth={1.75} />
-                            <h2 className="text-sm font-semibold text-gray-900">Perfil da Organização</h2>
+                        <div className="flex items-center gap-3 border-b border-white/5 px-6 py-5">
+                            <Building2 className="h-4 w-4 text-white/40" strokeWidth={1.75} />
+                            <h2 className="text-sm font-semibold text-white/92 tracking-wide">Perfil da Organização</h2>
                         </div>
 
-                        <div className="px-6 py-5 space-y-5">
+                        <div className="px-6 py-6 space-y-6">
                             {/* Brand name */}
-                            <div className="space-y-1.5">
-                                <label htmlFor="brandName" className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <div className="space-y-2">
+                                <label htmlFor="brandName" className="block text-[11px] font-bold text-white/40 uppercase tracking-[0.1em]">
                                     Nome da marca
                                 </label>
                                 <input
@@ -80,51 +80,51 @@ export default function PromoterSettingsPage() {
                                     value={brandName}
                                     onChange={(e) => setBrandName(e.target.value)}
                                     placeholder="Nome da sua organização"
-                                    className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-colors"
+                                    className="w-full rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 py-3.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 focus:bg-white/10 transition-colors"
                                 />
                             </div>
 
                             {account.contactEmail && (
-                                <div className="space-y-1.5">
-                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-[0.1em]">
                                         Email de contacto
                                     </label>
                                     <input
                                         value={account.contactEmail}
                                         disabled
-                                        className="w-full rounded-xl border border-gray-100 bg-gray-50 text-gray-400 px-4 py-2.5 text-sm cursor-not-allowed"
+                                        className="w-full rounded-2xl border border-white/5 bg-white/[0.02] text-white/40 px-5 py-3.5 text-[15px] cursor-not-allowed"
                                     />
-                                    <p className="text-xs text-gray-400">Para alterar, contacte o suporte.</p>
+                                    <p className="text-[12px] text-white/30">Para alterar, contacte o suporte.</p>
                                 </div>
                             )}
 
                             {account.vatNumber && (
-                                <div className="space-y-1.5">
-                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">NIF</label>
+                                <div className="space-y-2">
+                                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-[0.1em]">NIF</label>
                                     <input
                                         value={account.vatNumber}
                                         disabled
-                                        className="w-full rounded-xl border border-gray-100 bg-gray-50 text-gray-400 px-4 py-2.5 text-sm cursor-not-allowed"
+                                        className="w-full rounded-2xl border border-white/5 bg-white/[0.02] text-white/40 px-5 py-3.5 text-[15px] cursor-not-allowed"
                                     />
                                 </div>
                             )}
 
                             {/* Status */}
-                            <div className="flex items-center gap-2 pt-1">
-                                <div className={`w-1.5 h-1.5 rounded-full ${account.status === "APPROVED" ? "bg-emerald-500" : "bg-amber-400"}`} />
-                                <span className="text-xs text-gray-400">
-                                    Conta {account.status === "APPROVED" ? "aprovada" : account.status}
+                            <div className="flex items-center gap-2 pt-2">
+                                <div className={`w-2 h-2 rounded-full shadow-[0_0_12px_rgba(0,0,0,0.5)] ${account.status === "APPROVED" ? "bg-emerald-400 shadow-emerald-400/50" : "bg-amber-400 shadow-amber-400/50"}`} />
+                                <span className="text-[13px] font-bold text-white/60 tracking-wide">
+                                    Conta {account.status === "APPROVED" ? "Aprovada" : account.status}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
+                        <div className="px-6 py-5 border-t border-white/5 flex justify-end bg-black/20">
                             <button
                                 onClick={handleSave}
                                 disabled={saving || !brandName.trim() || !dirty}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-[14px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-xl shadow-white/5"
                             >
-                                <Save className="h-3.5 w-3.5" />
+                                <Save className="h-4 w-4" />
                                 {saving ? "A guardar…" : "Guardar"}
                             </button>
                         </div>

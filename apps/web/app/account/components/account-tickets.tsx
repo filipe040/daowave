@@ -47,22 +47,22 @@ export default function AccountTickets() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-white/92 tracking-tight">
           Bilhetes
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-white/55">
           Lista dos teus bilhetes e estado de check-in.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">A carregar…</p>
+        <p className="text-sm text-white/55">A carregar…</p>
       ) : error ? (
         <p className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
           {error}
         </p>
       ) : tickets.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Ainda não tens bilhetes.</p>
+        <p className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/55">Ainda não tens bilhetes.</p>
       ) : (
         <ul className="space-y-4" data-testid="account-tickets-list">
           {tickets.map((t) => {
@@ -73,13 +73,13 @@ export default function AccountTickets() {
               <li key={t.id}>
                 <Link
                   href={`/account/tickets/${t.id}`}
-                  className="block rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors hover:bg-zinc-800/50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="block rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-5 sm:p-6 transition-colors hover:bg-white/6 hover:border-white/16 shadow-[0_18px_60px_rgba(0,0,0,.45)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   data-testid={`ticket-card-${t.id}`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-foreground">{t.event?.title ?? "Evento"}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-semibold text-white/92 text-[17px]">{t.event?.title ?? "Evento"}</p>
+                      <p className="mt-0.5 text-sm text-white/55">
                         {t.ticketLot?.name ?? "Bilhete"} · {t.code}
                       </p>
                     </div>
@@ -90,7 +90,7 @@ export default function AccountTickets() {
                       {config.label}
                     </span>
                   </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
+                  <p className="mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
                     Comprado em {formatDate(t.createdAt)}
                   </p>
                 </Link>

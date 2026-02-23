@@ -15,8 +15,8 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
     return (
         <div className="min-h-full bg-transparent">
             {/* Page header */}
-            <div className="bg-transparent border-b border-white/5 px-8 sm:px-12 py-10 sm:py-16">
-                <div className="max-w-7xl mx-auto space-y-8">
+            <div className="bg-transparent border-b border-white/5 px-4 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16">
+                <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
                     {backButton && (
                         <a
                             href={backButton.href}
@@ -30,17 +30,17 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
                             {backButton.label || "Voltar"}
                         </a>
                     )}
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div className="min-w-0 space-y-2">
-                            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight -ml-1">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight -ml-1">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <div className="text-[16px] sm:text-[18px] text-white/40 font-medium leading-relaxed max-w-2xl">{subtitle}</div>
+                                <div className="text-[14px] sm:text-[16px] md:text-[18px] text-white/40 font-medium leading-relaxed max-w-2xl">{subtitle}</div>
                             )}
                         </div>
                         {actions && (
-                            <div className="flex flex-wrap items-center gap-3 shrink-0 pb-1">
+                            <div className="flex flex-wrap items-center gap-3 shrink-0 pb-1 mt-2 lg:mt-0">
                                 {actions}
                             </div>
                         )}
@@ -49,7 +49,7 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
             </div>
 
             {/* Page content */}
-            <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8 space-y-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-10 py-6 sm:py-8 space-y-6 sm:space-y-8">
                 {children}
             </div>
         </div>

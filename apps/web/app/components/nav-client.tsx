@@ -121,24 +121,24 @@ export default function NavClient() {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 lg:gap-12 absolute left-1/2 transform -translate-x-1/2">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
             <Link
               href="/events"
-              className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
+              className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
               DESCOBRIR
             </Link>
             {session && (
               <Link
                 href="/my-tickets"
-                className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
+                className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
               >
                 MEUS BILHETES
               </Link>
             )}
             <Link
               href="/help"
-              className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
+              className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
               AJUDA
             </Link>
@@ -146,8 +146,8 @@ export default function NavClient() {
 
           <div className="flex items-center gap-4">
             {session ? (
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="hidden md:flex items-center gap-4">
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className="hidden lg:flex items-center gap-3 xl:gap-4">
                   {role === "PROMOTER" && (
                     <Link
                       href="/organizer"
@@ -175,7 +175,7 @@ export default function NavClient() {
 
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden text-white p-2"
+                  className="lg:hidden text-white p-2"
                   aria-label="Menu"
                   type="button"
                 >
@@ -192,13 +192,13 @@ export default function NavClient() {
               <>
                 <Link
                   href="/auth/signin"
-                  className="hidden md:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
+                  className="hidden lg:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
                 >
                   ENTRAR
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden text-white p-2"
+                  className="lg:hidden text-white p-2"
                   aria-label="Menu"
                   type="button"
                 >
@@ -216,7 +216,7 @@ export default function NavClient() {
         </div>
 
         {mobileMenuOpen && (
-          <nav className="md:hidden pb-6 pt-4 border-t border-white/10 space-y-4">
+          <nav className="lg:hidden pb-6 pt-4 border-t border-white/10 space-y-4">
             {session && (
               <div className="pb-4 border-b border-white/10">
                 <UserBlock compact onClick={() => setMobileMenuOpen(false)} />

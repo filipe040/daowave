@@ -117,38 +117,38 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
       {toast && (
         <div
           className={`rounded-2xl border px-4 py-3 text-sm ${toast.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
-              : "bg-red-500/10 border-red-500/30 text-red-200"
+            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
+            : "bg-red-500/10 border-red-500/30 text-red-200"
             }`}
         >
           {toast.message}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Código QR</h2>
+      <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+        <h2 className="text-lg font-semibold text-white/92 mb-5">Código QR</h2>
         {ticket.qrPayload ? (
-          <div className="inline-block rounded-xl border border-zinc-700 bg-white p-4">
+          <div className="inline-block rounded-2xl border border-white/20 bg-white p-4 sm:p-5 shadow-[0_0_40px_rgba(255,255,255,0.1)]">
             <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticket.qrPayload)}`}
               alt="QR do bilhete"
               width={192}
               height={192}
-              className="h-48 w-48"
+              className="h-44 w-44 sm:h-52 sm:w-52"
               unoptimized
             />
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">QR não disponível.</p>
+          <p className="text-sm text-white/55">QR não disponível.</p>
         )}
       </section>
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Ações</h2>
+      <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(0,0,0,.45)] space-y-5">
+        <h2 className="text-lg font-semibold text-white/92">Ações</h2>
         <div className="flex flex-wrap gap-3">
           <Button
             type="button"
-            variant="outline"
+            className="rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10"
             onClick={handleDownloadPdf}
             disabled={loadingPdf}
             data-testid="ticket-download-pdf"
@@ -157,7 +157,7 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
           </Button>
           <Button
             type="button"
-            variant="outline"
+            className="rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10"
             onClick={handleResend}
             disabled={loadingResend}
             data-testid="ticket-resend-email"
@@ -167,7 +167,7 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
           {!ticket.checkedInAt && (
             <Button
               type="button"
-              variant="outline"
+              className="rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10"
               onClick={() => setTransferOpen(true)}
               data-testid="ticket-transfer-initiate"
             >
@@ -178,26 +178,26 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
       </section>
 
       {transferOpen && (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-          <h3 className="text-base font-semibold text-foreground mb-3">Iniciar transferência</h3>
+        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+          <h3 className="text-base font-semibold text-white/92 mb-4">Iniciar transferência</h3>
           <form onSubmit={handleTransfer} className="space-y-4 max-w-md">
             <div>
-              <Label htmlFor="transfer-email">Email do destinatário</Label>
+              <Label htmlFor="transfer-email" className="text-white/80">Email do destinatário</Label>
               <Input
                 id="transfer-email"
                 type="email"
                 value={transferEmail}
                 onChange={(e) => setTransferEmail(e.target.value)}
                 placeholder="email@exemplo.com"
-                className="mt-2 border-zinc-700 bg-zinc-950"
+                className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 placeholder:text-white/30 text-white focus:bg-white/10 focus:border-white/20 transition-all"
                 required
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="submit" disabled={transferLoading} data-testid="ticket-transfer-submit">
+            <div className="flex gap-3">
+              <Button type="submit" disabled={transferLoading} className="rounded-full bg-white text-black font-semibold hover:bg-white/90" data-testid="ticket-transfer-submit">
                 {transferLoading ? "A processar…" : "Transferir"}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setTransferOpen(false)}>
+              <Button type="button" className="rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10" onClick={() => setTransferOpen(false)}>
                 Cancelar
               </Button>
             </div>
@@ -205,7 +205,7 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 text-sm text-muted-foreground">
+      <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 text-sm text-white/55">
         <p>Comprado em {formatDate(ticket.createdAt)}</p>
         {ticket.checkedInAt && (
           <p className="mt-2">Utilizado em {formatDate(ticket.checkedInAt)}</p>

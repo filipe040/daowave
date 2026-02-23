@@ -180,9 +180,9 @@ export function TicketSelector({ event }: TicketSelectorProps) {
                 return (
                   <div
                     key={lot.id}
-                    className="bg-white/[0.03] rounded-2xl p-4 border border-white/5 transition-colors hover:bg-white/[0.05]"
+                    className="bg-white/[0.03] rounded-2xl p-3 sm:p-4 border border-white/5 transition-colors hover:bg-white/[0.05]"
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-2 sm:gap-4">
                       <div className="min-w-0 flex-1">
                         <h4 className="font-bold text-white tracking-wide truncate text-sm">{lot.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
@@ -197,21 +197,21 @@ export function TicketSelector({ event }: TicketSelectorProps) {
 
                       {/* Quantity Controls */}
                       {available > 0 && lot.isAvailable ? (
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
                           <button
                             onClick={() => updateQuantity(lot.id, -1, available, type.perUserLimit || lot.perUserLimit)}
                             disabled={quantity === 0}
-                            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-lg"
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-base sm:text-lg"
                           >
                             −
                           </button>
-                          <span className="w-6 text-center font-bold text-base text-white">
+                          <span className="w-5 sm:w-6 text-center font-bold text-sm sm:text-base text-white">
                             {quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(lot.id, 1, available, type.perUserLimit || lot.perUserLimit)}
                             disabled={quantity >= available || (!!(type.perUserLimit || lot.perUserLimit) && quantity >= (type.perUserLimit || lot.perUserLimit || 0))}
-                            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-lg font-bold"
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-base sm:text-lg font-bold"
                           >
                             +
                           </button>

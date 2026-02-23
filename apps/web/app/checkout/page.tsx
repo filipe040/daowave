@@ -53,7 +53,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
           {error}
         </div>
       )}
-      <div className="rounded-3xl border border-white/10 bg-black/40 p-5 p-px overflow-hidden">
+      <div className="rounded-3xl border border-white/10 bg-black/40 p-4 sm:p-5 overflow-hidden">
         <PaymentElement />
       </div>
       <button
