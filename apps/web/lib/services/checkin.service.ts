@@ -41,7 +41,7 @@ export class CheckinService {
       }
     }
 
-    // 2. Validate HMAC Signature
+    // 2. Try New Shared Format
     const payload = verifyQrToken(token, secretToUse);
 
     let ticket: any = null;
@@ -52,12 +52,64 @@ export class CheckinService {
         include: { event: true, user: true },
       });
     } else {
-      // Offline/Fallback manual entry
-      const code = token.trim().toUpperCase();
-      ticket = await prisma.ticket.findFirst({
-        where: { code },
-        include: { event: true, user: true },
-      });
+      // 3. Fallbacks for Legacy Formats
+      const tstr = token.trim();
+
+      // Fallback 3.1: UUID format (ticket ID)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(tstr)) {
+        ticket = await prisma.ticket.findUnique({
+          where: { id: tstr },
+          include: { event: true, user: true },
+        });
+      }
+
+      // Fallback 3.2: Legacy string format "v1:ticketId:eventId:..." or "v1:eventId:userId:..."
+      if (!ticket && tstr.startsWith("v1:")) {
+        const parts = tstr.split(":");
+        // The second field could be the ticket ID or event ID under some old seeds, but usually ticketId is a UUID
+        for (const part of parts) {
+          if (uuidRegex.test(part)) {
+            ticket = await prisma.ticket.findUnique({
+              where: { id: part },
+              include: { event: true, user: true },
+            });
+            // If we found a ticket with one of the UUIDs, break
+            if (ticket) break;
+          }
+        }
+      }
+
+      // Fallback 3.3: Legacy JSON HMAC base64 format (apps/web/lib/qr/hmac.ts)
+      if (!ticket && tstr.length > 20 && !tstr.includes(":") && !tstr.includes(" ")) {
+        try {
+          // Attempt base64 decode
+          const decoded = Buffer.from(tstr, 'base64').toString('utf8');
+          if (decoded.includes('"payload"') && decoded.includes('"sig"')) {
+            const parsed = JSON.parse(decoded);
+            if (parsed.payload) {
+              const inner = JSON.parse(parsed.payload);
+              if (inner.ticketId) {
+                ticket = await prisma.ticket.findUnique({
+                  where: { id: inner.ticketId },
+                  include: { event: true, user: true },
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore parse errors, it's just a fallback
+        }
+      }
+
+      // Fallback 3.4: Manual entry ticket `code` (e.g. "BRAGA--ME-XXXX")
+      if (!ticket) {
+        const code = tstr.toUpperCase();
+        ticket = await prisma.ticket.findFirst({
+          where: { code },
+          include: { event: true, user: true },
+        });
+      }
     }
 
     if (!ticket) {

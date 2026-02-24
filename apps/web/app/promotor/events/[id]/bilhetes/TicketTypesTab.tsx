@@ -88,15 +88,15 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
     }
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="flex flex-col h-full bg-transparent">
+            <div className="px-6 py-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-white/[0.02] gap-4">
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-900">Categorias GERAIS</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Defina as secções gerais (ex: Geral, VIP, Mesa).</p>
+                    <h3 className="text-[13px] font-bold text-white uppercase tracking-wider">Categorias GERAIS</h3>
+                    <p className="text-xs text-white/50 mt-1">Defina as secções gerais (ex: Geral, VIP, Mesa).</p>
                 </div>
                 <button
                     onClick={() => setIsFormOpen(!isFormOpen)}
-                    className="inline-flex items-center gap-2 bg-gray-900 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+                    className="inline-flex items-center justify-center gap-2 bg-white text-black px-4 py-2.5 rounded-2xl text-[13px] font-bold hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5 active:scale-95 shrink-0"
                 >
                     <Plus className="h-4 w-4" />
                     Novo Tipo
@@ -104,32 +104,32 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
             </div>
 
             {isFormOpen && (
-                <div className="p-6 border-b border-gray-100 bg-gray-50/30">
-                    <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                <div className="p-6 sm:p-8 border-b border-white/10 bg-black/40 relative">
+                    <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Nome do Tipo *</label>
-                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Entrada VIP" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 outline-none transition-all" />
+                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Nome do Tipo *</label>
+                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Entrada VIP" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Limite por Pessoa</label>
-                                <input type="number" min="1" value={formData.perUserLimit} onChange={e => setFormData({ ...formData, perUserLimit: e.target.value })} placeholder="Ex: 4 (Opcional)" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 outline-none transition-all" />
+                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Limite por Pessoa</label>
+                                <input type="number" min="1" value={formData.perUserLimit} onChange={e => setFormData({ ...formData, perUserLimit: e.target.value })} placeholder="Ex: 4 (Opcional)" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Descrição</label>
-                            <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Inclui 2 bebidas e acesso prioritário" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 outline-none transition-all" />
+                            <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Descrição</label>
+                            <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Inclui 2 bebidas e acesso prioritário" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
                         </div>
-                        <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                            <input type="checkbox" checked={formData.requiresSeat} onChange={e => setFormData({ ...formData, requiresSeat: e.target.value === 'true' })} value="true" className="w-4 h-4 text-gray-900 rounded border-gray-300 focus:ring-gray-900 focus:ring-2" />
+                        <label className="flex items-center gap-4 p-4 border border-white/10 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-colors mt-2">
+                            <input type="checkbox" checked={formData.requiresSeat} onChange={e => setFormData({ ...formData, requiresSeat: e.target.value === 'true' })} value="true" className="w-5 h-5 text-emerald-500 rounded-md border-white/20 bg-white/10 focus:ring-emerald-500 focus:ring-2 focus:ring-offset-black" />
                             <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-900">Requer seleção de Lugar Marcado no Checkout</span>
-                                <span className="text-xs text-gray-500">Marque apenas se este tipo precisar que o cliente escolha um lugar no mapa da sala.</span>
+                                <span className="text-[14px] font-bold text-emerald-400">Requer seleção de Lugar Marcado no Checkout</span>
+                                <span className="text-xs text-white/50 font-medium mt-0.5">Marque apenas se este tipo precisar que o cliente escolha um lugar no mapa da sala.</span>
                             </div>
                         </label>
-                        <div className="flex justify-end gap-2 pt-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Cancelar</button>
-                            <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-5 py-2.5 text-[13px] font-bold text-white/60 hover:text-white transition-colors">Cancelar</button>
+                            <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500 text-black text-[14px] font-bold rounded-2xl hover:bg-emerald-400 disabled:opacity-50 transition-all shadow-lg hover:-translate-y-0.5 mt-2 sm:mt-0">
                                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                                 Guardar Categoria
                             </button>
@@ -140,26 +140,26 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
 
             {types.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center">
-                    <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-4 text-gray-400">
-                        <Ticket className="h-6 w-6" />
+                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center mb-5 text-white/30 shadow-inner">
+                        <Ticket className="h-7 w-7" />
                     </div>
-                    <h4 className="text-sm font-medium text-gray-900">Sem Tipos de Bilhete</h4>
-                    <p className="text-sm text-gray-500 mt-1 max-w-sm">Comece por criar uma categoria geral como &quot;Bilhete Simples&quot; ou &quot;Mesa VIP&quot; para associar vários lotes e preços a essa categoria.</p>
+                    <h4 className="text-[15px] font-bold text-white">Sem Tipos de Bilhete</h4>
+                    <p className="text-[13px] text-white/50 mt-2 max-w-sm font-medium leading-relaxed">Comece por criar uma categoria geral como &quot;Bilhete Simples&quot; ou &quot;Mesa VIP&quot; para associar os futuros Lotes de venda a essa categoria.</p>
                 </div>
             ) : (
-                <div className="divide-y divide-gray-100 bg-white">
+                <div className="divide-y divide-white/10 bg-transparent flex-1">
                     {types.map(t => (
-                        <div key={t.id} className="p-4 px-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                        <div key={t.id} className="p-4 sm:p-5 px-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-white/[0.02] transition-colors gap-4">
                             <div>
-                                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                                <h4 className="text-[14px] font-bold text-white flex items-center gap-3">
                                     {t.name}
-                                    {t.requiresSeat && <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-widest bg-amber-100 text-amber-800 rounded-md">Lugares Marcados</span>}
+                                    {t.requiresSeat && <span className="px-2.5 py-1 text-[9px] uppercase font-black tracking-[0.1em] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">Lugares Marcados</span>}
                                 </h4>
-                                <p className="text-xs text-gray-500 mt-1">{t.description || "Sem descrição"}</p>
+                                <p className="text-[13px] text-white/50 mt-1 font-medium">{t.description || "Sem descrição especial."}</p>
                             </div>
-                            <div className="flex items-center gap-4 text-xs font-medium text-gray-500">
-                                <span>Lotes: {t._count?.ticketLots || 0}</span>
-                                {t.requiresSeat && <span>Lugares mapeados: {t._count?.seats || 0}</span>}
+                            <div className="flex items-center gap-5 text-[12px] font-bold text-white/40 uppercase tracking-wider bg-black/40 px-4 py-2 rounded-xl border border-white/5 shrink-0">
+                                <span>{t._count?.ticketLots || 0} Lotes</span>
+                                {t.requiresSeat && <span>• {t._count?.seats || 0} Lugares</span>}
                             </div>
                         </div>
                     ))}

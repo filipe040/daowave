@@ -22,8 +22,8 @@ function slugify(str: string) {
         .replace(/\s+/g, "-");
 }
 
-const inputCls = "w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-colors";
-const labelCls = "block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5";
+const inputCls = "w-full rounded-2xl border border-white/10 bg-black/50 text-white placeholder:text-white/30 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner";
+const labelCls = "block text-[12px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3";
 
 export default function CreateEventPage() {
     const router = useRouter();
@@ -87,8 +87,8 @@ export default function CreateEventPage() {
     if (loadingOrgs) return (
         <PageShell title="Criar Evento">
             <div className="max-w-2xl animate-pulse space-y-3">
-                <div className="h-10 bg-gray-100 rounded-xl" />
-                <div className="h-64 bg-white rounded-2xl border border-gray-200" />
+                <div className="h-10 bg-white/5 rounded-xl border border-white/10" />
+                <div className="h-64 bg-white/5 rounded-[32px] border border-white/10" />
             </div>
         </PageShell>
     );
@@ -106,14 +106,15 @@ export default function CreateEventPage() {
             title="Criar Evento"
             subtitle="Preencha os detalhes do novo evento"
             actions={
-                <Link href={`/promotor/events${orgId ? `?orgId=${orgId}` : ""}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                    <ArrowLeft className="h-3.5 w-3.5" />
+                <Link href={`/promotor/events${orgId ? `?orgId=${orgId}` : ""}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-all hover:-translate-y-0.5 shadow-lg active:scale-95">
+                    <ArrowLeft className="h-4 w-4" />
                     Voltar
                 </Link>
             }
         >
             <form onSubmit={handleSubmit} className="max-w-2xl">
-                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden divide-y divide-gray-100">
+                <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden divide-y divide-white/5 relative">
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
                     {/* Org selector — only if >1 */}
                     {orgs.length > 1 && (
@@ -140,7 +141,7 @@ export default function CreateEventPage() {
                             onChange={(e) => { setSlug(e.target.value); setSlugManual(true); }}
                             className={`${inputCls} font-mono`}
                         />
-                        <p className="mt-1 text-xs text-gray-400">tickets.daowave.pt/events/<span className="text-gray-600">{slug || "…"}</span></p>
+                        <p className="mt-3 text-xs text-white/40 font-medium">Link do Evento: tickets.daowave.pt/events/<span className="text-white font-bold">{slug || "…"}</span></p>
                     </div>
 
                     <div className="px-6 py-5 grid grid-cols-2 gap-4">
@@ -171,18 +172,18 @@ export default function CreateEventPage() {
                     </div>
 
                     {formError && (
-                        <div className="px-6 py-4 bg-red-50 border-t border-red-100">
-                            <p className="text-sm text-red-600">{formError}</p>
+                        <div className="px-8 py-5 bg-red-500/10 border-t border-red-500/20">
+                            <p className="text-[14px] font-bold text-red-400">{formError}</p>
                         </div>
                     )}
 
-                    <div className="px-6 py-4 bg-gray-50/50 flex justify-end">
+                    <div className="px-8 py-6 bg-black/40 flex justify-end">
                         <button
                             type="submit"
                             disabled={submitting || !orgId}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 active:scale-95"
                         >
-                            <Save className="h-3.5 w-3.5" />
+                            <Save className="h-4 w-4" />
                             {submitting ? "A criar…" : "Criar Evento"}
                         </button>
                     </div>
