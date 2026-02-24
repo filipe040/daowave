@@ -160,7 +160,7 @@ export default function PromoterEventsPage() {
                     rowActions={(e) => (
                         <div className="flex items-center gap-2">
                             <Link
-                                href={`/promotor/events/${e.id}/edit`}
+                                href={`/promotor/events/${e.id}`}
                                 className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                                 title="Editar Evento"
                             >

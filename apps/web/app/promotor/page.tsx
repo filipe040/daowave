@@ -206,7 +206,7 @@ export default function PromoterDashboardPage() {
                                                 {event.status === 'PUBLISHED' ? 'Ativo' : 'Rascunho'}
                                             </span>
                                             <Link
-                                                href={`/promotor/events/${event.id}/edit`}
+                                                href={`/promotor/events/${event.id}`}
                                                 className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                                             >
                                                 <Edit3 className="w-4 h-4" />
