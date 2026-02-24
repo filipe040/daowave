@@ -161,16 +161,16 @@ export function TicketSelector({ event }: TicketSelectorProps) {
 
       <div className="space-y-6 mb-8">
         {types.map((type) => (
-          <div key={type.id} className="space-y-3">
+          <div key={type.id} className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Ticket className="h-4 w-4 text-white/50" />
-              <h3 className="font-bold text-white text-sm uppercase tracking-widest">{type.name}</h3>
+              <Ticket className="h-4 w-4 text-white/70" />
+              <h3 className="font-bold text-white text-[15px] uppercase tracking-widest">{type.name}</h3>
               {type.requiresSeat && (
                 <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-200 border border-amber-500/30 rounded-md">Lugares Marcados</span>
               )}
             </div>
 
-            {type.description && <p className="text-xs text-white/50 mb-3">{type.description}</p>}
+            {type.description && <p className="text-[13px] text-white/70 mb-3">{type.description}</p>}
 
             <div className="space-y-3">
               {type.lots.map((lot) => {
@@ -184,7 +184,7 @@ export function TicketSelector({ event }: TicketSelectorProps) {
                   >
                     <div className="flex items-center justify-between gap-2 sm:gap-4">
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-white tracking-wide truncate text-sm">{lot.name}</h4>
+                        <h4 className="font-bold text-white tracking-wide truncate text-[15px]">{lot.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <p className="text-lg font-bold text-white">
                             {formatCurrency(lot.priceCents, "EUR")}
@@ -234,8 +234,8 @@ export function TicketSelector({ event }: TicketSelectorProps) {
         <div className="border-t border-white/10 pt-6 mb-8">
           <div className="flex justify-between items-end mb-2">
             <div>
-              <p className="text-[11px] font-bold text-white/30 uppercase tracking-[0.2em]">Total</p>
-              <p className="text-sm text-white/50">{totalItems} bilhetes selecionados</p>
+              <p className="text-[12px] font-bold text-white/50 uppercase tracking-[0.2em]">Total</p>
+              <p className="text-[15px] font-medium text-white/80">{totalItems} bilhetes selecionados</p>
             </div>
             <span className="text-3xl font-bold text-white tracking-tight">
               {formatCurrency(totalCents)}

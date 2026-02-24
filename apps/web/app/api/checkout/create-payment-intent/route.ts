@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     } catch (orderError: any) {
       console.error("Failed to create order:", orderError);
       return NextResponse.json(
-        { 
+        {
           error: "Failed to create order",
           message: orderError.message || "Database error",
         },
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
     if (!stripe) {
       console.error("Stripe is not configured. STRIPE_SECRET_KEY is missing.");
       return NextResponse.json(
-        { 
+        {
           error: "Stripe is not configured",
           message: "Please set STRIPE_SECRET_KEY in environment variables.",
         },
@@ -133,15 +133,15 @@ export async function POST(req: Request) {
       console.log("✅ Payment intent created:", paymentIntent.id);
     } catch (stripeError: any) {
       console.error("Stripe Payment Intent creation failed:", stripeError);
-      
+
       // If it's an invalid API key error, use mock instead
       if (stripeError.message?.includes("Invalid API Key") || stripeError.type === "StripeInvalidRequestError") {
         console.warn("⚠️  Invalid Stripe API Key detected. Using mock payment intent for development.");
-        
+
         // Return mock payment intent
         const mockPaymentIntentId = `pi_mock_${Date.now()}`;
         const mockClientSecret = `${mockPaymentIntentId}_secret_mock_${Math.random().toString(36).substring(7)}`;
-        
+
         return NextResponse.json({
           clientSecret: mockClientSecret,
           orderId: order.id,
@@ -149,9 +149,9 @@ export async function POST(req: Request) {
           warning: "Using mock payment intent. Get a valid Stripe key from https://dashboard.stripe.com/test/apikeys",
         });
       }
-      
+
       return NextResponse.json(
-        { 
+        {
           error: "Failed to create payment intent",
           message: stripeError.message || "Stripe API error",
         },
@@ -159,19 +159,35 @@ export async function POST(req: Request) {
       );
     }
 
-    // Update order with payment reference
-    // Note: Using PAYPAL enum value for Stripe (can be changed to a dedicated STRIPE value later)
+    // Update order with payment reference and create Payment entry
     try {
-      await (prisma.order.update({
-        where: { id: order.id },
-        data: { 
-          paymentProvider: "PAYPAL" as any, // Temporary: using PAYPAL for Stripe payments
-          paymentRef: paymentIntent.id,
-        } as any, // Type assertion until Prisma Client is regenerated
-      }) as Promise<any>);
+      await prisma.$transaction(async (tx) => {
+        // Update Order
+        await tx.order.update({
+          where: { id: order.id },
+          data: {
+            paymentProvider: "STRIPE",
+            paymentRef: paymentIntent.id,
+          },
+        });
+
+        // Create explicit Payment record
+        await tx.payment.create({
+          data: {
+            orderId: order.id,
+            provider: "STRIPE",
+            method: "STRIPE_CHECKOUT",
+            providerReference: paymentIntent.id,
+            status: "PENDING",
+            amountCents: total,
+            currency: "EUR",
+            rawResponse: JSON.parse(JSON.stringify(paymentIntent)),
+          },
+        });
+      });
     } catch (updateError) {
       // If update fails, log but don't fail the request
-      console.warn("Failed to update order payment reference:", updateError);
+      console.warn("Failed to update order and create payment record:", updateError);
     }
 
     return NextResponse.json({
@@ -183,13 +199,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error("Create payment intent error:", error);
-    
+
     // Return more detailed error in development
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     return NextResponse.json(
-      { 
+      {
         error: "Internal server error",
         message: process.env.NODE_ENV === "development" ? errorMessage : undefined,
         stack: process.env.NODE_ENV === "development" ? errorStack : undefined,

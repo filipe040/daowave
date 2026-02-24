@@ -195,35 +195,35 @@ export default async function EventPage({
                   {event.title}
                 </h1>
 
-                <div className="space-y-8 mb-12">
+                <div className="space-y-10 mb-12">
                   <section>
-                    <h2 className="text-[11px] font-bold text-white/40 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
-                    <p className="text-white/60 text-[16px] leading-[1.6] whitespace-pre-line">
+                    <h2 className="text-[12px] font-black text-white/50 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
+                    <p className="text-white/85 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
                       {event.description}
                     </p>
                   </section>
 
-                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/10">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                        <MapPin className="h-5 w-5 text-white/50" strokeWidth={1.5} />
+                      <div className="h-12 w-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                        <MapPin className="h-5 w-5 text-white/90" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Localização</p>
-                        <p className="text-white/90 font-medium">{event.venue}</p>
-                        <p className="text-sm text-white/50">{event.city}</p>
+                        <p className="text-[12px] font-bold text-white/50 uppercase tracking-widest mb-1.5">Localização</p>
+                        <p className="text-white font-semibold text-[15px]">{event.venue}</p>
+                        <p className="text-[14px] text-white/70">{event.city}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                        <Calendar className="h-5 w-5 text-white/50" strokeWidth={1.5} />
+                      <div className="h-12 w-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                        <Calendar className="h-5 w-5 text-white/90" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Data e Hora</p>
-                        <p className="text-white/90 font-medium">{formatDate(event.startAt)}</p>
+                        <p className="text-[12px] font-bold text-white/50 uppercase tracking-widest mb-1.5">Data e Hora</p>
+                        <p className="text-white font-semibold text-[15px]">{formatDate(event.startAt)}</p>
                         {event.endAt && (
-                          <p className="text-sm text-white/50">até {formatDate(event.endAt)}</p>
+                          <p className="text-[14px] text-white/70">até {formatDate(event.endAt)}</p>
                         )}
                       </div>
                     </div>

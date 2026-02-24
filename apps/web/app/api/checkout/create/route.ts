@@ -8,11 +8,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkoutCreateSchema } from "@/lib/security/validation";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
+import { InventoryService } from "@/lib/services/inventory.service";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const rateLimitResponse = await applyRateLimit(request, RATE_LIMITS.checkout);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,21 +49,27 @@ export async function POST(request: Request) {
       unitPriceCents: number;
     }> = [];
 
+    // Attempt to hold inventory securely
+    try {
+      await InventoryService.holdTickets(
+        validated.eventId,
+        session.user.id,
+        validated.items.map(item => ({
+          ticketLotId: item.ticketLotId,
+          qty: item.quantity
+        }))
+      );
+    } catch (holdError: any) {
+      return NextResponse.json(
+        { error: holdError.message || "Estoque insuficiente ou lote inválido" },
+        { status: 400 }
+      );
+    }
+
     for (const item of validated.items) {
       const lot = event.ticketLots.find((l) => l.id === item.ticketLotId);
-      if (!lot) {
-        return NextResponse.json(
-          { error: `Ticket lot ${item.ticketLotId} not found` },
-          { status: 400 }
-        );
-      }
-      const available = lot.quantityTotal - lot.quantitySold;
-      if (item.quantity > available) {
-        return NextResponse.json(
-          { error: `Insufficient stock for ${lot.name}` },
-          { status: 400 }
-        );
-      }
+      if (!lot) continue; // Should not happen since holdTickets validated
+
       orderItems.push({
         ticketLotId: lot.id,
         quantity: item.quantity,

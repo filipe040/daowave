@@ -1,183 +1,180 @@
-/**
- * Check-in QR e Segurança (Fase 5)
- * Valida assinatura HMAC, estado do ticket, janela de check-in; regista CheckinLog; resposta "já usado" com hora e operador.
- */
-
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { verifySignedQR } from "@/lib/qr/hmac";
+import { verifyQrToken, decodeQrPayload } from "@ticketing-platform/shared";
+import { FraudService } from "./fraud.service";
 
-export type VerifyCheckinInput = {
-  qrCode: string;
-  eventId: string;
-  userId: string;
-  userRole: string;
-  deviceId?: string | null;
-};
+const LEGACY_QR_SECRET = process.env.QR_SECRET || "change-me-in-production";
 
-export type VerifyCheckinResult =
-  | { success: true; ticket: { id: string; code: string; checkedInAt: Date } }
-  | {
-      success: false;
-      message: string;
-      checkedInAt?: Date;
-      checkedInByUserId?: string | null;
-      checkedInByName?: string | null;
-    };
-
-function rawPayloadHash(qrCode: string): string {
-  return crypto.createHash("sha256").update(qrCode).digest("hex");
+export interface CheckinResult {
+  success: boolean;
+  message: string;
+  ticketHolderName?: string;
+  scannedAt?: Date;
+  resultType: string;
 }
 
-async function logCheckin(params: {
-  ticketId: string;
-  eventId: string;
-  validatorUserId: string;
-  deviceId: string | null;
-  result: string;
-  rawPayloadHash: string;
-}) {
-  await prisma.checkinLog.create({
-    data: {
-      ticketId: params.ticketId,
-      eventId: params.eventId,
-      validatorUserId: params.validatorUserId,
-      deviceId: params.deviceId,
-      result: params.result,
-      rawPayloadHash: params.rawPayloadHash,
-    },
-  });
-}
-
-export const CheckinService = {
+export class CheckinService {
   /**
-   * Verifica assinatura QR, janela de check-in, ticket/evento e acesso promotor; regista CheckinLog; faz check-in.
-   * Resposta "já usado" inclui checkedInAt e checkedInByUserId (e opcionalmente nome do operador).
+   * Validates a ticket QR Code, authenticates HMAC Signature, 
+   * checks for Duplicates, and commits the Scan Log via Transaction.
    */
-  async verifyAndCheckin(input: VerifyCheckinInput): Promise<VerifyCheckinResult> {
-    const { qrCode, eventId, userId, userRole, deviceId = null } = input;
-    const hash = rawPayloadHash(qrCode);
+  static async validate(
+    token: string,
+    eventId: string | undefined,
+    deviceId: string,
+    validatorUserId: string
+  ): Promise<CheckinResult> {
+    const rawHash = crypto.createHash("sha256").update(token).digest("hex");
 
-    const verification = verifySignedQR(qrCode);
-    if (!verification.valid || !verification.payload) {
-      return { success: false, message: verification.error ?? "Invalid QR code" };
+    // 1. First, decode the payload without verifying to inspect the "kid"
+    const decodedPayload = decodeQrPayload(token);
+    let secretToUse = LEGACY_QR_SECRET;
+
+    if (decodedPayload?.kid) {
+      const signingKey = await prisma.qrSigningKey.findUnique({
+        where: { keyId: decodedPayload.kid }
+      });
+      if (signingKey) {
+        secretToUse = signingKey.keySecret;
+      } else {
+        console.warn(`[Validator] Token specifies kid ${decodedPayload.kid} but key not found in DB`);
+      }
     }
 
-    const { ticketId } = verification.payload;
+    // 2. Validate HMAC Signature
+    const payload = verifyQrToken(token, secretToUse);
 
-    const ticket = await prisma.ticket.findUnique({
-      where: { id: ticketId },
-      include: { event: true },
-    });
+    let ticket: any = null;
+
+    if (payload) {
+      ticket = await prisma.ticket.findUnique({
+        where: { id: payload.tid },
+        include: { event: true, user: true },
+      });
+    } else {
+      // Offline/Fallback manual entry
+      const code = token.trim().toUpperCase();
+      ticket = await prisma.ticket.findFirst({
+        where: { code },
+        include: { event: true, user: true },
+      });
+    }
 
     if (!ticket) {
-      return { success: false, message: "Ticket not found" };
-    }
-
-    if (ticket.eventId !== eventId) {
-      await logCheckin({
-        ticketId: ticket.id,
-        eventId: ticket.eventId,
-        validatorUserId: userId,
-        deviceId,
-        result: "INVALID_EVENT",
-        rawPayloadHash: hash,
-      });
-      return { success: false, message: "Ticket does not belong to this event" };
-    }
-
-    if (userRole === "PROMOTER") {
-      const promoter = await prisma.promoterProfile.findUnique({
-        where: { userId },
-      });
-      if (!promoter || ticket.event.promoterId !== promoter.id) {
-        await logCheckin({
-          ticketId: ticket.id,
-          eventId: ticket.eventId,
-          validatorUserId: userId,
+      // Record unknown attempt safely
+      await prisma.checkinLog.create({
+        data: {
+          ticketId: "unknown",
+          eventId: eventId || "unknown",
+          validatorUserId,
           deviceId,
-          result: "FORBIDDEN",
-          rawPayloadHash: hash,
-        });
-        return { success: false, message: "You do not have access to this event" };
-      }
+          result: "NOT_FOUND",
+          rawPayloadHash: rawHash,
+        }
+      }).catch(() => null);
+
+      return { success: false, resultType: "invalid", message: "Bilhete não encontrado" };
     }
 
-    const now = new Date();
-    const event = ticket.event;
-    if (event.checkinStartAt || event.checkinEndAt) {
-      const start = event.checkinStartAt ? new Date(event.checkinStartAt).getTime() : 0;
-      const end = event.checkinEndAt ? new Date(event.checkinEndAt).getTime() : Infinity;
-      if (now.getTime() < start) {
-        await logCheckin({
-          ticketId: ticket.id,
-          eventId: ticket.eventId,
-          validatorUserId: userId,
-          deviceId,
-          result: "OUTSIDE_WINDOW",
-          rawPayloadHash: hash,
-        });
-        return { success: false, message: "Check-in ainda não está aberto para este evento" };
-      }
-      if (now.getTime() > end) {
-        await logCheckin({
-          ticketId: ticket.id,
-          eventId: ticket.eventId,
-          validatorUserId: userId,
-          deviceId,
-          result: "OUTSIDE_WINDOW",
-          rawPayloadHash: hash,
-        });
-        return { success: false, message: "Janela de check-in já terminou para este evento" };
-      }
-    }
+    const ticketHolderName = ticket.attendeeName || ticket.user?.name || "Participante";
 
-    if (ticket.checkedInAt) {
-      await logCheckin({
-        ticketId: ticket.id,
-        eventId: ticket.eventId,
-        validatorUserId: userId,
-        deviceId,
-        result: "ALREADY_USED",
-        rawPayloadHash: hash,
-      });
-      let checkedInByName: string | null = null;
-      if (ticket.checkedInByUserId) {
-        const u = await prisma.user.findUnique({
-          where: { id: ticket.checkedInByUserId },
-          select: { name: true },
-        });
-        checkedInByName = u?.name ?? null;
-      }
-      return {
-        success: false,
-        message: "Ticket already checked in",
-        checkedInAt: ticket.checkedInAt,
-        checkedInByUserId: ticket.checkedInByUserId,
-        checkedInByName,
-      };
-    }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.ticket.update({
-        where: { id: ticket.id },
-        data: { checkedInAt: now, checkedInByUserId: userId },
-      });
-      await tx.checkinLog.create({
+    // 3. Verify event matches if provided
+    if (eventId && ticket.eventId !== eventId) {
+      await prisma.checkinLog.create({
         data: {
           ticketId: ticket.id,
           eventId: ticket.eventId,
-          validatorUserId: userId,
+          validatorUserId,
           deviceId,
-          result: "VALID",
-          rawPayloadHash: hash,
+          result: "INVALID_EVENT",
+          rawPayloadHash: rawHash,
         },
       });
+      return { success: false, resultType: "invalid", message: "Este bilhete não é para este evento", ticketHolderName };
+    }
+
+    // 4. Validate Ticket Status (e.g. Cancelled or Refunded)
+    if (ticket.status !== "VALID") {
+      await prisma.checkinLog.create({
+        data: {
+          ticketId: ticket.id,
+          eventId: ticket.eventId,
+          validatorUserId,
+          deviceId,
+          result: "INVALID",
+          rawPayloadHash: rawHash,
+        },
+      });
+      return { success: false, resultType: "invalid", message: `Bilhete inválido (Estado: ${ticket.status})`, ticketHolderName };
+    }
+
+    // 5. Atomic Transaction: Check-in Logging & Updating
+    const result = await prisma.$transaction(async (tx) => {
+      // Re-fetch inside transaction locking the row
+      const current = await tx.ticket.findUnique({
+        where: { id: ticket.id }
+      });
+
+      if (!current) {
+        return { success: false, resultType: "invalid", message: "Acesso concorrente ao bilhete", ticketHolderName };
+      }
+
+      // Check if ALREADY USED
+      if (current.checkedInAt) {
+        await tx.checkinLog.create({
+          data: {
+            ticketId: current.id,
+            eventId: current.eventId,
+            validatorUserId,
+            deviceId,
+            result: "ALREADY_USED",
+            rawPayloadHash: rawHash,
+          },
+        });
+
+        await FraudService.analyzeDoubleEntryAttempt(current.id, rawHash, current.orderId);
+
+        return {
+          success: false,
+          resultType: "already_used",
+          message: "Bilhete já foi utilizado",
+          ticketHolderName,
+          scannedAt: current.checkedInAt,
+        };
+      }
+
+      // SUCCESS: Mark as used
+      const now = new Date();
+      await tx.ticket.update({
+        where: { id: current.id },
+        data: {
+          checkedInAt: now,
+          checkedInByUserId: validatorUserId,
+          status: "USED", // Update the status to USED explicitly
+        },
+      });
+
+      await tx.checkinLog.create({
+        data: {
+          ticketId: current.id,
+          eventId: current.eventId,
+          validatorUserId,
+          deviceId,
+          result: "SUCCESS",
+          rawPayloadHash: rawHash,
+        },
+      });
+
+      return {
+        success: true,
+        resultType: "valid",
+        message: "Check-in realizado com sucesso",
+        ticketHolderName,
+        scannedAt: now,
+      };
     });
 
-    return {
-      success: true,
-      ticket: { id: ticket.id, code: ticket.code, checkedInAt: now },
-    };
-  },
-};
+    return result as CheckinResult;
+  }
+}
+

@@ -27,10 +27,10 @@ export default async function AccountDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-white/92 tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
           Resumo da conta
         </h1>
-        <p className="mt-2 text-sm text-white/55">
+        <p className="mt-2 text-base text-white/70">
           Visão geral das tuas compras e bilhetes.
         </p>
       </div>
@@ -48,12 +48,12 @@ export default async function AccountDashboardPage() {
 
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-white/45">Compras</p>
-              <p className="mt-2 text-3xl sm:text-4xl font-semibold text-white/92">{ordersCount}</p>
+              <p className="text-[12px] font-bold uppercase tracking-wider text-white/60">Compras</p>
+              <p className="mt-2 text-4xl sm:text-5xl font-black text-white">{ordersCount}</p>
             </div>
-            <ShoppingBag className="h-10 w-10 text-white/20 group-hover:text-white/40 transition-colors" />
+            <ShoppingBag className="h-10 w-10 text-white/40 group-hover:text-white/70 transition-colors" />
           </div>
-          <p className="relative mt-6 flex items-center gap-2 text-[13px] font-semibold text-white/70 group-hover:text-white transition-colors">
+          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-white/80 group-hover:text-white transition-colors">
             Ver histórico
             <ArrowRight className="h-4 w-4" />
           </p>
@@ -71,12 +71,12 @@ export default async function AccountDashboardPage() {
 
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-white/45">Bilhetes</p>
-              <p className="mt-2 text-3xl sm:text-4xl font-semibold text-white/92">{ticketsCount}</p>
+              <p className="text-[12px] font-bold uppercase tracking-wider text-white/60">Bilhetes</p>
+              <p className="mt-2 text-4xl sm:text-5xl font-black text-white">{ticketsCount}</p>
             </div>
-            <Ticket className="h-10 w-10 text-white/20 group-hover:text-white/40 transition-colors" />
+            <Ticket className="h-10 w-10 text-white/40 group-hover:text-white/70 transition-colors" />
           </div>
-          <p className="relative mt-6 flex items-center gap-2 text-[13px] font-semibold text-white/70 group-hover:text-white transition-colors">
+          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-white/80 group-hover:text-white transition-colors">
             Ver bilhetes
             <ArrowRight className="h-4 w-4" />
           </p>

@@ -127,18 +127,18 @@ export default async function Home({
         </div>
 
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] text-white/60 backdrop-blur-xl mb-8">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="uppercase tracking-wider">Plataforma de bilhetes</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-[12px] text-white/90 backdrop-blur-xl mb-8">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
+            <span className="uppercase tracking-wider font-semibold">Plataforma de bilhetes</span>
           </div>
 
-          <h1 className="text-[42px] sm:text-[60px] md:text-[72px] lg:text-[84px] font-bold tracking-tight text-white leading-[1.02] mb-6">
+          <h1 className="text-[42px] sm:text-[60px] md:text-[72px] lg:text-[84px] font-black tracking-tight text-white leading-[1.05] mb-6">
             A tua próxima
             <br />
-            <span className="text-white/60">experiência começa aqui.</span>
+            <span className="text-white/70">experiência começa aqui.</span>
           </h1>
 
-          <p className="mt-5 text-[16px] sm:text-[18px] text-white/50 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-[16px] sm:text-[20px] text-white/80 max-w-2xl mx-auto leading-relaxed">
             Descobre eventos em Portugal, compra em segundos e entra com QR code.
             Simples. Rápido. Seguro.
           </p>
@@ -159,9 +159,8 @@ export default async function Home({
             <PromoterLink
               className={cn(
                 "inline-flex items-center justify-center rounded-full",
-                "border border-white/15 bg-white/5 px-6 py-3.5",
-                "text-[14px] font-semibold text-white/80 hover:text-white",
-                "hover:bg-white/10 transition-all"
+                "border border-white/20 bg-white/10 px-6 py-3.5",
+                "text-[15px] font-bold text-white shadow-sm hover:bg-white/20 transition-all"
               )}
             >
               Sou promotor
@@ -201,18 +200,18 @@ export default async function Home({
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[12px] text-white/60">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
+            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
               Compra segura e protegida
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[12px] text-white/60">
-              <span className="text-[14px]">💳</span>
+            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90">
+              <span className="text-[15px]">💳</span>
               Visa · Mastercard · MB Way
             </div>
             <Link
               href="/politica-reembolsos"
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[12px] text-white/60 hover:text-white/80 transition-colors"
+              className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90 hover:bg-white/10 transition-colors"
             >
               Política de Reembolsos
             </Link>
@@ -279,27 +278,27 @@ export default async function Home({
                         </h3>
                       </div>
 
-                      <div className="mt-3 space-y-1.5 text-[12px] text-white/50">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-white/30 shrink-0" />
-                          <span className="line-clamp-1">{event.venue}, {event.city}</span>
+                      <div className="mt-3 space-y-2 text-[14px] text-white/70">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-white/50 shrink-0" />
+                          <span className="line-clamp-1 font-medium">{event.venue}, {event.city}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5 text-white/30 shrink-0" />
-                          <span>{formatDateTimePT(event.startAt)}</span>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-white/50 shrink-0" />
+                          <span className="font-medium">{formatDateTimePT(event.startAt)}</span>
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3">
+                      <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4">
                         {minPrice != null ? (
-                          <span className="text-[13px] font-semibold text-white/80">
+                          <span className="text-[15px] font-bold text-white">
                             Desde {formatPrice(minPrice)}
                           </span>
                         ) : (
-                          <span className="text-[12px] text-white/40">Consultar preço</span>
+                          <span className="text-[14px] font-medium text-white/60">Consultar preço</span>
                         )}
-                        <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-white/50 group-hover:text-white transition">
-                          Ver evento <ArrowRight className="h-3.5 w-3.5" />
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white/80 group-hover:text-white transition group-hover:translate-x-1">
+                          Ver evento <ArrowRight className="h-4 w-4" />
                         </span>
                       </div>
                     </div>
@@ -340,15 +339,15 @@ export default async function Home({
                 desc: "Mostra o teu QR no telemóvel na entrada. Sem impressões, sem filas.",
               },
             ].map((item) => (
-              <div key={item.step} className="relative rounded-3xl border border-white/8 bg-white/3 p-6 sm:p-7 text-left">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center shrink-0">
-                    <item.icon className="h-4.5 w-4.5 text-white/60" strokeWidth={1.75} />
+              <div key={item.step} className="relative rounded-3xl border border-white/10 bg-white/5 p-8 text-left shadow-lg hover:border-white/20 transition-colors">
+                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/10">
+                  <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                    <item.icon className="h-6 w-6 text-white" strokeWidth={2} />
                   </div>
-                  <span className="text-[11px] font-mono text-white/25 pt-2">{item.step}</span>
+                  <span className="text-[14px] font-bold tracking-widest text-emerald-400">PASSO {item.step}</span>
                 </div>
-                <h3 className="text-[15px] font-semibold text-white/85 mb-2">{item.title}</h3>
-                <p className="text-[13px] text-white/45 leading-relaxed">{item.desc}</p>
+                <h3 className="text-[18px] font-bold text-white mb-3">{item.title}</h3>
+                <p className="text-[15px] font-medium text-white/70 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -432,26 +431,26 @@ export default async function Home({
                         {event.title}
                       </h3>
 
-                      <div className="mt-3 space-y-2 text-[12px] text-white/55">
+                      <div className="mt-3 space-y-2 text-[14px] text-white/70">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-white/30 shrink-0" />
-                          <span className="line-clamp-1">{event.venue}, {event.city}</span>
+                          <MapPin className="h-4 w-4 text-white/50 shrink-0" />
+                          <span className="line-clamp-1 font-medium">{event.venue}, {event.city}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-white/30 shrink-0" />
-                          <span>{formatDateTimePT(event.startAt)}</span>
+                          <Calendar className="h-4 w-4 text-white/50 shrink-0" />
+                          <span className="font-medium">{formatDateTimePT(event.startAt)}</span>
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+                      <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4">
                         {minPrice != null ? (
-                          <span className="text-[13px] font-semibold text-white/75">
+                          <span className="text-[15px] font-bold text-white">
                             Desde {formatPrice(minPrice)}
                           </span>
                         ) : (
-                          <span className="text-[12px] text-white/40">{event.promoter?.brandName || "Promotor"}</span>
+                          <span className="text-[14px] font-medium text-white/60">{event.promoter?.brandName || "Promotor"}</span>
                         )}
-                        <span className="inline-flex items-center gap-2 text-[12px] font-semibold text-white/75 group-hover:text-white transition">
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white/80 group-hover:text-white transition group-hover:translate-x-1">
                           Ver detalhes <ArrowRight className="h-4 w-4" />
                         </span>
                       </div>

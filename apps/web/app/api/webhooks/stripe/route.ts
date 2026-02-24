@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { generateQrNonce } from "@/lib/qr";
 import { EmailService } from "@/lib/email-service";
 import { getEmailConfig } from "@/lib/config/email";
+import { InventoryService } from "@/lib/services/inventory.service";
 import crypto from "crypto";
 import Stripe from "stripe";
 
@@ -39,37 +40,86 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No orderId" }, { status: 400 });
     }
 
-    // Update order status and fetch with related data
-    const order = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: "PAID",
-        paidAt: new Date() as any, // Type assertion until Prisma Client is regenerated
-      } as any,
-      include: {
-        items: {
-          include: {
-            ticketLot: true,
+    // Update order status and payment record within a transaction
+    const order = await prisma.$transaction(async (tx) => {
+      // 1. Mark Payment as SUCCEEDED if it exists
+      await tx.payment.updateMany({
+        where: { providerReference: paymentIntent.id },
+        data: { status: "SUCCEEDED" },
+      });
+
+      // 2. Fetch the Order to get the userId and eventId
+      const targetOrder = await tx.order.findUnique({
+        where: { id: orderId }
+      });
+
+      if (targetOrder) {
+        // Find matching active holds for this user & event
+        const holds = await tx.inventoryHold.findMany({
+          where: {
+            userId: targetOrder.userId,
+            eventId: targetOrder.eventId,
+            status: "ACTIVE"
+          },
+          select: { id: true }
+        });
+
+        if (holds.length > 0) {
+          const holdIds = holds.map(h => h.id);
+          // Confirm the holds (this updates the actual TicketLot capacity internally)
+          await InventoryService.confirmHolds(holdIds);
+        }
+      }
+
+      // 3. Update Order status
+      return tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: "PAID",
+          paidAt: new Date(),
+        },
+        include: {
+          items: {
+            include: {
+              ticketLot: true,
+            },
+          },
+          event: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-        event: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    }) as any; // Type assertion until Prisma Client is regenerated
+      });
+    });
 
     // Generate tickets with attendee info (using buyer info if available, otherwise order user data)
     const tickets = [];
     const buyerName = (order as any).buyerName || order.user.name || "Participante";
     const buyerEmail = (order as any).buyerEmail || order.user.email;
 
+    // Get or create an active QR Signing Key
+    let activeKey = await prisma.qrSigningKey.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!activeKey) {
+      activeKey = await prisma.qrSigningKey.create({
+        data: {
+          keyId: `key_${crypto.randomBytes(4).toString("hex")}`,
+          keySecret: process.env.QR_SECRET || crypto.randomBytes(32).toString("hex"),
+          active: true,
+        },
+      });
+      console.log(`[Checkout] Created new active QRSsigningKey: ${activeKey.keyId}`);
+    }
+
     for (const item of order.items) {
-      for (let i = 0; i < item.qty; i++) {
+      for (let i = 0; i < item.quantity; i++) {
         const qrNonce = generateQrNonce();
         // Generates a mock ticket ID, in a real environment the ID would be known first
         // But Prisma needs it defined before or creates it implicitly
@@ -81,11 +131,11 @@ export async function POST(req: Request) {
           eid: order.eventId,
           n: qrNonce,
           iat: Math.floor(Date.now() / 1000),
+          kid: activeKey.keyId,
         };
 
         const { signQrPayload } = await import("@ticketing-platform/shared");
-        const QR_SECRET = process.env.QR_SECRET || "change-me-in-production";
-        const qrPayload = signQrPayload(payload, QR_SECRET);
+        const qrPayload = signQrPayload(payload, activeKey.keySecret);
 
         const ticket = await prisma.ticket.create({
           data: {
@@ -93,26 +143,17 @@ export async function POST(req: Request) {
             eventId: order.eventId,
             orderId: order.id,
             ticketLotId: item.ticketLotId,
-            holderUserId: order.userId,
-            attendeeName: buyerName,
-            attendeeEmail: buyerEmail,
+            userId: order.userId,
+            code: `${crypto.randomBytes(4).toString("hex").toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
             status: "VALID",
-            qrPayload, // Added proper JWT encoded payload 
-            qrNonce,
-          } as any,
+            qrPayload,
+          },
         });
         tickets.push(ticket);
       }
 
-      // Update stock sold
-      await prisma.ticketLot.update({
-        where: { id: item.ticketLotId },
-        data: {
-          quantitySold: {
-            increment: item.qty,
-          },
-        },
-      });
+      // NOTE: InventoryService.confirmHolds() already updates the `quantitySold` globally,
+      // so we do not need to increment it again here! This prevents double counting sold stock.
     }
 
     // Send order confirmation email
@@ -177,9 +218,16 @@ export async function POST(req: Request) {
     const orderId = paymentIntent.metadata.orderId;
 
     if (orderId) {
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: "CANCELED" }, // OrderStatus doesn't have FAILED
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.updateMany({
+          where: { providerReference: paymentIntent.id },
+          data: { status: "FAILED" },
+        });
+
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "CANCELED" }, // OrderStatus doesn't have FAILED
+        });
       });
     }
   }

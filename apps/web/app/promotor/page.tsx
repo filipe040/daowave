@@ -207,7 +207,7 @@ export default function PromoterDashboardPage() {
                                             </span>
                                             <Link
                                                 href={`/promotor/events/${event.id}/edit`}
-                                                className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                                                className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                                             >
                                                 <Edit3 className="w-4 h-4" />
                                             </Link>
@@ -216,7 +216,7 @@ export default function PromoterDashboardPage() {
                                 ))}
                                 {stats.recentEvents.length === 0 && (
                                     <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-[24px] p-10 text-center">
-                                        <p className="text-white/30 font-medium">Nenhum evento criado recentemente.</p>
+                                        <p className="text-white/60 font-medium">Nenhum evento criado recentemente.</p>
                                     </div>
                                 )}
                             </div>

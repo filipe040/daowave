@@ -29,33 +29,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await CheckinService.verifyAndCheckin({
+    const result = await CheckinService.validate(
       qrCode,
       eventId,
-      userId: session.user.id,
-      userRole,
-      deviceId: deviceId ?? null,
-    });
+      deviceId ?? "UNKNOWN",
+      session.user.id
+    );
 
     if (result.success) {
       return NextResponse.json({
         success: true,
         message: 'Ticket checked in successfully',
-        ticket: result.ticket,
+        ticketHolderName: result.ticketHolderName,
       });
     }
 
-    if (result.checkedInAt) {
+    if (result.resultType === "already_used") {
       return NextResponse.json({
         success: false,
         message: result.message,
-        checkedInAt: result.checkedInAt,
-        checkedInByUserId: result.checkedInByUserId,
-        checkedInByName: result.checkedInByName,
+        checkedInAt: result.scannedAt,
       });
     }
 
-    const status = result.message === 'Ticket not found' ? 404 : result.message.includes('event') || result.message.includes('access') ? 403 : 400;
+    const status = result.resultType === 'NOT_FOUND' ? 404 : 400;
     return NextResponse.json(
       { error: result.message },
       { status }

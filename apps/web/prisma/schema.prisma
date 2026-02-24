@@ -474,12 +474,34 @@ model Order {
   event           Event          @relation(fields: [eventId], references: [id])
   items           OrderItem[]
   tickets         Ticket[]
+  payments        Payment[]
   manualPayment   ManualPayment?
 
   @@index([userId])
   @@index([eventId])
   @@index([status])
   @@index([paymentRef])
+}
+
+model Payment {
+  id                String      @id @default(uuid())
+  orderId           String
+  provider          String      // e.g "STRIPE", "EUPAGO"
+  method            String      // e.g "MBWAY", "MULTIBANCO", "CREDIT_CARD", "APPLE_PAY"
+  providerReference String?     @unique
+  status            String      // "PENDING", "PROCESSING", "SUCCEEDED", "FAILED", "CANCELED"
+  amountCents       Int
+  currency          String      @default("EUR")
+  rawResponse       Json?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt @default(now())
+
+  // Relations
+  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([provider, providerReference])
+  @@index([status])
 }
 
 model OrderItem {
@@ -621,6 +643,16 @@ model FraudSignal {
   @@index([userId])
   @@index([type])
   @@index([createdAt])
+}
+
+model QrSigningKey {
+  id        String   @id @default(uuid())
+  keyId     String   @unique // The "kid" used in JWT/HMAC headers
+  keySecret String   // The actual secret string
+  active    Boolean  @default(true) // If false, new tickets won't be signed with it, but we may still validate it
+  createdAt DateTime @default(now())
+  
+  @@index([active])
 }
 
 enum Role {
