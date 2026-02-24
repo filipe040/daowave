@@ -56,60 +56,65 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Dados do Comprador</h2>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-[12px] font-bold text-white/50 uppercase tracking-[0.2em] mb-8">Dados do Comprador</h2>
 
-      <div>
-        <Label htmlFor="buyerName">Nome Completo *</Label>
+      <div className="space-y-2">
+        <Label htmlFor="buyerName" className="text-white/70 font-semibold text-sm ml-1">Nome Completo *</Label>
         <Input
           id="buyerName"
           data-testid="input-buyer-name"
           required
           value={formData.buyerName}
-          onChange={(e) =>
-            setFormData({ ...formData, buyerName: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, buyerName: e.target.value })}
+          className="h-14 bg-white/5 border-white/10 text-white rounded-2xl px-5 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+          placeholder="Ex: João Silva"
         />
       </div>
 
-      <div>
-        <Label htmlFor="buyerEmail">Email *</Label>
+      <div className="space-y-2">
+        <Label htmlFor="buyerEmail" className="text-white/70 font-semibold text-sm ml-1">Email *</Label>
         <Input
           id="buyerEmail"
           data-testid="input-buyer-email"
           type="email"
           required
           value={formData.buyerEmail}
-          onChange={(e) =>
-            setFormData({ ...formData, buyerEmail: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, buyerEmail: e.target.value })}
+          className="h-14 bg-white/5 border-white/10 text-white rounded-2xl px-5 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+          placeholder="joao.silva@email.com"
         />
       </div>
 
-      <div>
-        <Label htmlFor="buyerPhone">Telefone</Label>
+      <div className="space-y-2">
+        <Label htmlFor="buyerPhone" className="text-white/70 font-semibold text-sm ml-1">Telefone</Label>
         <Input
           id="buyerPhone"
           type="tel"
           value={formData.buyerPhone}
-          onChange={(e) =>
-            setFormData({ ...formData, buyerPhone: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, buyerPhone: e.target.value })}
+          className="h-14 bg-white/5 border-white/10 text-white rounded-2xl px-5 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+          placeholder="+351 900 000 000"
         />
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-        <p className="text-sm text-blue-800">
-          <strong>Modo de Teste:</strong> Este é um pagamento simulado.
-          Clique em &quot;Confirmar Pagamento&quot; para completar a compra.
+      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 mb-8">
+        <p className="text-[14px] text-emerald-400 font-medium">
+          <strong className="font-bold text-emerald-300">Modo Seguro:</strong> Pagamento simulado em ambiente de demonstração.
         </p>
-        <p className="text-sm text-gray-500 mt-2">
-          By clicking &quot;Pay now&quot;, you agree to our &quot;Terms of Service&quot;.
+        <p className="text-[12px] text-white/40 mt-3 font-medium">
+          Ao clicar em &quot;Confirmar Pagamento&quot;, aceita os nossos &quot;Termos de Serviço&quot; e a nossa política de reembolsos.
         </p>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full" size="lg" aria-busy={loading}>
-        {loading ? 'A processar...' : 'Confirmar Pagamento'}
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full h-14 rounded-2xl bg-white text-black font-bold text-[15px] hover:bg-white/90 shadow-[0_12px_40px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5 active:scale-95"
+        size="lg"
+        aria-busy={loading}
+      >
+        {loading ? 'A processar de forma segura...' : 'Confirmar Pagamento Seguro'}
       </Button>
     </form>
   );
