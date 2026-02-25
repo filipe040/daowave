@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Perguntas Frequentes — Daowave Bilhetes",
-    description: "Respostas às perguntas mais comuns sobre compra de bilhetes, reembolsos, check-in e gestão de eventos na Daowave.",
+    title: "Perguntas Frequentes — EasyTicket Bilhetes",
+    description: "Respostas às perguntas mais comuns sobre compra de bilhetes, reembolsos, check-in e gestão de eventos na EasyTicket.",
 };
 
 const FAQS = [

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Music, MapPin, Shield } from "lucide-react";
 
 export const metadata = {
-    title: "Sobre Nós — Daowave Bilhetes",
+    title: "Sobre Nós — EasyTicket Bilhetes",
     description:
         "Somos uma plataforma portuguesa de bilhética digital, criada para ligar promotores de eventos ao seu público de forma simples e segura.",
 };
@@ -25,7 +25,7 @@ export default function SobreNosPage() {
 
                 <div className="space-y-8 text-[15px] text-white/65 leading-relaxed">
                     <p>
-                        A <span className="text-white font-medium">Daowave</span> é uma plataforma de bilhética
+                        A <span className="text-white font-medium">EasyTicket</span> é uma plataforma de bilhética
                         digital 100% portuguesa, criada para simplificar a venda de bilhetes para eventos ao vivo.
                         Acreditamos que comprar um bilhete deve ser tão fácil como enviar uma mensagem.
                     </p>

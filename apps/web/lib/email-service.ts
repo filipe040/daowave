@@ -14,8 +14,12 @@ import {
   getPasswordResetEmailTemplate,
   getVerifyEmailTemplate,
   getTicketTransferTemplate,
-  getOrganizationInviteTemplate
+  getOrganizationInviteTemplate,
+  getEventReminderTemplate,
+  getPostEventThankYouTemplate,
+  getPromoterDailyReportTemplate
 } from "./email-templates-transactional";
+import { emailQueue } from "./queue/email.queue";
 
 export type EmailTemplate =
   | "verify-email"
@@ -23,7 +27,10 @@ export type EmailTemplate =
   | "order-confirmed"
   | "ticket-delivery"
   | "ticket-transfer"
-  | "invite-organization";
+  | "invite-organization"
+  | "event-reminder-24h"
+  | "post-event-thankyou"
+  | "promoter-daily-report";
 
 export interface SendTemplateOptions {
   to: string;
@@ -220,47 +227,118 @@ async function updateEmailLog(
 }
 
 /**
- * Send email using template
+ * Enqueue an email using BullMQ (replaces direct sending)
  */
-export async function sendTemplate(options: SendTemplateOptions): Promise<SendEmailResult> {
+export async function enqueueTemplate(options: SendTemplateOptions): Promise<{ success: boolean; message: string; jobId?: string }> {
   const config = getEmailConfig();
 
   if (!config.enabled) {
     safeLog.warn("Emails are disabled", { template: options.templateId, to: maskEmail(options.to) });
-    const log = await createEmailLog(
-      options.to,
-      `[${options.templateId}]`,
-      options.templateId,
-      options.idempotencyKey
-    );
-    await updateEmailLog(log.id, "FAILED", undefined, "Emails are disabled");
-    return {
-      success: false,
-      emailLogId: log.id,
-      error: "Emails are disabled",
-    };
+    return { success: false, message: "Emails are disabled" };
   }
 
-  // Check idempotency
-  if (options.idempotencyKey) {
-    const idempotencyCheck = await checkIdempotency(
-      options.idempotencyKey,
+  // Create EmailJobLog entry first
+  let jobLogId = "";
+  let idempotencyKey = options.idempotencyKey || `job-${Date.now()}-${options.to}`;
+
+  try {
+    // Map templateId to EmailJobType
+    const typeMapping: Record<string, string> = {
+      "verify-email": "VERIFY_EMAIL",
+      "invite-organization": "ORG_INVITE",
+      "order-confirmed": "PURCHASE_CONFIRMATION",
+      "ticket-delivery": "PURCHASE_CONFIRMATION", // Or appropriate mapping
+      "event-reminder-24h": "EVENT_REMINDER_24H",
+      "post-event-thankyou": "POST_EVENT_THANKYOU",
+      "promoter-daily-report": "PROMOTER_DAILY_REPORT",
+    };
+
+    const jobType = typeMapping[options.templateId] || "PURCHASE_CONFIRMATION";
+
+    const jobLog = await (prisma as any).emailJobLog.upsert({
+      where: { idempotencyKey },
+      create: {
+        toEmail: options.to,
+        templateId: options.templateId,
+        type: jobType,
+        payloadJson: options.variables as any,
+        status: "QUEUED",
+        idempotencyKey,
+      },
+      update: {},
+    });
+
+    // If it's already SENT, return deduplicated status
+    if (jobLog.status === "SENT") {
+      safeLog.info("Email duplication prevented at Job level", { idempotencyKey });
+      return { success: true, message: "Duplicate prevented", jobId: jobLog.id };
+    }
+
+    jobLogId = jobLog.id;
+  } catch (err: any) {
+    safeLog.warn("Could not create EmailJobLog, proceeding to enqueue anyway", { error: err.message });
+  }
+
+  // Add securely to BullMQ
+  try {
+    const job = await emailQueue.add(
       options.templateId,
-      options.to
+      {
+        to: options.to,
+        templateId: options.templateId,
+        payload: options.variables,
+        emailLogId: jobLogId,
+        attachments: options.attachments,
+      },
+      {
+        jobId: idempotencyKey, // deduplication at the queue level
+      }
     );
 
-    if (idempotencyCheck.isDuplicate) {
-      safeLog.info("Email duplicate prevented", {
-        template: options.templateId,
-        to: maskEmail(options.to),
-        existingLogId: idempotencyCheck.existingLogId,
-      });
-      return {
-        success: false,
-        emailLogId: idempotencyCheck.existingLogId!,
-        error: "Email already sent (idempotency check)",
-      };
+    return { success: true, message: "Queued", jobId: job.id };
+  } catch (err: any) {
+    safeLog.error("Queue error", { error: err.message });
+    // Fallback: If redis is down, mark as FAILED gracefully
+    if (jobLogId) {
+      await (prisma as any).emailJobLog.update({
+        where: { id: jobLogId },
+        data: { status: "FAILED", error: "Redis/Queue error: " + err.message },
+      }).catch(() => { });
     }
+    return { success: false, message: "Queue error" };
+  }
+}
+
+/**
+ * Send email using template (Backward compatibility wrapper)
+ */
+export async function sendTemplate(options: SendTemplateOptions): Promise<SendEmailResult> {
+  const result = await enqueueTemplate(options);
+  return {
+    success: result.success,
+    emailLogId: result.jobId || "placeholder",
+    error: result.success ? undefined : result.message,
+  };
+}
+
+/**
+ * Process the actual raw sending (Worker calls this)
+ */
+export async function processTemplateSend(
+  to: string,
+  templateId: string,
+  variables: any,
+  jobLogId?: string,
+  attachments?: any[]
+): Promise<SendEmailResult> {
+  const config = getEmailConfig();
+  if (!config.enabled) {
+    safeLog.warn("Emails are disabled", { template: templateId, to: maskEmail(to) });
+    return {
+      success: false,
+      emailLogId: jobLogId || "disabled",
+      error: "Emails are disabled",
+    };
   }
 
   // Generate email content from template
@@ -268,23 +346,23 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
   let html: string;
   let text: string | undefined;
 
-  switch (options.templateId) {
+  switch (templateId) {
     case "verify-email":
-      ({ subject, html, text } = getVerifyEmailTemplate(options.variables as {
+      ({ subject, html, text } = getVerifyEmailTemplate(variables as {
         name: string;
         verificationUrl: string;
         expiresIn?: string;
       }));
       break;
     case "reset-password":
-      ({ subject, html, text } = getPasswordResetEmailTemplate(options.variables as {
+      ({ subject, html, text } = getPasswordResetEmailTemplate(variables as {
         name: string;
         resetUrl: string;
         expiresIn?: string;
       }));
       break;
     case "order-confirmed":
-      ({ subject, html, text } = getOrderConfirmationEmailTemplate(options.variables as {
+      ({ subject, html, text } = getOrderConfirmationEmailTemplate(variables as {
         name: string;
         orderId: string;
         eventTitle: string;
@@ -293,7 +371,7 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
       }));
       break;
     case "ticket-delivery":
-      ({ subject, html, text } = getTicketEmailTemplate(options.variables as {
+      ({ subject, html, text } = getTicketEmailTemplate(variables as {
         name: string;
         eventTitle: string;
         eventDate: string;
@@ -307,7 +385,7 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
       }));
       break;
     case "ticket-transfer":
-      ({ subject, html, text } = getTicketTransferTemplate(options.variables as {
+      ({ subject, html, text } = getTicketTransferTemplate(variables as {
         recipientName: string;
         senderName: string;
         eventTitle: string;
@@ -317,32 +395,58 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
       }));
       break;
     case "invite-organization":
-      ({ subject, html, text } = getOrganizationInviteTemplate(options.variables as {
+      ({ subject, html, text } = getOrganizationInviteTemplate(variables as {
         organizationName: string;
         acceptUrl: string;
         expiresIn?: string;
       }));
       break;
+    case "event-reminder-24h":
+      ({ subject, html, text } = getEventReminderTemplate(variables as {
+        name: string;
+        eventTitle: string;
+        eventDate: string;
+        venueName: string;
+        address: string;
+        ticketUrl: string;
+      }));
+      break;
+    case "post-event-thankyou":
+      ({ subject, html, text } = getPostEventThankYouTemplate(variables as {
+        name: string;
+        eventTitle: string;
+        feedbackUrl?: string;
+      }));
+      break;
+    case "promoter-daily-report":
+      ({ subject, html, text } = getPromoterDailyReportTemplate(variables as {
+        promoterName: string;
+        date: string;
+        totalSales: string;
+        ticketsSold: number;
+        upcomingEvents: Array<{ title: string; date: string; sold: number }>;
+      }));
+      break;
     default:
-      throw new Error(`Unknown template: ${options.templateId}`);
+      throw new Error(`Unknown template: ${templateId}`);
   }
 
-  // Create email log
+  // Create email log fallback if needed
   const emailLog = await createEmailLog(
-    options.to,
+    to,
     subject,
-    options.templateId,
-    options.idempotencyKey,
-    options.variables.orderId,
-    options.variables.ticketId,
-    options.variables.userId
+    templateId,
+    undefined,
+    variables.orderId,
+    variables.ticketId,
+    variables.userId
   );
 
   try {
     const client = getResendClient();
 
     // Prepare attachments
-    const attachments = options.attachments?.map((att) => ({
+    const preparedAttachments = attachments?.map((att) => ({
       filename: att.filename,
       content: att.content instanceof Buffer ? att.content.toString("base64") : att.content,
       contentType: att.contentType,
@@ -350,12 +454,12 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
 
     const result = await client.emails.send({
       from: config.from,
-      to: options.to,
+      to: to,
       replyTo: config.replyTo,
       subject,
       html,
       text,
-      attachments,
+      attachments: preparedAttachments,
     });
 
     if (result.error) {
@@ -363,8 +467,8 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
 
       // Log detalhado do erro para debug
       safeLog.error("Email send failed", {
-        template: options.templateId,
-        to: maskEmail(options.to),
+        template: templateId,
+        to: maskEmail(to),
         error: result.error.message,
         errorName: result.error.name,
         errorCode: result.error.statusCode,
@@ -387,8 +491,8 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
 
     await updateEmailLog(emailLog.id, "SENT", result.data?.id);
     safeLog.info("Email sent successfully", {
-      template: options.templateId,
-      to: maskEmail(options.to),
+      template: templateId,
+      to: maskEmail(to),
       messageId: result.data?.id,
     });
 
@@ -400,8 +504,8 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
   } catch (error: any) {
     await updateEmailLog(emailLog.id, "FAILED", undefined, error.message, 1);
     safeLog.error("Email send error", {
-      template: options.templateId,
-      to: maskEmail(options.to),
+      template: templateId,
+      to: maskEmail(to),
       error: error.message,
     });
     return {
@@ -597,5 +701,7 @@ export function getTransporter(): null {
  */
 export const EmailService = {
   sendTemplate,
+  enqueueTemplate,
+  processTemplateSend,
   sendHtml,
 };

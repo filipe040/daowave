@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ThemeJson, themeJsonSchema, TicketTemplateStatus, TicketTemplateLayout } from "./models";
+import { ThemeJson, themeJsonSchema, TicketTemplateStatus, TicketTemplatePreset } from "./models";
 import { createAuditLog } from "@/lib/security";
 
 export const TicketTemplateService = {
@@ -25,7 +25,7 @@ export const TicketTemplateService = {
     /**
      * Create a DRAFT template with default values
      */
-    async createDraft(organizationId: string, name: string, layout: TicketTemplateLayout = TicketTemplateLayout.A4_CLASSIC) {
+    async createDraft(organizationId: string, name: string, preset: TicketTemplatePreset = "A4_CLASSIC") {
         const defaultTheme: ThemeJson = {
             brand: { logoUrl: "", tagline: "" },
             colors: {
@@ -51,7 +51,7 @@ export const TicketTemplateService = {
             data: {
                 organizationId,
                 name,
-                layout,
+                preset,
                 status: TicketTemplateStatus.DRAFT,
                 themeJson: defaultTheme as any,
                 version: 1,
@@ -62,7 +62,7 @@ export const TicketTemplateService = {
     /**
      * Update template data
      */
-    async updateTemplate(id: string, data: { name?: string; layout?: TicketTemplateLayout; themeJson?: Partial<ThemeJson> }) {
+    async updateTemplate(id: string, data: { name?: string; preset?: TicketTemplatePreset; themeJson?: Partial<ThemeJson> }) {
         const existing = await prisma.organizationTicketTemplate.findUnique({ where: { id } });
         if (!existing) throw new Error("Template not found");
 
@@ -77,7 +77,7 @@ export const TicketTemplateService = {
             where: { id },
             data: {
                 ...(data.name && { name: data.name }),
-                ...(data.layout && { layout: data.layout }),
+                ...(data.preset && { preset: data.preset }),
                 ...(data.themeJson && { themeJson: updatedTheme as any }),
             },
         });

@@ -9,13 +9,13 @@ import { toast } from "sonner";
 import { Layers, Plus, ExternalLink, Archive, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { TicketTemplateStatus, TicketTemplateLayout } from "@/lib/ticket-templates/models";
+import { TicketTemplateStatus, TicketTemplatePreset } from "@/lib/ticket-templates/models";
 
 interface Template {
     id: string;
     name: string;
     status: TicketTemplateStatus;
-    layout: TicketTemplateLayout;
+    preset: TicketTemplatePreset;
     version: number;
     createdAt: string;
 }
@@ -52,7 +52,7 @@ export default function TicketTemplatesPage() {
             const res = await fetchWithTimeout("/api/promotor/ticket-templates", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: "Novo Template", layout: "A4_CLASSIC" }),
+                body: JSON.stringify({ name: "Novo Template", preset: "A4_CLASSIC" }),
             });
             if (!res.ok) throw new Error("Erro ao criar template");
             const newTemplate = await res.json();
@@ -134,7 +134,7 @@ export default function TicketTemplatesPage() {
                                 {template.name}
                             </h3>
                             <p className="text-xs text-white/40 mb-6">
-                                Layout: {template.layout.replace('_', ' ')}
+                                Preset: {template.preset.replace('_', ' ')}
                             </p>
 
                             <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">

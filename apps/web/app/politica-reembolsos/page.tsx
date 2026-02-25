@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Política de Reembolsos — Daowave Bilhetes",
+    title: "Política de Reembolsos — EasyTicket Bilhetes",
     description:
-        "Consulta a nossa política de reembolsos e cancelamentos para compras de bilhetes na plataforma Daowave.",
+        "Consulta a nossa política de reembolsos e cancelamentos para compras de bilhetes na plataforma EasyTicket.",
 };
 
 export default function PoliticaReembolsosPage() {
@@ -28,7 +28,7 @@ export default function PoliticaReembolsosPage() {
                     <section>
                         <h2 className="text-[16px] font-semibold text-white/80 mb-3">1. Condições Gerais</h2>
                         <p>
-                            A Daowave atua como plataforma intermediária entre promotores de eventos e compradores
+                            A EasyTicket atua como plataforma intermediária entre promotores de eventos e compradores
                             de bilhetes. A política de reembolsos aplica-se a todas as compras efetuadas na
                             plataforma.
                         </p>

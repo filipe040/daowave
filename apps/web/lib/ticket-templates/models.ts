@@ -48,8 +48,16 @@ export const themeJsonSchema = z.object({
 
 export type ThemeJson = z.infer<typeof themeJsonSchema>;
 
-import { TicketTemplateLayout, TicketTemplateStatus } from "@prisma/client";
-export { TicketTemplateLayout, TicketTemplateStatus };
+export const TICKET_TEMPLATE_PRESETS = [
+    "A4_CLASSIC",
+    "HORIZONTAL_QR_RIGHT",
+    "MOBILE_PASS"
+] as const;
+
+export type TicketTemplatePreset = typeof TICKET_TEMPLATE_PRESETS[number];
+
+import { TicketTemplateStatus } from "@prisma/client";
+export { TicketTemplateStatus };
 
 /**
  * Render Model (Data needed to fill the template)

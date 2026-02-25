@@ -38,10 +38,10 @@ export async function generateMetadata({ params }: { params: Promise<{ cidade: s
     const cityName = decodeURIComponent(cidade);
     const capitalized = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
     return {
-        title: `Eventos em ${capitalized} — Bilhetes Online | Daowave`,
+        title: `Eventos em ${capitalized} — Bilhetes Online | EasyTicket`,
         description: `Compra bilhetes para os melhores eventos em ${capitalized}. Eventos de música, cultura e entretenimento com compra segura e QR code.`,
         openGraph: {
-            title: `Eventos em ${capitalized} | Daowave`,
+            title: `Eventos em ${capitalized} | EasyTicket`,
             description: `Descobre e compra bilhetes para eventos em ${capitalized}.`,
         },
     };

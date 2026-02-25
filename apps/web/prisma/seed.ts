@@ -5,7 +5,6 @@ import {
   TicketStatus,
   OrganizationStatus,
   TicketTemplateStatus,
-  TicketTemplateLayout,
   Role,
   OrganizerStatus
 } from "@prisma/client";
@@ -160,7 +159,7 @@ async function main() {
       organizationId: soundRepublic.id,
       name: "Classic Sound Republic",
       status: TicketTemplateStatus.ACTIVE,
-      layout: TicketTemplateLayout.A4_CLASSIC,
+      preset: "A4_CLASSIC",
       version: 1,
       themeJson: {
         brand: { logoUrl: "", tagline: "Sound Republic - Feel the Rhythm" },
@@ -190,7 +189,7 @@ async function main() {
       organizationId: soundRepublic.id,
       name: "Draft Horizontal",
       status: TicketTemplateStatus.DRAFT,
-      layout: TicketTemplateLayout.HORIZONTAL_QR_RIGHT,
+      preset: "HORIZONTAL_QR_RIGHT",
       version: 1,
       themeJson: {
         brand: { logoUrl: "", tagline: "" },

@@ -49,7 +49,7 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                         </div>
                     </div>
                     <div>
-                        <span className="text-[13px] font-black text-white uppercase tracking-[0.2em] leading-none block">DAOwave</span>
+                        <span className="text-[13px] font-black text-white uppercase tracking-[0.2em] leading-none block">EasyTicket</span>
                         <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1 block">Promotor</span>
                     </div>
                 </Link>

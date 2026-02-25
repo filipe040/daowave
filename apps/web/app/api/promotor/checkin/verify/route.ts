@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if (result.success) {
       return NextResponse.json({
         success: true,
-        message: 'Ticket checked in successfully',
+        message: 'Bilhete validado com sucesso',
         ticketHolderName: result.ticketHolderName,
       });
     }

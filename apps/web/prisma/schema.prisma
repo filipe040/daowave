@@ -130,6 +130,7 @@ model Organization {
 
   ticketTemplates      OrganizationTicketTemplate[]
   ticketTemplateAssets TicketTemplateAsset[]
+  ticketSnapshots      TicketRenderSnapshot[]
 
   @@index([slug])
   @@index([status])
@@ -143,12 +144,6 @@ enum TicketTemplateStatus {
   ARCHIVED
 }
 
-enum TicketTemplateLayout {
-  A4_CLASSIC
-  HORIZONTAL_QR_RIGHT
-  MOBILE_PASS
-}
-
 enum TicketTemplateAssetType {
   LOGO
   BACKGROUND
@@ -160,13 +155,14 @@ model OrganizationTicketTemplate {
   organizationId String
   name           String
   status         TicketTemplateStatus @default(DRAFT)
-  layout         TicketTemplateLayout @default(A4_CLASSIC)
+  preset         String
   themeJson      Json
   version        Int                  @default(1)
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 
   organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  snapshots      TicketRenderSnapshot[]
 
   @@index([organizationId])
   @@index([status])
@@ -189,13 +185,21 @@ model TicketTemplateAsset {
 model TicketRenderSnapshot {
   id                String   @id @default(uuid())
   ticketId          String   @unique
+  organizationId    String
   templateId        String
   templateVersion   Int
-  themeJsonSnapshot Json
-  renderedAt        DateTime @default(now())
+  preset            String
+  themeJson         Json
+  htmlHash          String   // sha256 do HTML final
+  pdfPath           String?  // opcional: path/cache local
+  createdAt         DateTime @default(now())
 
   ticket            Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template          OrganizationTicketTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
 
+  @@index([organizationId])
+  @@index([templateId])
   @@index([ticketId])
 }
 
@@ -556,6 +560,31 @@ enum TicketStatus {
   USED
   CANCELLED
   REFUNDED
+}
+
+enum EmailJobType {
+  VERIFY_EMAIL
+  ORG_INVITE
+  PURCHASE_CONFIRMATION
+  EVENT_REMINDER_24H
+  POST_EVENT_THANKYOU
+  PROMOTER_DAILY_REPORT
+}
+
+model EmailJobLog {
+  id             String       @id @default(uuid())
+  type           EmailJobType
+  toEmail        String
+  templateId     String
+  payloadJson    Json
+  status         String       // "QUEUED" | "SENT" | "FAILED"
+  error          String?      @db.Text
+  idempotencyKey String       @unique
+  createdAt      DateTime     @default(now())
+  sentAt         DateTime?
+  
+  @@index([status])
+  @@index([idempotencyKey])
 }
 
 model EmailLog {

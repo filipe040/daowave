@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { chromium } from "playwright";
-import { ThemeJson, TicketRenderModel, TicketTemplateLayout, TicketTemplateStatus } from "../ticket-templates/models";
+import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatus } from "../ticket-templates/models";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import crypto from "crypto";
 
 export const TicketRenderService = {
   /**
@@ -29,7 +30,7 @@ export const TicketRenderService = {
     });
 
     if (!ticket) {
-      throw new Error("Ticket not found");
+      throw new Error("Bilhete não encontrado");
     }
 
     let activeTemplate = null;
@@ -67,23 +68,41 @@ export const TicketRenderService = {
         footer: { supportUrl: "", supportEmail: "" },
       };
 
+      const preset = "A4_CLASSIC";
+      const model = await this.buildRenderModel(ticketId);
+      const html = this.generateHtml(preset, model, defaultTheme);
+      const htmlHash = crypto.createHash("sha256").update(html).digest("hex");
+
       return prisma.ticketRenderSnapshot.create({
         data: {
           ticketId,
+          organizationId: ticket.event.organizationId || "fallback",
           templateId: "fallback-template",
           templateVersion: 1,
-          themeJsonSnapshot: defaultTheme as any,
+          preset,
+          themeJson: defaultTheme as any,
+          htmlHash,
+          pdfPath: null,
         },
       });
     }
+
+    const preset = activeTemplate.preset as TicketTemplatePreset;
+    const model = await this.buildRenderModel(ticketId);
+    const html = this.generateHtml(preset, model, activeTemplate.themeJson as any);
+    const htmlHash = crypto.createHash("sha256").update(html).digest("hex");
 
     // Create snapshot
     return prisma.ticketRenderSnapshot.create({
       data: {
         ticketId,
+        organizationId: ticket.event.organizationId || "fallback",
         templateId: activeTemplate.id,
         templateVersion: activeTemplate.version,
-        themeJsonSnapshot: activeTemplate.themeJson as any,
+        preset,
+        themeJson: activeTemplate.themeJson as any,
+        htmlHash,
+        pdfPath: null,
       },
     });
   },
@@ -152,7 +171,7 @@ export const TicketRenderService = {
         status: "VALID",
       },
       event: {
-        title: "Nome do Seu Evento",
+        title: "Nome do Evento",
         venue: "Nome do Local",
         city: "Cidade",
         startAt: new Date(Date.now() + 86400000),
@@ -179,27 +198,24 @@ export const TicketRenderService = {
     const model = await this.buildRenderModel(ticketId);
 
     let theme: ThemeJson;
-    let layout: TicketTemplateLayout;
+    let preset: TicketTemplatePreset;
 
     if (templateId) {
       // Preview mode
       const template = await prisma.organizationTicketTemplate.findUnique({
         where: { id: templateId },
       });
-      if (!template) throw new Error("Template not found");
+      if (!template) throw new Error("Template não encontrado");
       theme = template.themeJson as unknown as ThemeJson;
-      layout = template.layout as TicketTemplateLayout;
+      preset = template.preset as TicketTemplatePreset;
     } else {
       // Production mode (use snapshot)
       const snapshot = await this.resolveSnapshot(ticketId);
-      const template = await prisma.organizationTicketTemplate.findUnique({
-        where: { id: snapshot.templateId },
-      });
-      theme = snapshot.themeJsonSnapshot as unknown as ThemeJson;
-      layout = template?.layout as TicketTemplateLayout || TicketTemplateLayout.A4_CLASSIC;
+      theme = snapshot.themeJson as unknown as ThemeJson;
+      preset = snapshot.preset as TicketTemplatePreset;
     }
 
-    const html = this.generateHtml(layout, model, theme);
+    const html = this.generateHtml(preset, model, theme);
 
     // Playwright rendering
     const browser = await chromium.launch({ headless: true });
@@ -222,7 +238,7 @@ export const TicketRenderService = {
   /**
    * Generates the HTML string for the ticket
    */
-  generateHtml(layout: TicketTemplateLayout, model: TicketRenderModel, theme: ThemeJson): string {
+  generateHtml(preset: TicketTemplatePreset, model: TicketRenderModel, theme: ThemeJson): string {
     const formatDate = (date: Date) => format(date, "EEEE, d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: pt });
 
     return `

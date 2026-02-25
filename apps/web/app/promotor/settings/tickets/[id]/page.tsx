@@ -23,7 +23,7 @@ import {
     MousePointer2
 } from "lucide-react";
 import Link from "next/link";
-import { ThemeJson, TicketTemplateLayout, TicketTemplateStatus, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
+import { ThemeJson, TicketTemplatePreset, TicketTemplateStatus, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
 
 export default function TicketTemplateEditorPage() {
     const params = useParams();
@@ -39,7 +39,7 @@ export default function TicketTemplateEditorPage() {
 
     // Form State
     const [name, setName] = useState("");
-    const [layout, setLayout] = useState<TicketTemplateLayout>(TicketTemplateLayout.A4_CLASSIC);
+    const [preset, setPreset] = useState<TicketTemplatePreset>("A4_CLASSIC");
     const [theme, setTheme] = useState<ThemeJson | null>(null);
 
     // Selection for preview
@@ -55,7 +55,7 @@ export default function TicketTemplateEditorPage() {
             const tJson = await tRes.json();
             setTemplate(tJson);
             setName(tJson.name);
-            setLayout(tJson.layout);
+            setPreset(tJson.preset || "A4_CLASSIC");
             setTheme(tJson.themeJson);
 
             // Load sample tickets for preview
@@ -85,7 +85,7 @@ export default function TicketTemplateEditorPage() {
             const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, layout, themeJson: theme }),
+                body: JSON.stringify({ name, preset, themeJson: theme }),
             });
             if (!res.ok) {
                 const errJson = await res.json();
@@ -190,10 +190,10 @@ export default function TicketTemplateEditorPage() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Layout Base</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Template Preset</label>
                                 <select
-                                    value={layout}
-                                    onChange={(e) => setLayout(e.target.value as TicketTemplateLayout)}
+                                    value={preset}
+                                    onChange={(e) => setPreset(e.target.value as TicketTemplatePreset)}
                                     className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
                                 >
                                     <option value="A4_CLASSIC">A4 Clássico</option>
