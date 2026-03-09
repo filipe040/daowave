@@ -6,24 +6,31 @@ import { safeLog } from "@/lib/security";
 
 const QUEUE_NAME = "email";
 
-export const emailQueue = new Queue(QUEUE_NAME, {
-    connection: redis as any,
-    defaultJobOptions: {
-        attempts: 5,
-        backoff: {
-            type: "exponential",
-            delay: 2000,
-        },
-        removeOnComplete: true,
-        removeOnFail: false,
-    },
-});
+let _emailQueue: Queue | null = null;
+
+export const getEmailQueue = () => {
+    if (!_emailQueue) {
+        _emailQueue = new Queue(QUEUE_NAME, {
+            connection: redis as any,
+            defaultJobOptions: {
+                attempts: 5,
+                backoff: {
+                    type: "exponential",
+                    delay: 2000,
+                },
+                removeOnComplete: true,
+                removeOnFail: false,
+            },
+        });
+    }
+    return _emailQueue;
+};
 
 export const initEmailWorker = () => {
     const worker = new Worker(
         QUEUE_NAME,
         async (job: Job) => {
-            const { to, templateId, payload, emailLogId } = job.data;
+            const { to, templateId, payload, emailLogId, attachments } = job.data;
 
             try {
                 safeLog.info("Processing email job", { jobId: job.id, to, templateId });
@@ -35,7 +42,8 @@ export const initEmailWorker = () => {
                     to,
                     templateId,
                     payload,
-                    emailLogId
+                    emailLogId,
+                    attachments
                 );
 
                 if (!result.success) {
@@ -57,7 +65,7 @@ export const initEmailWorker = () => {
     worker.on("completed", async (job) => {
         safeLog.info("Email job completed", { jobId: job.id });
         if (job.data.emailLogId) {
-            await prisma.emailJobLog.update({
+            await (prisma as any).emailJobLog.update({
                 where: { id: job.data.emailLogId },
                 data: { status: "SENT", sentAt: new Date() }
             });
@@ -67,7 +75,7 @@ export const initEmailWorker = () => {
     worker.on("failed", async (job, err) => {
         safeLog.error("Email job hopelessly failed", { jobId: job?.id, err: err.message });
         if (job?.data?.emailLogId) {
-            await prisma.emailJobLog.update({
+            await (prisma as any).emailJobLog.update({
                 where: { id: job.data.emailLogId },
                 data: { status: "FAILED", error: err.message }
             });

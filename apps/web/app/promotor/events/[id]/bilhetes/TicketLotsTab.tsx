@@ -102,8 +102,8 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                             <div className="col-span-1">
                                 <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Tipo pai (Opcional)</label>
                                 <select value={formData.ticketTypeId} onChange={e => setFormData({ ...formData, ticketTypeId: e.target.value })} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] appearance-none">
-                                    <option value="" className="bg-zinc-900">Sem categoria</option>
-                                    {types.map(t => <option key={t.id} value={t.id} className="bg-zinc-900">{t.name}</option>)}
+                                    <option value="" className="bg-background">Sem categoria</option>
+                                    {types.map(t => <option key={t.id} value={t.id} className="bg-background">{t.name}</option>)}
                                 </select>
                             </div>
                             <div className="col-span-1 sm:col-span-2">

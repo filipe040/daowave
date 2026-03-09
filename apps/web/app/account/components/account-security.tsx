@@ -126,17 +126,16 @@ export default function AccountSecurity() {
 
       {toast && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            toast.type === "success"
+          className={`rounded-2xl border px-4 py-3 text-sm ${toast.type === "success"
               ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
               : "bg-red-500/10 border-red-500/30 text-red-200"
-          }`}
+            }`}
         >
           {toast.message}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Sessões ativas</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Termina sessões em outros dispositivos. A sessão atual mantém-se ativa.
@@ -187,7 +186,7 @@ export default function AccountSecurity() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Alterar palavra-passe</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Usa uma palavra-passe forte com pelo menos 8 caracteres.

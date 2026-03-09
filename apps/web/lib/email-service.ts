@@ -19,7 +19,7 @@ import {
   getPostEventThankYouTemplate,
   getPromoterDailyReportTemplate
 } from "./email-templates-transactional";
-import { emailQueue } from "./queue/email.queue";
+import { getEmailQueue } from "./queue/email.queue";
 
 export type EmailTemplate =
   | "verify-email"
@@ -166,6 +166,7 @@ async function createEmailLog(
         relatedOrderId: relatedOrderId || null,
         relatedTicketId: relatedTicketId || null,
         relatedUserId: relatedUserId || null,
+        ipAddress: (typeof process !== "undefined" && (process as any).env && (process as any).env.MOCK_IP) ? (process as any).env.MOCK_IP : null,
         meta: idempotencyKey ? { idempotencyKey } : undefined,
       },
     });
@@ -187,6 +188,7 @@ async function createEmailLog(
       relatedOrderId: relatedOrderId || null,
       relatedTicketId: relatedTicketId || null,
       relatedUserId: relatedUserId || null,
+      ipAddress: null,
       meta: idempotencyKey ? { idempotencyKey } : null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -281,7 +283,7 @@ export async function enqueueTemplate(options: SendTemplateOptions): Promise<{ s
 
   // Add securely to BullMQ
   try {
-    const job = await emailQueue.add(
+    const job = await getEmailQueue().add(
       options.templateId,
       {
         to: options.to,

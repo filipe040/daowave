@@ -50,18 +50,18 @@ export async function checkRegisterRateLimit(
   }
 
   // Check per IP
-  // Try to count, but if EmailLog table doesn't exist, allow the request
-  // Note: MySQL/MariaDB JSON queries are complex, so we'll skip IP-based rate limiting for now
-  // or implement it differently (e.g., store IP in a separate column)
   let ipAttempts = 0;
   try {
-    // For MySQL, we can't easily query JSON path, so skip IP-based rate limiting
-    // This is a limitation but allows the system to work
-    // TODO: Add ipAddress column to EmailLog for proper IP-based rate limiting
-    ipAttempts = 0; // Skip IP rate limiting for now
+    ipAttempts = await prisma.emailLog.count({
+      where: {
+        type: "verify-email",
+        ipAddress: ip,
+        createdAt: { gte: oneHourAgo },
+        status: { in: ["SENT", "PENDING"] },
+      },
+    });
   } catch (error: any) {
-    // If EmailLog table doesn't exist, skip rate limiting
-    console.warn("EmailLog table not found, skipping IP rate limit check:", error.message);
+    console.warn("EmailLog table/IP column not found, skipping IP rate limit check:", error.message);
   }
 
   if (ipAttempts >= config.rateLimits.registerPerHour) {
@@ -112,17 +112,18 @@ export async function checkForgotPasswordRateLimit(
   }
 
   // Check per IP (10 per hour)
-  // Try to count, but if EmailLog table doesn't exist, allow the request
-  // Note: MySQL/MariaDB JSON queries are complex, so we'll skip IP-based rate limiting for now
   let ipAttempts = 0;
   try {
-    // For MySQL, we can't easily query JSON path, so skip IP-based rate limiting
-    // This is a limitation but allows the system to work
-    // TODO: Add ipAddress column to EmailLog for proper IP-based rate limiting
-    ipAttempts = 0; // Skip IP rate limiting for now
+    ipAttempts = await prisma.emailLog.count({
+      where: {
+        type: "reset-password",
+        ipAddress: ip,
+        createdAt: { gte: oneHourAgo },
+        status: { in: ["SENT", "PENDING"] },
+      },
+    });
   } catch (error: any) {
-    // If EmailLog table doesn't exist, skip rate limiting
-    console.warn("EmailLog table not found, skipping IP rate limit check:", error.message);
+    console.warn("EmailLog table/IP column not found, skipping IP rate limit check:", error.message);
   }
 
   if (ipAttempts >= 10) {

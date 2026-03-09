@@ -56,17 +56,16 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
 
       {toast && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            toast.type === "success"
+          className={`rounded-2xl border px-4 py-3 text-sm ${toast.type === "success"
               ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
               : "bg-red-500/10 border-red-500/30 text-red-200"
-          }`}
+            }`}
         >
           {toast.message}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-6">
+      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6 space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <Label className="text-base font-medium text-foreground">Emails de conta</Label>
@@ -77,15 +76,13 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyEmail}
             onClick={() => setPrefs((p) => ({ ...p, notifyEmail: !p.notifyEmail }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-              prefs.notifyEmail ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${prefs.notifyEmail ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+              }`}
             data-testid="switch-notify-email"
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                prefs.notifyEmail ? "translate-x-5" : "translate-x-0.5"
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${prefs.notifyEmail ? "translate-x-5" : "translate-x-0.5"
+                }`}
               style={{ marginTop: 2 }}
             />
           </button>
@@ -100,15 +97,13 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyEventReminders}
             onClick={() => setPrefs((p) => ({ ...p, notifyEventReminders: !p.notifyEventReminders }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${
-              prefs.notifyEventReminders ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyEventReminders ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+              }`}
             data-testid="switch-notify-reminders"
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                prefs.notifyEventReminders ? "translate-x-5" : "translate-x-0.5"
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${prefs.notifyEventReminders ? "translate-x-5" : "translate-x-0.5"
+                }`}
               style={{ marginTop: 2 }}
             />
           </button>
@@ -123,15 +118,13 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyTransfers}
             onClick={() => setPrefs((p) => ({ ...p, notifyTransfers: !p.notifyTransfers }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${
-              prefs.notifyTransfers ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyTransfers ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+              }`}
             data-testid="switch-notify-transfers"
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                prefs.notifyTransfers ? "translate-x-5" : "translate-x-0.5"
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${prefs.notifyTransfers ? "translate-x-5" : "translate-x-0.5"
+                }`}
               style={{ marginTop: 2 }}
             />
           </button>
@@ -146,15 +139,13 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.marketingOptIn}
             onClick={() => setPrefs((p) => ({ ...p, marketingOptIn: !p.marketingOptIn }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${
-              prefs.marketingOptIn ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.marketingOptIn ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+              }`}
             data-testid="switch-marketing"
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                prefs.marketingOptIn ? "translate-x-5" : "translate-x-0.5"
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${prefs.marketingOptIn ? "translate-x-5" : "translate-x-0.5"
+                }`}
               style={{ marginTop: 2 }}
             />
           </button>

@@ -87,17 +87,16 @@ export default function AccountLegal() {
 
       {toast && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            toast.type === "success"
+          className={`rounded-2xl border px-4 py-3 text-sm ${toast.type === "success"
               ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
               : "bg-red-500/10 border-red-500/30 text-red-200"
-          }`}
+            }`}
         >
           {toast.message}
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Exportar dados</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Descarrega uma cópia dos teus dados (perfil, encomendas, bilhetes) em JSON.

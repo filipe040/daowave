@@ -68,6 +68,39 @@ export default function Footer() {
               </ul>
             </div>
 
+            {/* Legal */}
+            <div>
+              <h4 className="text-sm font-semibold text-white/85">Legal</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>
+                  <a href="/legal/terms" className="text-white/55 hover:text-white transition">
+                    Termos e Condições
+                  </a>
+                </li>
+                <li>
+                  <a href="/legal/privacy" className="text-white/55 hover:text-white transition">
+                    Política de Privacidade
+                  </a>
+                </li>
+                <li>
+                  <a href="/legal/cookies" className="text-white/55 hover:text-white transition">
+                    Política de Cookies
+                  </a>
+                </li>
+                <li>
+                  <a href="/legal/ral" className="text-white/55 hover:text-white transition">
+                    Resolução de Litígios (RAL)
+                  </a>
+                </li>
+              </ul>
+
+              <div className="mt-6">
+                <a href="https://www.livroreclamacoes.pt" target="_blank" rel="noopener noreferrer" className="inline-block transition hover:opacity-80">
+                  <img src="https://www.livroreclamacoes.pt/assets/images/logo_lre.png" alt="Livro de Reclamações Eletrónico" className="h-10 object-contain bg-white px-2 py-1 rounded-md" />
+                </a>
+              </div>
+            </div>
+
             {/* Promoters */}
             <div>
               <h4 className="text-sm font-semibold text-white/85">Para Promotores</h4>
@@ -107,11 +140,6 @@ export default function Footer() {
                 <li>
                   <a href="/faq" className="text-white/55 hover:text-white transition">
                     Perguntas Frequentes
-                  </a>
-                </li>
-                <li>
-                  <a href="/politica-reembolsos" className="text-white/55 hover:text-white transition">
-                    Política de Reembolsos
                   </a>
                 </li>
                 <li>

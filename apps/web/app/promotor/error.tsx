@@ -19,7 +19,7 @@ export default function PromotorError({
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-background/50 p-8 text-center">
         <h2 className="text-lg font-semibold text-foreground">Erro ao carregar</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ocorreu um erro na área do promotor. Tenta novamente ou inicia sessão de novo.

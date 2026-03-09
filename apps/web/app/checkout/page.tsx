@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { AlertTriangle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
 import {
   Elements,
   PaymentElement,
@@ -23,6 +25,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
   const orderId = searchParams.get("order");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +34,12 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
 
     setLoading(true);
     setError(null);
+
+    if (!acceptedTerms) {
+      setError("Por favor, aceite os Termos e Condições e a Política de Privacidade.");
+      setLoading(false);
+      return;
+    }
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -56,9 +65,20 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
       <div className="rounded-3xl border border-white/10 bg-black/40 p-4 sm:p-5 overflow-hidden">
         <PaymentElement />
       </div>
+      <div className="flex items-start space-x-3 mt-4 bg-black/40 p-4 rounded-xl border border-white/10">
+        <Checkbox
+          id="terms"
+          checked={acceptedTerms}
+          onCheckedChange={(checked: boolean) => setAcceptedTerms(checked)}
+          className="mt-1 border-white/50"
+        />
+        <label htmlFor="terms" className="text-sm text-white/70 leading-relaxed font-normal cursor-pointer">
+          Li e aceito os <Link href="/legal/terms" target="_blank" className="text-emerald-400 hover:underline">Termos e Condições</Link> e a <Link href="/legal/privacy" target="_blank" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
+        </label>
+      </div>
       <button
         type="submit"
-        disabled={!stripe || loading}
+        disabled={!stripe || loading || !acceptedTerms}
         className="w-full rounded-full bg-white px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
       >
         {loading ? (
@@ -67,7 +87,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
             A processar…
           </span>
         ) : (
-          "Confirmar pagamento"
+          "Confirmar e Pagar"
         )}
       </button>
     </form>

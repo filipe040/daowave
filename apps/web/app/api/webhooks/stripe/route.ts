@@ -97,11 +97,6 @@ export async function POST(req: Request) {
     });
 
     // Generate tickets with attendee info (using buyer info if available, otherwise order user data)
-    const tickets = [];
-    const buyerName = (order as any).buyerName || order.user.name || "Participante";
-    const buyerEmail = (order as any).buyerEmail || order.user.email;
-
-    // Get or create an active QR Signing Key
     let activeKey = await prisma.qrSigningKey.findFirst({
       where: { active: true },
       orderBy: { createdAt: "desc" },
@@ -118,11 +113,12 @@ export async function POST(req: Request) {
       console.log(`[Checkout] Created new active QRSsigningKey: ${activeKey.keyId}`);
     }
 
+    const ticketsToCreate: any[] = [];
+    const { signQrPayload } = await import("@ticketing-platform/shared");
+
     for (const item of order.items) {
       for (let i = 0; i < item.quantity; i++) {
         const qrNonce = generateQrNonce();
-        // Generates a mock ticket ID, in a real environment the ID would be known first
-        // But Prisma needs it defined before or creates it implicitly
         const ticketId = crypto.randomUUID();
 
         const payload = {
@@ -134,26 +130,30 @@ export async function POST(req: Request) {
           kid: activeKey.keyId,
         };
 
-        const { signQrPayload } = await import("@ticketing-platform/shared");
         const qrPayload = signQrPayload(payload, activeKey.keySecret);
 
-        const ticket = await prisma.ticket.create({
-          data: {
-            id: ticketId,
-            eventId: order.eventId,
-            orderId: order.id,
-            ticketLotId: item.ticketLotId,
-            userId: order.userId,
-            code: `${crypto.randomBytes(4).toString("hex").toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
-            status: "VALID",
-            qrPayload,
-          },
+        ticketsToCreate.push({
+          id: ticketId,
+          eventId: order.eventId,
+          orderId: order.id,
+          ticketLotId: item.ticketLotId,
+          userId: order.userId,
+          code: `${crypto.randomBytes(4).toString("hex").toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
+          status: "VALID",
+          qrPayload,
         });
-        tickets.push(ticket);
       }
+    }
 
-      // NOTE: InventoryService.confirmHolds() already updates the `quantitySold` globally,
-      // so we do not need to increment it again here! This prevents double counting sold stock.
+    let ticketsCount = 0;
+    try {
+      const batchCreateResult = await prisma.ticket.createMany({
+        data: ticketsToCreate,
+      });
+      ticketsCount = batchCreateResult.count;
+    } catch (err) {
+      console.error("Failed to create tickets during webhook processing:", err);
+      return NextResponse.json({ error: "Failed to generate tickets" }, { status: 500 });
     }
 
     // Send order confirmation email
@@ -196,7 +196,7 @@ export async function POST(req: Request) {
           eventDate: ev.startAt.toLocaleString("pt-PT"),
           venueName: ev.venue,
           address: `${ev.venue}, ${ev.city}`,
-          ticketCount: tickets.length,
+          ticketCount: ticketsCount,
           branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null)
             ? {
               primaryColor: ev.primaryColor ?? undefined,
@@ -212,7 +212,7 @@ export async function POST(req: Request) {
       console.error("Error sending ticket email:", error);
     }
 
-    console.log(`Order ${orderId} paid, ${tickets.length} tickets issued`);
+    console.log(`Order ${orderId} paid, ${ticketsCount} tickets issued`);
   } else if (event.type === "payment_intent.payment_failed") {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     const orderId = paymentIntent.metadata.orderId;

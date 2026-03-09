@@ -155,7 +155,7 @@ model OrganizationTicketTemplate {
   organizationId String
   name           String
   status         TicketTemplateStatus @default(DRAFT)
-  preset         String
+  preset         String               @default("default")
   themeJson      Json
   version        Int                  @default(1)
   createdAt      DateTime             @default(now())
@@ -601,6 +601,7 @@ model EmailLog {
   relatedOrderId    String?
   relatedTicketId   String?
   relatedUserId     String?
+  ipAddress         String?   @db.VarChar(45)
   meta              Json?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
