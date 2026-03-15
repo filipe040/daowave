@@ -35,7 +35,7 @@ export function CookieBanner() {
                     <p className="text-white/70 text-sm leading-relaxed">
                         Utilizamos cookies estritamente necessários para o funcionamento técnico do website, e cookies analíticos para melhorar a tua experiência de navegação.
                         Ao clicar em &quot;Aceitar Todos&quot;, concordas com a utilização de todos os cookies. Podes rever as tuas opções a qualquer momento.
-                        Sabe mais na nossa <Link href="/legal/cookies" className="text-emerald-400 hover:underline">Política de Cookies</Link> e <Link href="/legal/privacy" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
+                        Sabe mais na nossa <Link href="/cookies" className="text-emerald-400 hover:underline">Política de Cookies</Link> e <Link href="/privacy" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">

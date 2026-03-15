@@ -132,7 +132,7 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
           className="mt-1"
         />
         <Label htmlFor="terms" className="text-sm text-white/70 leading-relaxed font-normal cursor-pointer">
-          Li e aceito os <Link href="/legal/terms" target="_blank" className="text-emerald-400 hover:underline">Termos e Condições</Link> e a <Link href="/legal/privacy" target="_blank" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
+          Li e aceito os <Link href="/terms" target="_blank" className="text-emerald-400 hover:underline">Termos e Condições</Link> e a <Link href="/privacy" target="_blank" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
         </Label>
       </div>
 
