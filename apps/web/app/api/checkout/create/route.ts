@@ -23,6 +23,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const globalRole = (session.user as any).role;
+    let isPromoterOrAdmin = globalRole === "ADMIN" || globalRole === "PROMOTER";
+    
+    if (!isPromoterOrAdmin) {
+      const membership = await prisma.organizationMember.findFirst({
+        where: { userId: (session.user as any).id }
+      });
+      if (membership) {
+        isPromoterOrAdmin = true;
+      }
+    }
+
+    if (isPromoterOrAdmin) {
+      return NextResponse.json(
+        { error: "Administradores e Promotores não podem comprar bilhetes." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const validated = checkoutCreateSchema.parse(body);
 

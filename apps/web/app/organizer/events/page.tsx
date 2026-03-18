@@ -21,12 +21,22 @@ export default async function OrganizerEventsPage() {
     where: { userId: session.user.id },
   });
 
-  if (!organizerProfile || organizerProfile.status !== "APPROVED") {
+  const memberships = await prisma.organizationMember.findMany({
+    where: { userId: session.user.id, status: "ACTIVE" },
+  });
+
+  if ((!organizerProfile || organizerProfile.status !== "APPROVED") && memberships.length === 0) {
     redirect("/");
   }
 
+  const orgIds = memberships.map(m => m.organizationId);
+
+  const eventFilters: any[] = [];
+  if (orgIds.length > 0) eventFilters.push({ organizationId: { in: orgIds } });
+  if (organizerProfile) eventFilters.push({ promoterId: organizerProfile.id });
+
   const events = await prisma.event.findMany({
-    where: { promoterId: organizerProfile.id },
+    where: { OR: eventFilters },
     orderBy: { createdAt: "desc" },
     include: {
       _count: {

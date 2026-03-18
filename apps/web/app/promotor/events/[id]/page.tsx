@@ -185,6 +185,12 @@ export default function PromoterEventDetailPage() {
                         Gestão de Bilhetes & Lotação
                     </Link>
                     <Link
+                        href={`/promotor/events/${id}/branding`}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                    >
+                        Personalização
+                    </Link>
+                    <Link
                         href={orgId ? `/promotor/events?orgId=${orgId}` : "/promotor/events"}
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-all"
                     >

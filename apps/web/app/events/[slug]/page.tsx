@@ -42,6 +42,11 @@ async function getEvent(slug: string) {
           },
         },
       },
+      organization: {
+        select: {
+          name: true,
+        },
+      },
       ticketLots: {
         where: {
           saleStartAt: { lte: new Date() },
@@ -98,9 +103,11 @@ export default async function EventPage({
       },
     },
     image: event.coverImage || event.bannerUrl || undefined,
-    organizer: event.promoter
-      ? { "@type": "Organization", name: event.promoter.brandName }
-      : undefined,
+    organizer: event.organization
+      ? { "@type": "Organization", name: event.organization.name }
+      : event.promoter
+        ? { "@type": "Organization", name: event.promoter.brandName }
+        : undefined,
     offers:
       event.ticketLots.length > 0
         ? event.ticketLots.map((lot) => ({
@@ -188,7 +195,7 @@ export default async function EventPage({
                   style={{ borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}10`, color: primaryColor }}
                 >
                   <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: primaryColor }} />
-                  Evento de {event.promoter?.brandName || 'Promotor'}
+                  Evento de {(event as any).organization?.name || event.promoter?.brandName || 'Organização'}
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white tracking-tight leading-[1.1]">
