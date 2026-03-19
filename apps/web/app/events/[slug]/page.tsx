@@ -4,9 +4,8 @@
 
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import Image from 'next/image';
-import Link from 'next/link';
 import { MapPin, Calendar } from 'lucide-react';
 import { TicketSelector } from './ticket-selector';
 
@@ -79,7 +78,7 @@ export default async function EventPage({
   const { slug } = await params;
   const event = await getEvent(slug);
 
-  if (!event || event.status !== 'PUBLISHED' || (event as any).archivedAt !== null) {
+  if (!event || event.status !== 'PUBLISHED' || event.archivedAt !== null) {
     notFound();
   }
 
@@ -200,7 +199,7 @@ export default async function EventPage({
                   style={{ borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}10`, color: primaryColor }}
                 >
                   <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: primaryColor }} />
-                  Evento de {(event as any).organization?.name || event.promoter?.brandName || 'Organização'}
+                  Evento de {event.organization?.name || event.promoter?.brandName || 'Organização'}
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white tracking-tight leading-[1.1]">
@@ -254,7 +253,7 @@ export default async function EventPage({
 
               <aside className="relative">
                 <div className="sticky top-24">
-                  <TicketSelector event={event as any} ticketLots={event.ticketLots as any} />
+                  <TicketSelector event={event} ticketLots={event.ticketLots} />
 
                   {/* Trust Footer */}
                   <div className="mt-6 text-center">
