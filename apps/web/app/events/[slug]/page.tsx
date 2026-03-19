@@ -31,7 +31,9 @@ async function getEvent(slug: string) {
       primaryColor: true,
       secondaryColor: true,
       bannerUrl: true,
-      // Landing Page fields removed (legacy)
+      fontFamily: true,
+      useCustomLandingPage: true,
+      landingPageContent: true,
       promoter: {
         include: {
           user: {
@@ -84,6 +86,7 @@ export default async function EventPage({
   // Landing page padrão com branding aplicado
   const primaryColor = event.primaryColor || '#6C2BD9';
   const secondaryColor = event.secondaryColor || '#06B6D4';
+  const fontFamily = event.fontFamily ? `"${event.fontFamily}", sans-serif` : 'Inter, sans-serif';
 
   // JSON-LD Schema.org Event structured data
   const jsonLd = {
@@ -127,6 +130,7 @@ export default async function EventPage({
   return (
     <div
       className="min-h-screen bg-black text-white"
+      style={{ fontFamily: 'var(--event-font)' }}
     >
       <script
         type="application/ld+json"
@@ -137,6 +141,7 @@ export default async function EventPage({
         :root {
           --event-primary: ${primaryColor};
           --event-secondary: ${secondaryColor};
+          --event-font: ${fontFamily};
         }
         .event-primary { color: ${primaryColor}; }
         .event-secondary { color: ${secondaryColor}; }
@@ -204,10 +209,19 @@ export default async function EventPage({
 
                 <div className="space-y-10 mb-12">
                   <section>
-                    <h2 className="text-[12px] font-black text-white/50 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
-                    <p className="text-white/85 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
-                      {event.description}
-                    </p>
+                    {event.useCustomLandingPage && event.landingPageContent ? (
+                      <div 
+                        className="custom-landing-page prose prose-invert prose-emerald max-w-none text-white/85 leading-[1.7] prose-headings:text-white prose-a:text-white"
+                        dangerouslySetInnerHTML={{ __html: event.landingPageContent }}
+                      />
+                    ) : (
+                      <>
+                        <h2 className="text-[12px] font-black text-white/50 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
+                        <p className="text-white/85 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
+                          {event.description}
+                        </p>
+                      </>
+                    )}
                   </section>
 
                   <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/10">

@@ -299,6 +299,9 @@ model Event {
   secondaryColor      String?  // Cor secundária da marca do evento
   logoUrl             String?  // URL do logo do evento
   bannerUrl           String?  // URL do banner/header do evento
+  fontFamily           String?
+  useCustomLandingPage Boolean  @default(false)
+  landingPageContent   String?  @db.Text
   
   // Check-in configuration
   checkinMode           String?  @default("SINGLE") // SINGLE, MULTI
