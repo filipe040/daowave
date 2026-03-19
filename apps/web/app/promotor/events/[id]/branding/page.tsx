@@ -259,6 +259,7 @@ export default function PromoterEventBrandingPage() {
                                 />
                                 {bannerUrl && (
                                     <div className="mt-4 relative rounded-xl overflow-hidden border border-white/10 h-32 w-full group">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={bannerUrl} alt="Banner Preview" className="h-full w-full object-cover" />
                                         <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                             <p className="text-xs font-bold text-white">Previsão da Imagem</p>
@@ -293,6 +294,7 @@ export default function PromoterEventBrandingPage() {
                                 />
                                 {logoUrl && (
                                     <div className="mt-4 bg-black/50 p-4 rounded-xl border border-white/10 inline-block">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={logoUrl} alt="Logo Preview" className="h-16 w-auto object-contain" />
                                     </div>
                                 )}
