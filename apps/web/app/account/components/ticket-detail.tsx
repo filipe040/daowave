@@ -38,13 +38,20 @@ export default function TicketDetail({ ticket }: TicketDetailProps) {
     setLoadingPdf(true);
     try {
       const res = await fetch(`/api/tickets/${ticket.id}/pdf`);
-      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        showToast("error", data.error ?? "Erro ao obter PDF");
+        const data = await res.json().catch(() => ({}));
+        showToast("error", (data as any).error ?? `Erro ${res.status} ao gerar PDF`);
         return;
       }
-      if (data.url) window.open(data.url, "_blank");
-      else showToast("error", "URL do PDF não disponível");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bilhete-${ticket.code}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch {
       showToast("error", "Erro ao obter PDF");
     } finally {
