@@ -347,6 +347,23 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
+  events: {
+    async signIn({ user }) {
+      try {
+        if (user?.email) {
+          const { sendLoginNotificationEmail } = await import("./email-service");
+          await sendLoginNotificationEmail(user.email, user.name || "Utilizador", {
+            ip: "unknown",
+            userAgent: null,
+            timestamp: new Date(),
+          });
+        }
+      } catch (err) {
+        console.error("[auth] Login notification email error:", err);
+      }
+    },
+  },
+
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin", // OAuth errors land on signin with ?error=
