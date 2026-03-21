@@ -59,6 +59,7 @@ export async function PATCH(
     const logoUrl = typeof body.logoUrl === "string" ? body.logoUrl.trim() || null : undefined;
     const bannerUrl = typeof body.bannerUrl === "string" ? body.bannerUrl.trim() || null : undefined;
     const fontFamily = typeof body.fontFamily === "string" ? body.fontFamily.trim() || null : undefined;
+    const ticketTemplateId = typeof body.ticketTemplateId === "string" ? body.ticketTemplateId.trim() || null : undefined;
     
     // Landing Page fields
     const landingPageContent = typeof body.landingPageContent === "string" ? body.landingPageContent : undefined;
@@ -78,6 +79,16 @@ export async function PATCH(
       return NextResponse.json({ error: "URL do banner inválida" }, { status: 400 });
     }
 
+    // Verify ticketTemplateId if provided
+    if (ticketTemplateId) {
+      const template = await prisma.organizationTicketTemplate.findUnique({
+        where: { id: ticketTemplateId }
+      });
+      if (!template || template.organizationId !== event.organizationId) {
+        return NextResponse.json({ error: "Template de bilhete inválido ou não pertence a esta organização." }, { status: 400 });
+      }
+    }
+
     const updateData: {
       primaryColor?: string | null;
       secondaryColor?: string | null;
@@ -86,6 +97,7 @@ export async function PATCH(
       fontFamily?: string | null;
       landingPageContent?: string | null;
       useCustomLandingPage?: boolean;
+      ticketTemplateId?: string | null;
     } = {};
     
     if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
@@ -95,6 +107,7 @@ export async function PATCH(
     if (fontFamily !== undefined) updateData.fontFamily = fontFamily;
     if (landingPageContent !== undefined) updateData.landingPageContent = landingPageContent;
     if (useCustomLandingPage !== undefined) updateData.useCustomLandingPage = useCustomLandingPage;
+    if (ticketTemplateId !== undefined) updateData.ticketTemplateId = ticketTemplateId;
 
     await prisma.event.update({
       where: { id: eventId },

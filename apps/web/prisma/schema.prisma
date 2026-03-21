@@ -163,6 +163,7 @@ model OrganizationTicketTemplate {
 
   organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   snapshots      TicketRenderSnapshot[]
+  events         Event[]              @relation("EventTicketTemplate")
 
   @@index([organizationId])
   @@index([status])
@@ -302,6 +303,9 @@ model Event {
   fontFamily           String?
   useCustomLandingPage Boolean  @default(false)
   landingPageContent   String?  @db.Text
+  
+  ticketTemplateId     String?  // Id do template de bilhetes especifico para este evento
+  ticketTemplate       OrganizationTicketTemplate? @relation("EventTicketTemplate", fields: [ticketTemplateId], references: [id])
   
   // Check-in configuration
   checkinMode           String?  @default("SINGLE") // SINGLE, MULTI

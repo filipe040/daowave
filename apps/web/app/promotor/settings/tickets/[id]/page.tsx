@@ -117,6 +117,26 @@ export default function TicketTemplateEditorPage() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm("Tem a certeza que deseja apagar (arquivar) este template? Esta ação não pode ser desfeita.")) return;
+        setArchiving(true);
+        try {
+            const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                throw new Error(errJson.error || "Erro ao apagar o template");
+            }
+            toast.success("Template apagado com sucesso");
+            router.push("/promotor/settings/tickets");
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setArchiving(false);
+        }
+    };
+
     const handlePreview = () => {
         window.open(`/api/promotor/ticket-preview?templateId=${id}&ticketId=SAMPLE`, '_blank');
         // Note: I'll need to handle 'SAMPLE' in the API or find a real ticket ID
@@ -143,7 +163,17 @@ export default function TicketTemplateEditorPage() {
             subtitle={`v${template.version} • ${template.status === 'ACTIVE' ? 'Ativo' : 'Rascunho'}`}
             backButton={{ href: "/promotor/settings/tickets", label: "Voltar aos designs" }}
             actions={
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                    {template.status !== 'ARCHIVED' && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={archiving}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-red-500/20 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-all"
+                        >
+                            <Archive className="h-4 w-4" />
+                            Apagar
+                        </button>
+                    )}
                     <button
                         onClick={handlePreview}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-white/10 text-white hover:bg-white/5 transition-all"

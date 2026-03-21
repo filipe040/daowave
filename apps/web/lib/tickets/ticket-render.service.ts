@@ -36,13 +36,22 @@ export const TicketRenderService = {
     let activeTemplate = null;
 
     if (ticket.event.organizationId) {
-      // Find ACTIVE template for org
-      activeTemplate = await prisma.organizationTicketTemplate.findFirst({
-        where: {
-          organizationId: ticket.event.organizationId,
-          status: TicketTemplateStatus.ACTIVE,
-        },
-      });
+      // Prioritize the event's assigned template
+      if (ticket.event.ticketTemplateId) {
+        activeTemplate = await prisma.organizationTicketTemplate.findUnique({
+          where: { id: ticket.event.ticketTemplateId },
+        });
+      }
+
+      // Fallback to the organization's ACTIVE template if none assigned or the assigned one was deleted
+      if (!activeTemplate) {
+        activeTemplate = await prisma.organizationTicketTemplate.findFirst({
+          where: {
+            organizationId: ticket.event.organizationId,
+            status: TicketTemplateStatus.ACTIVE,
+          },
+        });
+      }
     }
 
     if (!activeTemplate) {

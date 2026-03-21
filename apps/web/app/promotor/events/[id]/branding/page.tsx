@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { ArrowLeft, Save, Palette, Image as ImageIcon, Type, LayoutTemplate } from "lucide-react";
+import { ArrowLeft, Save, Palette, Image as ImageIcon, Type, LayoutTemplate, Ticket } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
@@ -20,6 +20,7 @@ interface EventBranding {
     fontFamily: string | null;
     useCustomLandingPage: boolean;
     landingPageContent: string | null;
+    ticketTemplateId: string | null;
 }
 
 const inputCls = "w-full rounded-2xl border border-white/10 bg-black/50 text-white placeholder:text-white/30 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner";
@@ -42,6 +43,8 @@ export default function PromoterEventBrandingPage() {
     const [fontFamily, setFontFamily] = useState("Inter");
     const [useCustomLandingPage, setUseCustomLandingPage] = useState(false);
     const [landingPageContent, setLandingPageContent] = useState("");
+    const [ticketTemplateId, setTicketTemplateId] = useState("");
+    const [templates, setTemplates] = useState<{ id: string; name: string }[]>([]);
 
     const load = useCallback(async () => {
         setLoading(true); setError(null);
@@ -57,6 +60,14 @@ export default function PromoterEventBrandingPage() {
             setFontFamily(data.fontFamily || "Inter");
             setUseCustomLandingPage(data.useCustomLandingPage || false);
             setLandingPageContent(data.landingPageContent || "");
+            setTicketTemplateId(data.ticketTemplateId || "");
+            
+            // Fetch templates
+            const tRes = await fetchWithTimeout("/api/promotor/ticket-templates");
+            if (tRes.ok) {
+                const tData = await tRes.json();
+                setTemplates(tData);
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro ao carregar evento");
         } finally {
@@ -79,7 +90,8 @@ export default function PromoterEventBrandingPage() {
                     bannerUrl,
                     fontFamily,
                     useCustomLandingPage,
-                    landingPageContent
+                    landingPageContent,
+                    ticketTemplateId: ticketTemplateId || null
                 }),
             });
             if (!res.ok) {
@@ -341,6 +353,29 @@ export default function PromoterEventBrandingPage() {
                                 </p>
                             </div>
                         )}
+                    </div>
+
+                    {/* Ticket Template */}
+                    <div className="p-6 pb-4 flex items-center gap-3 border-t border-white/5 bg-black/40">
+                        <Ticket className="h-5 w-5 text-amber-500" />
+                        <h2 className="text-sm font-bold text-amber-500 tracking-widest uppercase">Design de Bilhetes</h2>
+                    </div>
+
+                    <div className="px-6 py-6 space-y-4 bg-black/40 border-b border-white/5">
+                        <label className={labelCls}>Template de Bilhetes PDF</label>
+                        <select 
+                            value={ticketTemplateId} 
+                            onChange={e => setTicketTemplateId(e.target.value)} 
+                            className={`${inputCls} appearance-none cursor-pointer`}
+                        >
+                            <option value="">Automático (Template principal da Organização)</option>
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                        </select>
+                        <p className="mt-2 text-xs text-white/40">
+                            Selecione o design específico para os bilhetes descarregados pelos compradores deste evento. Pode gerir designs na aba &quot;Bilhetes&quot; do menu principal.
+                        </p>
                     </div>
 
                     {/* Footer Actions */}
