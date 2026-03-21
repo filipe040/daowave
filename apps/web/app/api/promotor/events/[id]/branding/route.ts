@@ -19,6 +19,7 @@ function isValidHexColor(s: string | null | undefined): boolean {
 
 function isValidUrl(s: string | null | undefined): boolean {
   if (s == null || s === "") return true;
+  if (s.startsWith("/")) return true;
   try {
     new URL(s);
     return true;

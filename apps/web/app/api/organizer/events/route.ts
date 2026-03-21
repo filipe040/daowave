@@ -98,10 +98,9 @@ const CreateEventSchema = z.object({
     if (!val) return true; // nullable
     // Accept imgur.com links (with or without protocol, direct image links)
     if (val.includes("imgur.com")) {
-      // imgur.com links can be: https://imgur.com/xxx, https://i.imgur.com/xxx, imgur.com/xxx, etc.
-      // Also accept direct image links: https://i.imgur.com/xxx.jpg
       return true;
     }
+    if (val.startsWith("/")) return true;
     // For other URLs, validate as normal URL
     try {
       new URL(val.startsWith("http") ? val : `https://${val}`);

@@ -69,6 +69,7 @@ const UpdateEventSchema = z.object({
     if (val.includes("imgur.com")) {
       return true;
     }
+    if (val.startsWith("/")) return true;
     // For other URLs, validate as normal URL
     try {
       new URL(val.startsWith("http") ? val : `https://${val}`);
