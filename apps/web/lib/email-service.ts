@@ -89,7 +89,7 @@ function getResendClient(): Resend {
 }
 
 /**
- * Check idempotency - prevent duplicate emails
+ * Check idempotency - prevent duplicate emails for the SAME exact operation
  */
 async function checkIdempotency(
   idempotencyKey: string,
@@ -100,45 +100,35 @@ async function checkIdempotency(
     return { isDuplicate: false };
   }
 
-  // For MySQL/MariaDB, JSON queries are different - use raw query or skip idempotency check
-  // For now, skip idempotency check if EmailLog doesn't exist or JSON query fails
-  let existing = null;
   try {
-    // Try to find existing email log
-    // Note: MySQL JSON path syntax is different, so we'll check by template and to only
-    existing = await prisma.emailLog.findFirst({
+    // Only block if we find a SENT email with the EXACT same idempotency key
+    const existing = await prisma.emailLog.findFirst({
       where: {
         status: "SENT",
         template,
         to: to.toLowerCase().trim(),
-        // For MySQL, we can't easily query JSON path, so we'll rely on template + to + status
-        // This is less strict but works without complex JSON queries
       },
       orderBy: { createdAt: "desc" },
     });
 
-    // If found, check if idempotencyKey matches (if meta exists)
-    if (existing && existing.meta && typeof existing.meta === 'object' && 'idempotencyKey' in existing.meta) {
-      if ((existing.meta as any).idempotencyKey === idempotencyKey) {
-        // Match found
-      } else {
-        // Different idempotency key, not a duplicate
-        existing = null;
-      }
-    } else if (existing) {
-      // Found existing but no idempotencyKey in meta, treat as potential duplicate
-      // (conservative approach - prevent sending if recent email exists)
-    }
-  } catch (error: any) {
-    // If EmailLog table doesn't exist or query fails, skip idempotency check
-    safeLog.warn("EmailLog query failed, skipping idempotency check", { error: error.message });
-  }
+    // Require the exact idempotency key to match — never block if keys differ or are missing
+    const isExactMatch =
+      existing &&
+      existing.meta &&
+      typeof existing.meta === "object" &&
+      (existing.meta as Record<string, unknown>).idempotencyKey === idempotencyKey;
 
-  return {
-    isDuplicate: !!existing,
-    existingLogId: existing?.id,
-  };
+    return {
+      isDuplicate: !!isExactMatch,
+      existingLogId: isExactMatch ? existing!.id : undefined,
+    };
+  } catch (error: any) {
+    safeLog.warn("EmailLog query failed, skipping idempotency check", { error: error.message });
+    return { isDuplicate: false };
+  }
 }
+
+
 
 /**
  * Create email log entry
