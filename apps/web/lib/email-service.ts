@@ -651,11 +651,16 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
         event: {
           include: {
             organization: true,
-          }
+          },
         },
         user: true,
         tickets: true,
-      }
+        items: {
+          include: {
+            ticketLot: true,
+          },
+        },
+      },
     });
 
     if (!order || !order.user || !order.event) {
@@ -664,8 +669,25 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
     }
 
     const { user, event, tickets } = order;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://tickets.daowave.pt";
 
-    // Build variables
+    // -- Generate Invoice PDF attachment --
+    let invoiceAttachment: { filename: string; content: Buffer; contentType: string } | undefined;
+    try {
+      const { generateInvoicePDF, buildInvoiceData } = await import("./invoice/invoice-pdf.service");
+      const invoiceData = buildInvoiceData(order as any);
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      invoiceAttachment = {
+        filename: `fatura-${invoiceData.invoiceNumber}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      };
+      safeLog.info("Invoice PDF generated", { orderId, invoiceNumber: invoiceData.invoiceNumber });
+    } catch (pdfErr: any) {
+      safeLog.error("Invoice PDF generation failed (sending email without it)", { orderId, error: pdfErr.message });
+    }
+
+    // Build email variables
     const variables = {
       name: user.name || "Cliente",
       eventTitle: event.title,
@@ -673,25 +695,27 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
       venueName: event.venue || "Local a anunciar",
       address: event.city || "",
       ticketCount: tickets.length,
-      downloadLink: `${process.env.NEXT_PUBLIC_APP_URL || "https://7eventickets.pt"}/my-tickets`, // Updated to generic tickets page.
+      downloadLink: `${appUrl}/account/tickets`,
     };
 
     const res = await sendTemplate({
       to: user.email,
       templateId: "ticket-delivery",
       variables,
-      idempotencyKey: `ticket-delivery-${orderId}`
+      idempotencyKey: `ticket-delivery-${orderId}`,
+      attachments: invoiceAttachment ? [invoiceAttachment] : undefined,
     });
 
     if (!res.success) {
       safeLog.error("Failed to send ticket delivery email", { orderId, error: res.error });
     } else {
-      safeLog.info("Ticket delivery email sent", { orderId, messageId: res.messageId });
+      safeLog.info("Ticket delivery email sent", { orderId, messageId: res.messageId, withInvoice: !!invoiceAttachment });
     }
   } catch (error: any) {
     safeLog.error("Error generating/sending ticket email", { orderId, error: error.message });
   }
 }
+
 
 /**
  * Generate ticket PDF
