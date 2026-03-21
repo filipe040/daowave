@@ -215,7 +215,42 @@ export const TicketRenderService = {
       preset = snapshot.preset as TicketTemplatePreset;
     }
 
-    const html = this.generateHtml(preset, model, theme);
+    const defaultTheme: ThemeJson = {
+      brand: { logoUrl: "", tagline: "" },
+      colors: {
+        bg: "#ffffff",
+        card: "#ffffff",
+        text: "#111111",
+        primary: "#19c37d",
+        muted: "#666666",
+      },
+      typography: { fontFamily: "Inter" },
+      qr: { size: "M", label: "Validar na entrada" },
+      blocks: {
+        showBuyerName: true,
+        showOrderId: true,
+        showTicketType: true,
+        showTerms: true,
+        showSupport: true,
+      },
+      footer: { supportUrl: "", supportEmail: "" },
+    };
+
+    const safeTheme: ThemeJson = {
+      brand: { ...defaultTheme.brand, ...(theme?.brand || {}) },
+      colors: { ...defaultTheme.colors, ...(theme?.colors || {}) },
+      typography: { ...defaultTheme.typography, ...(theme?.typography || {}) },
+      qr: { ...defaultTheme.qr, ...(theme?.qr || {}) },
+      blocks: { ...defaultTheme.blocks, ...(theme?.blocks || {}) },
+      footer: { ...defaultTheme.footer, ...(theme?.footer || {}) },
+    };
+
+    if (safeTheme.brand.logoUrl && safeTheme.brand.logoUrl.startsWith("/")) {
+      const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      safeTheme.brand.logoUrl = `${baseUrl}${safeTheme.brand.logoUrl}`;
+    }
+
+    const html = this.generateHtml(preset, model, safeTheme);
 
     // Playwright rendering
     const browser = await chromium.launch({ headless: true });
