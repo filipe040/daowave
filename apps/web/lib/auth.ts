@@ -350,14 +350,58 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user }) {
       try {
-        if (user?.email) {
-          const { sendLoginNotificationEmail } = await import("./email-service");
-          await sendLoginNotificationEmail(user.email, user.name || "Utilizador", {
-            ip: "unknown",
-            userAgent: null,
-            timestamp: new Date(),
-          });
+        if (!user?.email) return;
+
+        // -- Capture headers (server context) --
+        let ip = "Desconhecido";
+        let userAgent = "Desconhecido";
+        try {
+          const { headers } = await import("next/headers");
+          const hdrs = await headers();
+          ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim()
+            || hdrs.get("x-real-ip")
+            || "Desconhecido";
+          userAgent = hdrs.get("user-agent") || "Desconhecido";
+        } catch { /* headers() unavailable in some contexts */ }
+
+        // -- Parse device from user-agent --
+        function parseDevice(ua: string): string {
+          if (/iPhone/i.test(ua)) return "iPhone";
+          if (/iPad/i.test(ua)) return "iPad";
+          if (/Android/i.test(ua) && /Mobile/i.test(ua)) return "Android (Telemóvel)";
+          if (/Android/i.test(ua)) return "Android (Tablet)";
+          if (/Windows/i.test(ua)) return "Windows (PC)";
+          if (/Macintosh/i.test(ua)) return "Mac (PC)";
+          if (/Linux/i.test(ua)) return "Linux (PC)";
+          return "Dispositivo desconhecido";
         }
+        const device = parseDevice(userAgent);
+
+        // -- Geo-lookup --
+        let location = "Localização desconhecida";
+        try {
+          if (ip && ip !== "Desconhecido" && !ip.startsWith("127.") && !ip.startsWith("::")) {
+            const geo = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,status`, {
+              signal: AbortSignal.timeout(2000),
+            }).then(r => r.json());
+            if (geo?.status === "success") {
+              location = [geo.city, geo.country].filter(Boolean).join(", ");
+            }
+          }
+        } catch { /* geo lookup failed, continue */ }
+
+        // -- Build forgot-password link (pre-filled email) --
+        const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.daowave.pt";
+        const resetUrl = `${appUrl}/auth/forgot-password?email=${encodeURIComponent(user.email)}`;
+        const timestamp = new Date().toLocaleString("pt-PT", { timeZone: "Europe/Lisbon" });
+
+        const { sendLoginNotificationEmail } = await import("./email-service");
+        await sendLoginNotificationEmail(
+          user.email,
+          user.name || "Utilizador",
+          { ip, userAgent, timestamp: new Date() },
+          { device, location, timestamp, resetUrl }
+        );
       } catch (err) {
         console.error("[auth] Login notification email error:", err);
       }

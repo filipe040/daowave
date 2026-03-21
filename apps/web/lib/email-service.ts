@@ -612,29 +612,36 @@ export async function sendHtml(options: SendHtmlOptions): Promise<SendEmailResul
 }
 
 /**
- * Send login notification email
+ * Send login notification email — rich version with device/location/reset link
  */
 export async function sendLoginNotificationEmail(
   to: string,
   name: string,
-  loginInfo: { ip: string; userAgent: string | null; timestamp: Date }
+  loginInfo: { ip: string; userAgent: string | null; timestamp: Date },
+  richInfo?: { device: string; location: string; timestamp: string; resetUrl: string }
 ): Promise<void> {
-  await EmailService.sendHtml({
-    to,
-    subject: "Novo acesso à sua conta",
-    html: `
-      <h2>Olá ${name},</h2>
-      <p>Detetámos um novo acesso à sua conta:</p>
-      <ul>
-        <li><strong>Data/Hora:</strong> ${loginInfo.timestamp.toLocaleString("pt-PT")}</li>
-        <li><strong>IP:</strong> ${loginInfo.ip}</li>
-        <li><strong>Navegador:</strong> ${loginInfo.userAgent || "Desconhecido"}</li>
-      </ul>
-      <p>Se não foi você, por favor altere a sua palavra-passe imediatamente.</p>
-    `,
-    idempotencyKey: `login-notification-${to}-${loginInfo.timestamp.getTime()}`,
-  });
+  try {
+    const { getLoginNotificationTemplate } = await import("./email-templates-transactional");
+    const tpl = getLoginNotificationTemplate({
+      name,
+      ip: loginInfo.ip || "Desconhecido",
+      device: richInfo?.device || "Desconhecido",
+      location: richInfo?.location || "Desconhecida",
+      timestamp: richInfo?.timestamp || loginInfo.timestamp.toLocaleString("pt-PT"),
+      resetUrl: richInfo?.resetUrl || `${process.env.APP_URL || "https://tickets.daowave.pt"}/auth/forgot-password`,
+    });
+
+    await EmailService.sendHtml({
+      to,
+      subject: tpl.subject,
+      html: tpl.html,
+      idempotencyKey: `login-notification-${to}-${loginInfo.timestamp.getTime()}`,
+    });
+  } catch (err: any) {
+    safeLog.error("Failed to send login notification email", { to: maskEmail(to), error: err.message });
+  }
 }
+
 
 export async function sendTicketsEmail(orderId: string): Promise<void> {
   try {

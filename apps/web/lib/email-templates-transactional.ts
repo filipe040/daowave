@@ -1,11 +1,10 @@
 /**
  * Transactional Email Templates
- * HTML templates for transactional emails (verify-email, reset-password, etc.)
+ * Premium Dark SaaS Aesthetic — DãoWave Brand
  */
 
 import { getEmailConfig } from "./config/email";
 
-// Lazy load config to avoid errors during module initialization
 function getConfig() {
   try {
     return getEmailConfig();
@@ -14,274 +13,160 @@ function getConfig() {
   }
 }
 
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.daowave.pt";
+const BRAND = "DãoWave";
+const ACCENT = "#10b981"; // emerald-500
+const ACCENT_DARK = "#059669";
+const BG = "#09090b";
+const SURFACE = "#111113";
+const SURFACE2 = "#18181b";
+const BORDER = "#27272a";
+const TEXT_PRIMARY = "#f4f4f5";
+const TEXT_SECONDARY = "#a1a1aa";
+const TEXT_MUTED = "#71717a";
+
 /**
- * Base email template wrapper
- * Premium SaaS Aesthetic: Clean, Minimal, Professional
+ * BASE TEMPLATE — Dark Premium DãoWave
  */
-function getBaseTemplate(content: string, showBetaBanner: boolean = false): string {
-  const betaBanner = showBetaBanner
-    ? `
-    <div style="background-color: #FEF3C7; border: 1px solid #F59E0B; color: #92400E; padding: 12px 16px; margin-bottom: 24px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 0.02em;">
-      ⚠️ AMBIENTE BETA
-    </div>
-  `
+function base(preheader: string, content: string, betaBanner = false): string {
+  const beta = betaBanner
+    ? `<tr><td style="padding:0 0 24px 0"><div style="background:#422006;border:1px solid #92400e;border-radius:8px;padding:12px 16px;text-align:center;font-size:13px;font-weight:700;color:#fde68a;letter-spacing:.04em">⚠️ AMBIENTE BETA — Plataforma em testes</div></td></tr>`
     : "";
 
-  return `
-    <!DOCTYPE html>
-    <html lang="pt">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="color-scheme" content="light dark">
-        <meta name="supported-color-schemes" content="light dark">
-        <style>
-          /* Base Resets */
-          body, p, h1, h2, h3, h4, h5, h6 { margin: 0; padding: 0; }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #1a1a1c;
-            background-color: #f5f6f8;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-          table { border-collapse: collapse; width: 100%; }
-          img { max-width: 100%; height: auto; border: 0; }
-          a { color: #19c37d; text-decoration: none; }
-          a:hover { text-decoration: underline; }
-
-          /* Layout */
-          .wrapper {
-            width: 100%;
-            background-color: #f5f6f8;
-            padding: 40px 20px;
-            box-sizing: border-box;
-          }
-          .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eaeaea;
-          }
-
-          /* Header */
-          .header {
-            background-color: #0b0b0c;
-            padding: 32px 40px;
-            text-align: center;
-          }
-          .header-brand {
-            font-size: 22px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -0.02em;
-            margin: 0;
-          }
-          .header-subtitle {
-            font-size: 13px;
-            color: #a1a1aa;
-            margin-top: 4px;
-            font-weight: 500;
-            letter-spacing: 0.01em;
-          }
-
-          /* Content */
-          .content {
-            padding: 40px;
-            background-color: #ffffff;
-          }
-          .content p {
-            font-size: 15px;
-            color: #3f3f46;
-            margin-bottom: 20px;
-            line-height: 1.6;
-          }
-          .content h2 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #18181b;
-            margin-bottom: 16px;
-            margin-top: 32px;
-            letter-spacing: -0.01em;
-          }
-          .content h2:first-child { margin-top: 0; }
-          
-          /* Components */
-          .info-card {
-            background-color: #f4f4f5;
-            border-radius: 8px;
-            padding: 24px;
-            margin: 24px 0;
-            border: 1px solid #e4e4e7;
-          }
-          .info-card p {
-            margin-bottom: 12px;
-            font-size: 14px;
-          }
-          .info-card p:last-child { margin-bottom: 0; }
-          .info-card strong { color: #18181b; }
-
-          .button-wrap {
-            text-align: center;
-            margin: 32px 0;
-          }
-          .button {
-            display: inline-block;
-            background-color: #19c37d;
-            color: #ffffff !important;
-            padding: 14px 28px;
-            text-decoration: none !important;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 15px;
-            text-align: center;
-            transition: background-color 0.2s;
-          }
-
-          .meta-text {
-            font-size: 13px !important;
-            color: #71717a !important;
-          }
-
-          /* Footer */
-          .footer {
-            padding: 32px 40px;
-            text-align: center;
-            background-color: #fafafa;
-            border-top: 1px solid #f4f4f5;
-          }
-          .footer p {
-            font-size: 12px;
-            color: #a1a1aa;
-            margin-bottom: 8px;
-            line-height: 1.5;
-          }
-          .footer p:last-child { margin-bottom: 0; }
-
-          /* Dark Mode Support (for clients that support it) */
-          @media (prefers-color-scheme: dark) {
-            .wrapper { background-color: #000000 !important; }
-            .container { background-color: #121212 !important; border-color: #27272a !important; }
-            .content { background-color: #121212 !important; }
-            .content p { color: #d4d4d8 !important; }
-            .content h2 { color: #ffffff !important; }
-            .info-card { background-color: #18181b !important; border-color: #27272a !important; }
-            .info-card strong { color: #ffffff !important; }
-            .footer { background-color: #09090b !important; border-top-color: #27272a !important; }
-            .footer p { color: #71717a !important; }
-            .meta-text { color: #a1a1aa !important; }
-          }
-          
-          /* Mobile Responsiveness */
-          @media only screen and (max-width: 600px) {
-            .wrapper { padding: 20px 10px !important; }
-            .header { padding: 24px 20px !important; }
-            .content { padding: 24px 20px !important; }
-            .footer { padding: 24px 20px !important; }
-            .button { display: block !important; width: 100% !important; box-sizing: border-box !important; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="wrapper">
-          <!-- Visually hidden preheader text -->
-          <div style="display: none; max-height: 0px; overflow: hidden;">
-            Atualização importante da EasyTickets
-            &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
-          </div>
-          
-          <div class="container">
-            <div class="header">
-              <h1 class="header-brand">EasyTickets</h1>
-              <p class="header-subtitle">Bilhética digital de confiança</p>
-            </div>
-            
-            <div class="content">
-              ${betaBanner}
-              ${content}
-            </div>
-            
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} EasyTickets. Todos os direitos reservados.</p>
-              <p>Este é um email gerado automaticamente, por favor não responda a este endereço.</p>
-            </div>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  return `<!DOCTYPE html>
+<html lang="pt" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>${BRAND}</title>
+<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body,p,h1,h2,h3,h4,ul,li{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;background:${BG};color:${TEXT_PRIMARY};-webkit-font-smoothing:antialiased}
+table{border-collapse:collapse}
+img{display:block;max-width:100%;height:auto;border:0}
+a{color:${ACCENT};text-decoration:none}
+.wrapper{width:100%;background:${BG};padding:40px 16px}
+.container{max-width:600px;margin:0 auto;background:${SURFACE};border:1px solid ${BORDER};border-radius:16px;overflow:hidden}
+.header{background:linear-gradient(135deg,#0a0a0b 0%,#111113 100%);padding:36px 40px;text-align:center;border-bottom:1px solid ${BORDER}}
+.logo{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.04em}
+.logo span{color:${ACCENT}}
+.tagline{font-size:12px;color:${TEXT_MUTED};margin-top:4px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.body{padding:40px}
+.body p{font-size:15px;color:${TEXT_SECONDARY};margin-bottom:18px;line-height:1.65}
+.body h2{font-size:22px;font-weight:800;color:${TEXT_PRIMARY};margin:0 0 20px 0;letter-spacing:-.03em}
+.body .lead{font-size:16px;color:${TEXT_PRIMARY};font-weight:500}
+.btn-wrap{text-align:center;margin:28px 0}
+.btn{display:inline-block;background:${ACCENT};color:#fff!important;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;text-decoration:none!important;letter-spacing:-.01em}
+.btn-secondary{background:transparent;border:1px solid ${BORDER};color:${TEXT_SECONDARY}!important}
+.card{background:${SURFACE2};border:1px solid ${BORDER};border-radius:12px;padding:24px;margin:24px 0}
+.card-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid ${BORDER}}
+.card-row:last-child{border-bottom:none;padding-bottom:0}
+.card-label{font-size:12px;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.05em;font-weight:600;min-width:90px;padding-top:2px}
+.card-value{font-size:14px;color:${TEXT_PRIMARY};font-weight:600;flex:1}
+.alert{border-radius:10px;padding:16px 20px;margin:20px 0;font-size:14px;line-height:1.6}
+.alert-warn{background:#422006;border:1px solid #92400e;color:#fde68a}
+.alert-info{background:#0c1a2e;border:1px solid #1e3a5f;color:#93c5fd}
+.alert-danger{background:#310d0d;border:1px solid #7f1d1d;color:#fca5a5}
+.divider{height:1px;background:${BORDER};margin:28px 0}
+.meta{font-size:13px!important;color:${TEXT_MUTED}!important}
+.footer{padding:28px 40px;text-align:center;background:${BG};border-top:1px solid ${BORDER}}
+.footer p{font-size:12px;color:${TEXT_MUTED};margin-bottom:6px;line-height:1.5}
+.footer a{color:${TEXT_MUTED}}
+@media only screen and (max-width:600px){
+  .wrapper{padding:16px 8px!important}
+  .body,.header,.footer{padding:28px 20px!important}
+  .btn{display:block;text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div style="display:none;max-height:0;overflow:hidden">${preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">DÃO<span>WAVE</span></div>
+      <div class="tagline">Bilhética digital</div>
+    </div>
+    <div class="body">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${beta}
+        <tr><td>${content}</td></tr>
+      </table>
+    </div>
+    <div class="footer">
+      <p>&copy; ${new Date().getFullYear()} ${BRAND} &mdash; Todos os direitos reservados.</p>
+      <p>Este é um email automático. Por favor não responda.</p>
+      <p><a href="${APP_URL}">tickets.daowave.pt</a></p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
 }
 
 /**
- * Verify Email Template
+ * Verify Email
  */
-export function getVerifyEmailTemplate(variables: {
+export function getVerifyEmailTemplate(v: {
   name: string;
   verificationUrl: string;
   expiresIn?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Verifique o seu email</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>Obrigado por se registar na EasyTickets. Para ativar a sua conta e garantir a segurança dos seus dados, precisamos que verifique o seu endereço de email.</p>
-    
-    <div class="button-wrap">
-      <a href="${variables.verificationUrl}" class="button">Verificar o meu email</a>
-    </div>
-    
-    <p class="meta-text">Ou copie e cole este link no seu navegador:</p>
-    <p class="meta-text" style="word-break: break-all;"><a href="${variables.verificationUrl}">${variables.verificationUrl}</a></p>
-    
-    ${variables.expiresIn ? `<p class="meta-text" style="margin-top: 16px;">Este link expira em ${variables.expiresIn}.</p>` : ""}
-    <p class="meta-text" style="margin-top: 16px;">Se não criou uma conta na EasyTickets, pode ignorar este email de forma segura.</p>
-  `;
+<h2>Confirme o seu email</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Obrigado por criar a sua conta na <strong style="color:${TEXT_PRIMARY}">${BRAND}</strong>. Para ativar a sua conta, clique no botão abaixo.</p>
+<div class="btn-wrap">
+  <a href="${v.verificationUrl}" class="btn">Confirmar email</a>
+</div>
+<p class="meta">Ou copie e cole este link no seu navegador:</p>
+<p class="meta" style="word-break:break-all"><a href="${v.verificationUrl}">${v.verificationUrl}</a></p>
+${v.expiresIn ? `<div class="divider"></div><p class="meta">⏱ Este link expira em <strong>${v.expiresIn}</strong>.</p>` : ""}
+<p class="meta">Se não criou uma conta, pode ignorar este email.</p>`;
 
   return {
-    subject: "Verifique o seu email - EasyTickets",
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nVerifique o seu email: ${variables.verificationUrl}`,
+    subject: `Confirme o seu email — ${BRAND}`,
+    html: base("Confirme o seu endereço de email para ativar a sua conta.", content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\nConfirme o seu email: ${v.verificationUrl}`,
   };
 }
 
 /**
- * Reset Password Template
+ * Password Reset
  */
-export function getPasswordResetEmailTemplate(variables: {
+export function getPasswordResetEmailTemplate(v: {
   name: string;
   resetUrl: string;
   expiresIn?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Redefinição de palavra-passe</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>Recebemos um pedido para redefinir a palavra-passe associada à sua conta. Se foi você, clique no botão abaixo para criar uma nova palavra-passe.</p>
-    
-    <div class="button-wrap">
-      <a href="${variables.resetUrl}" class="button">Redefinir palavra-passe</a>
-    </div>
-    
-    <p class="meta-text">Ou copie e cole este link no seu navegador:</p>
-    <p class="meta-text" style="word-break: break-all;"><a href="${variables.resetUrl}">${variables.resetUrl}</a></p>
-    
-    ${variables.expiresIn ? `<p class="meta-text" style="margin-top: 16px;">Este link expira em ${variables.expiresIn}.</p>` : ""}
-    <p class="meta-text" style="margin-top: 16px;"><strong>Se não solicitou esta alteração, ignore este email.</strong> A sua conta permanece segura e a palavra-passe não será alterada.</p>
-  `;
+<h2>Redefinir palavra-passe</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Recebemos um pedido para redefinir a palavra-passe da sua conta. Se foi você, clique no botão abaixo.</p>
+<div class="btn-wrap">
+  <a href="${v.resetUrl}" class="btn">Redefinir palavra-passe</a>
+</div>
+<p class="meta">Ou copie e cole este link no seu navegador:</p>
+<p class="meta" style="word-break:break-all"><a href="${v.resetUrl}">${v.resetUrl}</a></p>
+${v.expiresIn ? `<div class="divider"></div><p class="meta">⏱ Este link expira em <strong>${v.expiresIn}</strong>.</p>` : ""}
+<div class="alert alert-warn" style="margin-top:20px">
+  <strong>🔒 Não foi você?</strong><br>Se não solicitou esta alteração, ignore este email. A sua palavra-passe continua segura e não será alterada.
+</div>`;
 
   return {
-    subject: "Redefinir palavra-passe - EasyTickets",
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nRedefinir palavra-passe: ${variables.resetUrl}`,
+    subject: `Redefinir palavra-passe — ${BRAND}`,
+    html: base("Pedido de redefinição de palavra-passe.", content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\nRedefinir palavra-passe: ${v.resetUrl}`,
   };
 }
 
 /**
- * Order Confirmation Template
+ * Order Confirmation
  */
-export function getOrderConfirmationEmailTemplate(variables: {
+export function getOrderConfirmationEmailTemplate(v: {
   name: string;
   orderId: string;
   eventTitle: string;
@@ -289,28 +174,37 @@ export function getOrderConfirmationEmailTemplate(variables: {
   currency?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Pagamento confirmado</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>Obrigado pela sua compra. A sua encomenda foi processada e confirmada com sucesso.</p>
-    
-    <div class="info-card">
-      <p><strong>Evento:</strong><br>${variables.eventTitle}</p>
-      <p><strong>Número da Encomenda:</strong><br>${variables.orderId}</p>
-      <p><strong>Total Pago:</strong><br>${variables.total} ${variables.currency || "EUR"}</p>
-    </div>
-    
-    <p>Os seus bilhetes com o código QR de acesso serão enviados muito em breve num email separado.</p>
-    <p>Obrigado por escolher a EasyTickets.</p>
-  `;
+<h2>Pagamento confirmado ✓</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>A sua encomenda foi processada com sucesso. Os seus bilhetes eletrónicos serão enviados em breve.</p>
+
+<div class="card">
+  <div class="card-row">
+    <span class="card-label">Evento</span>
+    <span class="card-value">${v.eventTitle}</span>
+  </div>
+  <div class="card-row">
+    <span class="card-label">Encomenda</span>
+    <span class="card-value" style="font-family:monospace;letter-spacing:.05em">${v.orderId.substring(0, 8).toUpperCase()}</span>
+  </div>
+  <div class="card-row">
+    <span class="card-label">Total</span>
+    <span class="card-value" style="color:${ACCENT};font-size:18px">${v.total} ${v.currency || "EUR"}</span>
+  </div>
+</div>
+
+<div class="btn-wrap">
+  <a href="${APP_URL}/account/tickets" class="btn">Ver os meus bilhetes</a>
+</div>
+<p class="meta" style="text-align:center">Os bilhetes com QR Code serão enviados separadamente.</p>`;
 
   return {
-    subject: `Recibo: Encomenda confirmada - ${variables.eventTitle}`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nEncomenda ${variables.orderId} confirmada.\nEvento: ${variables.eventTitle}\nTotal: ${variables.total} ${variables.currency || "EUR"}`,
+    subject: `✓ Compra confirmada — ${v.eventTitle}`,
+    html: base(`Encomenda confirmada para ${v.eventTitle}.`, content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\nEncomenda ${v.orderId} confirmada.\nEvento: ${v.eventTitle}\nTotal: ${v.total} ${v.currency || "EUR"}`,
   };
 }
 
-/** Branding for ticket email (Protocolo Visual) */
 export type TicketEmailBranding = {
   primaryColor?: string | null;
   secondaryColor?: string | null;
@@ -319,10 +213,9 @@ export type TicketEmailBranding = {
 };
 
 /**
- * Ticket Delivery Template
- * Uses event branding (primary color, banner URL) when provided for the email ticket design.
+ * Ticket Delivery
  */
-export function getTicketEmailTemplate(variables: {
+export function getTicketEmailTemplate(v: {
   name: string;
   eventTitle: string;
   eventDate: string;
@@ -334,153 +227,165 @@ export function getTicketEmailTemplate(variables: {
   ticketCode?: string | null;
   qrCodeImageUrl?: string | null;
 }): { subject: string; html: string; text: string } {
-  const primaryColor = variables.branding?.primaryColor || "#0b0b0c";
-  const headerTitle = variables.branding?.headerTitle?.trim() || "O seu bilhete de acesso";
-  const bannerUrl = variables.branding?.bannerUrl?.trim();
+  const primary = v.branding?.primaryColor || ACCENT;
+  const headerTitle = v.branding?.headerTitle?.trim() || "O seu bilhete de acesso";
+  const bannerUrl = v.branding?.bannerUrl?.trim();
 
-  // Premium Custom Ticket Header (Overrrides Base Header)
-  const ticketHeader = bannerUrl
-    ? `
-      <div style="width: 100%; height: 160px; overflow: hidden; position: relative;">
-        <img src="${bannerUrl}" alt="Event Banner" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
-      </div>
-      <div style="background-color: ${primaryColor}; padding: 24px 40px; text-align: center;">
-        <h1 style="color: #ffffff; font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em;">${headerTitle}</h1>
-      </div>
-    `
-    : `
-      <div style="background-color: ${primaryColor}; padding: 40px; text-align: center;">
-        <h1 style="color: #ffffff; font-size: 24px; margin: 0; font-weight: 800; letter-spacing: -0.02em;">${headerTitle}</h1>
-      </div>
-    `;
+  const hero = bannerUrl
+    ? `<div style="width:100%;height:180px;overflow:hidden;position:relative;border-bottom:1px solid ${BORDER}"><img src="${bannerUrl}" alt="Banner do Evento" style="width:100%;height:100%;object-fit:cover"></div>
+       <div style="background:${BG};padding:24px 40px;text-align:center;border-bottom:1px solid ${BORDER}"><p style="margin:0;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em">${headerTitle}</p></div>`
+    : `<div style="background:linear-gradient(135deg,${primary}22 0%,${BG} 100%);padding:36px 40px;text-align:center;border-bottom:1px solid ${BORDER}">
+         <div style="display:inline-block;background:${primary}22;border:1px solid ${primary}44;border-radius:12px;padding:12px 20px;margin-bottom:16px">
+           <span style="font-size:28px">🎫</span>
+         </div>
+         <p style="margin:0;font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em">${headerTitle}</p>
+       </div>`;
 
-  const downloadSection = variables.downloadLink
-    ? `
-    <div style="background-color: #fafafa; border: 1px solid #e4e4e7; padding: 24px; margin: 32px 0; border-radius: 8px; text-align: center;">
-      <p style="margin-bottom: 16px; font-weight: 600; color: #18181b;">Aceder ao formato PDF</p>
-      <a href="${variables.downloadLink}" style="display: inline-block; background-color: ${primaryColor}; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Descarregar Bilhete(s)</a>
-      <p style="margin-top: 12px; font-size: 13px; color: #71717a;">Recomendamos fazer o download antes de chegar ao recinto.</p>
-    </div>
-  `
-    : "";
+  const qrSection = v.qrCodeImageUrl || v.ticketCode ? `
+<div style="text-align:center;margin:28px 0;padding:28px;background:${SURFACE2};border:1px solid ${BORDER};border-radius:12px">
+  <p style="font-size:11px;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:20px">Código QR de Acesso</p>
+  ${v.qrCodeImageUrl ? `<img src="${v.qrCodeImageUrl}" alt="QR Code" width="180" height="180" style="margin:0 auto 16px;border-radius:8px;background:#fff;padding:8px">` : ""}
+  ${v.ticketCode ? `<p style="font-family:monospace;font-size:22px;font-weight:800;color:${TEXT_PRIMARY};letter-spacing:.12em">${v.ticketCode}</p>` : ""}
+</div>` : "";
 
-  const qrSection =
-    variables.qrCodeImageUrl || variables.ticketCode
-      ? `
-    <div style="text-align: center; margin: 32px 0; padding: 32px 0; border-top: 1px dashed #e4e4e7; border-bottom: 1px dashed #e4e4e7;">
-      <p style="font-size: 12px; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; font-weight: 600;">Código de Acesso Remoto</p>
-      ${variables.qrCodeImageUrl ? `<img src="${variables.qrCodeImageUrl}" alt="QR Code" width="200" height="200" style="width: 200px; height: auto; border-radius: 8px; margin: 0 auto; display: block;" />` : ""}
-      ${variables.ticketCode ? `<p style="font-family: monospace; font-size: 20px; font-weight: 800; color: #18181b; margin: 24px 0 0 0; letter-spacing: 0.1em;">${variables.ticketCode}</p>` : ""}
-    </div>
-  `
-      : "";
+  const downloadSection = v.downloadLink ? `
+<div class="btn-wrap">
+  <a href="${v.downloadLink}" class="btn">Descarregar bilhete(s) PDF</a>
+</div>
+<p class="meta" style="text-align:center">Recomendamos descarregar antes de chegar ao recinto.</p>` : "";
 
   const bodyContent = `
-    <h2>Validação de entrada</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>Os seus bilhetes para o evento <strong>${variables.eventTitle}</strong> estão confirmados e prontos a utilizar.</p>
-    
-    ${qrSection}
-    
-    <div class="info-card">
-      <h3 style="font-size: 14px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 16px 0;">Detalhes do Evento</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px;">
-        <tr>
-          <td style="padding: 8px 0; color: #71717a; width: 100px;">Evento:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #18181b;">${variables.eventTitle}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #71717a;">Data:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #18181b;">${variables.eventDate}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #71717a;">Local:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #18181b;">${variables.venueName}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #71717a;">Morada:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #18181b;">${variables.address}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #71717a;">Quantidade:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #18181b;">${variables.ticketCount} bilhete(s)</td>
-        </tr>
-      </table>
+<h2 style="margin-bottom:8px">Bilhete(s) confirmado(s) ✓</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Os seus bilhetes para <strong style="color:${TEXT_PRIMARY}">${v.eventTitle}</strong> estão prontos! Apresente o QR Code à entrada do recinto.</p>
+
+${qrSection}
+
+<div class="card">
+  <div class="card-row"><span class="card-label">Evento</span><span class="card-value">${v.eventTitle}</span></div>
+  <div class="card-row"><span class="card-label">Data</span><span class="card-value">${v.eventDate}</span></div>
+  <div class="card-row"><span class="card-label">Local</span><span class="card-value">${v.venueName}</span></div>
+  ${v.address ? `<div class="card-row"><span class="card-label">Morada</span><span class="card-value">${v.address}</span></div>` : ""}
+  <div class="card-row"><span class="card-label">Bilhetes</span><span class="card-value" style="color:${ACCENT}">${v.ticketCount} bilhete(s)</span></div>
+</div>
+
+${downloadSection}
+
+<div class="alert alert-info">
+  📱 <strong>Na entrada do evento:</strong> Apresente o QR Code neste email (ou no PDF) diretamente no seu smartphone. Aumente o brilho do ecrã para facilitar a leitura.
+</div>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${BRAND}</title>
+<style>
+*{box-sizing:border-box}body,p,h1,h2,h3{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;background:${BG};color:${TEXT_PRIMARY};-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto;border:0}
+.wrapper{width:100%;background:${BG};padding:40px 16px}
+.container{max-width:600px;margin:0 auto;background:${SURFACE};border:1px solid ${BORDER};border-radius:16px;overflow:hidden}
+.body{padding:40px}.body p{font-size:15px;color:${TEXT_SECONDARY};margin-bottom:18px;line-height:1.65}
+.body h2{font-size:22px;font-weight:800;color:${TEXT_PRIMARY};margin:0 0 8px 0;letter-spacing:-.03em}
+.body .lead{font-size:16px;color:${TEXT_PRIMARY};font-weight:500}.btn-wrap{text-align:center;margin:28px 0}
+.btn{display:inline-block;background:${primary};color:#fff!important;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;text-decoration:none!important}
+.card{background:${SURFACE2};border:1px solid ${BORDER};border-radius:12px;padding:24px;margin:24px 0}
+.card-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid ${BORDER}}
+.card-row:last-child{border-bottom:none;padding-bottom:0}
+.card-label{font-size:12px;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.05em;font-weight:600;min-width:80px;padding-top:2px}
+.card-value{font-size:14px;color:${TEXT_PRIMARY};font-weight:600;flex:1}
+.alert{border-radius:10px;padding:16px 20px;margin:20px 0;font-size:14px;line-height:1.6}
+.alert-info{background:#0c1a2e;border:1px solid #1e3a5f;color:#93c5fd}
+.meta{font-size:13px!important;color:${TEXT_MUTED}!important}.footer{padding:28px 40px;text-align:center;background:${BG};border-top:1px solid ${BORDER}}
+.footer p{font-size:12px;color:${TEXT_MUTED};margin-bottom:6px;line-height:1.5}.footer a{color:${TEXT_MUTED}}
+@media only screen and (max-width:600px){.wrapper{padding:16px 8px!important}.body,.footer{padding:28px 20px!important}.btn{display:block;text-align:center}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div style="display:none;max-height:0;overflow:hidden">Os seus bilhetes para ${v.eventTitle} estão prontos!&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <div class="container">
+    ${hero}
+    <div class="body">
+      ${getConfig().mode === "public_beta" ? `<div style="background:#422006;border:1px solid #92400e;border-radius:8px;padding:12px 16px;margin-bottom:24px;text-align:center;font-size:13px;font-weight:700;color:#fde68a">⚠️ AMBIENTE BETA</div>` : ""}
+      ${bodyContent}
     </div>
-    
-    ${downloadSection}
-    
-    <div style="background-color: #fef08a; padding: 16px; border-radius: 8px; margin-top: 32px;">
-      <p style="margin: 0; font-size: 13px; color: #854d0e; line-height: 1.5;">
-        <strong>Instruções à porta:</strong> Por favor, apresente este email (ou o ficheiro PDF) diretamente no seu smartphone. Aumente o brilho do ecrã para facilitar a leitura do código QR pelo scanner.
-      </p>
+    <div class="footer">
+      <p>&copy; ${new Date().getFullYear()} ${BRAND} — Todos os direitos reservados.</p>
+      <p><a href="${APP_URL}">tickets.daowave.pt</a></p>
     </div>
-  `;
-
-  // For the ticket delivery, we compose the HTML directly replacing the standard header 
-  // with the custom branding header, but keeping the exact same premium structure.
-
-  const betaBanner = getConfig().mode === "public_beta"
-    ? `<div style="background-color: #FEF3C7; border: 1px solid #F59E0B; color: #92400E; padding: 12px 16px; margin-bottom: 24px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 0.02em;">⚠️ AMBIENTE BETA</div>`
-    : "";
-
-  const html = `
-    <!DOCTYPE html>
-    <html lang="pt">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body, p, h1, h2, h3, h4, h5, h6 { margin: 0; padding: 0; }
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1c; background-color: #f5f6f8; -webkit-font-smoothing: antialiased; }
-          table { border-collapse: collapse; }
-          img { max-width: 100%; height: auto; border: 0; }
-          .wrapper { width: 100%; background-color: #f5f6f8; padding: 40px 20px; box-sizing: border-box; }
-          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #eaeaea; }
-          .content { padding: 40px; background-color: #ffffff; }
-          .content p { font-size: 15px; color: #3f3f46; margin-bottom: 20px; line-height: 1.6; }
-          .content h2 { font-size: 20px; font-weight: 700; color: #18181b; margin-bottom: 16px; margin-top: 32px; letter-spacing: -0.01em; }
-          .content h2:first-child { margin-top: 0; }
-          .info-card { background-color: #f4f4f5; border-radius: 8px; padding: 24px; margin: 24px 0; border: 1px solid #e4e4e7; }
-          .footer { padding: 32px 40px; text-align: center; background-color: #fafafa; border-top: 1px solid #f4f4f5; }
-          .footer p { font-size: 12px; color: #a1a1aa; margin-bottom: 8px; line-height: 1.5; }
-          @media only screen and (max-width: 600px) {
-            .wrapper { padding: 20px 10px !important; }
-            .content { padding: 24px 20px !important; }
-            .footer { padding: 24px 20px !important; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="wrapper">
-          <div style="display: none; max-height: 0px; overflow: hidden;">O seu bilhete de acesso está pronto.</div>
-          <div class="container">
-            ${ticketHeader}
-            <div class="content">
-              ${betaBanner}
-              ${bodyContent}
-            </div>
-            <div class="footer">
-              <p>&copy; ${new Date().getFullYear()} EasyTickets. Todos os direitos reservados.</p>
-              <p>Este é um email gerado automaticamente com anexos importantes.</p>
-            </div>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  </div>
+</div>
+</body>
+</html>`;
 
   return {
-    subject: `Os seus bilhetes para ${variables.eventTitle}`,
+    subject: `🎫 Os seus bilhetes para ${v.eventTitle}`,
     html,
-    text: `Olá ${variables.name},\n\nBilhetes para ${variables.eventTitle}\nData: ${variables.eventDate}\nLocal: ${variables.venueName}${variables.ticketCode ? `\nCódigo: ${variables.ticketCode}` : ""}`,
+    text: `Olá ${v.name},\nOs seus bilhetes para ${v.eventTitle}\nData: ${v.eventDate}\nLocal: ${v.venueName}${v.ticketCode ? `\nCódigo: ${v.ticketCode}` : ""}`,
   };
 }
 
 /**
- * Ticket Transfer Template
+ * Login Notification — with security info + reset link
  */
-export function getTicketTransferTemplate(variables: {
+export function getLoginNotificationTemplate(v: {
+  name: string;
+  ip: string;
+  device: string;
+  location: string;
+  timestamp: string;
+  resetUrl: string;
+}): { subject: string; html: string; text: string } {
+  const content = `
+<h2>Novo acesso à sua conta</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Detetámos um novo acesso à sua conta ${BRAND}. Se foi você, não é necessária nenhuma ação.</p>
+
+<div class="card">
+  <p style="font-size:11px;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:16px">Detalhes do acesso</p>
+  <div class="card-row">
+    <span class="card-label">⏱ Data/Hora</span>
+    <span class="card-value">${v.timestamp}</span>
+  </div>
+  <div class="card-row">
+    <span class="card-label">🌐 Endereço IP</span>
+    <span class="card-value" style="font-family:monospace">${v.ip}</span>
+  </div>
+  <div class="card-row">
+    <span class="card-label">💻 Dispositivo</span>
+    <span class="card-value">${v.device}</span>
+  </div>
+  <div class="card-row">
+    <span class="card-label">📍 Localização</span>
+    <span class="card-value">${v.location}</span>
+  </div>
+</div>
+
+<div class="alert alert-danger">
+  <strong>⚠️ Não foi você?</strong><br>
+  Se não reconhece este acesso, altere a sua palavra-passe imediatamente para proteger a sua conta.
+</div>
+
+<div class="btn-wrap">
+  <a href="${v.resetUrl}" class="btn" style="background:#dc2626">Alterar palavra-passe agora</a>
+</div>
+<p class="meta" style="text-align:center">Este link de segurança expira em 1 hora.</p>
+<div class="divider"></div>
+<p class="meta">Se foi você a entrar, pode ignorar este email. A sua conta está segura.</p>`;
+
+  return {
+    subject: `🔐 Novo acesso à sua conta — ${BRAND}`,
+    html: base("Novo acesso detetado na sua conta DãoWave.", content, false),
+    text: `Olá ${v.name},\n\nNovo acesso à sua conta DãoWave.\nData: ${v.timestamp}\nIP: ${v.ip}\nDispositivo: ${v.device}\nLocalização: ${v.location}\n\nNão foi você? Altere a sua palavra-passe: ${v.resetUrl}`,
+  };
+}
+
+/**
+ * Ticket Transfer
+ */
+export function getTicketTransferTemplate(v: {
   recipientName: string;
   senderName: string;
   eventTitle: string;
@@ -489,75 +394,64 @@ export function getTicketTransferTemplate(variables: {
   expiresIn?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Transferência de bilhete</h2>
-    <p>Olá <strong>${variables.recipientName}</strong>,</p>
-    <p>O utilizador <strong>${variables.senderName}</strong> acabou de lhe transferir um bilhete para um próximo evento.</p>
-    
-    <div class="info-card">
-      <p><strong>Evento:</strong><br>${variables.eventTitle}</p>
-      <p><strong>Data:</strong><br>${variables.eventDate}</p>
-      <p><strong>Enviado por:</strong><br>${variables.senderName}</p>
-    </div>
-    
-    <p>Para adicionar o bilhete à sua conta ou descarregá-lo, por favor aceite a transferência através do botão abaixo:</p>
-    
-    <div class="button-wrap">
-      <a href="${variables.acceptUrl}" class="button">Aceitar Bilhete</a>
-    </div>
-    
-    <p class="meta-text">Ou copie e cole este link no seu navegador:</p>
-    <p class="meta-text" style="word-break: break-all;"><a href="${variables.acceptUrl}">${variables.acceptUrl}</a></p>
-    
-    ${variables.expiresIn ? `<p class="meta-text" style="margin-top: 16px;">Este link de transferência expira em ${variables.expiresIn}.</p>` : ""}
-    <p class="meta-text" style="margin-top: 16px;">Se não conhece o remetente ou não espera receber este bilhete, pode ignorar este email com segurança.</p>
-  `;
+<h2>Recebeu um bilhete 🎫</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.recipientName}</strong>,</p>
+<p><strong style="color:${TEXT_PRIMARY}">${v.senderName}</strong> transferiu-lhe um bilhete para o seguinte evento:</p>
+
+<div class="card">
+  <div class="card-row"><span class="card-label">Evento</span><span class="card-value">${v.eventTitle}</span></div>
+  <div class="card-row"><span class="card-label">Data</span><span class="card-value">${v.eventDate}</span></div>
+  <div class="card-row"><span class="card-label">De</span><span class="card-value">${v.senderName}</span></div>
+</div>
+
+<div class="btn-wrap">
+  <a href="${v.acceptUrl}" class="btn">Aceitar bilhete</a>
+</div>
+<p class="meta" style="text-align:center">Ou copie: <a href="${v.acceptUrl}">${v.acceptUrl}</a></p>
+${v.expiresIn ? `<p class="meta" style="text-align:center">⏱ Este link expira em <strong>${v.expiresIn}</strong>.</p>` : ""}
+<p class="meta">Se não conhece o remetente, pode ignorar este email.</p>`;
 
   return {
-    subject: `${variables.senderName} enviou-lhe um bilhete para ${variables.eventTitle}`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.recipientName},\n\n${variables.senderName} transferiu um bilhete para ${variables.eventTitle}.\nAceitar: ${variables.acceptUrl}`,
+    subject: `🎫 ${v.senderName} enviou-lhe um bilhete para ${v.eventTitle}`,
+    html: base(`${v.senderName} transferiu um bilhete para ${v.eventTitle}.`, content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.recipientName},\n\n${v.senderName} transferiu um bilhete para ${v.eventTitle}.\nAceitar: ${v.acceptUrl}`,
   };
 }
 
 /**
- * Organization Invite Template
+ * Organization Invite
  */
-export function getOrganizationInviteTemplate(variables: {
+export function getOrganizationInviteTemplate(v: {
   organizationName: string;
   acceptUrl: string;
   expiresIn?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Convite para equipa</h2>
-    <p>Olá,</p>
-    <p>Foi convidado(a) para se juntar à organização profissional <strong>${variables.organizationName}</strong> na plataforma EasyTickets.</p>
-    
-    <div class="info-card">
-      <p>Como membro da equipa, poderá ajudar a criar e gerir eventos, participar no controlo de acessos (validação de bilhetes) e consultar métricas de vendas, com base no seu nível de permissões.</p>
-    </div>
-    
-    <div class="button-wrap">
-      <a href="${variables.acceptUrl}" class="button">Aceitar Convite</a>
-    </div>
-    
-    <p class="meta-text">Ou copie e cole este link no seu navegador:</p>
-    <p class="meta-text" style="word-break: break-all;"><a href="${variables.acceptUrl}">${variables.acceptUrl}</a></p>
-    
-    ${variables.expiresIn ? `<p class="meta-text" style="margin-top: 16px;">Este convite expira em ${variables.expiresIn}.</p>` : ""}
-    <p class="meta-text" style="margin-top: 16px;">Se não conhece esta organização, pode ignorar este email de forma segura.</p>
-  `;
+<h2>Convite para equipa</h2>
+<p>Foi convidado(a) para se juntar à organização <strong style="color:${TEXT_PRIMARY}">${v.organizationName}</strong> na plataforma ${BRAND}.</p>
+
+<div class="card">
+  <p style="color:${TEXT_SECONDARY};font-size:14px;margin:0">Como membro da equipa poderá ajudar a criar e gerir eventos, participar no controlo de acessos e consultar métricas de vendas, conforme as permissões atribuídas.</p>
+</div>
+
+<div class="btn-wrap">
+  <a href="${v.acceptUrl}" class="btn">Aceitar convite</a>
+</div>
+<p class="meta" style="text-align:center">Ou copie: <a href="${v.acceptUrl}">${v.acceptUrl}</a></p>
+${v.expiresIn ? `<p class="meta" style="text-align:center">⏱ Este convite expira em <strong>${v.expiresIn}</strong>.</p>` : ""}
+<p class="meta">Se não conhece esta organização, pode ignorar este email.</p>`;
 
   return {
-    subject: `Convite para integrar a organização ${variables.organizationName}`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá,\n\nFoi convidado para a organização ${variables.organizationName}.\nAceitar convite: ${variables.acceptUrl}`,
+    subject: `Convite para integrar ${v.organizationName} — ${BRAND}`,
+    html: base(`Convite para a organização ${v.organizationName}.`, content, getConfig().mode === "public_beta"),
+    text: `Foi convidado para a organização ${v.organizationName}.\nAceitar: ${v.acceptUrl}`,
   };
 }
 
 /**
- * Event Reminder 24h Template
+ * Event Reminder 24h
  */
-export function getEventReminderTemplate(variables: {
+export function getEventReminderTemplate(v: {
   name: string;
   eventTitle: string;
   eventDate: string;
@@ -566,110 +460,100 @@ export function getEventReminderTemplate(variables: {
   ticketUrl: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Falta pouco tempo!</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>É já amanhã! Este é um lembrete automático de que o evento <strong>${variables.eventTitle}</strong> começa em menos de 24 horas.</p>
-    
-    <div class="info-card">
-      <p><strong>Evento:</strong><br>${variables.eventTitle}</p>
-      <p><strong>Data de Ínicio:</strong><br>${variables.eventDate}</p>
-      <p><strong>Recinto:</strong><br>${variables.venueName}</p>
-      <p><strong>Localização:</strong><br>${variables.address}</p>
-    </div>
-    
-    <p>Certifique-se de que tem os seus bilhetes digitais prontos e acessíveis no seu telemóvel para rápida validação à entrada.</p>
-    
-    <div class="button-wrap">
-      <a href="${variables.ticketUrl}" class="button">Aceder aos meus bilhetes</a>
-    </div>
-    
-    <p>Desejamos-lhe um excelente espetáculo!</p>
-  `;
+<h2>É amanhã! ⏰</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Lembrete automático: o evento <strong style="color:${TEXT_PRIMARY}">${v.eventTitle}</strong> começa em menos de 24 horas!</p>
+
+<div class="card">
+  <div class="card-row"><span class="card-label">Evento</span><span class="card-value">${v.eventTitle}</span></div>
+  <div class="card-row"><span class="card-label">Data</span><span class="card-value">${v.eventDate}</span></div>
+  <div class="card-row"><span class="card-label">Local</span><span class="card-value">${v.venueName}</span></div>
+  <div class="card-row"><span class="card-label">Morada</span><span class="card-value">${v.address}</span></div>
+</div>
+
+<div class="btn-wrap">
+  <a href="${v.ticketUrl}" class="btn">Ver os meus bilhetes</a>
+</div>
+<p>Certifique-se de ter os seus bilhetes acessíveis no smartphone. Bom espetáculo! 🎉</p>`;
 
   return {
-    subject: `Lembrete: O evento ${variables.eventTitle} é amanhã!`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nO evento ${variables.eventTitle} é amanhã!\nVer bilhetes: ${variables.ticketUrl}`,
+    subject: `⏰ Amanhã: ${v.eventTitle}`,
+    html: base(`O evento ${v.eventTitle} é amanhã!`, content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\n\nO evento ${v.eventTitle} é amanhã!\nVer bilhetes: ${v.ticketUrl}`,
   };
 }
 
 /**
- * Post-Event Thank You Template
+ * Post-Event Thank You
  */
-export function getPostEventThankYouTemplate(variables: {
+export function getPostEventThankYouTemplate(v: {
   name: string;
   eventTitle: string;
   feedbackUrl?: string;
 }): { subject: string; html: string; text: string } {
   const content = `
-    <h2>Obrigado pela sua presença</h2>
-    <p>Olá <strong>${variables.name}</strong>,</p>
-    <p>Esperamos que tenha desfrutado do evento <strong>${variables.eventTitle}</strong> ao máximo!</p>
-    <p>Obrigado por ter escolhido a EasyTickets para garantir a sua presença e por fazer parte desta incrível experiência.</p>
-    
-    ${variables.feedbackUrl ? `
-    <div class="info-card">
-      <p><strong>A sua opinião importa</strong><br>Trabalhamos constantemente com os promotores para melhorar a qualidade dos eventos. Se tiver disponibilidade, agradeceríamos muito que partilhasse a sua opinião brevemente connosco.</p>
-    </div>
-    <div class="button-wrap">
-      <a href="${variables.feedbackUrl}" class="button">Avaliar Evento</a>
-    </div>
-    ` : ""}
-    
-    <p>Até à próxima e contamos consigo em futuros eventos!</p>
-  `;
+<h2>Obrigado pela sua presença! 🎉</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.name}</strong>,</p>
+<p>Esperamos que tenha desfrutado ao máximo do <strong style="color:${TEXT_PRIMARY}">${v.eventTitle}</strong>. Obrigado por fazer parte deste momento!</p>
+
+${v.feedbackUrl ? `
+<div class="card">
+  <p style="color:${TEXT_SECONDARY};font-size:14px;margin:0">A sua opinião ajuda-nos a melhorar. Se tiver um momento, adorávamos saber o que achou do evento.</p>
+</div>
+<div class="btn-wrap">
+  <a href="${v.feedbackUrl}" class="btn btn-secondary">Avaliar o evento</a>
+</div>` : ""}
+
+<p>Até à próxima! Fique atento(a) a futuros eventos em <a href="${APP_URL}">${APP_URL}</a>.</p>`;
 
   return {
-    subject: `Obrigado por ir ao evento: ${variables.eventTitle}`,
-    html: getBaseTemplate(content, getConfig().mode === "public_beta"),
-    text: `Olá ${variables.name},\n\nObrigado por ter participado no evento ${variables.eventTitle}!`,
+    subject: `Obrigado por participar em ${v.eventTitle}!`,
+    html: base(`Obrigado por participar em ${v.eventTitle}!`, content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\n\nObrigado por participar em ${v.eventTitle}!`,
   };
 }
 
 /**
- * Promoter Daily Report Template
+ * Promoter Daily Report
  */
-export function getPromoterDailyReportTemplate(variables: {
+export function getPromoterDailyReportTemplate(v: {
   promoterName: string;
   date: string;
   totalSales: string;
   ticketsSold: number;
   upcomingEvents: Array<{ title: string; date: string; sold: number }>;
 }): { subject: string; html: string; text: string } {
-
-  const eventsHtml = variables.upcomingEvents.length > 0
-    ? variables.upcomingEvents.map(e => `
-        <div style="padding: 12px 0; border-bottom: 1px solid #e4e4e7;">
-          <p style="margin: 0; font-weight: 600; color: #18181b; font-size: 15px;">${e.title}</p>
-          <p style="margin: 4px 0 0 0; color: #71717a; font-size: 13px;">Data: ${e.date} &nbsp;•&nbsp; <strong style="color: #19c37d;">${e.sold} vendidas</strong></p>
-        </div>
-      `).join("")
-    : "<p style=\"color: #71717a; font-size: 14px;\">Sem eventos ativos nas próximas datas.</p>";
+  const eventRows = v.upcomingEvents.length > 0
+    ? v.upcomingEvents.map(e => `
+<div style="padding:12px 0;border-bottom:1px solid ${BORDER}">
+  <p style="margin:0;font-weight:700;color:${TEXT_PRIMARY};font-size:14px">${e.title}</p>
+  <p style="margin:4px 0 0;color:${TEXT_MUTED};font-size:13px">${e.date} &nbsp;•&nbsp; <strong style="color:${ACCENT}">${e.sold} vendidos</strong></p>
+</div>`).join("")
+    : `<p style="color:${TEXT_MUTED};font-size:14px">Sem eventos ativos nas próximas datas.</p>`;
 
   const content = `
-    <h2>Relatório Diário de Vendas</h2>
-    <p>Olá <strong>${variables.promoterName}</strong>,</p>
-    <p>Aqui está o resumo diário automatizado referente às vendas consolidadas da sua organização até à data de <strong>${variables.date}</strong>.</p>
-    
-    <div class="info-card" style="border-left: 4px solid #19c37d; text-align: center;">
-      <h3 style="margin-top: 0; color: #71717a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Receita de Bilheteira (24h)</h3>
-      <p style="font-size: 32px; font-weight: 800; color: #18181b; margin: 12px 0;">${variables.totalSales}</p>
-      <p style="font-size: 14px; color: #52525b; margin: 0;"><strong>${variables.ticketsSold}</strong> inscrições transacionadas</p>
-    </div>
+<h2>Relatório Diário de Vendas</h2>
+<p class="lead">Olá <strong style="color:${TEXT_PRIMARY}">${v.promoterName}</strong>,</p>
+<p>Aqui está o resumo das vendas até <strong style="color:${TEXT_PRIMARY}">${v.date}</strong>.</p>
 
-    <h3 style="font-size: 16px; font-weight: 600; color: #18181b; margin: 32px 0 16px 0; border-bottom: 2px solid #f4f4f5; padding-bottom: 8px;">Breakdown Próximos Eventos</h3>
-    <div style="background-color: #ffffff;">
-      ${eventsHtml}
-    </div>
+<div class="card" style="text-align:center;border-left:3px solid ${ACCENT}">
+  <p style="font-size:12px;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px">Receita de Bilheteira (24h)</p>
+  <p style="font-size:36px;font-weight:900;color:${TEXT_PRIMARY};margin:8px 0;letter-spacing:-.03em">${v.totalSales}</p>
+  <p style="font-size:14px;color:${TEXT_MUTED};margin:0"><strong style="color:${ACCENT}">${v.ticketsSold}</strong> bilhetes vendidos</p>
+</div>
 
-    <div class="button-wrap">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://tickets.daowave.pt'}/promotor" class="button">Abrir Dashboard</a>
-    </div>
-  `;
+<p style="font-size:13px;font-weight:700;color:${TEXT_MUTED};text-transform:uppercase;letter-spacing:.05em;margin:28px 0 12px">Próximos Eventos</p>
+<div class="card" style="padding:0 24px">
+  ${eventRows}
+</div>
+
+<div class="btn-wrap">
+  <a href="${APP_URL}/promotor" class="btn">Abrir Dashboard</a>
+</div>`;
 
   return {
-    subject: `Resumo de Vendas: ${variables.totalSales} gerados`,
-    html: getBaseTemplate(content, false), // No beta banner for daily reports generally.
-    text: `Olá ${variables.promoterName},\n\nReceita de hoje: ${variables.totalSales}\nBilhetes: ${variables.ticketsSold}\n\nAceda ao dashboard para mais detalhes.`,
+    subject: `📊 Relatório de Vendas — ${v.totalSales} em ${v.date}`,
+    html: base(`Relatório de vendas de ${v.date}.`, content, false),
+    text: `Olá ${v.promoterName},\n\nReceita de hoje: ${v.totalSales}\nBilhetes: ${v.ticketsSold}\n\nAceda ao dashboard: ${APP_URL}/promotor`,
   };
 }
