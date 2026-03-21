@@ -15,10 +15,10 @@ export const RATE_LIMITS = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: 5, // 5 attempts per 15 minutes
   },
-  // Checkout - prevent abuse
+  // Checkout - prevent abuse but allow normal purchase flow
   checkout: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 3, // 3 checkouts per minute
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    maxRequests: 15, // 15 checkout attempts per 5 minutes
   },
   // Resend ticket - prevent spam
   resendTicket: {
