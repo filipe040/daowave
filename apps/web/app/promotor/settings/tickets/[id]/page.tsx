@@ -11,7 +11,6 @@ import {
     Save,
     Send,
     Eye,
-    ChevronLeft,
     Layout,
     Palette,
     Type,
@@ -20,7 +19,10 @@ import {
     QrCode,
     Info,
     Type as TypeIcon,
-    MousePointer2
+    MousePointer2,
+    Upload,
+    Image as ImageIcon,
+    X
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeJson, TicketTemplatePreset, TicketTemplateStatus, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
@@ -36,6 +38,7 @@ export default function TicketTemplateEditorPage() {
     const [publishing, setPublishing] = useState(false);
     const [archiving, setArchiving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
 
     // Form State
     const [name, setName] = useState("");
@@ -134,6 +137,33 @@ export default function TicketTemplateEditorPage() {
             toast.error(err.message);
         } finally {
             setArchiving(false);
+        }
+    };
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingLogo(true);
+        const toastId = toast.loading("A carregar logo...");
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await fetch(`/api/promotor/ticket-templates/${id}/logo-upload`, {
+                method: "POST",
+                body: formData,
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || "Erro ao fazer upload");
+            }
+            const data = await res.json();
+            updateTheme('brand.logoUrl', data.url);
+            toast.success("Logo carregado!", { id: toastId });
+        } catch (err: any) {
+            toast.error(err.message || "Falha no upload", { id: toastId });
+        } finally {
+            setUploadingLogo(false);
+            e.target.value = "";
         }
     };
 
@@ -241,19 +271,65 @@ export default function TicketTemplateEditorPage() {
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Logo URL (PNG/JPG)</label>
-                                <input
-                                    value={theme?.brand.logoUrl || ""}
-                                    onChange={(e) => updateTheme('brand.logoUrl', e.target.value)}
-                                    placeholder="https://..."
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
-                                />
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Logo (Upload do PC)</label>
+                                <div className="space-y-2">
+                                    <div className="relative border border-dashed border-white/20 rounded-xl p-4 bg-black/20 hover:bg-black/40 transition-colors cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                                            onChange={handleLogoUpload}
+                                            disabled={uploadingLogo}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                        <div className="flex items-center gap-3 pointer-events-none">
+                                            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                                                {uploadingLogo ? (
+                                                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <Upload className="h-4 w-4 text-white/50" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-white/70">{uploadingLogo ? "A carregar..." : "Clique para fazer upload"}</p>
+                                                <p className="text-[10px] text-white/30">PNG, JPG, SVG &mdash; máx. 5MB</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {theme?.brand.logoUrl && (
+                                        <div className="relative bg-black/40 rounded-xl p-3 border border-white/10 flex items-center gap-3">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={theme.brand.logoUrl} alt="Logo" className="h-10 w-auto object-contain max-w-[80px]" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-bold text-white/70 truncate">Logo atual</p>
+                                                <p className="text-[10px] text-white/30 truncate">{theme.brand.logoUrl}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => updateTheme('brand.logoUrl', '')}
+                                                className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <div className="relative">
+                                        <input
+                                            value={theme?.brand.logoUrl || ""}
+                                            onChange={(e) => updateTheme('brand.logoUrl', e.target.value)}
+                                            placeholder="ou cole aqui um URL (https://...)"
+                                            className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white/60 focus:border-emerald-500/50 outline-none transition-all placeholder:text-white/20"
+                                        />
+                                    </div>
+                                </div>
                             </div>
+
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Tagline / Slogan</label>
                                 <input
                                     value={theme?.brand.tagline || ""}
                                     onChange={(e) => updateTheme('brand.tagline', e.target.value)}
+                                    placeholder="ex: O festival mais esperado do ano"
                                     className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
                                 />
                             </div>
@@ -266,34 +342,21 @@ export default function TicketTemplateEditorPage() {
                             <Palette className="h-4 w-4" /> Cores
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Primária</label>
-                                <div className="flex gap-2">
-                                    <input type="color" value={theme?.colors.primary} onChange={(e) => updateTheme('colors.primary', e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none" />
-                                    <input value={theme?.colors.primary} onChange={(e) => updateTheme('colors.primary', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
+                            {[
+                                { key: 'primary', label: 'Primária (Destaque)' },
+                                { key: 'text', label: 'Texto' },
+                                { key: 'bg', label: 'Fundo' },
+                                { key: 'card', label: 'Cartão' },
+                                { key: 'muted', label: 'Secundário (Muted)' },
+                            ].map(({ key, label }) => (
+                                <div key={key} className={key === 'muted' ? 'col-span-2' : ''}>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">{label}</label>
+                                    <div className="flex gap-2">
+                                        <input type="color" value={(theme?.colors as any)?.[key] || '#000000'} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none flex-shrink-0" />
+                                        <input value={(theme?.colors as any)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Texto</label>
-                                <div className="flex gap-2">
-                                    <input type="color" value={theme?.colors.text} onChange={(e) => updateTheme('colors.text', e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none" />
-                                    <input value={theme?.colors.text} onChange={(e) => updateTheme('colors.text', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Fundo</label>
-                                <div className="flex gap-2">
-                                    <input type="color" value={theme?.colors.bg} onChange={(e) => updateTheme('colors.bg', e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none" />
-                                    <input value={theme?.colors.bg} onChange={(e) => updateTheme('colors.bg', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Cartão</label>
-                                <div className="flex gap-2">
-                                    <input type="color" value={theme?.colors.card} onChange={(e) => updateTheme('colors.card', e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none" />
-                                    <input value={theme?.colors.card} onChange={(e) => updateTheme('colors.card', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </section>
                 </div>

@@ -16,7 +16,10 @@ const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
  */
 export const themeJsonSchema = z.object({
     brand: z.object({
-        logoUrl: z.string().url().startsWith("https://").optional().or(z.literal("")),
+        logoUrl: z.string().optional().or(z.literal("")).refine(
+            (v) => !v || v.startsWith("/") || v.startsWith("https://"),
+            { message: "Logo URL must be a valid https URL or a relative path" }
+        ),
         tagline: z.string().max(100).optional(),
     }),
     colors: z.object({
