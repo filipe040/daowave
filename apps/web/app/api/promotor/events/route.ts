@@ -30,9 +30,9 @@ export async function GET(req: NextRequest) {
     const data = await EventService.getByOrganization(orgId, page);
 
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Get Events] Error:", error);
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: error?.message || "Unauthorized", stack: error?.stack }, { status: 401 });
   }
 }
 
