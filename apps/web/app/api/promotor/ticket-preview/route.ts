@@ -39,6 +39,6 @@ export async function GET(req: NextRequest) {
     } catch (error: any) {
         if (error.digest?.includes("NEXT_REDIRECT")) throw error;
         safeLog.error("Error generating ticket preview", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });
     }
 }
