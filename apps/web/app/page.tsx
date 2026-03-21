@@ -254,13 +254,14 @@ export default async function Home({
                   >
                     {/* Cover Image */}
                     <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
-                      {event.coverImage ? (
+                      {event.bannerUrl || event.coverImage ? (
                         <Image
-                          src={event.coverImage}
+                          src={event.bannerUrl || event.coverImage!}
                           alt={event.title}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                          unoptimized
                         />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/3 flex items-center justify-center">
@@ -411,14 +412,15 @@ export default async function Home({
                       <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
                     </div>
 
-                    {event.coverImage ? (
+                    {event.bannerUrl || event.coverImage ? (
                       <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
                         <Image
-                          src={event.coverImage}
+                          src={event.bannerUrl || event.coverImage!}
                           alt={event.title}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                          unoptimized
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                       </div>
