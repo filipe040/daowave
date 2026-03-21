@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         results.emailConfigError = e.message;
     }
 
-    // 2. Check recent order (if not specified, use most recent PAID order)
+    // 2. Find order
     let resolvedOrderId = orderId;
     try {
         if (!resolvedOrderId) {
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
         results.orderError = e.message;
     }
 
-    // 3. Try invoice PDF generation alone
+    // 3. Test invoice PDF generation alone
     if (resolvedOrderId) {
         try {
             const order = await prisma.order.findUnique({
@@ -84,18 +84,44 @@ export async function GET(req: Request) {
                 results.invoicePdf = { success: true, sizeBytes: pdfBuffer.length, invoiceNumber: invoiceData.invoiceNumber };
             }
         } catch (e: any) {
-            results.invoicePdfError = { message: e.message, stack: e.stack?.substring(0, 800) };
+            results.invoicePdfError = { message: e.message, stack: e.stack?.substring(0, 600) };
         }
     }
 
-    // 4. Try sendTicketsEmail end-to-end
+    // 4. Test processTemplateSend directly (bypass idempotency, capture real Resend result)
     if (resolvedOrderId) {
         try {
-            const { sendTicketsEmail } = await import("@/lib/email-service");
-            await sendTicketsEmail(resolvedOrderId);
-            results.sendTicketsEmail = "called successfully (check server logs for Resend result)";
+            const order = await prisma.order.findUnique({
+                where: { id: resolvedOrderId },
+                include: {
+                    event: { include: { organization: true } },
+                    user: true,
+                    items: { include: { ticketLot: true } },
+                    tickets: true,
+                },
+            });
+            if (order) {
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://tickets.daowave.pt";
+                const { processTemplateSend } = await import("@/lib/email-service");
+                const sendResult = await processTemplateSend(
+                    order.user.email,
+                    "ticket-delivery",
+                    {
+                        name: order.user.name || "Cliente",
+                        eventTitle: order.event.title,
+                        eventDate: order.event.startAt ? new Date(order.event.startAt).toLocaleString("pt-PT") : "Data a anunciar",
+                        venueName: (order.event as any).venue || "Local a anunciar",
+                        address: (order.event as any).city || "",
+                        ticketCount: order.tickets.length,
+                        downloadLink: `${appUrl}/account/tickets`,
+                    },
+                    undefined,
+                    undefined // no PDF attachment to simplify test
+                );
+                results.sendResult = sendResult;
+            }
         } catch (e: any) {
-            results.sendTicketsEmailError = { message: e.message, stack: e.stack?.substring(0, 800) };
+            results.sendResultError = { message: e.message, stack: e.stack?.substring(0, 600) };
         }
     }
 

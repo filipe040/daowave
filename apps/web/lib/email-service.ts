@@ -312,12 +312,26 @@ export async function sendTemplate(options: SendTemplateOptions): Promise<SendEm
     return { success: false, emailLogId: "disabled", error: "Emails are disabled" };
   }
 
+  // Check idempotency before sending
+  if (options.idempotencyKey) {
+    const { isDuplicate, existingLogId } = await checkIdempotency(
+      options.idempotencyKey,
+      options.templateId,
+      options.to
+    );
+    if (isDuplicate) {
+      safeLog.info("Email duplicate prevented", { key: options.idempotencyKey, template: options.templateId });
+      return { success: true, emailLogId: existingLogId || "duplicate", messageId: undefined };
+    }
+  }
+
   return processTemplateSend(
     options.to,
     options.templateId,
     options.variables,
     undefined,
-    options.attachments
+    options.attachments,
+    options.idempotencyKey
   );
 }
 
@@ -329,7 +343,8 @@ export async function processTemplateSend(
   templateId: string,
   variables: any,
   jobLogId?: string,
-  attachments?: any[]
+  attachments?: any[],
+  idempotencyKey?: string
 ): Promise<SendEmailResult> {
   const config = getEmailConfig();
   if (!config.enabled) {
