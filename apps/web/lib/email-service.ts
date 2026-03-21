@@ -312,15 +312,23 @@ export async function enqueueTemplate(options: SendTemplateOptions): Promise<{ s
 }
 
 /**
- * Send email using template (Backward compatibility wrapper)
+ * Send email using template — sends directly via Resend (no queue dependency)
  */
 export async function sendTemplate(options: SendTemplateOptions): Promise<SendEmailResult> {
-  const result = await enqueueTemplate(options);
-  return {
-    success: result.success,
-    emailLogId: result.jobId || "placeholder",
-    error: result.success ? undefined : result.message,
-  };
+  const config = getEmailConfig();
+
+  if (!config.enabled) {
+    safeLog.warn("Emails are disabled", { template: options.templateId, to: maskEmail(options.to) });
+    return { success: false, emailLogId: "disabled", error: "Emails are disabled" };
+  }
+
+  return processTemplateSend(
+    options.to,
+    options.templateId,
+    options.variables,
+    undefined,
+    options.attachments
+  );
 }
 
 /**
