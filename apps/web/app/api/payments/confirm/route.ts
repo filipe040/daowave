@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { getPaymentProvider } from '@/lib/payment';
 import { generateTicketCode } from '@/lib/utils';
 import { getQRPayload } from '@/lib/qr/generate';
+import { sendTicketsEmail } from '@/lib/email-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,70 +18,48 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { orderId, paymentIntentId } = await request.json();
 
     if (!orderId || !paymentIntentId) {
-      return NextResponse.json(
-        { error: 'Missing orderId or paymentIntentId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing orderId or paymentIntentId' }, { status: 400 });
     }
 
     // Get order
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        items: {
-          include: {
-            ticketLot: true,
-          },
-        },
+        items: { include: { ticketLot: true } },
         event: true,
       },
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
     if (order.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     if (order.status === 'PAID') {
-      return NextResponse.json({
-        success: true,
-        orderId: order.id,
-        message: 'Order already paid',
-      });
+      // Already paid — attempt to resend email in case it was missed
+      sendTicketsEmail(orderId).catch((e) => console.error('[confirm] resend email error:', e));
+      return NextResponse.json({ success: true, orderId: order.id, message: 'Order already paid' });
     }
 
-    // Confirm payment
+    // Confirm payment with provider
     const paymentProvider = getPaymentProvider();
     const paymentResult = await paymentProvider.confirmPayment(paymentIntentId);
 
     if (!paymentResult.success) {
-      return NextResponse.json(
-        { error: paymentResult.error || 'Payment failed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: paymentResult.error || 'Payment failed' }, { status: 400 });
     }
 
-    // Update order status and create tickets
+    // Update order status and create tickets (atomic)
     await prisma.$transaction(async (tx) => {
-      // Update order
       await tx.order.update({
         where: { id: order.id },
         data: {
@@ -90,15 +69,9 @@ export async function POST(request: Request) {
         },
       });
 
-      // Create tickets
-      const tickets = [];
       for (const item of order.items) {
         for (let i = 0; i < item.quantity; i++) {
           const code = generateTicketCode();
-          const qrPayload = getQRPayload({
-            ticketId: '', // Will be set after creation
-            code,
-          });
 
           const ticket = await tx.ticket.create({
             data: {
@@ -107,38 +80,32 @@ export async function POST(request: Request) {
               userId: order.userId,
               ticketLotId: item.ticketLotId,
               code,
-              qrPayload: '', // Will be updated
+              qrPayload: '',
             },
           });
 
-          // Update QR payload with ticket ID
-          const finalQRPayload = getQRPayload({
-            ticketId: ticket.id,
-            code,
-          });
+          const finalQRPayload = getQRPayload({ ticketId: ticket.id, code });
 
           await tx.ticket.update({
             where: { id: ticket.id },
             data: { qrPayload: finalQRPayload },
           });
 
-          // Update lot sold count
           await tx.ticketLot.update({
             where: { id: item.ticketLotId },
-            data: {
-              quantitySold: { increment: 1 },
-            },
-          });
-
-          tickets.push({
-            ...ticket,
-            qrPayload: finalQRPayload,
+            data: { quantitySold: { increment: 1 } },
           });
         }
       }
-
-      return tickets;
     });
+
+    // ✅ Send ticket email + invoice PDF after successful payment
+    try {
+      await sendTicketsEmail(orderId);
+    } catch (emailErr) {
+      console.error('[confirm] Error sending ticket email:', emailErr);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({
       success: true,
@@ -147,9 +114,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Payment confirmation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to confirm payment' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to confirm payment' }, { status: 500 });
   }
 }
