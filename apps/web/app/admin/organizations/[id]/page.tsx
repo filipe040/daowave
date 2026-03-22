@@ -74,13 +74,13 @@ export default function OrganizationDetailPage() {
             }}
             actions={
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => toast.info("Edição em desenvolvimento")}
+                    <Link
+                        href="/organizer/settings"
                         className="flex items-center gap-2 px-4 h-10 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[13px] font-bold transition-all border border-white/5"
                     >
                         <Settings className="h-4 w-4 text-white/40" />
                         Configurações
-                    </button>
+                    </Link>
                     {org.website && (
                         <a
                             href={org.website}
