@@ -104,7 +104,7 @@ export class MarketingService {
       return { success: true, count: users.length };
     } catch (error: any) {
       safeLog.error("Error dispatching custom marketing campaign", { error: error.message });
-      return { success: false, error: "Failed to dispatch" };
+      return { success: false, error: error.message || "Failed to dispatch" };
     }
   }
 
