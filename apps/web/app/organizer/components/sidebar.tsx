@@ -13,6 +13,7 @@ import {
   Tags,
   FileText,
   Settings,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 
@@ -70,7 +71,7 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           </div>
           <div className="shrink-0 p-4 sm:p-6 border-b border-zinc-800">
             <Link href="/organizer" onClick={onClose} className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-              EasyTicket
+              GoPass
             </Link>
             <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
           </div>
@@ -95,6 +96,18 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
               );
             })}
           </nav>
+
+          {/* Home button */}
+          <div className="shrink-0 px-4 pt-3 border-t border-zinc-800">
+            <Link
+              href="/"
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-zinc-400 hover:bg-white/5 hover:text-white"
+            >
+              <Home className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+              <span className="text-sm font-medium">Voltar ao site</span>
+            </Link>
+          </div>
 
           {session?.user && (
             <div className="shrink-0 p-4 border-t border-zinc-800">

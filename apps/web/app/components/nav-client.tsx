@@ -117,7 +117,7 @@ export default function NavClient() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
-              EasyTicket
+              GoPass
             </span>
           </Link>
 

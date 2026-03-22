@@ -8,10 +8,10 @@ import { CookieBanner } from "./components/cookie-banner";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "EasyTicket - Marketplace de Bilhética",
+  title: "GoPass - Marketplace de Bilhética",
   description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
   metadataBase: new URL("https://ticket.daowave.pt"),
-  applicationName: "EasyTicket",
+  applicationName: "GoPass",
 };
 
 export function generateViewport() {

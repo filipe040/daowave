@@ -99,7 +99,7 @@ const envSchema = z.object({
   ),
 
   // Application
-  APP_NAME: z.string().default("EasyTicket"),
+  APP_NAME: z.string().default("GoPass"),
   SUPPORT_EMAIL: z.string().email().optional(),
 });
 

@@ -149,7 +149,7 @@ function SignInContent() {
           <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
             <ArrowLeft className="h-4 w-4" /> Voltar ao início
           </Link>
-          <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight uppercase">EasyTicket</h1>
+          <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight uppercase">GoPass</h1>
           <p className="mt-2 text-[13px] sm:text-[14px] text-white/45">Entre na sua conta para continuar</p>
         </div>
 

@@ -21,7 +21,7 @@ export default function Footer() {
 
                 <div className="min-w-0">
                   <h3 className="text-base md:text-lg font-semibold tracking-wide text-white/90">
-                    EasyTicket
+                    GoPass
                   </h3>
                   <p className="text-[11px] md:text-xs uppercase tracking-wider text-white/40">
                     Bilhética &amp; acesso
@@ -143,8 +143,8 @@ export default function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:suporte@easyticket.pt" className="text-white/55 hover:text-white transition">
-                    suporte@easyticket.pt
+                  <a href="mailto:suporte@gopass.pt" className="text-white/55 hover:text-white transition">
+                    suporte@gopass.pt
                   </a>
                 </li>
               </ul>
@@ -156,7 +156,7 @@ export default function Footer() {
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-white/45">
-              © {year} EasyTicket. Todos os direitos reservados.
+              © {year} GoPass. Todos os direitos reservados.
             </p>
 
             <div className="flex items-center gap-2">

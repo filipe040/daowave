@@ -32,6 +32,7 @@ import {
   FileCheck,
   Shield,
   PlusCircle,
+  Home,
 } from "lucide-react";
 
 interface PromoterSidebarProps {
@@ -239,7 +240,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
 
             <div className="min-w-0">
               <div className="text-[13px] font-semibold text-foreground tracking-wide uppercase">
-                EASYTICKET
+                GOPASS
               </div>
               <div className="text-[11px] text-muted-foreground truncate">{section}</div>
             </div>
@@ -333,6 +334,20 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
                 <div className="text-xs text-muted-foreground truncate">{session.user.email}</div>
               </div>
             </div>
+
+            <Link
+              href="/"
+              onClick={() => setIsMobileOpen(false)}
+              className={cn(
+                "w-full rounded-xl border border-border bg-secondary mb-2",
+                "text-foreground px-4 py-2.5 flex items-center justify-center gap-2",
+                "transition-all duration-200 hover:opacity-95",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              )}
+            >
+              <Home className="h-4 w-4" />
+              <span className="text-sm font-medium">Voltar ao site</span>
+            </Link>
 
             <button
               onClick={() => signOut({ callbackUrl: "/promotor/login" })}
