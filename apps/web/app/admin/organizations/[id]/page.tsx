@@ -26,6 +26,7 @@ import { TeamTab } from "./components/TeamTab";
 import { InvitesTab } from "./components/InvitesTab";
 import { AuditTab } from "./components/AuditTab";
 import { InviteModal } from "./components/InviteModal";
+import { OrgEditModal } from "./components/OrgEditModal";
 
 type TabType = "overview" | "team" | "invites" | "audit";
 
@@ -44,6 +45,7 @@ export default function OrganizationDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -74,13 +76,13 @@ export default function OrganizationDetailPage() {
             }}
             actions={
                 <div className="flex items-center gap-3">
-                    <Link
-                        href="/organizer/settings"
+                    <button
+                        onClick={() => setShowEditModal(true)}
                         className="flex items-center gap-2 px-4 h-10 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[13px] font-bold transition-all border border-white/5"
                     >
                         <Settings className="h-4 w-4 text-white/40" />
                         Configurações
-                    </Link>
+                    </button>
                     {org.website && (
                         <a
                             href={org.website}
@@ -95,6 +97,14 @@ export default function OrganizationDetailPage() {
                 </div>
             }
         >
+            {showEditModal && (
+                <OrgEditModal
+                    org={org}
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={(updated) => setOrg({ ...org, ...updated } as Organization)}
+                />
+            )}
             <InviteModal
                 isOpen={showInviteModal}
                 onClose={() => setShowInviteModal(false)}
