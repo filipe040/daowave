@@ -1,5 +1,5 @@
 import { prisma } from "../prisma";
-import { getEmailQueue } from "../queue/email.queue";
+import { EmailService } from "../email-service";
 import { safeLog } from "../security";
 
 export class MarketingService {
@@ -29,37 +29,30 @@ export class MarketingService {
         return { success: true, message: "No users to notify" };
       }
 
-      const queue = getEmailQueue();
+      // Send emails directly (avoiding queue connection errors in dev)
       const orgName = event.organization?.name || "GoPass";
-
-      // Enqueue job for each user using Promise.all locally (fine for <10k users usually, 
-      // but BullMQ handles large arrays with addBulk nicely, though we'll use add for now
-      // for simplicity with our queue setup)
-      const jobs = users.map(u => {
-        return {
-          name: "marketing-event",
-          data: {
-            to: u.email,
-            templateId: "marketing-campaign",
-            payload: {
-              subject: `Novidade: ${event.title} já está disponível!`,
-              title: "Novo Evento Disponível",
-              content: `<p>Olá ${u.name || 'GoPasser'},</p>
-                        <p>Temos o prazer de anunciar um novo evento na GoPass: <strong>${event.title}</strong>.</p>
-                        <p>A ${orgName} acabou de lançar este evento. Garanta já o seu lugar antes que esgote!</p>
-                        <br/>
-                        <div style="text-align: center;">
-                          <a href="${process.env.APP_URL || 'https://tickets.wwave.pt'}/events/${event.slug}" 
-                             style="background: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                            Ver Evento e Bilhetes
-                          </a>
-                        </div>`,
-            }
+      const promises = users.map(u => {
+        return EmailService.sendTemplate({
+          to: u.email,
+          templateId: "marketing-campaign",
+          variables: {
+            subject: `Novidade: ${event.title} já está disponível!`,
+            title: "Novo Evento Disponível",
+            content: `<p>Olá ${u.name || 'GoPasser'},</p>
+                      <p>Temos o prazer de anunciar um novo evento na GoPass: <strong>${event.title}</strong>.</p>
+                      <p>A ${orgName} acabou de lançar este evento. Garanta já o seu lugar antes que esgote!</p>
+                      <br/>
+                      <div style="text-align: center;">
+                        <a href="${process.env.APP_URL || 'https://tickets.wwave.pt'}/events/${event.slug}" 
+                           style="background: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                          Ver Evento e Bilhetes
+                        </a>
+                      </div>`,
           }
-        };
+        });
       });
 
-      await queue.addBulk(jobs);
+      await Promise.allSettled(promises);
 
       safeLog.info("Marketing events dispatched", { eventId, count: users.length });
       return { success: true, count: users.length };
@@ -83,23 +76,20 @@ export class MarketingService {
         return { success: true, count: 0 };
       }
 
-      const queue = getEmailQueue();
-      const jobs = users.map(u => {
-        return {
-          name: "marketing-custom",
-          data: {
-            to: u.email,
-            templateId: "marketing-campaign",
-            payload: {
-              subject,
-              title,
-              content: htmlContent,
-            }
+      // Send emails directly (avoiding queue connection errors in dev)
+      const promises = users.map(u => {
+        return EmailService.sendTemplate({
+          to: u.email,
+          templateId: "marketing-campaign",
+          variables: {
+            subject,
+            title,
+            content: htmlContent,
           }
-        };
+        });
       });
 
-      await queue.addBulk(jobs);
+      await Promise.allSettled(promises);
       safeLog.info("Custom marketing campaign dispatched", { count: users.length, subject });
       return { success: true, count: users.length };
     } catch (error: any) {
