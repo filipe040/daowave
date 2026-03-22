@@ -37,6 +37,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
     const [form, setForm] = useState({
         name: org.name || "",
         legalName: org.legalName || "",
+        slug: org.slug || "",
         vatNumber: org.vatNumber || "",
         contactEmail: org.contactEmail || "",
         phone: org.phone || "",
@@ -128,8 +129,20 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
                                 <input type="text" value={form.vatNumber} onChange={(e) => set("vatNumber", e.target.value)} className={inputClass} placeholder="510 123 456" maxLength={20} />
                             </div>
                             <div>
-                                <label className={labelClass}>Slug (só leitura)</label>
-                                <input type="text" value={org.slug} className={`${inputClass} opacity-40 cursor-not-allowed`} disabled />
+                                <label className={labelClass}>Slug <span className="text-red-400">*</span></label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-[14px] select-none">@</span>
+                                    <input
+                                        type="text"
+                                        value={form.slug}
+                                        onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                                        className={`${inputClass} pl-8`}
+                                        placeholder="minha-organizacao"
+                                        required
+                                    />
+                                </div>
+                                <p className="text-[11px] text-white/30 mt-1">Apenas letras minúsculas, números e hífens.</p>
+                                {errors.slug && <p className="text-red-400 text-xs mt-1">{errors.slug}</p>}
                             </div>
                         </div>
                     </div>

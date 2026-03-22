@@ -7,6 +7,12 @@ import { createAuditLog } from "@/lib/audit";
 
 const updateOrgSchema = z.object({
     name: z.string().min(2).optional(),
+    slug: z
+        .string()
+        .min(2, "Slug deve ter pelo menos 2 caracteres")
+        .max(64, "Slug demasiado longo")
+        .regex(/^[a-z0-9-]+$/, "Slug apenas pode conter letras minúsculas, números e hífens")
+        .optional(),
     legalName: z.string().optional(),
     vatNumber: z.string().optional(),
     contactEmail: z.string().email().optional().or(z.literal("")),
@@ -73,12 +79,25 @@ export async function PATCH(
             return NextResponse.json({ error: "Organização não encontrada" }, { status: 404 });
         }
 
+        // Check slug uniqueness if slug is being changed
+        if (body.slug && body.slug !== existing.slug) {
+            const slugTaken = await prisma.organization.findUnique({
+                where: { slug: body.slug },
+            });
+            if (slugTaken) {
+                return NextResponse.json(
+                    { error: "Este slug já está em uso por outra organização", details: [{ path: ["slug"], message: "Slug já em uso" }] },
+                    { status: 409 }
+                );
+            }
+        }
+
         const updated = await prisma.organization.update({
             where: { id: params.id },
             data: body,
         });
 
-        // Audit logs for status change or major updates
+        // Audit log for status changes
         if (body.status && body.status !== existing.status) {
             await createAuditLog({
                 userId,
@@ -94,7 +113,10 @@ export async function PATCH(
         return NextResponse.json(updated);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+            return NextResponse.json(
+                { error: error.errors[0].message, details: error.errors.map(e => ({ path: e.path, message: e.message })) },
+                { status: 400 }
+            );
         }
         console.error("[Admin Organization Detail PATCH]", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
