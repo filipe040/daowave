@@ -58,8 +58,8 @@ export default function SobreNosPage() {
                             Contacto
                         </div>
                         <div className="space-y-2 text-[14px] text-white/55">
-                            <div>📧 <a href="mailto:suporte@daowave.pt" className="hover:text-white transition">suporte@daowave.pt</a></div>
-                            <div>📍 Lisboa, Portugal</div>
+                            <div>📧 <a href="mailto:suporte@gopass.pt" className="hover:text-white transition">suporte@gopass.pt</a></div>
+                            <div>📍 Viseu, Portugal</div>
                         </div>
                     </div>
                 </div>

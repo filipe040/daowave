@@ -82,7 +82,7 @@ export default function FAQPage() {
                 </h1>
                 <p className="text-[15px] text-white/50 mb-12">
                     Não encontras o que procuras?{" "}
-                    <a href="mailto:suporte@daowave.pt" className="text-white/80 hover:text-white underline underline-offset-2">
+                    <a href="mailto:suporte@gopass.pt" className="text-white/80 hover:text-white underline underline-offset-2">
                         Contacta-nos
                     </a>
                     .

@@ -7,13 +7,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
+import { Tag, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 interface CheckoutFormProps {
   orderId: string;
   totalCents: number;
+  eventId: string;
 }
 
-export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
+interface AppliedCoupon {
+  id: string;
+  code: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  discountCents: number;
+  finalCents: number;
+}
+
+export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,15 +34,53 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const serviceFee = totalCents > 150 ? 1.50 : 0;
-  const ticketPrice = (totalCents / 100) - serviceFee;
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+
+  const effectiveTotal = appliedCoupon ? appliedCoupon.finalCents : totalCents;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError('');
+    setAppliedCoupon(null);
+
+    try {
+      const res = await fetch('/api/checkout/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponCode.trim().toUpperCase(),
+          eventId,
+          totalCents,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.error || 'Cupão inválido');
+      } else {
+        setAppliedCoupon({ ...data.coupon, discountCents: data.discountCents, finalCents: data.finalCents });
+      }
+    } catch {
+      setCouponError('Erro ao verificar cupão. Tente novamente.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-    if (!formData.buyerName.trim() || !formData.buyerEmail.trim()) {
-      return;
-    }
+    if (!formData.buyerName.trim() || !formData.buyerEmail.trim()) return;
     if (!acceptedTerms) {
       alert('Por favor, aceite os Termos e Condições e a Política de Privacidade.');
       return;
@@ -47,6 +96,8 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
           buyerEmail: formData.buyerEmail.trim(),
           buyerPhone: formData.buyerPhone.trim() || undefined,
           paymentMock: true,
+          couponId: appliedCoupon?.id,
+          discountCents: appliedCoupon?.discountCents ?? 0,
         }),
       });
 
@@ -108,19 +159,83 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         />
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8">
+      {/* Coupon Section */}
+      <div className="space-y-2">
+        <Label className="text-white/70 font-semibold text-sm ml-1 flex items-center gap-1.5">
+          <Tag className="h-3.5 w-3.5" />
+          Código de Desconto
+        </Label>
+
+        {appliedCoupon ? (
+          <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-5 py-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-emerald-400 font-bold text-sm font-mono">{appliedCoupon.code}</p>
+              <p className="text-emerald-400/70 text-xs">
+                {appliedCoupon.discountType === 'PERCENTAGE'
+                  ? `${appliedCoupon.discountValue}% de desconto`
+                  : `${(appliedCoupon.discountCents / 100).toFixed(2)}€ de desconto`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveCoupon}
+              className="text-white/40 hover:text-white/70 transition-colors"
+            >
+              <XCircle className="h-5 w-5" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              value={couponCode}
+              onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+              className="h-12 bg-white/5 border-white/10 text-white rounded-2xl px-5 font-mono uppercase focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30 placeholder:normal-case"
+              placeholder="CÓDIGO20"
+            />
+            <Button
+              type="button"
+              onClick={handleApplyCoupon}
+              disabled={!couponCode.trim() || couponLoading}
+              className="h-12 px-5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-0 shrink-0"
+            >
+              {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
+            </Button>
+          </div>
+        )}
+        {couponError && (
+          <p className="text-red-400 text-xs ml-1 flex items-center gap-1">
+            <XCircle className="h-3.5 w-3.5" />
+            {couponError}
+          </p>
+        )}
+      </div>
+
+      {/* Order Summary */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
         <h3 className="text-sm font-semibold text-white/90 mb-4">Resumo da Encomenda</h3>
         <div className="flex justify-between mb-2">
-          <span className="text-white/70 text-sm">Preço do Bilhete:</span>
-          <span className="text-white text-sm">{ticketPrice.toFixed(2).replace('.', ',')}€</span>
+          <span className="text-white/70 text-sm">Subtotal:</span>
+          <span className="text-white text-sm">{(totalCents / 100).toFixed(2).replace('.', ',')}€</span>
         </div>
-        <div className="flex justify-between mb-4">
-          <span className="text-white/70 text-sm">Taxa de Serviço:</span>
-          <span className="text-white text-sm">{serviceFee.toFixed(2).replace('.', ',')}€</span>
-        </div>
+        {appliedCoupon && (
+          <div className="flex justify-between mb-2">
+            <span className="text-emerald-400 text-sm flex items-center gap-1">
+              <Tag className="h-3.5 w-3.5" />
+              Desconto ({appliedCoupon.code}):
+            </span>
+            <span className="text-emerald-400 text-sm font-bold">
+              -{(appliedCoupon.discountCents / 100).toFixed(2).replace('.', ',')}€
+            </span>
+          </div>
+        )}
         <div className="flex justify-between font-bold border-t border-white/10 pt-4">
           <span className="text-white">Total a Pagar:</span>
-          <span className="text-emerald-400">{(totalCents / 100).toFixed(2).replace('.', ',')}€ <span className="text-xs font-normal text-white/50">(IVA incluído)</span></span>
+          <span className="text-emerald-400">
+            {(effectiveTotal / 100).toFixed(2).replace('.', ',')}€{' '}
+            <span className="text-xs font-normal text-white/50">(IVA incluído)</span>
+          </span>
         </div>
       </div>
 
@@ -149,7 +264,7 @@ export function CheckoutForm({ orderId, totalCents }: CheckoutFormProps) {
         size="lg"
         aria-busy={loading}
       >
-        {loading ? 'A processar de forma segura...' : 'Confirmar e Pagar'}
+        {loading ? 'A processar de forma segura...' : `Confirmar e Pagar — ${(effectiveTotal / 100).toFixed(2).replace('.', ',')}€`}
       </Button>
     </form>
   );

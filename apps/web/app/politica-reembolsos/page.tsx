@@ -55,7 +55,7 @@ export default function PoliticaReembolsosPage() {
                     <section>
                         <h2 className="text-[16px] font-semibold text-white/80 mb-3">4. Processo de Reembolso</h2>
                         <ol className="list-decimal list-inside space-y-2">
-                            <li>Envia um email para <a href="mailto:suporte@daowave.pt" className="text-white/80 hover:text-white underline underline-offset-2">suporte@daowave.pt</a> com o número de ordem e motivo.</li>
+                            <li>Envia um email para <a href="mailto:suporte@gopass.pt" className="text-white/80 hover:text-white underline underline-offset-2">suporte@gopass.pt</a> com o número de ordem e motivo.</li>
                             <li>A equipa analisa o pedido dentro de 24–48h.</li>
                             <li>O reembolso é processado para o método de pagamento original.</li>
                         </ol>
@@ -82,8 +82,8 @@ export default function PoliticaReembolsosPage() {
                         <h2 className="text-[16px] font-semibold text-white/80 mb-3">7. Contacto</h2>
                         <p>
                             Para questões relacionadas com reembolsos:{" "}
-                            <a href="mailto:suporte@daowave.pt" className="text-white/80 hover:text-white underline underline-offset-2">
-                                suporte@daowave.pt
+                            <a href="mailto:suporte@gopass.pt" className="text-white/80 hover:text-white underline underline-offset-2">
+                                suporte@gopass.pt
                             </a>
                         </p>
                     </section>

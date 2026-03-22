@@ -93,6 +93,42 @@ export async function POST(
       );
     }
 
+    // Validate coupon server-side (if provided)
+    const couponId = typeof b.couponId === "string" ? b.couponId : undefined;
+    const discountCents = typeof b.discountCents === "number" ? b.discountCents : 0;
+    let verifiedDiscount = 0;
+
+    if (couponId) {
+      const now = new Date();
+      const coupon = await prisma.coupon.findFirst({
+        where: {
+          id: couponId,
+          eventId: order.eventId,
+          isActive: true,
+          startsAt: { lte: now },
+          endsAt: { gte: now },
+        },
+      });
+
+      if (coupon) {
+        if (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) {
+          const baseTotal = order.items.reduce(
+            (sum, item) => sum + item.quantity * item.unitPriceCents,
+            0
+          );
+          if (coupon.discountType === "PERCENTAGE") {
+            verifiedDiscount = Math.floor((baseTotal * coupon.discountValue) / 100);
+          } else {
+            verifiedDiscount = Math.min(coupon.discountValue, baseTotal);
+          }
+        }
+      }
+    }
+
+    const finalTotal = Math.max(0,
+      order.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0) - verifiedDiscount
+    );
+
     await prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: order.id },
@@ -103,8 +139,17 @@ export async function POST(
           status: "PAID",
           paymentProvider: paymentProviderName,
           paymentRef,
+          totalCents: finalTotal,
         },
       });
+
+      // Increment coupon usage
+      if (couponId && verifiedDiscount > 0) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
 
       for (const item of order.items) {
         for (let i = 0; i < item.quantity; i++) {

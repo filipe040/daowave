@@ -40,28 +40,28 @@ const envSchema = z.object({
   SMTP_SECURE: z.string().optional(),
   SMTP_USER: z.string().email().optional(),
   SMTP_PASS: z.string().optional(),
-  
+
   // Email Provider (Resend)
   RESEND_API_KEY: z.string().optional(), // Resend API key (re_...)
-  EMAIL_FROM: z.string().default("DãoWave <no-reply@daowave.pt>"), // From address with display name
+  EMAIL_FROM: z.string().default("GoPass <no-reply@gopass.pt>"), // From address with display name
   EMAIL_REPLY_TO: z.string().email().optional(), // Reply-to address (defaults to EMAIL_FROM if not set)
-  
+
   // Application URL
   APP_URL: z.string().url().optional(), // Base URL for links in emails
-  
+
   // Email Controls
   EMAILS_ENABLED: z.string().transform((val) => val === "true").default("true"),
   EMAILS_MODE: z.enum(["public_beta", "production"]).default("public_beta"),
-  
+
   // Rate Limiting
   EMAIL_RATE_LIMIT_REGISTER_PER_HOUR: z.string().transform(Number).default("3"),
   EMAIL_RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR: z.string().transform(Number).default("3"),
   EMAIL_RATE_LIMIT_RESEND_TICKET_PER_MIN: z.string().transform(Number).default("1"),
   EMAIL_RATE_LIMIT_RESEND_TICKET_PER_DAY: z.string().transform(Number).default("5"),
-  
+
   // Legacy (deprecated, use RESEND_API_KEY)
   EMAIL_PROVIDER_KEY: z.string().optional(), // Resend (re_...) or SendGrid (SG....)
-  
+
   // Beta Email Controls (deprecated, use EMAILS_MODE)
   BETA_EMAILS_ENABLED: z.string().transform((val) => val === "true").default("false"),
   BETA_EMAIL_ALLOWLIST: z.string().optional(), // Comma-separated list of allowed emails
@@ -90,11 +90,11 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().default(
     process.env.NODE_ENV === "production"
       ? (
-          process.env.APP_URL ??
-          process.env.NEXT_PUBLIC_APP_URL ??
-          process.env.NEXTAUTH_URL ??
-          ""
-        )
+        process.env.APP_URL ??
+        process.env.NEXT_PUBLIC_APP_URL ??
+        process.env.NEXTAUTH_URL ??
+        ""
+      )
       : "http://localhost:3000"
   ),
 
@@ -121,28 +121,28 @@ export const env = (() => {
       process.env.NEXTAUTH_URL = 'http://localhost:3000';
     }
   }
-  
+
   // Set defaults if not provided
   if (!process.env.NEXTAUTH_URL) {
-    process.env.NEXTAUTH_URL = process.env.NODE_ENV === 'production' 
+    process.env.NEXTAUTH_URL = process.env.NODE_ENV === 'production'
       ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
       : 'http://localhost:3000';
   }
-  
+
   if (!process.env.NEXTAUTH_SECRET) {
     process.env.NEXTAUTH_SECRET = 'dev-secret-key-change-in-production-12345678901234567890';
   }
-  
+
   try {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Check if we're in build phase (Edge-safe, no process.argv)
       // CRITICAL: Use ONLY NEXT_PHASE env var - no process.argv (not available in Edge Runtime)
-      const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build" || 
-                           process.env.NEXT_PHASE === "phase-development-build" ||
-                           process.env.NEXT_PHASE === "phase-export";
-      
+      const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build" ||
+        process.env.NEXT_PHASE === "phase-development-build" ||
+        process.env.NEXT_PHASE === "phase-export";
+
       // During build phase, some variables can be optional
       if (isBuildPhase) {
         // Filter out errors for variables that can be optional during build
@@ -152,7 +152,7 @@ export const env = (() => {
           const path = err.path.join(".");
           return !buildOptionalVars.includes(path);
         });
-        
+
         if (criticalErrors.length > 0) {
           console.warn("⚠️  Environment variable validation failed (critical variables):");
           criticalErrors.forEach((err) => {
@@ -163,7 +163,7 @@ export const env = (() => {
           // During build, don't throw - just warn
           // Variables will be validated at runtime
         }
-        
+
         // Return env with build-optional variables as optional
         // CRITICAL: REDIS_URL não é obrigatória durante build (Redis é opcional)
         const buildEnvSchema = envSchema.extend({
@@ -175,10 +175,10 @@ export const env = (() => {
           REDIS_URL: z.string().url().optional(),
           KV_URL: z.string().url().optional(),
         });
-        
+
         return buildEnvSchema.parse(process.env);
       }
-      
+
       // Normal validation for runtime
       console.error("❌ Environment variable validation failed:");
       error.errors.forEach((err) => {

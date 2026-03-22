@@ -136,7 +136,7 @@ export default async function CheckoutPage({
             {/* decorative gradient inside the card */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-            <CheckoutForm orderId={orderId} totalCents={totalCents} />
+            <CheckoutForm orderId={orderId} totalCents={totalCents} eventId={order.event.id} />
           </div>
         </div>
       </div>

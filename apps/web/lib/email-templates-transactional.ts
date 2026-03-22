@@ -99,7 +99,7 @@ a{color:${ACCENT};text-decoration:none}
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} ${BRAND} &mdash; Todos os direitos reservados.</p>
       <p>Este é um email automático. Por favor não responda.</p>
-      <p><a href="${APP_URL}">tickets.daowave.pt</a></p>
+      <p><a href="${APP_URL}">tickets.wwave.pt</a></p>
     </div>
   </div>
 </div>
