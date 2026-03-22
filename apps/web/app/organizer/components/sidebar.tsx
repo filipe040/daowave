@@ -24,7 +24,8 @@ const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/organizer/tickets", label: "Bilhetes", icon: Ticket },
   { href: "/organizer/coupons", label: "Cupões", icon: Tags },
   { href: "/organizer/templates", label: "Modelos", icon: FileText },
-  { href: "/organizer/account", label: "Conta", icon: Settings },
+  { href: "/organizer/settings", label: "Configurações", icon: Settings },
+  { href: "/organizer/account", label: "Conta", icon: User },
 ];
 
 interface OrganizerSidebarProps {
