@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
+import { MarketingService } from "@/lib/services/marketing";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,9 @@ async function handleApprove(
       },
       ...metadata,
     });
+
+    // Fire & forget automated marketing email
+    MarketingService.dispatchNewEventCampaign(id).catch(e => console.error(e));
 
     safeLog.info(`Event published: ${id}`, { eventId: id, adminId: session.user.id });
 

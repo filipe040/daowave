@@ -12,6 +12,7 @@ import {
     Monitor,
     LogOut,
     ScrollText,
+    Mail,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -20,6 +21,7 @@ const routes = [
     { label: "Organizações", icon: Building2, href: "/admin/organizations" },
     { label: "Eventos", icon: Calendar, href: "/admin/events" },
     { label: "Utilizadores", icon: Users, href: "/admin/users" },
+    { label: "Marketing", icon: Mail, href: "/admin/marketing" },
     { label: "Anti-Fraude", icon: ShieldAlert, href: "/admin/fraud" },
     { label: "Sistema", icon: Monitor, href: "/admin/system" },
     { label: "Registos de Auditoria", icon: ScrollText, href: "/admin/audit-logs" },

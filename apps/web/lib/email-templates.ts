@@ -21,7 +21,7 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
     title,
     content,
     showBetaBanner = config.env.isStaging,
-    supportEmail = config.app.supportEmail || "support@7eventickets.pt",
+    supportEmail = config.app.supportEmail || "support@gopass.pt",
     downloadLink,
     downloadLinkExpiresAt,
   } = options;
@@ -45,8 +45,8 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
         </a>
       </p>
       ${downloadLinkExpiresAt
-        ? `<p style="font-size: 12px; color: #666; margin-top: 10px;">Este link expira em ${downloadLinkExpiresAt.toLocaleString("pt-PT")}</p>`
-        : ""}
+      ? `<p style="font-size: 12px; color: #666; margin-top: 10px;">Este link expira em ${downloadLinkExpiresAt.toLocaleString("pt-PT")}</p>`
+      : ""}
       <p style="font-size: 12px; color: #666; margin-top: 10px;">
         <strong>Nota:</strong> Por questões de segurança, este link tem validade limitada. Se o link expirar, pode solicitar um novo através da área "Meus Bilhetes".
       </p>
@@ -139,10 +139,10 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
                   <a href="mailto:${supportEmail}">${supportEmail}</a>
                 </p>
                 ${showBetaBanner
-                  ? `<p style="margin-top: 15px; font-size: 11px; color: #999;">
+      ? `<p style="margin-top: 15px; font-size: 11px; color: #999;">
                       Este é um ambiente de teste. Os bilhetes enviados são apenas para fins de demonstração.
                     </p>`
-                  : ""}
+      : ""}
               </div>
             </div>
           </div>
@@ -220,6 +220,21 @@ export function getOrderConfirmationEmailTemplate(
   return getBetaEmailTemplate({
     title: "✅ Encomenda Confirmada",
     content,
+  });
+}
+
+/**
+ * Generate marketing campaign template
+ */
+export function getMarketingCampaignTemplate(
+  subject: string,
+  title: string,
+  contentHtml: string
+): string {
+  // Use beta template base for marketing wrappers too
+  return getBetaEmailTemplate({
+    title,
+    content: contentHtml,
   });
 }
 

@@ -34,10 +34,10 @@ export default function ContactPage() {
                 </div>
 
                 <a
-                  href="mailto:support@7eventickets.pt"
+                  href="mailto:support@gopass.pt"
                   className="mt-2 inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-semibold text-white/85 hover:text-white transition"
                 >
-                  support@7eventickets.pt
+                  support@gopass.pt
                   <span className="text-white/40">→</span>
                 </a>
 

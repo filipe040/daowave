@@ -19,6 +19,7 @@ import {
   getPostEventThankYouTemplate,
   getPromoterDailyReportTemplate
 } from "./email-templates-transactional";
+import { getMarketingCampaignTemplate } from "./email-templates";
 import { getEmailQueue } from "./queue/email.queue";
 
 export type EmailTemplate =
@@ -30,7 +31,8 @@ export type EmailTemplate =
   | "invite-organization"
   | "event-reminder-24h"
   | "post-event-thankyou"
-  | "promoter-daily-report";
+  | "promoter-daily-report"
+  | "marketing-campaign";
 
 export interface SendTemplateOptions {
   to: string;
@@ -442,8 +444,16 @@ export async function processTemplateSend(
         upcomingEvents: Array<{ title: string; date: string; sold: number }>;
       }));
       break;
+    case "marketing-campaign":
+      {
+        const v = variables as { subject: string; title: string; content: string };
+        subject = v.subject;
+        html = getMarketingCampaignTemplate(v.subject, v.title, v.content);
+        text = v.content.replace(/<[^>]*>?/gm, ''); // simple strip tags for text fallback
+      }
+      break;
     default:
-      throw new Error(`Unknown template: ${templateId}`);
+      throw new Error(`Unknown template ID: ${templateId}`);
   }
 
   // Create email log fallback if needed

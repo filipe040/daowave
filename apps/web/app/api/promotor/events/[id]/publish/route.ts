@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { safeLog } from "@/lib/security";
 import { EventService } from "@/lib/services/event.service";
 import { requirePromoter } from "@/lib/auth/guards";
+import { MarketingService } from "@/lib/services/marketing";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,9 @@ export async function POST(
     }
 
     const updated = await EventService.publish(id);
+
+    // Fire & forget automated marketing email
+    MarketingService.dispatchNewEventCampaign(id).catch(e => console.error(e));
 
     safeLog.info(`Event published: ${id}`, { eventId: id, publishedBy: session.user.id });
 
