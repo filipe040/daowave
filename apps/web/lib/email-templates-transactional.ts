@@ -13,15 +13,15 @@ function getConfig() {
   }
 }
 
-const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.daowave.pt";
-const BRAND = "DãoWave";
-const ACCENT = "#10b981"; // emerald-500
-const ACCENT_DARK = "#059669";
-const BG = "#09090b";
-const SURFACE = "#111113";
-const SURFACE2 = "#18181b";
-const BORDER = "#27272a";
-const TEXT_PRIMARY = "#f4f4f5";
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.wwave.pt";
+const BRAND = "GoPass";
+const ACCENT = "#a855f7"; // purple-500
+const ACCENT_DARK = "#9333ea";
+const BG = "#000000";
+const SURFACE = "#0a0a0b";
+const SURFACE2 = "#121214";
+const BORDER = "#1f1f22";
+const TEXT_PRIMARY = "#ffffff";
 const TEXT_SECONDARY = "#a1a1aa";
 const TEXT_MUTED = "#71717a";
 
@@ -87,8 +87,8 @@ a{color:${ACCENT};text-decoration:none}
   <div style="display:none;max-height:0;overflow:hidden">${preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
   <div class="container">
     <div class="header">
-      <div class="logo">DÃO<span>WAVE</span></div>
-      <div class="tagline">Bilhética digital</div>
+      <div class="logo">GO<span>PASS</span></div>
+      <div class="tagline">The ultimate ticketing experience</div>
     </div>
     <div class="body">
       <table width="100%" cellpadding="0" cellspacing="0">

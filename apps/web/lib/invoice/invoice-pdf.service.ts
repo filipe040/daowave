@@ -237,7 +237,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Buffer> {
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await page.setContent(generateInvoiceHtml(data), { waitUntil: "networkidle" });
-    
+
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
