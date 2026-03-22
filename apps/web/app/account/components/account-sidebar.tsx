@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Ticket,
   FileText,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,7 +63,8 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
             </svg>
           </button>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="flex flex-col h-full p-4">
+          <div className="space-y-1 flex-1">
           {menuItems.map((item) => {
             const isActive =
               item.href === "/account"
@@ -85,6 +87,19 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
               </Link>
             );
           })}
+          </div>
+
+          {/* Home button at the bottom */}
+          <div className="pt-4 border-t border-zinc-800">
+            <Link
+              href="/"
+              onClick={onClose}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+            >
+              <Home className="h-5 w-5 shrink-0" />
+              Voltar ao site
+            </Link>
+          </div>
         </nav>
       </aside>
     </>
