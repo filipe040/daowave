@@ -142,7 +142,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
               className={inputClass}
-              placeholder="Ex: DãoWave Produções"
+              placeholder="Ex: GoPass Produções"
               required
             />
             {errors.name && <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{errors.name}</p>}
@@ -154,7 +154,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               value={form.legalName}
               onChange={(e) => set("legalName", e.target.value)}
               className={inputClass}
-              placeholder="Ex: DãoWave Produções, Lda."
+              placeholder="Ex: GoPass Produções, Lda."
             />
             {errors.legalName && <p className="text-red-400 text-xs mt-1">{errors.legalName}</p>}
           </Field>
@@ -291,15 +291,14 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
 
       {/* Status badge */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-900/40">
-        <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${
-          organization.status === "ACTIVE" ? "bg-emerald-400" :
-          organization.status === "PENDING" ? "bg-amber-400" : "bg-zinc-500"
-        }`} />
+        <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${organization.status === "ACTIVE" ? "bg-emerald-400" :
+            organization.status === "PENDING" ? "bg-amber-400" : "bg-zinc-500"
+          }`} />
         <span className="text-sm text-zinc-400">
           Estado da organização:&nbsp;
           <span className="font-semibold text-zinc-200">
             {organization.status === "ACTIVE" ? "Ativa" :
-             organization.status === "PENDING" ? "Pendente de aprovação" : organization.status}
+              organization.status === "PENDING" ? "Pendente de aprovação" : organization.status}
           </span>
         </span>
       </div>

@@ -275,7 +275,7 @@ export function buildInvoiceData(order: {
   return {
     invoiceNumber,
     issuedAt: order.createdAt,
-    sellerName: org?.name || "DãoWave",
+    sellerName: org?.name || "GoPass",
     sellerAddress: org?.address || "Portugal",
     sellerNif: (org as any)?.nif || undefined,
     buyerName: order.buyerName || order.user.name || "Consumidor final",

@@ -51,7 +51,7 @@ RESEND_API_KEY=<resend-api-key>
 
 EMAIL_FROM=noreply@daowave.pt
 # Email de origem (com ou sem display name)
-# Exemplo: "DãoWave <noreply@daowave.pt>" ou "noreply@daowave.pt"
+# Exemplo: " <noreply@daowave.pt>" ou "noreply@daowave.pt"
 
 APP_URL=https://daowave-beta.vercel.app
 # URL base da aplicação (usado para links em emails)

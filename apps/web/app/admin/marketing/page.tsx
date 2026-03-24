@@ -45,7 +45,7 @@ export default function AdminMarketingPage() {
 
         setSending(true);
         setStatus("idle");
-        
+
         try {
             const res = await fetch("/api/admin/marketing", {
                 method: "POST",
@@ -76,7 +76,7 @@ export default function AdminMarketingPage() {
             subtitle="Envie atualizações e promoções para os utilizadores que autorizaram receber marketing."
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {/* STAs */}
                 <div className="lg:col-span-1">
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl sticky top-24">
@@ -148,7 +148,7 @@ export default function AdminMarketingPage() {
                                     onChange={(e) => setContent(e.target.value)}
                                     rows={8}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-mono text-sm"
-                                    placeholder="<p>Olá,</p><p>Temos dezenas de novos eventos disponíveis! Veja no nosso <a href='https://tickets.wwave.pt'>site</a>.</p>"
+                                    placeholder="<p>Olá,</p><p>Temos dezenas de novos eventos disponíveis! Veja no nosso <a href='https://tickets.daowave.pt'>site</a>.</p>"
                                 />
                                 <p className="text-[11px] text-white/30 mt-2">
                                     Pode usar tags HTML simples como &lt;b&gt;, &lt;p&gt;, &lt;a href=&quot;...&quot;&gt;, &lt;br&gt;.

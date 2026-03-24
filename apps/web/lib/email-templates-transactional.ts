@@ -1,6 +1,6 @@
 /**
  * Transactional Email Templates
- * Premium Dark SaaS Aesthetic — DãoWave Brand
+ * Premium Dark SaaS Aesthetic — GoPass Brand
  */
 
 import { getEmailConfig } from "./config/email";
@@ -13,7 +13,7 @@ function getConfig() {
   }
 }
 
-const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.wwave.pt";
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.daowave.pt";
 const BRAND = "GoPass";
 const ACCENT = "#a855f7"; // purple-500
 const ACCENT_DARK = "#9333ea";
@@ -26,7 +26,7 @@ const TEXT_SECONDARY = "#a1a1aa";
 const TEXT_MUTED = "#71717a";
 
 /**
- * BASE TEMPLATE — Dark Premium DãoWave
+ * BASE TEMPLATE — Dark Premium GoPass
  */
 function base(preheader: string, content: string, betaBanner = false): string {
   const beta = betaBanner
@@ -99,7 +99,7 @@ a{color:${ACCENT};text-decoration:none}
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} ${BRAND} &mdash; Todos os direitos reservados.</p>
       <p>Este é um email automático. Por favor não responda.</p>
-      <p><a href="${APP_URL}">tickets.wwave.pt</a></p>
+      <p><a href="${APP_URL}">tickets.daowave.pt</a></p>
     </div>
   </div>
 </div>
@@ -377,8 +377,8 @@ export function getLoginNotificationTemplate(v: {
 
   return {
     subject: `🔐 Novo acesso à sua conta — ${BRAND}`,
-    html: base("Novo acesso detetado na sua conta DãoWave.", content, false),
-    text: `Olá ${v.name},\n\nNovo acesso à sua conta DãoWave.\nData: ${v.timestamp}\nIP: ${v.ip}\nDispositivo: ${v.device}\nLocalização: ${v.location}\n\nNão foi você? Altere a sua palavra-passe: ${v.resetUrl}`,
+    html: base("Novo acesso detetado na sua conta GoPass.", content, false),
+    text: `Olá ${v.name},\n\nNovo acesso à sua conta GoPass.\nData: ${v.timestamp}\nIP: ${v.ip}\nDispositivo: ${v.device}\nLocalização: ${v.location}\n\nNão foi você? Altere a sua palavra-passe: ${v.resetUrl}`,
   };
 }
 

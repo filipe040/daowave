@@ -43,7 +43,7 @@ export class MarketingService {
                       <p>A ${orgName} acabou de lançar este evento. Garanta já o seu lugar antes que esgote!</p>
                       <br/>
                       <div style="text-align: center;">
-                        <a href="${process.env.APP_URL || 'https://tickets.wwave.pt'}/events/${event.slug}" 
+                        <a href="${process.env.APP_URL || 'https://tickets.daowave.pt'}/events/${event.slug}" 
                            style="background: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
                           Ver Evento e Bilhetes
                         </a>
