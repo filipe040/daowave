@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatus } from "../ticket-templates/models";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
 import crypto from "crypto";
 import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
+import { renderTicketHtml } from "./ticket-html-templates";
 
 const DEFAULT_THEME: ThemeJson = {
   brand: { logoUrl: "", tagline: "" },
@@ -24,6 +23,7 @@ const DEFAULT_THEME: ThemeJson = {
     showSupport: true,
   },
   footer: { supportUrl: "", supportEmail: "" },
+  layout: { accentStyle: "bar", cardStyle: "elevated", cornerRadius: "md" },
 };
 
 function mergeTheme(theme?: ThemeJson): ThemeJson {
@@ -34,6 +34,7 @@ function mergeTheme(theme?: ThemeJson): ThemeJson {
     qr: { ...DEFAULT_THEME.qr, ...(theme?.qr || {}) },
     blocks: { ...DEFAULT_THEME.blocks, ...(theme?.blocks || {}) },
     footer: { ...DEFAULT_THEME.footer, ...(theme?.footer || {}) },
+    layout: { ...DEFAULT_THEME.layout, ...(theme?.layout || {}) },
   };
 
   if (safeTheme.brand.logoUrl && safeTheme.brand.logoUrl.startsWith("/")) {
@@ -99,7 +100,7 @@ export const TicketRenderService = {
 
       const preset = "A4_CLASSIC";
       const model = await this.buildRenderModel(ticketId);
-      const html = this.generateHtml(preset, model, defaultTheme);
+      const html = renderTicketHtml(preset, model, defaultTheme);
       const htmlHash = crypto.createHash("sha256").update(html).digest("hex");
 
       return prisma.ticketRenderSnapshot.create({
@@ -118,7 +119,7 @@ export const TicketRenderService = {
 
     const preset = activeTemplate.preset as TicketTemplatePreset;
     const model = await this.buildRenderModel(ticketId);
-    const html = this.generateHtml(preset, model, activeTemplate.themeJson as any);
+    const html = renderTicketHtml(preset, model, activeTemplate.themeJson as any);
     const htmlHash = crypto.createHash("sha256").update(html).digest("hex");
 
     // Create snapshot
@@ -249,11 +250,23 @@ export const TicketRenderService = {
   },
 
   /**
+   * Renders HTML from draft settings (live preview — não precisa de guardar)
+   */
+  async renderHtmlDraft(
+    ticketId: string,
+    preset: TicketTemplatePreset,
+    theme: ThemeJson
+  ): Promise<string> {
+    const model = await this.buildRenderModel(ticketId);
+    return renderTicketHtml(preset, model, mergeTheme(theme));
+  },
+
+  /**
    * Renders the ticket as HTML (no Playwright — works in production)
    */
   async renderHtml(ticketId: string, templateId?: string): Promise<string> {
     const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
-    return this.generateHtml(preset, model, theme);
+    return renderTicketHtml(preset, model, theme);
   },
 
   /**
@@ -261,7 +274,7 @@ export const TicketRenderService = {
    */
   async renderPdf(ticketId: string, templateId?: string): Promise<Buffer> {
     const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
-    const html = this.generateHtml(preset, model, theme);
+    const html = renderTicketHtml(preset, model, theme);
 
     try {
       const { chromium } = await import("playwright");
@@ -289,164 +302,5 @@ export const TicketRenderService = {
         qrPayload: model.ticket.qrPayload || model.ticket.code,
       });
     }
-  },
-
-  /**
-   * Generates the HTML string for the ticket
-   */
-  generateHtml(preset: TicketTemplatePreset, model: TicketRenderModel, theme: ThemeJson): string {
-    const formatDate = (date: Date) => format(date, "EEEE, d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: pt });
-
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=${theme.typography.fontFamily}:wght@400;600;700&display=swap" rel="stylesheet">
-        <style>
-          body {
-            font-family: '${theme.typography.fontFamily}', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: ${theme.colors.bg};
-            color: ${theme.colors.text};
-            -webkit-print-color-adjust: exact;
-          }
-          .ticket-container {
-            width: 210mm;
-            height: 297mm;
-            padding: 20mm;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-          }
-          .card {
-            background-color: ${theme.colors.card};
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(0,0,0,0.05);
-          }
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
-          }
-          .logo {
-            max-height: 60px;
-          }
-          .event-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            color: ${theme.colors.primary};
-          }
-          .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-          }
-          .label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: ${theme.colors.muted};
-            margin-bottom: 5px;
-          }
-          .value {
-            font-size: 16px;
-            font-weight: 600;
-          }
-          .qr-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: auto;
-            padding-top: 40px;
-            border-top: 1px dashed ${theme.colors.muted}44;
-          }
-          .qr-code {
-            width: ${theme.qr.size === 'L' ? '200px' : theme.qr.size === 'M' ? '150px' : '100px'};
-            height: ${theme.qr.size === 'L' ? '200px' : theme.qr.size === 'M' ? '150px' : '100px'};
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-          }
-          .qr-label {
-            font-size: 14px;
-            color: ${theme.colors.muted};
-          }
-          .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: ${theme.colors.muted};
-            text-align: center;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket-container">
-          <div class="card">
-            <div class="header">
-              <div>
-                ${theme.brand.logoUrl ? `<img src="${theme.brand.logoUrl}" class="logo" />` : `<h2 style="margin:0">${model.event.organizationName}</h2>`}
-                ${theme.brand.tagline ? `<p style="margin:5px 0; font-size:14px; color:${theme.colors.muted}">${theme.brand.tagline}</p>` : ""}
-              </div>
-              <div style="text-align: right">
-                <div class="label">Código do Bilhete</div>
-                <div class="value" style="font-family: monospace; font-size: 18px">${model.ticket.code}</div>
-              </div>
-            </div>
-
-            <h1 class="event-title">${model.event.title}</h1>
-            
-            <div class="info-grid">
-              <div>
-                <div class="label">Local</div>
-                <div class="value">${model.event.venue}<br/>${model.event.city}</div>
-              </div>
-              <div>
-                <div class="label">Data e Hora</div>
-                <div class="value">${formatDate(model.event.startAt)}</div>
-              </div>
-              
-              ${theme.blocks.showBuyerName ? `
-              <div>
-                <div class="label">Titular</div>
-                <div class="value">${model.buyer.name}</div>
-              </div>
-              ` : ""}
-              
-              ${theme.blocks.showTicketType ? `
-              <div>
-                <div class="label">Tipo de Bilhete</div>
-                <div class="value">${model.ticketLot.name}</div>
-              </div>
-              ` : ""}
-            </div>
-
-            <div class="qr-section">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(model.ticket.qrPayload)}" class="qr-code" />
-              <div class="qr-label">${theme.qr.label || "Validar na entrada"}</div>
-            </div>
-
-            <div class="footer">
-              ${theme.blocks.showOrderId ? `<p>Encomenda: ${model.order.id}</p>` : ""}
-              ${theme.blocks.showSupport && theme.footer.supportEmail ? `<p>Suporte: ${theme.footer.supportEmail}</p>` : ""}
-              ${theme.footer.supportUrl ? `<p>${theme.footer.supportUrl}</p>` : ""}
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
   },
 };

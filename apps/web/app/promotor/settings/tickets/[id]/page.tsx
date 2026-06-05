@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { ErrorState } from "@/components/dashboard/ErrorState";
@@ -49,6 +49,20 @@ export default function TicketTemplateEditorPage() {
     const [sampleTicketId, setSampleTicketId] = useState<string>("");
     const [sampleTickets, setSampleTickets] = useState<any[]>([]);
 
+    const [previewHtml, setPreviewHtml] = useState("");
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const previewDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const normalizeTheme = (raw: ThemeJson): ThemeJson => ({
+        ...raw,
+        layout: {
+            accentStyle: "bar",
+            cardStyle: "elevated",
+            cornerRadius: "md",
+            ...(raw.layout || {}),
+        },
+    });
+
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -59,7 +73,7 @@ export default function TicketTemplateEditorPage() {
             setTemplate(tJson);
             setName(tJson.name);
             setPreset(tJson.preset || "A4_CLASSIC");
-            setTheme(tJson.themeJson);
+            setTheme(normalizeTheme(tJson.themeJson));
 
             // Load sample tickets for preview
             const eRes = await fetchWithTimeout("/api/promotor/events");
@@ -80,6 +94,39 @@ export default function TicketTemplateEditorPage() {
     useEffect(() => {
         load();
     }, [load]);
+
+    const refreshPreview = useCallback(async (currentPreset: TicketTemplatePreset, currentTheme: ThemeJson) => {
+        setPreviewLoading(true);
+        try {
+            const res = await fetch("/api/promotor/ticket-preview", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    preset: currentPreset,
+                    themeJson: currentTheme,
+                    ticketId: "SAMPLE",
+                }),
+            });
+            if (res.ok) {
+                setPreviewHtml(await res.text());
+            }
+        } catch {
+            /* preview opcional */
+        } finally {
+            setPreviewLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!theme) return;
+        if (previewDebounce.current) clearTimeout(previewDebounce.current);
+        previewDebounce.current = setTimeout(() => {
+            refreshPreview(preset, theme);
+        }, 350);
+        return () => {
+            if (previewDebounce.current) clearTimeout(previewDebounce.current);
+        };
+    }, [preset, theme, refreshPreview]);
 
     const handleSave = async () => {
         if (!theme) return;
@@ -168,20 +215,54 @@ export default function TicketTemplateEditorPage() {
     };
 
     const handlePreview = () => {
-        window.open(`/api/promotor/ticket-preview?templateId=${id}&ticketId=SAMPLE`, '_blank');
-        // Note: I'll need to handle 'SAMPLE' in the API or find a real ticket ID
+        if (!theme) return;
+        fetch("/api/promotor/ticket-preview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ preset, themeJson: theme, ticketId: "SAMPLE" }),
+        })
+            .then(async (res) => {
+                if (!res.ok) throw new Error("Erro ao gerar preview");
+                const html = await res.text();
+                const w = window.open("", "_blank");
+                if (w) {
+                    w.document.write(html);
+                    w.document.close();
+                }
+            })
+            .catch(() => toast.error("Não foi possível abrir o preview"));
     };
 
-    const updateTheme = (path: string, value: any) => {
+    const updateTheme = (path: string, value: unknown) => {
         if (!theme) return;
-        const parts = path.split('.');
-        const newTheme = { ...theme };
-        let current: any = newTheme;
-        for (let i = 0; i < parts.length - 1; i++) {
-            current = current[parts[i]];
-        }
-        current[parts[parts.length - 1]] = value;
-        setTheme({ ...newTheme });
+        setTheme((prev) => {
+            if (!prev) return prev;
+            const next = structuredClone(prev);
+            const parts = path.split(".");
+            let current: Record<string, unknown> = next as Record<string, unknown>;
+            for (let i = 0; i < parts.length - 1; i++) {
+                current = current[parts[i]] as Record<string, unknown>;
+            }
+            current[parts[parts.length - 1]] = value;
+            return next;
+        });
+    };
+
+    const updateLayout = (key: "accentStyle" | "cardStyle" | "cornerRadius", value: string) => {
+        if (!theme) return;
+        setTheme((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                layout: {
+                    accentStyle: "bar",
+                    cardStyle: "elevated",
+                    cornerRadius: "md",
+                    ...(prev.layout || {}),
+                    [key]: value,
+                },
+            };
+        });
     };
 
     if (loading) return <PageShell title="Carregar Editor..."><Skeleton className="h-96 w-full rounded-2xl bg-white/5" /></PageShell>;
@@ -209,7 +290,7 @@ export default function TicketTemplateEditorPage() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-white/10 text-white hover:bg-white/5 transition-all"
                     >
                         <Eye className="h-4 w-4" />
-                        Preview PDF
+                        Abrir Preview
                     </button>
                     <button
                         onClick={handleSave}
@@ -250,16 +331,17 @@ export default function TicketTemplateEditorPage() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Template Preset</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Layout / Preset</label>
                                 <select
                                     value={preset}
                                     onChange={(e) => setPreset(e.target.value as TicketTemplatePreset)}
                                     className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
                                 >
-                                    <option value="A4_CLASSIC">A4 Clássico</option>
-                                    <option value="HORIZONTAL_QR_RIGHT">Horizontal (QR à Direita)</option>
-                                    <option value="MOBILE_PASS">Mobile Pass (Ecológico)</option>
+                                    <option value="A4_CLASSIC">A4 Clássico — vertical, QR em baixo</option>
+                                    <option value="HORIZONTAL_QR_RIGHT">Horizontal — QR à direita</option>
+                                    <option value="MOBILE_PASS">Mobile Pass — estilo wallet</option>
                                 </select>
+                                <p className="text-[10px] text-white/30 mt-2 ml-1">O preview atualiza automaticamente ao alterar o preset.</p>
                             </div>
                         </div>
                     </section>
@@ -380,6 +462,54 @@ export default function TicketTemplateEditorPage() {
                         </div>
                     </section>
 
+                    {/* Layout & estilo */}
+                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                            <Layout className="h-4 w-4" /> Estilo do Cartão
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Destaque superior</label>
+                                <select
+                                    value={theme?.layout?.accentStyle || "bar"}
+                                    onChange={(e) => updateLayout("accentStyle", e.target.value)}
+                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
+                                >
+                                    <option value="bar">Barra colorida</option>
+                                    <option value="gradient">Cabeçalho gradiente</option>
+                                    <option value="none">Sem destaque</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Estilo do cartão</label>
+                                <select
+                                    value={theme?.layout?.cardStyle || "elevated"}
+                                    onChange={(e) => updateLayout("cardStyle", e.target.value)}
+                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
+                                >
+                                    <option value="elevated">Com sombra</option>
+                                    <option value="bordered">Com borda colorida</option>
+                                    <option value="flat">Plano (sem sombra)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Cantos arredondados</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {(["sm", "md", "lg"] as const).map((r) => (
+                                        <button
+                                            key={r}
+                                            type="button"
+                                            onClick={() => updateLayout("cornerRadius", r)}
+                                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.cornerRadius || "md") === r ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5"}`}
+                                        >
+                                            {r === "sm" ? "Suave" : r === "md" ? "Médio" : "Forte"}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     {/* Blocks */}
                     <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
                         <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
@@ -439,10 +569,38 @@ export default function TicketTemplateEditorPage() {
                     </section>
                 </div>
 
-                {/* Right Info Column */}
+                {/* Live Preview */}
                 <div className="lg:col-span-4">
+                    <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sticky top-6">
+                        <div className="flex items-center justify-between mb-3 px-2">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
+                                <Eye className="h-4 w-4" /> Preview ao vivo
+                            </h3>
+                            {previewLoading && (
+                                <span className="text-[10px] text-emerald-400/80 animate-pulse">A atualizar...</span>
+                            )}
+                        </div>
+                        <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-900/80" style={{ height: "520px" }}>
+                            {previewHtml ? (
+                                <iframe
+                                    title="Preview do bilhete"
+                                    srcDoc={previewHtml}
+                                    className="w-full h-full border-0 bg-white"
+                                    sandbox="allow-same-origin"
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-white/30 text-sm">
+                                    A carregar preview...
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-white/30 mt-3 px-2 leading-relaxed">
+                            Reflete alterações instantâneas — preset, cores, blocos e layout. Guarde para aplicar em bilhetes reais.
+                        </p>
+                    </section>
+
                     {/* Footer */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
+                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-6">
                         <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
                             Rodapé
                         </h3>

@@ -45,6 +45,7 @@ export const TicketTemplateService = {
                 showSupport: true,
             },
             footer: { supportUrl: "", supportEmail: "" },
+            layout: { accentStyle: "bar", cardStyle: "elevated", cornerRadius: "md" },
         };
 
         return prisma.organizationTicketTemplate.create({
@@ -68,8 +69,7 @@ export const TicketTemplateService = {
 
         let updatedTheme = existing.themeJson as unknown as ThemeJson;
         if (data.themeJson) {
-            updatedTheme = { ...updatedTheme, ...data.themeJson };
-            // Validate with Zod
+            updatedTheme = data.themeJson as ThemeJson;
             themeJsonSchema.parse(updatedTheme);
         }
 

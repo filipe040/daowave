@@ -47,6 +47,11 @@ export const themeJsonSchema = z.object({
         supportUrl: z.string().url().startsWith("https://").optional().or(z.literal("")),
         supportEmail: z.string().email().optional().or(z.literal("")),
     }),
+    layout: z.object({
+        accentStyle: z.enum(["bar", "gradient", "none"]).optional(),
+        cardStyle: z.enum(["elevated", "flat", "bordered"]).optional(),
+        cornerRadius: z.enum(["sm", "md", "lg"]).optional(),
+    }).optional(),
 });
 
 export type ThemeJson = z.infer<typeof themeJsonSchema>;
