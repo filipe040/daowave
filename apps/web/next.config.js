@@ -12,7 +12,7 @@ const nextConfig = {
   // Mark bullmq and ioredis as external packages to prevent bundling during build
   // CRITICAL: These packages should NOT be bundled - they try to connect to Redis
   // Note: These are now optionalDependencies, so they may not be installed
-  serverExternalPackages: ['bullmq', 'ioredis'],
+  serverExternalPackages: ['bullmq', 'ioredis', 'pdfkit'],
 
   // Exclude test files from build
   webpack: (config, { isServer, dev }) => {

@@ -700,83 +700,53 @@ export async function sendTicketsEmail(
 
     const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
 
-    // -- Invoice PDF --
+    // -- Invoice PDF (pdfkit — fiável em produção) --
     const invoiceNumber = `REC-${order.createdAt.getFullYear()}-${order.id.substring(0, 8).toUpperCase()}`;
     try {
-      const { generateInvoicePDF, buildInvoiceData } = await import("./invoice/invoice-pdf.service");
-      const invoiceData = buildInvoiceData(order as any);
-      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      const invoicePdf = await generateSimpleInvoicePDF({
+        invoiceNumber,
+        eventTitle: event.title,
+        orderId: order.id,
+        buyerName: recipientName,
+        buyerEmail: recipientEmail,
+        totalCents: order.totalCents,
+        currency: order.currency,
+        items: order.items.map((item) => ({
+          name: item.ticketLot.name,
+          quantity: item.quantity,
+          unitPriceCents: item.unitPriceCents,
+        })),
+      });
       attachments.push({
-        filename: `fatura-${invoiceData.invoiceNumber}.pdf`,
-        content: pdfBuffer,
+        filename: `fatura-${invoiceNumber}.pdf`,
+        content: invoicePdf,
         contentType: "application/pdf",
       });
-      safeLog.info("Invoice PDF generated", { orderId, invoiceNumber: invoiceData.invoiceNumber });
+      safeLog.info("Invoice PDF generated", { orderId, invoiceNumber });
     } catch (pdfErr: any) {
-      safeLog.warn("Invoice PDF render failed, using fallback", { orderId, error: pdfErr.message });
-      try {
-        const fallback = await generateSimpleInvoicePDF({
-          invoiceNumber,
-          eventTitle: event.title,
-          orderId: order.id,
-          buyerName: recipientName,
-          buyerEmail: recipientEmail,
-          totalCents: order.totalCents,
-          currency: order.currency,
-          items: order.items.map((item) => ({
-            name: item.ticketLot.name,
-            quantity: item.quantity,
-            unitPriceCents: item.unitPriceCents,
-          })),
-        });
-        attachments.push({
-          filename: `fatura-${invoiceNumber}.pdf`,
-          content: fallback,
-          contentType: "application/pdf",
-        });
-      } catch (fallbackErr: any) {
-        safeLog.error("Simple invoice PDF fallback failed", { orderId, error: fallbackErr.message });
-      }
+      safeLog.error("Invoice PDF generation failed", { orderId, error: pdfErr.message });
     }
 
-    // -- Ticket PDFs (design via Playwright quando disponível; pdfkit como fallback) --
+    // -- Ticket PDFs (pdfkit + QR) --
     for (const ticket of tickets) {
       const filename = `bilhete-${ticket.code}.pdf`;
-      let attached = false;
-
       try {
-        const { TicketRenderService } = await import("./tickets/ticket-render.service");
-        const pdfBuffer = await TicketRenderService.renderPdf(ticket.id);
-        attachments.push({ filename, content: pdfBuffer, contentType: "application/pdf" });
-        attached = true;
+        const ticketPdf = await generateSimpleTicketPDF({
+          code: ticket.code,
+          eventTitle: event.title,
+          eventDate: event.startAt,
+          venue: event.venue || "",
+          city: event.city || "",
+          buyerName: recipientName,
+          qrPayload: ticket.qrPayload || ticket.code,
+        });
+        attachments.push({ filename, content: ticketPdf, contentType: "application/pdf" });
       } catch (ticketPdfErr: any) {
-        safeLog.warn("Ticket PDF render failed, using fallback", {
+        safeLog.error("Ticket PDF generation failed", {
           orderId,
           ticketId: ticket.id,
           error: ticketPdfErr.message,
         });
-      }
-
-      if (!attached) {
-        try {
-          const fallback = await generateSimpleTicketPDF({
-            code: ticket.code,
-            eventTitle: event.title,
-            eventDate: event.startAt,
-            venue: event.venue || "",
-            city: event.city || "",
-            buyerName: recipientName,
-            qrPayload: ticket.qrPayload || ticket.code,
-          });
-          attachments.push({ filename, content: fallback, contentType: "application/pdf" });
-          attached = true;
-        } catch (fallbackErr: any) {
-          safeLog.error("Simple ticket PDF fallback failed", {
-            orderId,
-            ticketId: ticket.id,
-            error: fallbackErr.message,
-          });
-        }
       }
     }
 

@@ -65,63 +65,64 @@ export async function GET(req: Request) {
         results.orderError = e.message;
     }
 
-    // 3. Test invoice PDF generation alone
+    // 3. Test pdfkit PDF generation (used in production emails)
     if (resolvedOrderId) {
         try {
             const order = await prisma.order.findUnique({
                 where: { id: resolvedOrderId },
                 include: {
-                    event: { include: { organization: true } },
+                    event: true,
                     user: true,
                     items: { include: { ticketLot: true } },
                     tickets: true,
                 },
             });
-            if (order) {
-                const { generateInvoicePDF, buildInvoiceData } = await import("@/lib/invoice/invoice-pdf.service");
-                const invoiceData = buildInvoiceData(order as any);
-                const pdfBuffer = await generateInvoicePDF(invoiceData);
-                results.invoicePdf = { success: true, sizeBytes: pdfBuffer.length, invoiceNumber: invoiceData.invoiceNumber };
+            if (order && order.tickets[0]) {
+                const { generateSimpleInvoicePDF, generateSimpleTicketPDF } = await import("@/lib/tickets/simple-ticket-pdf");
+                const invoicePdf = await generateSimpleInvoicePDF({
+                    invoiceNumber: `REC-TEST-${order.id.substring(0, 8)}`,
+                    eventTitle: order.event.title,
+                    orderId: order.id,
+                    buyerName: order.buyerName || order.user.name || "Cliente",
+                    buyerEmail: order.buyerEmail || order.user.email,
+                    totalCents: order.totalCents,
+                    currency: order.currency,
+                    items: order.items.map((item) => ({
+                        name: item.ticketLot.name,
+                        quantity: item.quantity,
+                        unitPriceCents: item.unitPriceCents,
+                    })),
+                });
+                const ticket = order.tickets[0];
+                const ticketPdf = await generateSimpleTicketPDF({
+                    code: ticket.code,
+                    eventTitle: order.event.title,
+                    eventDate: order.event.startAt,
+                    venue: order.event.venue || "",
+                    city: order.event.city || "",
+                    buyerName: order.buyerName || order.user.name || "Cliente",
+                    qrPayload: ticket.qrPayload || ticket.code,
+                });
+                results.pdfkit = {
+                    invoiceBytes: invoicePdf.length,
+                    ticketBytes: ticketPdf.length,
+                };
             }
         } catch (e: any) {
-            results.invoicePdfError = { message: e.message, stack: e.stack?.substring(0, 600) };
+            results.pdfkitError = { message: e.message, stack: e.stack?.substring(0, 600) };
         }
     }
 
-    // 4. Test processTemplateSend directly (bypass idempotency, capture real Resend result)
-    if (resolvedOrderId) {
+    // 4. Optionally send full email with fatura + bilhetes
+    if (resolvedOrderId && url.searchParams.get("send") === "1") {
         try {
-            const order = await prisma.order.findUnique({
-                where: { id: resolvedOrderId },
-                include: {
-                    event: { include: { organization: true } },
-                    user: true,
-                    items: { include: { ticketLot: true } },
-                    tickets: true,
-                },
+            const { sendTicketsEmail } = await import("@/lib/email-service");
+            await sendTicketsEmail(resolvedOrderId, {
+                idempotencyKey: `ticket-delivery-resend-${resolvedOrderId}-${Date.now()}`,
             });
-            if (order) {
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://tickets.daowave.pt";
-                const { processTemplateSend } = await import("@/lib/email-service");
-                const sendResult = await processTemplateSend(
-                    order.user.email,
-                    "ticket-delivery",
-                    {
-                        name: order.user.name || "Cliente",
-                        eventTitle: order.event.title,
-                        eventDate: order.event.startAt ? new Date(order.event.startAt).toLocaleString("pt-PT") : "Data a anunciar",
-                        venueName: (order.event as any).venue || "Local a anunciar",
-                        address: (order.event as any).city || "",
-                        ticketCount: order.tickets.length,
-                        downloadLink: `${appUrl}/account/tickets`,
-                    },
-                    undefined,
-                    undefined // no PDF attachment to simplify test
-                );
-                results.sendResult = sendResult;
-            }
+            results.sendTicketsEmail = { success: true };
         } catch (e: any) {
-            results.sendResultError = { message: e.message, stack: e.stack?.substring(0, 600) };
+            results.sendTicketsEmailError = { message: e.message, stack: e.stack?.substring(0, 600) };
         }
     }
 
