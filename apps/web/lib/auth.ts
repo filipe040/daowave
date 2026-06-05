@@ -58,7 +58,6 @@ async function linkOAuthAccount(params: {
 // ── AuthOptions ────────────────────────────────────────────────────────────
 
 export const authOptions: NextAuthOptions = {
-  trustHost: true,
   providers: [
     // ── Google ──────────────────────────────────────────────────────────
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET

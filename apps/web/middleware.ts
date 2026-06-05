@@ -1,6 +1,37 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+/** Build redirect URL using proxy headers (nginx/Cloudflare), not the internal bind address. */
+function redirectUrl(request: NextRequest, pathname: string, params?: Record<string, string>) {
+  const url = request.nextUrl.clone();
+  const qIndex = pathname.indexOf("?");
+  url.pathname = qIndex === -1 ? pathname : pathname.slice(0, qIndex);
+  url.search = "";
+  if (qIndex !== -1) {
+    new URLSearchParams(pathname.slice(qIndex + 1)).forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+  }
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      url.searchParams.set(key, value);
+    }
+  }
+  const host =
+    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ??
+    request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto");
+  if (host) {
+    const [hostname, port] = host.includes(":") ? host.split(":") : [host, ""];
+    url.hostname = hostname;
+    url.port = port;
+  } else {
+    url.port = "";
+  }
+  if (proto) url.protocol = proto.endsWith(":") ? proto : `${proto}:`;
+  return url;
+}
+
 /**
  * Edge-safe middleware - 100% Edge Runtime Compatible
  *
@@ -48,8 +79,10 @@ export async function middleware(request: NextRequest) {
     } else {
       target = pathname.replace(/^\/organizer/, "/promotor");
     }
-    const url = new URL(target, request.url);
-    url.search = request.nextUrl.search;
+    const url = redirectUrl(request, target);
+    request.nextUrl.searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
     return NextResponse.redirect(url, 308);
   }
 
@@ -135,9 +168,7 @@ export async function middleware(request: NextRequest) {
 
     // If token is null or undefined, user is not authenticated
     if (!token) {
-      const signInUrl = new URL("/auth/signin", request.url);
-      signInUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(signInUrl);
+      return NextResponse.redirect(redirectUrl(request, "/auth/signin", { from: pathname }));
     }
 
     // Determine required role based on path
@@ -146,7 +177,7 @@ export async function middleware(request: NextRequest) {
     // OBJETIVO C: Role-based protection
     if (pathname.startsWith("/admin")) {
       if (userRole !== "ADMIN") {
-        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
+        return NextResponse.redirect(redirectUrl(request, "/auth/signin", { error: "AccessDenied" }));
       }
     }
 
@@ -155,14 +186,14 @@ export async function middleware(request: NextRequest) {
       // checks OrganizationMember membership and handles role-based redirects.
       // Users may have system role 'USER' while still being org promoters.
       if (!token) {
-        return NextResponse.redirect(new URL("/auth/signin?from=/promotor", request.url));
+        return NextResponse.redirect(redirectUrl(request, "/auth/signin", { from: "/promotor" }));
       }
     }
 
     // Legacy validator route - keep until fully migrated
     if (pathname.startsWith("/validator")) {
       if (userRole !== "VALIDATOR" && userRole !== "ADMIN" && userRole !== "PROMOTER") {
-        return NextResponse.redirect(new URL("/auth/signin?error=AccessDenied", request.url));
+        return NextResponse.redirect(redirectUrl(request, "/auth/signin", { error: "AccessDenied" }));
       }
     }
 
