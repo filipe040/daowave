@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-/** Build redirect URL using proxy headers (nginx/Cloudflare), not the internal bind address. */
+/** Absolute redirect URL — Next.js 15 middleware requires absolute URLs behind nginx. */
 function redirectUrl(request: NextRequest, pathname: string, params?: Record<string, string>) {
   const url = request.nextUrl.clone();
   const qIndex = pathname.indexOf("?");
@@ -20,7 +20,7 @@ function redirectUrl(request: NextRequest, pathname: string, params?: Record<str
   const host =
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ??
     request.headers.get("host");
-  const proto = request.headers.get("x-forwarded-proto");
+  const proto = request.headers.get("x-forwarded-proto") ?? "https";
   if (host) {
     const [hostname, port] = host.includes(":") ? host.split(":") : [host, ""];
     url.hostname = hostname;
@@ -28,7 +28,7 @@ function redirectUrl(request: NextRequest, pathname: string, params?: Record<str
   } else {
     url.port = "";
   }
-  if (proto) url.protocol = proto.endsWith(":") ? proto : `${proto}:`;
+  url.protocol = proto.endsWith(":") ? proto : `${proto}:`;
   return url;
 }
 
@@ -118,10 +118,13 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    const isPublicPromoterRoute =
+      pathname === "/promotor/login" || pathname.startsWith("/promotor/login/");
+
     // Check if route needs protection (canonical: /admin, /promotor, /validator)
     const isProtectedRoute =
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/promotor") ||
+      (pathname.startsWith("/promotor") && !isPublicPromoterRoute) ||
       pathname.startsWith("/validator");
 
     // If not a protected route, return early with security headers
@@ -178,15 +181,6 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith("/admin")) {
       if (userRole !== "ADMIN") {
         return NextResponse.redirect(redirectUrl(request, "/auth/signin", { error: "AccessDenied" }));
-      }
-    }
-
-    if (pathname.startsWith("/promotor")) {
-      // Only require authentication here — the requirePromoter() server guard
-      // checks OrganizationMember membership and handles role-based redirects.
-      // Users may have system role 'USER' while still being org promoters.
-      if (!token) {
-        return NextResponse.redirect(redirectUrl(request, "/auth/signin", { from: "/promotor" }));
       }
     }
 

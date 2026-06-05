@@ -57,9 +57,7 @@ export async function requirePromoter() {
     }
 
     if (!membership && !isGlobalAdmin) {
-        // If not a member and not an admin, they can't access /promotor
-        // Fallback to a safe landing page or the homepage if setup doesn't exist
-        redirect("/");
+        redirect("/auth/signin?error=PromoterAccessDenied");
     }
 
     return {

@@ -20,6 +20,9 @@ const OAUTH_ERRORS: Record<string, string> = {
     "Este email já está associado a outra forma de acesso. Use email e palavra-passe.",
   OAuthError: "Erro de autenticação OAuth. Tente novamente.",
   Callback: "Erro na autenticação. Tente novamente.",
+  PromoterAccessDenied:
+    "A sua conta não tem acesso à área de promotor. Contacte o suporte se acha que isto é um erro.",
+  google: "Erro ao ligar com o Google. Verifique a configuração OAuth ou tente com email.",
   Default: "Erro ao entrar. Por favor, tente novamente.",
 };
 
@@ -61,6 +64,7 @@ function AppleIcon({ className }: { className?: string }) {
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { status } = useSession();
 
   const [credLoading, setCredLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
@@ -82,6 +86,12 @@ function SignInContent() {
   useEffect(() => {
     if (rawError) setError(OAUTH_ERRORS[rawError] ?? OAUTH_ERRORS.Default);
   }, [rawError]);
+
+  useEffect(() => {
+    if (status === "authenticated" && !rawError && from !== "/") {
+      window.location.replace(from);
+    }
+  }, [status, from, rawError]);
 
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
 
@@ -127,8 +137,7 @@ function SignInContent() {
         );
         setCredLoading(false);
       } else {
-        router.push(from);
-        router.refresh();
+        window.location.replace(from);
       }
     } catch {
       setError("Erro ao processar login.");
