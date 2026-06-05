@@ -95,10 +95,12 @@ test.describe("Checkout Flow E2E", () => {
     await expect(page.getByTestId("input-buyer-name")).toBeVisible({ timeout: 5000 });
     await page.getByTestId("input-buyer-name").fill("Test User");
     await page.getByTestId("input-buyer-email").fill("test@example.com");
+    await page.getByTestId("checkbox-terms").click();
+    await page.getByTestId("payment-method-multibanco").click();
 
-    const payButton = page.locator("button[type='submit']").or(page.locator("button:has-text('Confirmar Pagamento')"));
-    await expect(payButton.first()).toBeVisible({ timeout: 5000 });
-    await payButton.first().click();
+    const payButton = page.getByTestId("btn-confirm-payment");
+    await expect(payButton).toBeVisible({ timeout: 5000 });
+    await payButton.click();
 
     await expect(page.getByTestId("page-order-success").or(page.locator("text=Pagamento concluído")).or(page.locator("text=Meus bilhetes")).or(page.getByTestId("page-my-tickets")).first()).toBeVisible({ timeout: 20000 });
   });

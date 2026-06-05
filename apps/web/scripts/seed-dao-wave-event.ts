@@ -13,6 +13,7 @@ import {
   OrganizerStatus,
   TicketTypeStatus,
   TicketLotStatus,
+  MemberRole,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -61,6 +62,48 @@ async function main() {
         brandName: "DãoWave",
         status: OrganizerStatus.APPROVED,
         contactEmail: user.email,
+      },
+    });
+  }
+
+  const promoterUser = await prisma.user.findUnique({
+    where: { id: promoter.userId },
+  });
+
+  if (promoterUser) {
+    await prisma.organizationMember.upsert({
+      where: {
+        organizationId_userId: {
+          organizationId: org.id,
+          userId: promoterUser.id,
+        },
+      },
+      update: { role: MemberRole.PROMOTER_OWNER, status: "ACTIVE" },
+      create: {
+        organizationId: org.id,
+        userId: promoterUser.id,
+        role: MemberRole.PROMOTER_OWNER,
+        status: "ACTIVE",
+      },
+    });
+  }
+
+  // Ensure ADMIN users can access /promotor even without explicit membership
+  const admins = await prisma.user.findMany({ where: { role: "ADMIN" } });
+  for (const admin of admins) {
+    await prisma.organizationMember.upsert({
+      where: {
+        organizationId_userId: {
+          organizationId: org.id,
+          userId: admin.id,
+        },
+      },
+      update: { role: MemberRole.PROMOTER_OWNER, status: "ACTIVE" },
+      create: {
+        organizationId: org.id,
+        userId: admin.id,
+        role: MemberRole.PROMOTER_OWNER,
+        status: "ACTIVE",
       },
     });
   }

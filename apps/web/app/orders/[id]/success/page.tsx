@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CheckCircle } from "lucide-react";
+import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 
 export const dynamic = "force-dynamic";
 
@@ -46,8 +47,13 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in py-16" data-testid="page-order-success">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+    <div className="min-h-screen bg-black pt-24 pb-16 relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-4 max-w-lg relative z-10">
+        <CheckoutStepper currentStep={3} />
+
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-2xl" data-testid="page-order-success">
         <div className="mb-6 flex justify-center"><CheckCircle className="h-20 w-20 text-emerald-400" strokeWidth={1.5} /></div>
         <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-white/92">Pagamento concluído!</h1>
         <p className="mb-8 text-lg text-white/60">
@@ -73,6 +79,7 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
           >
             Voltar ao evento
           </Link>
+        </div>
         </div>
       </div>
     </div>

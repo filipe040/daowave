@@ -2,23 +2,26 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Wrench } from "lucide-react";
+import { Loader2, ShieldCheck, CreditCard } from "lucide-react";
+import { PaymentProcessingOverlay } from "@/components/checkout/PaymentProcessingOverlay";
+import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 
 function MockCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order");
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleMockPayment = async () => {
+  const handlePayment = async () => {
     if (!orderId) return;
 
     setProcessing(true);
+    setError("");
+
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Call mock payment completion endpoint
+      await new Promise((r) => setTimeout(r, 2000));
+
       const res = await fetch(`/api/payments/mock/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,53 +29,71 @@ function MockCheckoutContent() {
       });
 
       if (res.ok) {
-        router.push(`/orders/${orderId}/success?mock=true`);
+        router.push(`/orders/${orderId}/success`);
       } else {
-        console.error("Failed to complete mock payment");
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Não foi possível concluir o pagamento.");
         setProcessing(false);
       }
-    } catch (error) {
-      console.error("Mock payment error:", error);
+    } catch {
+      setError("Erro de ligação. Tente novamente.");
       setProcessing(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold">Checkout (Modo Desenvolvimento)</h1>
-        <p className="text-base text-zinc-400">Pagamento simulado para testes</p>
-      </div>
-      <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-6 sm:p-8 backdrop-blur-sm">
-        <div className="mb-6">
-          <div className="mb-4 flex justify-center">
-          <Wrench className="h-14 w-14 text-zinc-400" strokeWidth={1.5} />
+    <div className="min-h-screen bg-black pt-24 pb-16 relative overflow-hidden">
+      <PaymentProcessingOverlay active={processing} />
+
+      <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[500px] h-[500px] bg-emerald-500/8 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-4 max-w-lg relative z-10">
+        <CheckoutStepper currentStep={2} />
+
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-black text-white tracking-tight">Pagamento seguro</h1>
+          <p className="text-white/45 mt-2 text-sm">Confirme para concluir a encomenda</p>
         </div>
-          <h2 className="text-xl font-bold mb-2 text-yellow-400">Modo Mock Ativo</h2>
-          <p className="text-sm text-zinc-300 mb-4">
-            Está a usar um pagamento simulado porque o Stripe não está configurado ou a chave é inválida.
-          </p>
-          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 mb-6">
-            <p className="text-sm text-yellow-300">
-              <strong>Nota:</strong> Para usar pagamentos reais, configure uma chave válida do Stripe no ficheiro .env
-            </p>
+
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-3xl p-8 shadow-2xl space-y-6">
+          <div className="flex items-center justify-center gap-3 py-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
+              <CreditCard className="h-7 w-7 text-white/70" />
+            </div>
           </div>
-        </div>
-        
-        <button
-          onClick={handleMockPayment}
-          disabled={processing}
-          className="w-full rounded-xl bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-yellow-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95"
-        >
-          {processing ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              A simular pagamento...
-            </span>
-          ) : (
-            "Simular Pagamento Bem-Sucedido"
+
+          <p className="text-center text-white/60 text-sm leading-relaxed">
+            O seu pagamento será processado de forma segura. Após confirmação, os bilhetes serão
+            emitidos e enviados por email.
+          </p>
+
+          {error && (
+            <p className="text-center text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+              {error}
+            </p>
           )}
-        </button>
+
+          <button
+            onClick={handlePayment}
+            disabled={processing || !orderId}
+            data-testid="btn-confirm-payment"
+            className="w-full rounded-2xl bg-white px-6 py-4 text-[15px] font-bold text-black shadow-[0_12px_40px_rgba(255,255,255,0.12)] transition-all hover:bg-white/90 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            {processing ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                A processar...
+              </span>
+            ) : (
+              "Confirmar e pagar"
+            )}
+          </button>
+
+          <p className="flex items-center justify-center gap-2 text-[11px] text-white/30 uppercase tracking-widest">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            SSL · Pagamento encriptado
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -80,14 +101,13 @@ function MockCheckoutContent() {
 
 export default function MockCheckoutPage() {
   return (
-    <Suspense fallback={
-      <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
-        <div className="mb-8 space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold">Checkout (Modo Desenvolvimento)</h1>
-          <p className="text-base text-zinc-400">A carregar...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white/20" />
         </div>
-      </div>
-    }>
+      }
+    >
       <MockCheckoutContent />
     </Suspense>
   );
