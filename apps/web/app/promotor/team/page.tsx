@@ -13,8 +13,20 @@ interface OrgMember {
     id: string;
     role: "PROMOTER_OWNER" | "PROMOTER_MANAGER" | "PROMOTER_STAFF" | "OWNER" | "MANAGER" | "STAFF" | "READ_ONLY";
     createdAt: string;
-    user: { id: string; name: string | null; email: string };
+    user: { id: string; name: string | null; email: string; role?: string };
     organization: { id: string; name: string };
+}
+
+function canRemoveMember(
+    member: OrgMember,
+    currentUserId: string | null,
+    canRemoveMembers: boolean,
+    isGlobalAdmin: boolean
+): boolean {
+    if (!canRemoveMembers || !currentUserId) return false;
+    if (member.user.id === currentUserId) return false;
+    if (member.user.role === "ADMIN" && !isGlobalAdmin) return false;
+    return true;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -44,6 +56,7 @@ export default function PromoterTeamPage() {
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [canRemoveMembers, setCanRemoveMembers] = useState(false);
+    const [isGlobalAdmin, setIsGlobalAdmin] = useState(false);
     const [memberToRemove, setMemberToRemove] = useState<OrgMember | null>(null);
     const [removing, setRemoving] = useState(false);
 
@@ -59,11 +72,12 @@ export default function PromoterTeamPage() {
             if (!res.ok) throw new Error(`Erro ${res.status}`);
             const json: {
                 data: OrgMember[];
-                meta?: { currentUserId?: string; canRemoveMembers?: boolean };
+                meta?: { currentUserId?: string; canRemoveMembers?: boolean; isGlobalAdmin?: boolean };
             } = await res.json();
             setMembers(json.data);
             setCurrentUserId(json.meta?.currentUserId ?? null);
             setCanRemoveMembers(json.meta?.canRemoveMembers ?? false);
+            setIsGlobalAdmin(json.meta?.isGlobalAdmin ?? false);
         } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro"); }
         finally { setLoading(false); }
     }, []);
@@ -161,9 +175,16 @@ export default function PromoterTeamPage() {
                                     </td>
                                     <td className="px-6 py-5 text-white/40 font-bold uppercase tracking-tight text-xs">{m.organization.name}</td>
                                     <td className="px-6 py-5">
-                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-current opacity-80 ${ROLE_COLOR[m.role]}`}>
-                                            {ROLE_LABELS[m.role] || m.role}
-                                        </span>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-current opacity-80 ${ROLE_COLOR[m.role]}`}>
+                                                {ROLE_LABELS[m.role] || m.role}
+                                            </span>
+                                            {m.user.role === "ADMIN" && (
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                                                    Admin plataforma
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-5 text-[11px] font-bold text-white/20 uppercase tracking-widest">
                                         {new Date(m.createdAt).toLocaleDateString("pt-PT")}
@@ -174,7 +195,11 @@ export default function PromoterTeamPage() {
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">
                                                     Você
                                                 </span>
-                                            ) : (
+                                            ) : m.user.role === "ADMIN" && !isGlobalAdmin ? (
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/25">
+                                                    Protegido
+                                                </span>
+                                            ) : canRemoveMember(m, currentUserId, canRemoveMembers, isGlobalAdmin) ? (
                                                 <button
                                                     type="button"
                                                     onClick={() => setMemberToRemove(m)}
@@ -184,7 +209,7 @@ export default function PromoterTeamPage() {
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                     Remover
                                                 </button>
-                                            )}
+                                            ) : null}
                                         </td>
                                     )}
                                 </tr>

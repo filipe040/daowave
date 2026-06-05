@@ -41,7 +41,7 @@ export async function DELETE(
     const member = await prisma.organizationMember.findFirst({
       where: { id: memberId, organizationId: orgId },
       include: {
-        user: { select: { id: true, email: true, name: true } },
+        user: { select: { id: true, email: true, name: true, role: true } },
         organization: { select: { name: true } },
       },
     });
@@ -54,6 +54,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: "Não pode remover a sua própria conta da equipa." },
         { status: 400 }
+      );
+    }
+
+    // Promoter owners cannot remove platform administrators from the team
+    if (member.user.role === "ADMIN" && !isGlobalAdmin) {
+      return NextResponse.json(
+        { error: "Não tem permissão para remover administradores da plataforma." },
+        { status: 403 }
       );
     }
 

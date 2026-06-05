@@ -14,7 +14,7 @@ export async function GET(req: Request) {
         const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
 
         if (!orgId) {
-            return NextResponse.json({ data: [], total: 0, meta: { currentUserId: userId, canRemoveMembers: isGlobalAdmin } });
+            return NextResponse.json({ data: [], total: 0, meta: { currentUserId: userId, canRemoveMembers: isGlobalAdmin, isGlobalAdmin } });
         }
 
         const canRemoveMembers =
@@ -36,6 +36,7 @@ export async function GET(req: Request) {
                         name: true,
                         email: true,
                         avatarUrl: true,
+                        role: true,
                     },
                 },
                 organization: {
@@ -47,7 +48,7 @@ export async function GET(req: Request) {
         return NextResponse.json({
             data: members,
             total: members.length,
-            meta: { currentUserId: userId, canRemoveMembers },
+            meta: { currentUserId: userId, canRemoveMembers, isGlobalAdmin },
         });
     } catch (error) {
         safeLog.error("Promotor team error", error);

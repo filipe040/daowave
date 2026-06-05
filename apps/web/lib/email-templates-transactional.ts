@@ -223,6 +223,7 @@ export function getTicketEmailTemplate(v: {
   address: string;
   ticketCount: number;
   downloadLink?: string;
+  hasPdfAttachments?: boolean;
   branding?: TicketEmailBranding | null;
   ticketCode?: string | null;
   qrCodeImageUrl?: string | null;
@@ -248,11 +249,17 @@ export function getTicketEmailTemplate(v: {
   ${v.ticketCode ? `<p style="font-family:monospace;font-size:22px;font-weight:800;color:${TEXT_PRIMARY};letter-spacing:.12em">${v.ticketCode}</p>` : ""}
 </div>` : "";
 
-  const downloadSection = v.downloadLink ? `
+  const downloadSection = v.hasPdfAttachments
+    ? `<div class="alert alert-info">
+  📎 <strong>Documentos em anexo:</strong> Encontrará o(s) bilhete(s) em PDF e a fatura/recibo neste email.
+</div>`
+    : v.downloadLink
+      ? `
 <div class="btn-wrap">
   <a href="${v.downloadLink}" class="btn">Descarregar bilhete(s) PDF</a>
 </div>
-<p class="meta" style="text-align:center">Recomendamos descarregar antes de chegar ao recinto.</p>` : "";
+<p class="meta" style="text-align:center">Recomendamos descarregar antes de chegar ao recinto.</p>`
+      : "";
 
   const bodyContent = `
 <h2 style="margin-bottom:8px">Bilhete(s) confirmado(s) ✓</h2>

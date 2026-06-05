@@ -12,6 +12,7 @@ import { getPaymentProvider } from "@/lib/payment";
 import { generateTicketCode } from "@/lib/utils";
 import { getQRPayload } from "@/lib/qr/generate";
 import { checkoutConfirmSchema } from "@/lib/security/validation";
+import { sendTicketsEmail } from "@/lib/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,9 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (order.status === "PAID") {
+      sendTicketsEmail(order.id).catch((err) =>
+        console.error("[checkout/confirm] resend ticket email error:", err)
+      );
       return NextResponse.json({
         success: true,
         orderId: order.id,
@@ -176,6 +180,12 @@ export async function POST(
         }
       }
     });
+
+    try {
+      await sendTicketsEmail(order.id);
+    } catch (emailErr) {
+      console.error("[checkout/confirm] Error sending ticket email:", emailErr);
+    }
 
     return NextResponse.json({
       success: true,

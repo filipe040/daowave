@@ -21,6 +21,7 @@ import {
 } from "./email-templates-transactional";
 import { getMarketingCampaignTemplate } from "./email-templates";
 import { getEmailQueue } from "./queue/email.queue";
+import { generateSimpleTicketPDF, generateSimpleInvoicePDF } from "./tickets/simple-ticket-pdf";
 
 export type EmailTemplate =
   | "verify-email"
@@ -396,6 +397,7 @@ export async function processTemplateSend(
         address: string;
         ticketCount: number;
         downloadLink?: string;
+        hasPdfAttachments?: boolean;
         branding?: { primaryColor?: string; secondaryColor?: string; bannerUrl?: string; headerTitle?: string };
         ticketCode?: string;
         qrCodeImageUrl?: string;
@@ -683,51 +685,126 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
       return;
     }
 
+    if (order.tickets.length === 0) {
+      safeLog.error("No tickets to email for order", { orderId });
+      return;
+    }
+
     const { user, event, tickets } = order;
+    const recipientEmail = (order.buyerEmail || user.email).toLowerCase().trim();
+    const recipientName = order.buyerName || user.name || "Cliente";
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://tickets.daowave.pt";
 
-    // -- Generate Invoice PDF attachment --
-    let invoiceAttachment: { filename: string; content: Buffer; contentType: string } | undefined;
+    const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
+
+    // -- Invoice PDF --
+    const invoiceNumber = `REC-${order.createdAt.getFullYear()}-${order.id.substring(0, 8).toUpperCase()}`;
     try {
       const { generateInvoicePDF, buildInvoiceData } = await import("./invoice/invoice-pdf.service");
       const invoiceData = buildInvoiceData(order as any);
       const pdfBuffer = await generateInvoicePDF(invoiceData);
-      invoiceAttachment = {
+      attachments.push({
         filename: `fatura-${invoiceData.invoiceNumber}.pdf`,
         content: pdfBuffer,
         contentType: "application/pdf",
-      };
+      });
       safeLog.info("Invoice PDF generated", { orderId, invoiceNumber: invoiceData.invoiceNumber });
     } catch (pdfErr: any) {
-      safeLog.error("Invoice PDF generation failed (sending email without it)", { orderId, error: pdfErr.message });
+      safeLog.warn("Invoice PDF render failed, using fallback", { orderId, error: pdfErr.message });
+      try {
+        const fallback = await generateSimpleInvoicePDF({
+          invoiceNumber,
+          eventTitle: event.title,
+          orderId: order.id,
+          buyerName: recipientName,
+          buyerEmail: recipientEmail,
+          totalCents: order.totalCents,
+          currency: order.currency,
+          items: order.items.map((item) => ({
+            name: item.ticketLot.name,
+            quantity: item.quantity,
+            unitPriceCents: item.unitPriceCents,
+          })),
+        });
+        attachments.push({
+          filename: `fatura-${invoiceNumber}.pdf`,
+          content: fallback,
+          contentType: "application/pdf",
+        });
+      } catch (fallbackErr: any) {
+        safeLog.error("Simple invoice PDF fallback failed", { orderId, error: fallbackErr.message });
+      }
     }
 
-    // Build email variables
+    // -- Ticket PDFs (Playwright design, fallback to simple PDF) --
+    const { TicketRenderService } = await import("./tickets/ticket-render.service");
+
+    for (const ticket of tickets) {
+      const filename = `bilhete-${ticket.code}.pdf`;
+      try {
+        const pdfBuffer = await TicketRenderService.renderPdf(ticket.id);
+        attachments.push({ filename, content: pdfBuffer, contentType: "application/pdf" });
+      } catch (ticketPdfErr: any) {
+        safeLog.warn("Ticket PDF render failed, using fallback", {
+          orderId,
+          ticketId: ticket.id,
+          error: ticketPdfErr.message,
+        });
+        try {
+          const fallback = await generateSimpleTicketPDF({
+            code: ticket.code,
+            eventTitle: event.title,
+            eventDate: event.startAt,
+            venue: event.venue || "",
+            city: event.city || "",
+            buyerName: recipientName,
+          });
+          attachments.push({ filename, content: fallback, contentType: "application/pdf" });
+        } catch (fallbackErr: any) {
+          safeLog.error("Simple ticket PDF fallback failed", {
+            orderId,
+            ticketId: ticket.id,
+            error: fallbackErr.message,
+          });
+        }
+      }
+    }
+
     const variables = {
-      name: user.name || "Cliente",
+      name: recipientName,
       eventTitle: event.title,
-      eventDate: event.startAt ? new Date(event.startAt).toLocaleString("pt-PT") : "Data a anunciar",
+      eventDate: event.startAt
+        ? new Date(event.startAt).toLocaleString("pt-PT", { timeZone: "Europe/Lisbon" })
+        : "Data a anunciar",
       venueName: event.venue || "Local a anunciar",
       address: event.city || "",
       ticketCount: tickets.length,
-      downloadLink: `${appUrl}/account/tickets`,
+      downloadLink: `${appUrl}/my-tickets`,
+      hasPdfAttachments: attachments.length > 0,
+      ticketCode: tickets.length === 1 ? tickets[0].code : null,
     };
 
     const res = await sendTemplate({
-      to: user.email,
+      to: recipientEmail,
       templateId: "ticket-delivery",
       variables,
       idempotencyKey: `ticket-delivery-${orderId}`,
-      attachments: invoiceAttachment ? [invoiceAttachment] : undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
     });
 
     if (!res.success) {
-      safeLog.error("Failed to send ticket delivery email", { orderId, error: res.error });
+      safeLog.error("Failed to send ticket delivery email", { orderId, error: res.error, to: maskEmail(recipientEmail) });
     } else {
-      safeLog.info("Ticket delivery email sent", { orderId, messageId: res.messageId, withInvoice: !!invoiceAttachment });
+      safeLog.info("Ticket delivery email sent", {
+        orderId,
+        messageId: res.messageId,
+        to: maskEmail(recipientEmail),
+        attachmentCount: attachments.length,
+      });
     }
   } catch (error: any) {
     safeLog.error("Error generating/sending ticket email", { orderId, error: error.message });
+    throw error;
   }
 }
 
