@@ -144,7 +144,7 @@ async function main() {
   console.log(`   Slug:      ${event.slug}`);
   console.log(`   ID:        ${event.id}`);
   console.log(`   Lote:      ${lot.name} — ${(lot.priceCents / 100).toFixed(2)} EUR (${lot.quantityTotal} bilhetes)`);
-  console.log(`\n🌐 URL: https://daowave.pt/events/dao-wave`);
+  console.log(`\n🌐 URL: https://tickets.daowave.pt/events/dao-wave`);
   console.log("\n📋 Para comprar em mock:");
   console.log("   1. .env: ENABLE_MOCK_PAYMENTS=true");
   console.log("   2. Conta USER (não promotor/admin) — regista em /auth/signup");

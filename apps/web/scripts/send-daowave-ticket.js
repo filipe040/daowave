@@ -6,7 +6,7 @@ const { hash } = require("bcryptjs");
 const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-async function generateTicketPDF(ticket, event) {
+async function generateTicketPDF(ticket, event, attendeeName) {
     return new Promise((resolve, reject) => {
         const doc = new PDFDocument({ size: "A4", margin: 50 });
         const chunks = [];
@@ -20,7 +20,7 @@ async function generateTicketPDF(ticket, event) {
         doc.moveDown(2);
         
         doc.fontSize(14).text(`Código: ${ticket.code}`);
-        doc.text(`Participante: ${ticket.attendeeName}`);
+        doc.text(`Participante: ${attendeeName || "—"}`);
         doc.text(`Data: ${new Date(event.startAt).toLocaleString("pt-PT")}`);
         doc.text(`Local: ${event.venue}, ${event.city}`);
         doc.moveDown(2);
@@ -157,7 +157,8 @@ async function main() {
 
     // 6. Generate Attachments
     console.log("📄 Generating PDFs...");
-    const ticketPdf = await generateTicketPDF(ticket, event);
+    const attendeeName = order.buyerName || user.name || user.email;
+    const ticketPdf = await generateTicketPDF(ticket, event, attendeeName);
     const invoicePdf = await generateInvoiceText(order, event);
 
     // 7. Send Email via Resend

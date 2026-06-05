@@ -7,6 +7,7 @@
  */
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { redirect } from "next/navigation";
 
 export default async function AuthCallbackPage({
@@ -33,9 +34,9 @@ export default async function AuthCallbackPage({
     if (role === "ADMIN") redirect("/admin");
     if (role === "PROMOTER") redirect("/promotor");
 
-    // Default: go where they came from, fallback to home
-    if (from && from.startsWith("/") && !from.startsWith("/auth")) {
-        redirect(from);
+    const safeFrom = safeRedirectPath(from, "/");
+    if (safeFrom !== "/") {
+        redirect(safeFrom);
     }
 
     redirect("/");

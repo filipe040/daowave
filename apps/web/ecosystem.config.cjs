@@ -27,7 +27,7 @@ if (fs.existsSync(envPath)) {
 const productionUrl =
   envFromFile.APP_URL ||
   envFromFile.NEXTAUTH_URL ||
-  "https://daowave.pt";
+  "https://tickets.daowave.pt";
 
 module.exports = {
   apps: [
