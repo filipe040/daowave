@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth/guards";
 import { z } from "zod";
 import { OrganizationStatus } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit";
+import { OrganizationService } from "@/lib/services/organization.service";
 
 const updateOrgSchema = z.object({
     name: z.string().min(2).optional(),
@@ -120,5 +121,53 @@ export async function PATCH(
         }
         console.error("[Admin Organization Detail PATCH]", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
+    try {
+        const params = await context.params;
+        const session = await requireAuth();
+        const userId = (session.user as { id?: string }).id;
+
+        if ((session.user as { role?: string }).role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        const existing = await prisma.organization.findUnique({
+            where: { id: params.id },
+            select: { id: true, name: true },
+        });
+
+        if (!existing) {
+            return NextResponse.json({ error: "Organização não encontrada" }, { status: 404 });
+        }
+
+        const result = await OrganizationService.delete(params.id);
+
+        await createAuditLog({
+            userId,
+            action: "ORGANIZATION_DELETED",
+            entityType: "organization",
+            entityId: params.id,
+            details: {
+                organizationName: result.name,
+                eventsDeleted: result.eventsDeleted,
+            },
+            ip: req.headers.get("x-forwarded-for") || undefined,
+            userAgent: req.headers.get("user-agent") || undefined,
+        });
+
+        return NextResponse.json({ success: true, ...result });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Erro ao apagar organização";
+        console.error("[Admin Organization Detail DELETE]", error);
+        return NextResponse.json(
+            { error: message },
+            { status: message.includes("não encontrada") ? 404 : 500 }
+        );
     }
 }

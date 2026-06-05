@@ -14,7 +14,8 @@ import {
     Settings,
     Activity,
     ArrowLeft,
-    Plus
+    Plus,
+    Trash2
 } from "lucide-react";
 import { api, Organization } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ import { InvitesTab } from "./components/InvitesTab";
 import { AuditTab } from "./components/AuditTab";
 import { InviteModal } from "./components/InviteModal";
 import { OrgEditModal } from "./components/OrgEditModal";
+import { DeleteOrgModal } from "./components/DeleteOrgModal";
 
 type TabType = "overview" | "team" | "invites" | "audit";
 
@@ -46,6 +48,7 @@ export default function OrganizationDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -77,6 +80,13 @@ export default function OrganizationDetailPage() {
             actions={
                 <div className="flex items-center gap-3">
                     <button
+                        onClick={() => setShowDeleteModal(true)}
+                        className="flex items-center gap-2 px-4 h-10 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-[13px] font-bold transition-all border border-red-500/20"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Apagar
+                    </button>
+                    <button
                         onClick={() => setShowEditModal(true)}
                         className="flex items-center gap-2 px-4 h-10 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[13px] font-bold transition-all border border-white/5"
                     >
@@ -97,6 +107,14 @@ export default function OrganizationDetailPage() {
                 </div>
             }
         >
+            {showDeleteModal && (
+                <DeleteOrgModal
+                    org={org}
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                    onDeleted={() => router.push("/admin/organizations")}
+                />
+            )}
             {showEditModal && (
                 <OrgEditModal
                     org={org}

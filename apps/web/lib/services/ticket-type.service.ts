@@ -43,9 +43,33 @@ export class TicketTypeService {
      * Apagar um tipo de bilhete
      */
     static async delete(id: string) {
-        // Validation happens in the API route (e.g. check if there are sold tickets)
-        return prisma.ticketType.delete({
-            where: { id }
+        const ticketType = await prisma.ticketType.findUnique({
+            where: { id },
+            include: {
+                ticketLots: {
+                    select: { id: true, soldCount: true, quantitySold: true },
+                },
+                _count: { select: { seats: true } },
+            },
         });
+
+        if (!ticketType) throw new Error("Tipo de bilhete não encontrado");
+
+        const lotsWithSales = ticketType.ticketLots.filter(
+            (lot) => (lot.soldCount ?? lot.quantitySold ?? 0) > 0
+        );
+        if (lotsWithSales.length > 0) {
+            throw new Error("Não é possível apagar um tipo com lotes que já tenham vendas.");
+        }
+
+        if (ticketType.ticketLots.length > 0) {
+            throw new Error("Remova primeiro os lotes associados a este tipo.");
+        }
+
+        if (ticketType._count.seats > 0) {
+            throw new Error("Não é possível apagar um tipo com lugares marcados configurados.");
+        }
+
+        return prisma.ticketType.delete({ where: { id } });
     }
 }

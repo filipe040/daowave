@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
-import { Plus, Check, Loader2, Pencil, X } from "lucide-react";
+import { Plus, Check, Loader2, Pencil, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const EMPTY_FORM = {
@@ -28,6 +28,7 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
     const [editingLotId, setEditingLotId] = useState<string | null>(null);
     const [minCapacity, setMinCapacity] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deletingLotId, setDeletingLotId] = useState<string | null>(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
 
     const loadData = useCallback(async () => {
@@ -120,6 +121,35 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
             toast.error(err instanceof Error ? err.message : "Erro");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (lot: { id: string; name: string; soldCount?: number; quantitySold?: number }) => {
+        const sold = lot.soldCount ?? lot.quantitySold ?? 0;
+        if (sold > 0) {
+            toast.error("Não é possível apagar um lote com bilhetes vendidos.");
+            return;
+        }
+        if (!confirm(`Apagar o lote "${lot.name}"? Esta ação não pode ser desfeita.`)) return;
+
+        setDeletingLotId(lot.id);
+        try {
+            const res = await fetchWithTimeout(
+                `/api/promotor/events/${eventId}/ticket-lots/${lot.id}`,
+                { method: "DELETE" },
+                8000
+            );
+            if (!res.ok) {
+                const b = await res.json();
+                throw new Error(b.error || "Erro ao apagar lote");
+            }
+            toast.success("Lote apagado");
+            if (editingLotId === lot.id) resetForm();
+            await loadData();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro");
+        } finally {
+            setDeletingLotId(null);
         }
     };
 
@@ -261,14 +291,26 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                                     </td>
                                     {canEdit && (
                                         <td className="px-6 py-5 text-right">
-                                            <button
-                                                type="button"
-                                                onClick={() => isEditing ? resetForm() : startEdit(lot)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                                            >
-                                                {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-                                                {isEditing ? "Fechar" : "Editar"}
-                                            </button>
+                                            <div className="inline-flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => isEditing ? resetForm() : startEdit(lot)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                                >
+                                                    {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                                                    {isEditing ? "Fechar" : "Editar"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(lot)}
+                                                    disabled={deletingLotId === lot.id || sold > 0}
+                                                    title={sold > 0 ? "Lote com vendas — não pode apagar" : "Apagar lote"}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                                >
+                                                    {deletingLotId === lot.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                                    Apagar
+                                                </button>
+                                            </div>
                                         </td>
                                     )}
                                 </tr>

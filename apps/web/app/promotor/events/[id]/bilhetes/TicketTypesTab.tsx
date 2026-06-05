@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
-import { Plus, Check, Loader2, AlertCircle, Ticket, Pencil, X } from "lucide-react";
+import { Plus, Check, Loader2, AlertCircle, Ticket, Pencil, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface TicketType {
@@ -26,6 +26,7 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deletingTypeId, setDeletingTypeId] = useState<string | null>(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
 
     const load = useCallback(async () => {
@@ -103,6 +104,39 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
             toast.error(err instanceof Error ? err.message : "Erro");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (type: TicketType) => {
+        const lotCount = type._count?.ticketLots ?? 0;
+        const msg = lotCount > 0
+            ? `O tipo "${type.name}" tem ${lotCount} lote(s). Remova os lotes primeiro.`
+            : `Apagar o tipo "${type.name}"? Esta ação não pode ser desfeita.`;
+
+        if (lotCount > 0) {
+            toast.error(msg);
+            return;
+        }
+        if (!confirm(msg)) return;
+
+        setDeletingTypeId(type.id);
+        try {
+            const res = await fetchWithTimeout(
+                `/api/promotor/events/${eventId}/ticket-types/${type.id}`,
+                { method: "DELETE" },
+                8000
+            );
+            if (!res.ok) {
+                const b = await res.json();
+                throw new Error(b.error || "Erro ao apagar tipo");
+            }
+            toast.success("Tipo de bilhete apagado");
+            if (editingTypeId === type.id) resetForm();
+            await load();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro");
+        } finally {
+            setDeletingTypeId(null);
         }
     };
 
@@ -214,14 +248,26 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
                                         {t.requiresSeat && <span>• {t._count?.seats || 0} Lugares</span>}
                                     </div>
                                     {canEdit && (
-                                        <button
-                                            type="button"
-                                            onClick={() => isEditing ? resetForm() : startEdit(t)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                                        >
-                                            {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-                                            {isEditing ? "Fechar" : "Editar"}
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => isEditing ? resetForm() : startEdit(t)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                            >
+                                                {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                                                {isEditing ? "Fechar" : "Editar"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(t)}
+                                                disabled={deletingTypeId === t.id || (t._count?.ticketLots ?? 0) > 0}
+                                                title={(t._count?.ticketLots ?? 0) > 0 ? "Remova os lotes associados primeiro" : "Apagar tipo"}
+                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                {deletingTypeId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                                Apagar
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>

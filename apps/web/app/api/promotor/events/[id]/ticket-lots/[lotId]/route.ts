@@ -111,3 +111,51 @@ export async function PATCH(
     return NextResponse.json({ error: "Erro ao atualizar lote" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string; lotId: string }> }
+) {
+  try {
+    const { session, role, orgId, userId } = await requirePromoter();
+    const globalRole = (session.user as { role?: string }).role;
+
+    if (!canEditTicketInventory(globalRole, role)) {
+      return NextResponse.json(
+        { error: "Apenas o proprietário da organização ou administrador pode apagar lotes." },
+        { status: 403 }
+      );
+    }
+
+    const { id: eventId, lotId } = await params;
+    await assertPromoterEventAccess(eventId, orgId, globalRole || "", userId);
+
+    const existing = await prisma.ticketLot.findFirst({ where: { id: lotId, eventId } });
+    if (!existing) {
+      return NextResponse.json({ error: "Lote não encontrado" }, { status: 404 });
+    }
+
+    await TicketLotService.delete(lotId);
+
+    const metadata = getRequestMetadata(req);
+    await createAuditLog({
+      userId,
+      action: "TICKET_LOT_DELETED",
+      entityType: "ticketLot",
+      entityId: lotId,
+      details: { eventId, lotName: existing.name },
+      ...metadata,
+    });
+    safeLog.info("ticket_lot.deleted", { lotId, eventId });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    const message = error instanceof Error ? error.message : "Erro ao apagar lote";
+    const status = message.includes("Não é possível") ? 400 : 500;
+    console.error("[ticket-lots DELETE] error:", error);
+    return NextResponse.json({ error: message }, { status });
+  }
+}

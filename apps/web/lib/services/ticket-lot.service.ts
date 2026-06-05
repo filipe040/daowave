@@ -101,4 +101,29 @@ export class TicketLotService {
             include: { ticketType: true },
         });
     }
+
+    /**
+     * Apagar lote (apenas se não houver vendas)
+     */
+    static async delete(id: string) {
+        const lot = await prisma.ticketLot.findUnique({
+            where: { id },
+            include: {
+                _count: { select: { tickets: true, orderItems: true, holds: true } },
+            },
+        });
+
+        if (!lot) throw new Error("Lote não encontrado");
+
+        const sold = lot.soldCount ?? lot.quantitySold ?? 0;
+        if (sold > 0 || lot._count.tickets > 0 || lot._count.orderItems > 0) {
+            throw new Error("Não é possível apagar um lote com bilhetes vendidos ou encomendas associadas.");
+        }
+
+        if (lot._count.holds > 0) {
+            await prisma.inventoryHold.deleteMany({ where: { ticketLotId: id } });
+        }
+
+        return prisma.ticketLot.delete({ where: { id } });
+    }
 }
