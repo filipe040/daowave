@@ -6,6 +6,7 @@ import { Plus, Check, Loader2, Pencil, X, Trash2, Mic2, ExternalLink } from "luc
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import { ArtistsApiPanel } from "./ArtistsApiPanel";
 
 interface Artist {
     id: string;
@@ -341,6 +342,8 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
                     })}
                 </div>
             )}
+
+            {eventSlug && <ArtistsApiPanel eventSlug={eventSlug} />}
         </div>
     );
 }
