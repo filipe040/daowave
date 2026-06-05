@@ -60,7 +60,9 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (order.status === "PAID") {
-      sendTicketsEmail(order.id).catch((err) =>
+      sendTicketsEmail(order.id, {
+        idempotencyKey: `ticket-delivery-resend-${order.id}-${Date.now()}`,
+      }).catch((err) =>
         console.error("[checkout/confirm] resend ticket email error:", err)
       );
       return NextResponse.json({

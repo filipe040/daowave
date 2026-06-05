@@ -660,7 +660,10 @@ export async function sendLoginNotificationEmail(
 }
 
 
-export async function sendTicketsEmail(orderId: string): Promise<void> {
+export async function sendTicketsEmail(
+  orderId: string,
+  options?: { idempotencyKey?: string }
+): Promise<void> {
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -736,20 +739,25 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
       }
     }
 
-    // -- Ticket PDFs (Playwright design, fallback to simple PDF) --
-    const { TicketRenderService } = await import("./tickets/ticket-render.service");
-
+    // -- Ticket PDFs (design via Playwright quando disponível; pdfkit como fallback) --
     for (const ticket of tickets) {
       const filename = `bilhete-${ticket.code}.pdf`;
+      let attached = false;
+
       try {
+        const { TicketRenderService } = await import("./tickets/ticket-render.service");
         const pdfBuffer = await TicketRenderService.renderPdf(ticket.id);
         attachments.push({ filename, content: pdfBuffer, contentType: "application/pdf" });
+        attached = true;
       } catch (ticketPdfErr: any) {
         safeLog.warn("Ticket PDF render failed, using fallback", {
           orderId,
           ticketId: ticket.id,
           error: ticketPdfErr.message,
         });
+      }
+
+      if (!attached) {
         try {
           const fallback = await generateSimpleTicketPDF({
             code: ticket.code,
@@ -758,8 +766,10 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
             venue: event.venue || "",
             city: event.city || "",
             buyerName: recipientName,
+            qrPayload: ticket.qrPayload || ticket.code,
           });
           attachments.push({ filename, content: fallback, contentType: "application/pdf" });
+          attached = true;
         } catch (fallbackErr: any) {
           safeLog.error("Simple ticket PDF fallback failed", {
             orderId,
@@ -768,6 +778,19 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
           });
         }
       }
+    }
+
+    const invoiceAttached = attachments.some((a) => a.filename.startsWith("fatura-"));
+    const ticketAttachmentCount = attachments.filter((a) => a.filename.startsWith("bilhete-")).length;
+
+    if (!invoiceAttached || ticketAttachmentCount !== tickets.length) {
+      safeLog.error("Ticket email missing required PDF attachments", {
+        orderId,
+        invoiceAttached,
+        ticketAttachmentCount,
+        expectedTickets: tickets.length,
+      });
+      throw new Error("Não foi possível gerar a fatura e todos os bilhetes em PDF.");
     }
 
     const variables = {
@@ -788,8 +811,8 @@ export async function sendTicketsEmail(orderId: string): Promise<void> {
       to: recipientEmail,
       templateId: "ticket-delivery",
       variables,
-      idempotencyKey: `ticket-delivery-${orderId}`,
-      attachments: attachments.length > 0 ? attachments : undefined,
+      idempotencyKey: options?.idempotencyKey ?? `ticket-delivery-v2-${orderId}`,
+      attachments,
     });
 
     if (!res.success) {

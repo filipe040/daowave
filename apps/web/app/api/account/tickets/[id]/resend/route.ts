@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog, getRequestMetadata } from "@/lib/security";
 import { createAuditLog } from "@/lib/audit";
+import { sendTicketsEmail } from "@/lib/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,10 @@ export async function POST(
   }
 
   try {
+    await sendTicketsEmail(ticket.orderId, {
+      idempotencyKey: `ticket-delivery-resend-${ticket.orderId}-${Date.now()}`,
+    });
+
     const metadata = getRequestMetadata(req);
     await createAuditLog({
       userId: session.user.id,
@@ -63,5 +68,5 @@ export async function POST(
     console.error("[account/tickets/resend] audit error:", e);
   }
 
-  return NextResponse.json({ success: true, message: "Email será reenviado em breve" });
+  return NextResponse.json({ success: true, message: "Email enviado com fatura e bilhete(s) em anexo." });
 }

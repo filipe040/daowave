@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePromoter } from "@/lib/auth/guards";
 import { prisma } from "@/lib/prisma";
-import { TicketRenderService } from "@/lib/tickets/ticket-render.service";
-import { EmailService } from "@/lib/email-service";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { sendTicketsEmail } from "@/lib/email-service";
 
 export const dynamic = "force-dynamic";
 
@@ -37,38 +34,9 @@ export async function POST(
             return NextResponse.json({ error: "No customer email associated with this order" }, { status: 400 });
         }
 
-        // Generate PDFs for all tickets
-        const attachments = await Promise.all(
-            order.tickets.map(async (ticket) => {
-                const pdf = await TicketRenderService.renderPdf(ticket.id);
-                return {
-                    filename: `bilhete-${ticket.code}.pdf`,
-                    content: pdf,
-                    contentType: "application/pdf",
-                };
-            })
-        );
-
-        // Send Email
-        const result = await EmailService.sendTemplate({
-            to: email,
-            templateId: "ticket-delivery",
-            variables: {
-                name: order.buyerName || "Cliente",
-                eventTitle: order.event.title,
-                eventDate: format(order.event.startAt, "d 'de' MMMM", { locale: pt }),
-                venueName: order.event.venue,
-                address: order.event.city,
-                ticketCount: order.tickets.length,
-                orderId: order.id,
-            },
-            attachments,
-            idempotencyKey: `resend-${order.id}-${Date.now()}`,
+        await sendTicketsEmail(order.id, {
+            idempotencyKey: `ticket-delivery-resend-${order.id}-${Date.now()}`,
         });
-
-        if (!result.success) {
-            return NextResponse.json({ error: result.error }, { status: 500 });
-        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

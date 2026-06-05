@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-// CRITICAL: Dynamic import to prevent top-level execution during build
-// import { processTicketIssuance } from "@/lib/queue";
 import { applyRateLimit, RATE_LIMITS, safeLog, getRequestMetadata } from "@/lib/security";
 import { createAuditLog } from "@/lib/audit";
+import { sendTicketsEmail } from "@/lib/email-service";
 
 /**
  * POST /api/tickets/[id]/resend
@@ -77,9 +76,10 @@ export async function POST(
       );
     }
 
-    // Queue ticket email resend - DISABLED (Redis disabled)
-    // Queue service is disabled - skip queue processing
-    // Note: In production, you may want to send email directly here
+    // Reenviar email com fatura + bilhetes em anexo
+    await sendTicketsEmail(ticket.orderId, {
+      idempotencyKey: `ticket-delivery-resend-${ticket.orderId}-${Date.now()}`,
+    });
 
     // Audit log
     const metadata = getRequestMetadata(req);

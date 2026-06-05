@@ -1,4 +1,5 @@
 import PDFDocument from "pdfkit";
+import QRCode from "qrcode";
 
 export async function generateSimpleTicketPDF(params: {
   code: string;
@@ -7,7 +8,12 @@ export async function generateSimpleTicketPDF(params: {
   venue: string;
   city: string;
   buyerName: string;
+  qrPayload?: string;
 }): Promise<Buffer> {
+  const qrDataUrl = params.qrPayload
+    ? await QRCode.toDataURL(params.qrPayload, { width: 220, margin: 1 })
+    : null;
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margin: 50 });
     const chunks: Buffer[] = [];
@@ -27,6 +33,15 @@ export async function generateSimpleTicketPDF(params: {
     }
     doc.text(`Local: ${[params.venue, params.city].filter(Boolean).join(", ") || "A anunciar"}`);
     doc.moveDown(2);
+
+    if (qrDataUrl) {
+      const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
+      const qrSize = 160;
+      const qrX = (doc.page.width - qrSize) / 2;
+      doc.image(Buffer.from(qrBase64, "base64"), qrX, doc.y, { width: qrSize, height: qrSize });
+      doc.moveDown(10);
+    }
+
     doc.fontSize(10).text("Apresente este documento ou o QR Code na entrada do evento.", {
       align: "center",
     });

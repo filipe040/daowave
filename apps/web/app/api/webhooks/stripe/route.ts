@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { generateQrNonce } from "@/lib/qr";
-import { EmailService } from "@/lib/email-service";
-import { getEmailConfig } from "@/lib/config/email";
+import { sendTicketsEmail } from "@/lib/email-service";
 import { InventoryService } from "@/lib/services/inventory.service";
 import crypto from "crypto";
 import Stripe from "stripe";
@@ -156,60 +155,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Failed to generate tickets" }, { status: 500 });
     }
 
-    // Send order confirmation email
-    const emailConfig = getEmailConfig();
-
+    // Email com fatura + bilhetes em anexo
     try {
-      await EmailService.sendTemplate({
-        to: order.user.email,
-        templateId: "order-confirmed",
-        variables: {
-          name: order.user.name || "Utilizador",
-          orderId: order.id,
-          eventTitle: order.event.title,
-          total: (order.totalCents / 100).toFixed(2),
-          currency: order.currency,
-        },
-        idempotencyKey: `order-confirmed-${order.id}`,
-      });
+      await sendTicketsEmail(order.id);
     } catch (error) {
-      console.error("Error sending order confirmation email:", error);
-    }
-
-    // Send ticket delivery email (uses event branding from Protocolo Visual when set)
-    const ev = order.event as {
-      title: string;
-      startAt: Date;
-      venue: string;
-      city: string;
-      primaryColor?: string | null;
-      secondaryColor?: string | null;
-      bannerUrl?: string | null;
-    };
-    try {
-      await EmailService.sendTemplate({
-        to: order.user.email,
-        templateId: "ticket-delivery",
-        variables: {
-          name: order.user.name || "Utilizador",
-          eventTitle: ev.title,
-          eventDate: ev.startAt.toLocaleString("pt-PT"),
-          venueName: ev.venue,
-          address: `${ev.venue}, ${ev.city}`,
-          ticketCount: ticketsCount,
-          branding: (ev.primaryColor != null || ev.secondaryColor != null || ev.bannerUrl != null)
-            ? {
-              primaryColor: ev.primaryColor ?? undefined,
-              secondaryColor: ev.secondaryColor ?? undefined,
-              bannerUrl: ev.bannerUrl ?? undefined,
-              headerTitle: "O teu bilhete",
-            }
-            : undefined,
-        },
-        idempotencyKey: `ticket-delivery-${order.id}`,
-      });
-    } catch (error) {
-      console.error("Error sending ticket email:", error);
+      console.error("Error sending ticket email with attachments:", error);
     }
 
     console.log(`Order ${orderId} paid, ${ticketsCount} tickets issued`);
