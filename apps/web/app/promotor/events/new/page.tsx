@@ -45,6 +45,7 @@ export default function CreateEventPage() {
     const [city, setCity] = useState("");
     const [startAt, setStartAt] = useState("");
     const [endAt, setEndAt] = useState("");
+    const [layoutMode, setLayoutMode] = useState<"STANDARD" | "ARTISTS">("STANDARD");
 
     const loadOrgs = useCallback(async () => {
         setLoadingOrgs(true); setOrgError(null);
@@ -71,7 +72,7 @@ export default function CreateEventPage() {
             const res = await fetchWithTimeout("/api/promotor/events", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, slug, description, venue, city, startAt, endAt, orgId }),
+                body: JSON.stringify({ title, slug, description, venue, city, startAt, endAt, orgId, layoutMode }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({})) as { error?: string };
@@ -163,6 +164,28 @@ export default function CreateEventPage() {
                         <div>
                             <label htmlFor="city" className={labelCls}>Cidade *</label>
                             <input id="city" required placeholder="Lisboa" value={city} onChange={(e) => setCity(e.target.value)} className={inputCls} />
+                        </div>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <label className={labelCls}>Tipo de página *</label>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setLayoutMode("STANDARD")}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                            >
+                                <p className="font-bold text-white text-[14px]">Evento clássico</p>
+                                <p className="text-xs text-white/40 mt-1">Uma página com todos os bilhetes do evento.</p>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLayoutMode("ARTISTS")}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                            >
+                                <p className="font-bold text-white text-[14px]">Bilhetes por artista</p>
+                                <p className="text-xs text-white/40 mt-1">Grid de artistas com página individual e poster (estilo festival).</p>
+                            </button>
                         </div>
                     </div>
 

@@ -12,6 +12,7 @@ const updateEventSchema = z.object({
   startAt: z.string().transform(str => new Date(str)).optional(),
   endAt: z.string().transform(str => new Date(str)).optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED']).optional(),
+  layoutMode: z.enum(['STANDARD', 'ARTISTS']).optional(),
 });
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {

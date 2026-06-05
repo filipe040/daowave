@@ -26,6 +26,29 @@ export function formatDate(date: Date | string): string {
   });
 }
 
+/** Ex: "7 agosto" */
+export function formatShortDayMonth(date: Date | string): string {
+  const d = new Date(date);
+  return d.toLocaleDateString('pt-PT', { day: 'numeric', month: 'long' });
+}
+
+/** Ex: "Sábado, 08 Ago às 22:00" */
+export function formatPerformanceDateTime(date: Date | string): string {
+  const d = new Date(date);
+  const weekday = d.toLocaleDateString('pt-PT', { weekday: 'long' });
+  const day = d.toLocaleDateString('pt-PT', { day: '2-digit' });
+  const month = d.toLocaleDateString('pt-PT', { month: 'short' }).replace('.', '');
+  const time = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  return `${cap(weekday)}, ${day} ${cap(month)} às ${time}`;
+}
+
+export function daysUntil(date: Date | string): number {
+  const target = new Date(date).getTime();
+  const now = Date.now();
+  return Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
+}
+
 export function generateSlug(text: string): string {
   return text
     .toLowerCase()

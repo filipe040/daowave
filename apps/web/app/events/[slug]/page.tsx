@@ -2,7 +2,7 @@
  * Event Detail Page
  */
 
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { formatDate } from '@/lib/utils';
 import Image from 'next/image';
@@ -26,6 +26,7 @@ async function getEvent(slug: string) {
       coverImage: true,
       status: true,
       archivedAt: true,
+      layoutMode: true,
       // Branding
       primaryColor: true,
       secondaryColor: true,
@@ -80,6 +81,10 @@ export default async function EventPage({
 
   if (!event || event.status !== 'PUBLISHED' || event.archivedAt !== null) {
     notFound();
+  }
+
+  if (event.layoutMode === 'ARTISTS') {
+    redirect(`/events/${slug}/artistas`);
   }
 
   // Landing page padrão com branding aplicado

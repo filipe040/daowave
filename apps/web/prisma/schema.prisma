@@ -311,6 +311,8 @@ model Event {
   checkinMode           String?  @default("SINGLE") // SINGLE, MULTI
   checkinStartAt        DateTime? // Início da janela de check-in
   checkinEndAt          DateTime? // Fim da janela de check-in
+
+  layoutMode            EventLayoutMode @default(STANDARD)
   
   organization  Organization? @relation(fields: [organizationId], references: [id])
   promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
@@ -328,6 +330,7 @@ model Event {
   coupons       Coupon[]
   assets        EventAsset[]
   trackingLinks TrackingLink[]
+  artists       EventArtist[]
   
   @@index([slug])
   @@index([status])
@@ -385,8 +388,33 @@ model TicketType {
   event        Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   ticketLots   TicketLot[]
   seats        Seat[]
+  artist       EventArtist?
 
   @@index([eventId])
+}
+
+model EventArtist {
+  id            String   @id @default(uuid())
+  eventId       String
+  name          String
+  slug          String
+  imageUrl      String?  @db.VarChar(2048)
+  bio           String?  @db.Text
+  performanceAt DateTime
+  venue         String?
+  sortOrder     Int      @default(0)
+  badgeLabel    String?
+  isPublished   Boolean  @default(true)
+  ticketTypeId  String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt @default(now())
+
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticketType  TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, slug])
+  @@index([eventId])
+  @@index([performanceAt])
 }
 
 model InventoryHold {
@@ -706,6 +734,11 @@ enum EventStatus {
   ENDED
 }
 
+enum EventLayoutMode {
+  STANDARD
+  ARTISTS
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -914,4 +947,4 @@ model Payout {
   @@index([promoterId])
   @@index([status])
 }
-
+

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { ArrowLeft, Save, Globe, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, AlertCircle, CheckCircle2, ExternalLink, Mic2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
@@ -21,6 +21,7 @@ interface EventDetail {
     status: string;
     organizationId: string | null;
     bannerUrl: string | null;
+    layoutMode?: string;
 }
 
 const inputCls = "w-full rounded-2xl border border-white/10 bg-black/50 text-white placeholder:text-white/30 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner";
@@ -178,6 +179,17 @@ export default function PromoterEventDetailPage() {
             }
             actions={
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+                    {isPublished && event.layoutMode === "ARTISTS" && (
+                        <Link
+                            href={`/events/${event.slug}/artistas`}
+                            target="_blank"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition-all"
+                        >
+                            <Mic2 className="h-4 w-4" />
+                            Ver página de artistas
+                            <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                    )}
                     <Link
                         href={`/promotor/events/${id}/bilhetes`}
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-white text-black hover:bg-white/90 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"

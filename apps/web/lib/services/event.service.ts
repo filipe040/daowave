@@ -4,7 +4,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import type { Event, EventStatus, Prisma, PromoterProfile } from "@prisma/client";
+import type { Event, EventStatus, EventLayoutMode, Prisma, PromoterProfile } from "@prisma/client";
 
 export type CreateEventInput = {
   promoterId: string;
@@ -17,6 +17,7 @@ export type CreateEventInput = {
   startAt: Date;
   endAt: Date;
   bannerUrl?: string | null;
+  layoutMode?: EventLayoutMode;
   checkinMode?: string;
   maxEntries?: number | null;
   checkinStartAt?: Date | null;
@@ -32,6 +33,7 @@ export type UpdateEventInput = Partial<{
   startAt: Date;
   endAt: Date;
   bannerUrl: string | null;
+  layoutMode: EventLayoutMode;
   checkinMode: string;
   maxEntries: number | null;
   checkinStartAt: Date | null;
@@ -152,6 +154,7 @@ export const EventService = {
       startAt: input.startAt,
       endAt: input.endAt,
       status: "DRAFT",
+      ...(input.layoutMode != null && { layoutMode: input.layoutMode }),
       ...(input.bannerUrl != null && { bannerUrl: input.bannerUrl }),
       ...(input.checkinMode != null && { checkinMode: input.checkinMode }),
       ...(input.maxEntries != null && { maxEntries: input.maxEntries }),
@@ -174,6 +177,7 @@ export const EventService = {
     if (input.startAt !== undefined) data.startAt = input.startAt;
     if (input.endAt !== undefined) data.endAt = input.endAt;
     if (input.bannerUrl !== undefined) data.bannerUrl = input.bannerUrl;
+    if (input.layoutMode !== undefined) data.layoutMode = input.layoutMode;
     if (input.checkinMode !== undefined) data.checkinMode = input.checkinMode;
     // maxEntries removed from schema
     // if (input.maxEntries !== undefined) data.maxEntries = input.maxEntries;

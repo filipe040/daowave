@@ -19,7 +19,10 @@ export async function POST(
     // Load the event
     const event = await prisma.event.findUnique({
       where: { id },
-      include: { ticketLots: { select: { quantityTotal: true, quantitySold: true } } },
+      include: {
+        ticketLots: { select: { quantityTotal: true, quantitySold: true } },
+        artists: { where: { isPublished: true }, select: { id: true } },
+      },
     });
 
     if (!event) {
@@ -53,6 +56,16 @@ export async function POST(
         {
           error: "O evento não pode ser publicado — corrija os seguintes campos",
           details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (event.layoutMode === "ARTISTS" && event.artists.length === 0) {
+      return NextResponse.json(
+        {
+          error: "Adicione pelo menos um artista antes de publicar",
+          details: [{ field: "artists", message: "Modo artistas requer pelo menos um artista configurado" }],
         },
         { status: 400 }
       );

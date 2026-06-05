@@ -15,7 +15,8 @@ const createEventSchema = z.object({
   city: z.string().min(1, "Cidade obrigatória"),
   startAt: z.string().transform(str => new Date(str)),
   endAt: z.string().transform(str => new Date(str)),
-  orgId: z.string().optional(), // optional: promotor without org can still create
+  orgId: z.string().optional(),
+  layoutMode: z.enum(["STANDARD", "ARTISTS"]).default("STANDARD"),
 });
 
 export async function GET(req: NextRequest) {
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest) {
       endAt: body.endAt,
       organizationId: (body.orgId || orgId) ?? undefined,
       promoterId: promoter.id,
+      layoutMode: body.layoutMode,
     });
 
     return NextResponse.json(event);
