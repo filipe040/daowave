@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { TicketLotService } from "@/lib/services/ticket-lot.service";
 import { requirePromoter } from "@/lib/auth/guards";
+import { assertPromoterEventAccess, canEditTicketInventory, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 import { safeLog } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
@@ -10,13 +11,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requirePromoter();
+    const { session, role, orgId, userId } = await requirePromoter();
+    const globalRole = (session.user as { role?: string }).role;
     const { id: eventId } = await params;
 
+    await assertPromoterEventAccess(eventId, orgId, globalRole || "", userId);
+
     const lots = await TicketLotService.getByEvent(eventId);
-    return NextResponse.json({ ticketLots: lots });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 401 });
+    return NextResponse.json({
+      ticketLots: lots,
+      meta: { canEdit: canEditTicketInventory(globalRole, role) },
+    });
+  } catch (error: unknown) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    const message = error instanceof Error ? error.message : "Erro";
+    return NextResponse.json({ error: message }, { status: 401 });
   }
 }
 

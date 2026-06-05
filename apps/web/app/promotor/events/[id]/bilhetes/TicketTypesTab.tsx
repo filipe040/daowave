@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
-import { Plus, Check, Loader2, AlertCircle, Ticket } from "lucide-react";
+import { Plus, Check, Loader2, AlertCircle, Ticket, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface TicketType {
@@ -15,15 +15,18 @@ interface TicketType {
     _count?: { ticketLots: number; seats: number };
 }
 
+const EMPTY_FORM = { name: "", description: "", requiresSeat: false, perUserLimit: "", status: "ACTIVE" as "ACTIVE" | "PAUSED" };
+
 export default function TicketTypesTab({ eventId }: { eventId: string }) {
     const [types, setTypes] = useState<TicketType[]>([]);
+    const [canEdit, setCanEdit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Form State
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState({ name: "", description: "", requiresSeat: false, perUserLimit: "" });
+    const [formData, setFormData] = useState(EMPTY_FORM);
 
     const load = useCallback(async () => {
         setLoading(true); setError(null);
@@ -32,8 +35,9 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
             if (!res.ok) throw new Error("Erro ao carregar tipos de bilhete");
             const data = await res.json();
             setTypes(data.ticketTypes);
-        } catch (err: any) {
-            setError(err.message);
+            setCanEdit(!!data.meta?.canEdit);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro");
         } finally {
             setLoading(false);
         }
@@ -41,32 +45,62 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
 
     useEffect(() => { load(); }, [load]);
 
+    const resetForm = () => {
+        setFormData(EMPTY_FORM);
+        setEditingTypeId(null);
+        setIsFormOpen(false);
+    };
+
+    const startCreate = () => {
+        resetForm();
+        setIsFormOpen(true);
+    };
+
+    const startEdit = (type: TicketType) => {
+        setEditingTypeId(type.id);
+        setFormData({
+            name: type.name,
+            description: type.description || "",
+            requiresSeat: type.requiresSeat,
+            perUserLimit: type.perUserLimit ? String(type.perUserLimit) : "",
+            status: type.status === "PAUSED" ? "PAUSED" : "ACTIVE",
+        });
+        setIsFormOpen(true);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
             const payload = {
-                ...formData,
-                perUserLimit: formData.perUserLimit ? parseInt(formData.perUserLimit) : undefined
+                name: formData.name.trim(),
+                description: formData.description.trim() || null,
+                requiresSeat: formData.requiresSeat,
+                perUserLimit: formData.perUserLimit ? parseInt(formData.perUserLimit, 10) : null,
+                status: formData.status,
             };
 
-            const res = await fetchWithTimeout(`/api/promotor/events/${eventId}/ticket-types`, {
-                method: "POST",
+            const url = editingTypeId
+                ? `/api/promotor/events/${eventId}/ticket-types/${editingTypeId}`
+                : `/api/promotor/events/${eventId}/ticket-types`;
+            const method = editingTypeId ? "PATCH" : "POST";
+
+            const res = await fetchWithTimeout(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }, 8000);
 
             if (!res.ok) {
                 const b = await res.json();
-                throw new Error(b.error || "Erro ao criar tipo");
+                throw new Error(b.error || "Erro ao guardar tipo");
             }
 
-            toast.success("Tipo de bilhete criado com sucesso");
-            setIsFormOpen(false);
-            setFormData({ name: "", description: "", requiresSeat: false, perUserLimit: "" });
+            toast.success(editingTypeId ? "Tipo atualizado" : "Tipo de bilhete criado com sucesso");
+            resetForm();
             await load();
-        } catch (err: any) {
-            toast.error(err.message);
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro");
         } finally {
             setIsSubmitting(false);
         }
@@ -95,7 +129,7 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
                     <p className="text-xs text-white/50 mt-1">Defina as secções gerais (ex: Geral, VIP, Mesa).</p>
                 </div>
                 <button
-                    onClick={() => setIsFormOpen(!isFormOpen)}
+                    onClick={startCreate}
                     className="inline-flex items-center justify-center gap-2 bg-white text-black px-4 py-2.5 rounded-2xl text-[13px] font-bold hover:bg-white/90 shadow-[0_12px_30px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5 active:scale-95 shrink-0"
                 >
                     <Plus className="h-4 w-4" />
@@ -105,34 +139,48 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
 
             {isFormOpen && (
                 <div className="p-6 sm:p-8 border-b border-white/10 bg-black/40 relative">
+                    <h4 className="text-sm font-bold text-white mb-4">
+                        {editingTypeId ? "Editar tipo de bilhete" : "Novo tipo de bilhete"}
+                    </h4>
                     <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
                                 <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Nome do Tipo *</label>
-                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Entrada VIP" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
+                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} disabled={!!editingTypeId && !canEdit} placeholder="Ex: Entrada VIP" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Limite por Pessoa</label>
-                                <input type="number" min="1" value={formData.perUserLimit} onChange={e => setFormData({ ...formData, perUserLimit: e.target.value })} placeholder="Ex: 4 (Opcional)" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
+                                <input type="number" min="1" value={formData.perUserLimit} onChange={e => setFormData({ ...formData, perUserLimit: e.target.value })} disabled={!!editingTypeId && !canEdit} placeholder="Ex: 4 (Opcional)" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                         </div>
                         <div>
                             <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Descrição</label>
-                            <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Inclui 2 bebidas e acesso prioritário" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px]" />
+                            <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} disabled={!!editingTypeId && !canEdit} placeholder="Inclui 2 bebidas e acesso prioritário" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                         </div>
+                        {editingTypeId && canEdit && (
+                            <div>
+                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Estado</label>
+                                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as "ACTIVE" | "PAUSED" })} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 text-[14px]">
+                                    <option value="ACTIVE" className="bg-background">Ativo</option>
+                                    <option value="PAUSED" className="bg-background">Pausado</option>
+                                </select>
+                            </div>
+                        )}
                         <label className="flex items-center gap-4 p-4 border border-white/10 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-colors mt-2">
-                            <input type="checkbox" checked={formData.requiresSeat} onChange={e => setFormData({ ...formData, requiresSeat: e.target.value === 'true' })} value="true" className="w-5 h-5 text-emerald-500 rounded-md border-white/20 bg-white/10 focus:ring-emerald-500 focus:ring-2 focus:ring-offset-black" />
+                            <input type="checkbox" checked={formData.requiresSeat} onChange={e => setFormData({ ...formData, requiresSeat: e.target.checked })} disabled={!!editingTypeId && !canEdit} className="w-5 h-5 text-emerald-500 rounded-md border-white/20 bg-white/10 focus:ring-emerald-500 focus:ring-2 focus:ring-offset-black disabled:opacity-50" />
                             <div className="flex flex-col">
                                 <span className="text-[14px] font-bold text-emerald-400">Requer seleção de Lugar Marcado no Checkout</span>
                                 <span className="text-xs text-white/50 font-medium mt-0.5">Marque apenas se este tipo precisar que o cliente escolha um lugar no mapa da sala.</span>
                             </div>
                         </label>
                         <div className="flex justify-end gap-3 pt-4">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-5 py-2.5 text-[13px] font-bold text-white/60 hover:text-white transition-colors">Cancelar</button>
-                            <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500 text-black text-[14px] font-bold rounded-2xl hover:bg-emerald-400 disabled:opacity-50 transition-all shadow-lg hover:-translate-y-0.5 mt-2 sm:mt-0">
-                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                                Guardar Categoria
-                            </button>
+                            <button type="button" onClick={resetForm} className="px-5 py-2.5 text-[13px] font-bold text-white/60 hover:text-white transition-colors">Cancelar</button>
+                            {(!editingTypeId || canEdit) && (
+                                <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500 text-black text-[14px] font-bold rounded-2xl hover:bg-emerald-400 disabled:opacity-50 transition-all shadow-lg hover:-translate-y-0.5 mt-2 sm:mt-0">
+                                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                                    {editingTypeId ? "Guardar alterações" : "Guardar Categoria"}
+                                </button>
+                            )}
                         </div>
                     </form>
                 </div>
@@ -148,21 +196,37 @@ export default function TicketTypesTab({ eventId }: { eventId: string }) {
                 </div>
             ) : (
                 <div className="divide-y divide-white/10 bg-transparent flex-1">
-                    {types.map(t => (
-                        <div key={t.id} className="p-4 sm:p-5 px-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-white/[0.02] transition-colors gap-4">
-                            <div>
-                                <h4 className="text-[14px] font-bold text-white flex items-center gap-3">
-                                    {t.name}
-                                    {t.requiresSeat && <span className="px-2.5 py-1 text-[9px] uppercase font-black tracking-[0.1em] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">Lugares Marcados</span>}
-                                </h4>
-                                <p className="text-[13px] text-white/50 mt-1 font-medium">{t.description || "Sem descrição especial."}</p>
+                    {types.map(t => {
+                        const isEditing = editingTypeId === t.id;
+                        return (
+                            <div key={t.id} className={`p-4 sm:p-5 px-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-white/[0.02] transition-colors gap-4 ${isEditing ? "bg-emerald-500/5" : ""}`}>
+                                <div>
+                                    <h4 className="text-[14px] font-bold text-white flex items-center gap-3 flex-wrap">
+                                        {t.name}
+                                        {t.requiresSeat && <span className="px-2.5 py-1 text-[9px] uppercase font-black tracking-[0.1em] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg">Lugares Marcados</span>}
+                                        {t.status === "PAUSED" && <span className="px-2.5 py-1 text-[9px] uppercase font-black tracking-[0.1em] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-lg">Pausado</span>}
+                                    </h4>
+                                    <p className="text-[13px] text-white/50 mt-1 font-medium">{t.description || "Sem descrição especial."}</p>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <div className="flex items-center gap-5 text-[12px] font-bold text-white/40 uppercase tracking-wider bg-black/40 px-4 py-2 rounded-xl border border-white/5">
+                                        <span>{t._count?.ticketLots || 0} Lotes</span>
+                                        {t.requiresSeat && <span>• {t._count?.seats || 0} Lugares</span>}
+                                    </div>
+                                    {canEdit && (
+                                        <button
+                                            type="button"
+                                            onClick={() => isEditing ? resetForm() : startEdit(t)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                        >
+                                            {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+                                            {isEditing ? "Fechar" : "Editar"}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-5 text-[12px] font-bold text-white/40 uppercase tracking-wider bg-black/40 px-4 py-2 rounded-xl border border-white/5 shrink-0">
-                                <span>{t._count?.ticketLots || 0} Lotes</span>
-                                {t.requiresSeat && <span>• {t._count?.seats || 0} Lugares</span>}
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { TicketTypeService } from "@/lib/services/ticket-type.service";
 import { requirePromoter } from "@/lib/auth/guards";
+import { assertPromoterEventAccess, canEditTicketInventory, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 import { z } from "zod";
 import { safeLog } from "@/lib/security";
 
@@ -17,13 +18,23 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        await requirePromoter(); // Assumes user implies access to the org events
+        const { session, role, orgId, userId } = await requirePromoter();
+        const globalRole = (session.user as { role?: string }).role;
         const { id: eventId } = await params;
 
+        await assertPromoterEventAccess(eventId, orgId, globalRole || "", userId);
+
         const types = await TicketTypeService.getByEvent(eventId);
-        return NextResponse.json({ ticketTypes: types });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: error.message.includes("Não autorizado") ? 401 : 500 });
+        return NextResponse.json({
+            ticketTypes: types,
+            meta: { canEdit: canEditTicketInventory(globalRole, role) },
+        });
+    } catch (error: unknown) {
+        if (error instanceof TicketManagementAccessError) {
+            return NextResponse.json({ error: error.message }, { status: error.status });
+        }
+        const message = error instanceof Error ? error.message : "Erro";
+        return NextResponse.json({ error: message }, { status: message.includes("Não autorizado") ? 401 : 500 });
     }
 }
 

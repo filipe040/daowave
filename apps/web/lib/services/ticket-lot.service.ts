@@ -67,18 +67,38 @@ export class TicketLotService {
      * Atualizar lote 
      */
     static async update(id: string, data: Partial<TicketLotCreateInput>) {
-        const updateData: Prisma.TicketLotUpdateInput = {
-            ...data
-        };
+        const updateData: Prisma.TicketLotUpdateInput = {};
 
-        if (data.capacity !== undefined) updateData.quantityTotal = data.capacity;
-        if (data.startsAt !== undefined) updateData.saleStartAt = data.startsAt;
-        if (data.endsAt !== undefined) updateData.saleEndAt = data.endsAt;
-        if (data.status !== undefined) updateData.isActive = data.status !== "PAUSED";
+        if (data.name !== undefined) updateData.name = data.name;
+        if (data.description !== undefined) updateData.description = data.description;
+        if (data.priceCents !== undefined) updateData.priceCents = data.priceCents;
+        if (data.capacity !== undefined) {
+            updateData.capacity = data.capacity;
+            updateData.quantityTotal = data.capacity;
+        }
+        if (data.startsAt !== undefined) {
+            updateData.startsAt = data.startsAt;
+            updateData.saleStartAt = data.startsAt;
+        }
+        if (data.endsAt !== undefined) {
+            updateData.endsAt = data.endsAt;
+            updateData.saleEndAt = data.endsAt;
+        }
+        if (data.status !== undefined) {
+            updateData.status = data.status;
+            updateData.isActive = data.status !== "PAUSED";
+        }
+        if (data.perUserLimit !== undefined) updateData.perUserLimit = data.perUserLimit;
+        if (data.ticketTypeId !== undefined) {
+            updateData.ticketType = data.ticketTypeId
+                ? { connect: { id: data.ticketTypeId } }
+                : { disconnect: true };
+        }
 
         return prisma.ticketLot.update({
             where: { id },
-            data: updateData
+            data: updateData,
+            include: { ticketType: true },
         });
     }
 }
