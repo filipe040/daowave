@@ -1,9 +1,48 @@
 import { prisma } from "@/lib/prisma";
-import { chromium } from "playwright";
 import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatus } from "../ticket-templates/models";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import crypto from "crypto";
+import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
+
+const DEFAULT_THEME: ThemeJson = {
+  brand: { logoUrl: "", tagline: "" },
+  colors: {
+    bg: "#ffffff",
+    card: "#ffffff",
+    text: "#111111",
+    primary: "#19c37d",
+    muted: "#666666",
+  },
+  typography: { fontFamily: "Inter" },
+  qr: { size: "M", label: "Validar na entrada" },
+  blocks: {
+    showBuyerName: true,
+    showOrderId: true,
+    showTicketType: true,
+    showTerms: true,
+    showSupport: true,
+  },
+  footer: { supportUrl: "", supportEmail: "" },
+};
+
+function mergeTheme(theme?: ThemeJson): ThemeJson {
+  const safeTheme: ThemeJson = {
+    brand: { ...DEFAULT_THEME.brand, ...(theme?.brand || {}) },
+    colors: { ...DEFAULT_THEME.colors, ...(theme?.colors || {}) },
+    typography: { ...DEFAULT_THEME.typography, ...(theme?.typography || {}) },
+    qr: { ...DEFAULT_THEME.qr, ...(theme?.qr || {}) },
+    blocks: { ...DEFAULT_THEME.blocks, ...(theme?.blocks || {}) },
+    footer: { ...DEFAULT_THEME.footer, ...(theme?.footer || {}) },
+  };
+
+  if (safeTheme.brand.logoUrl && safeTheme.brand.logoUrl.startsWith("/")) {
+    const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    safeTheme.brand.logoUrl = `${baseUrl}${safeTheme.brand.logoUrl}`;
+  }
+
+  return safeTheme;
+}
 
 export const TicketRenderService = {
   /**
@@ -56,26 +95,7 @@ export const TicketRenderService = {
 
     if (!activeTemplate) {
       // Create a fallback snapshot
-      const defaultTheme: ThemeJson = {
-        brand: { logoUrl: "", tagline: "" },
-        colors: {
-          bg: "#ffffff",
-          card: "#ffffff",
-          text: "#111111",
-          primary: "#19c37d",
-          muted: "#666666",
-        },
-        typography: { fontFamily: "Inter" },
-        qr: { size: "M", label: "Validar na entrada" },
-        blocks: {
-          showBuyerName: true,
-          showOrderId: true,
-          showTicketType: true,
-          showTerms: true,
-          showSupport: true,
-        },
-        footer: { supportUrl: "", supportEmail: "" },
-      };
+      const defaultTheme: ThemeJson = DEFAULT_THEME;
 
       const preset = "A4_CLASSIC";
       const model = await this.buildRenderModel(ticketId);
@@ -201,16 +221,18 @@ export const TicketRenderService = {
   },
 
   /**
-   * Renders the ticket to PDF buffer using Playwright
+   * Resolve template theme + preset for rendering
    */
-  async renderPdf(ticketId: string, templateId?: string): Promise<Buffer> {
+  async resolveRenderContext(
+    ticketId: string,
+    templateId?: string
+  ): Promise<{ model: TicketRenderModel; preset: TicketTemplatePreset; theme: ThemeJson }> {
     const model = await this.buildRenderModel(ticketId);
 
     let theme: ThemeJson;
     let preset: TicketTemplatePreset;
 
     if (templateId) {
-      // Preview mode
       const template = await prisma.organizationTicketTemplate.findUnique({
         where: { id: templateId },
       });
@@ -218,64 +240,54 @@ export const TicketRenderService = {
       theme = template.themeJson as unknown as ThemeJson;
       preset = template.preset as TicketTemplatePreset;
     } else {
-      // Production mode (use snapshot)
       const snapshot = await this.resolveSnapshot(ticketId);
       theme = snapshot.themeJson as unknown as ThemeJson;
       preset = snapshot.preset as TicketTemplatePreset;
     }
 
-    const defaultTheme: ThemeJson = {
-      brand: { logoUrl: "", tagline: "" },
-      colors: {
-        bg: "#ffffff",
-        card: "#ffffff",
-        text: "#111111",
-        primary: "#19c37d",
-        muted: "#666666",
-      },
-      typography: { fontFamily: "Inter" },
-      qr: { size: "M", label: "Validar na entrada" },
-      blocks: {
-        showBuyerName: true,
-        showOrderId: true,
-        showTicketType: true,
-        showTerms: true,
-        showSupport: true,
-      },
-      footer: { supportUrl: "", supportEmail: "" },
-    };
+    return { model, preset, theme: mergeTheme(theme) };
+  },
 
-    const safeTheme: ThemeJson = {
-      brand: { ...defaultTheme.brand, ...(theme?.brand || {}) },
-      colors: { ...defaultTheme.colors, ...(theme?.colors || {}) },
-      typography: { ...defaultTheme.typography, ...(theme?.typography || {}) },
-      qr: { ...defaultTheme.qr, ...(theme?.qr || {}) },
-      blocks: { ...defaultTheme.blocks, ...(theme?.blocks || {}) },
-      footer: { ...defaultTheme.footer, ...(theme?.footer || {}) },
-    };
+  /**
+   * Renders the ticket as HTML (no Playwright — works in production)
+   */
+  async renderHtml(ticketId: string, templateId?: string): Promise<string> {
+    const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
+    return this.generateHtml(preset, model, theme);
+  },
 
-    if (safeTheme.brand.logoUrl && safeTheme.brand.logoUrl.startsWith("/")) {
-      const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      safeTheme.brand.logoUrl = `${baseUrl}${safeTheme.brand.logoUrl}`;
-    }
+  /**
+   * Renders the ticket to PDF buffer (Playwright when available, pdfkit fallback)
+   */
+  async renderPdf(ticketId: string, templateId?: string): Promise<Buffer> {
+    const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
+    const html = this.generateHtml(preset, model, theme);
 
-    const html = this.generateHtml(preset, model, safeTheme);
-
-    // Playwright rendering
-    const browser = await chromium.launch({ headless: true });
     try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: "networkidle" });
-
-      const pdfBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: { top: "0", right: "0", bottom: "0", left: "0" },
+      const { chromium } = await import("playwright");
+      const browser = await chromium.launch({ headless: true });
+      try {
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle" });
+        const pdfBuffer = await page.pdf({
+          format: "A4",
+          printBackground: true,
+          margin: { top: "0", right: "0", bottom: "0", left: "0" },
+        });
+        return Buffer.from(pdfBuffer);
+      } finally {
+        await browser.close();
+      }
+    } catch {
+      return generateSimpleTicketPDF({
+        code: model.ticket.code,
+        eventTitle: model.event.title,
+        eventDate: model.event.startAt,
+        venue: model.event.venue,
+        city: model.event.city,
+        buyerName: model.buyer.name,
+        qrPayload: model.ticket.qrPayload || model.ticket.code,
       });
-
-      return Buffer.from(pdfBuffer);
-    } finally {
-      await browser.close();
     }
   },
 
