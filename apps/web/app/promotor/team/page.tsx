@@ -5,7 +5,7 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, UserPlus, X, Mail, ShieldCheck } from "lucide-react";
+import { Users, UserPlus, X, Mail, ShieldCheck, Trash2, AlertTriangle } from "lucide-react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { toast } from "sonner";
 
@@ -42,6 +42,10 @@ export default function PromoterTeamPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [canRemoveMembers, setCanRemoveMembers] = useState(false);
+    const [memberToRemove, setMemberToRemove] = useState<OrgMember | null>(null);
+    const [removing, setRemoving] = useState(false);
 
     // Invite Form
     const [inviteEmail, setInviteEmail] = useState("");
@@ -53,8 +57,13 @@ export default function PromoterTeamPage() {
         try {
             const res = await fetchWithTimeout("/api/promotor/team");
             if (!res.ok) throw new Error(`Erro ${res.status}`);
-            const json: { data: OrgMember[] } = await res.json();
+            const json: {
+                data: OrgMember[];
+                meta?: { currentUserId?: string; canRemoveMembers?: boolean };
+            } = await res.json();
             setMembers(json.data);
+            setCurrentUserId(json.meta?.currentUserId ?? null);
+            setCanRemoveMembers(json.meta?.canRemoveMembers ?? false);
         } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro"); }
         finally { setLoading(false); }
     }, []);
@@ -76,10 +85,31 @@ export default function PromoterTeamPage() {
             toast.success("Convite enviado com sucesso!");
             setShowInviteModal(false);
             setInviteEmail("");
+            load();
         } catch (err: any) {
             toast.error(err.message);
         } finally {
             setInviting(false);
+        }
+    };
+
+    const handleRemove = async () => {
+        if (!memberToRemove) return;
+        setRemoving(true);
+        try {
+            const res = await fetchWithTimeout(`/api/promotor/team/${memberToRemove.id}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Erro ao remover membro");
+
+            toast.success(`${memberToRemove.user.name ?? memberToRemove.user.email} foi removido da equipa.`);
+            setMemberToRemove(null);
+            load();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Erro ao remover membro");
+        } finally {
+            setRemoving(false);
         }
     };
 
@@ -115,7 +145,7 @@ export default function PromoterTeamPage() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-white/5">
-                                {["Membro", "Organização", "Função", "Desde"].map((h) => (
+                                {["Membro", "Organização", "Função", "Desde", ...(canRemoveMembers ? ["Ações"] : [])].map((h) => (
                                     <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
                                         {h}
                                     </th>
@@ -138,10 +168,74 @@ export default function PromoterTeamPage() {
                                     <td className="px-6 py-5 text-[11px] font-bold text-white/20 uppercase tracking-widest">
                                         {new Date(m.createdAt).toLocaleDateString("pt-PT")}
                                     </td>
+                                    {canRemoveMembers && (
+                                        <td className="px-6 py-5 text-right">
+                                            {m.user.id === currentUserId ? (
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+                                                    Você
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMemberToRemove(m)}
+                                                    className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/20 transition-all"
+                                                    aria-label={`Remover ${m.user.name ?? m.user.email}`}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    Remover
+                                                </button>
+                                            )}
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {/* Remove confirmation */}
+            {memberToRemove && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        onClick={() => !removing && setMemberToRemove(null)}
+                    />
+                    <div className="relative w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-[28px] shadow-2xl p-8">
+                        <div className="flex flex-col items-center text-center mb-8">
+                            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                                <AlertTriangle className="w-7 h-7 text-red-400" />
+                            </div>
+                            <h2 className="text-xl font-black text-white uppercase tracking-tight">
+                                Remover membro
+                            </h2>
+                            <p className="text-white/45 text-sm mt-3 leading-relaxed">
+                                Tem a certeza que deseja remover{" "}
+                                <strong className="text-white">
+                                    {memberToRemove.user.name ?? memberToRemove.user.email}
+                                </strong>{" "}
+                                da equipa? Esta ação não pode ser desfeita.
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                disabled={removing}
+                                onClick={() => setMemberToRemove(null)}
+                                className="flex-1 py-3.5 rounded-xl border border-white/10 text-white/70 font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                disabled={removing}
+                                onClick={handleRemove}
+                                className="flex-1 py-3.5 rounded-xl bg-red-500 text-white font-black text-xs uppercase tracking-widest hover:bg-red-600 transition-all disabled:opacity-50"
+                            >
+                                {removing ? "A remover..." : "Remover"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

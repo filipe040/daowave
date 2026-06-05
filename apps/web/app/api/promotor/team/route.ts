@@ -10,11 +10,17 @@ export async function GET(req: Request) {
     if (rateLimitRes) return rateLimitRes;
 
     try {
-        const { orgId } = await requirePromoter();
+        const { session, orgId, userId, role: actorRole } = await requirePromoter();
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
 
         if (!orgId) {
-            return NextResponse.json({ data: [], total: 0 });
+            return NextResponse.json({ data: [], total: 0, meta: { currentUserId: userId, canRemoveMembers: isGlobalAdmin } });
         }
+
+        const canRemoveMembers =
+            isGlobalAdmin ||
+            actorRole === "PROMOTER_OWNER" ||
+            actorRole === "OWNER";
 
         // Fetch all members of that organization (org-level, not per-event)
         const members = await prisma.organizationMember.findMany({
@@ -38,7 +44,11 @@ export async function GET(req: Request) {
             },
         });
 
-        return NextResponse.json({ data: members, total: members.length });
+        return NextResponse.json({
+            data: members,
+            total: members.length,
+            meta: { currentUserId: userId, canRemoveMembers },
+        });
     } catch (error) {
         safeLog.error("Promotor team error", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
