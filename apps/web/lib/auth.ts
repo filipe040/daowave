@@ -58,6 +58,7 @@ async function linkOAuthAccount(params: {
 // ── AuthOptions ────────────────────────────────────────────────────────────
 
 export const authOptions: NextAuthOptions = {
+  trustHost: true,
   providers: [
     // ── Google ──────────────────────────────────────────────────────────
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -341,8 +342,16 @@ export const authOptions: NextAuthOptions = {
 
     // ── Redirect (role-based) ─────────────────────────────────────────────
     async redirect({ url, baseUrl }) {
-      // Allow relative URLs and same-origin
-      if (url.startsWith("/") || url.startsWith(baseUrl)) return url;
+      // Allow relative URLs and same-origin; block localhost / external redirects
+      if (url.startsWith("/") && !url.startsWith("//")) return url;
+      if (url.startsWith(baseUrl)) return url;
+      try {
+        const target = new URL(url);
+        const base = new URL(baseUrl);
+        if (target.origin === base.origin) return url;
+      } catch {
+        /* ignore malformed URLs */
+      }
       return baseUrl;
     },
   },

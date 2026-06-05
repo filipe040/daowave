@@ -10,6 +10,7 @@
     "db:generate": "npx prisma generate",
     "db:migrate:deploy": "npx prisma migrate deploy",
     "db:seed": "npx prisma db seed",
+    "seed:dao-wave": "npx ts-node -P tsconfig.seed.json scripts/seed-dao-wave-event.ts",
     "diagnose:db": "node scripts/diagnose-db.js",
     "e2e:prep": "npx prisma migrate deploy && npm run db:seed",
     "test": "jest --passWithNoTests",

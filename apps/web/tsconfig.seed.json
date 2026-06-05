@@ -21,6 +21,7 @@
   },
   "include": [
     "prisma/seed.ts",
+    "scripts/seed-dao-wave-event.ts",
     "../../node_modules/@prisma/client/index.d.ts"
   ],
   "exclude": [

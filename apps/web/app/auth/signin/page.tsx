@@ -55,6 +55,13 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
+/** Only allow same-site relative redirects (blocks localhost / external URLs in ?from=). */
+function safeRedirectPath(raw: string | null, fallback = "/"): string {
+  if (!raw) return fallback;
+  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  return fallback;
+}
+
 // ── Main UI ────────────────────────────────────────────────────────────────
 
 function SignInContent() {
@@ -68,7 +75,10 @@ function SignInContent() {
   const [showPassword, setShowPassword] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const from = searchParams.get("from") || "/";
+  const from = safeRedirectPath(
+    searchParams.get("from") ?? searchParams.get("callbackUrl"),
+    "/"
+  );
   const registered = searchParams.get("registered") === "true";
   const passwordReset = searchParams.get("passwordReset") === "true";
   const verified = searchParams.get("verified") === "true";
