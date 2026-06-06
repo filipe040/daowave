@@ -133,6 +133,7 @@ export async function POST(req: Request) {
         description: data.description,
         venue: data.venueName,
         city: data.city,
+        category: data.category || null,
         startAt,
         endAt,
         checkinMode: data.checkinMode,

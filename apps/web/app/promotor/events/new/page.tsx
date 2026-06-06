@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/dashboard/ErrorState";
 import { ArrowLeft, Building2, Save, MapPin, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { EVENT_CATEGORIES } from "@/lib/events/event-categories";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 
 interface Org { id: string; name: string; role: string }
@@ -43,6 +44,7 @@ export default function CreateEventPage() {
     const [description, setDescription] = useState("");
     const [venue, setVenue] = useState("");
     const [city, setCity] = useState("");
+    const [category, setCategory] = useState("");
     const [locationUrl, setLocationUrl] = useState("");
     const [startAt, setStartAt] = useState("");
     const [endAt, setEndAt] = useState("");
@@ -73,7 +75,7 @@ export default function CreateEventPage() {
             const res = await fetchWithTimeout("/api/promotor/events", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, slug, description, venue, city, locationUrl: locationUrl.trim() || undefined, startAt, endAt, orgId, layoutMode }),
+                body: JSON.stringify({ title, slug, description, venue, city, category: category || undefined, locationUrl: locationUrl.trim() || undefined, startAt, endAt, orgId, layoutMode }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({})) as { error?: string };
@@ -155,6 +157,17 @@ export default function CreateEventPage() {
                             <label htmlFor="endAt" className={labelCls}>Fim *</label>
                             <input id="endAt" required type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} className={inputCls} />
                         </div>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <label htmlFor="category" className={labelCls}>Género / categoria</label>
+                        <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
+                            <option value="">Selecionar género…</option>
+                            {EVENT_CATEGORIES.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                        <p className="mt-2 text-xs text-neutral-500">Aparece nos filtros públicos quando o evento estiver publicado.</p>
                     </div>
 
                     <div className="px-6 py-5 grid grid-cols-2 gap-4">

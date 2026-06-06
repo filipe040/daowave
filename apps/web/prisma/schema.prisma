@@ -291,6 +291,7 @@ model Event {
   description String      @db.Text
   venue       String
   city        String
+  category    String?  // Género: Concertos, Teatro, Festivais, etc.
   locationUrl String?  @db.VarChar(2048) // Link Google Maps para o mapa na página pública
   startAt     DateTime
   endAt       DateTime
@@ -340,6 +341,7 @@ model Event {
   
   @@index([slug])
   @@index([status])
+  @@index([category])
   @@index([promoterId])
   @@index([organizationId])
 }

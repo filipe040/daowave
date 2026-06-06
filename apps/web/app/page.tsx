@@ -4,7 +4,11 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import EventsSearch from "./components/events-search";
 import PromoterLink from "./components/PromoterLink";
-import { cityMatchValues, getCitiesWithPublishedEvents } from "@/lib/events/public-event-cities";
+import {
+  buildPublicEventsWhere,
+  getCategoriesWithPublishedEvents,
+  getCitiesWithPublishedEvents,
+} from "@/lib/events/public-event-filters";
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Ticket, Users, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -12,21 +16,7 @@ export const revalidate = 0;
 
 // ── Data fetchers ──────────────────────────────────────────────────────────
 async function getEvents(searchParams: { search?: string; city?: string; category?: string }) {
-  const where: any = {
-    status: "PUBLISHED",
-    archivedAt: null,
-    endAt: { gte: new Date() },
-  };
-  if (searchParams.search) {
-    where.OR = [
-      { title: { contains: searchParams.search } },
-      { description: { contains: searchParams.search } },
-      { city: { contains: searchParams.search } },
-    ];
-  }
-  if (searchParams.city && searchParams.city !== "ALL PORTUGAL") {
-    where.city = { in: cityMatchValues(searchParams.city) };
-  }
+  const where = buildPublicEventsWhere(searchParams);
   return prisma.event
     .findMany({
       where,
@@ -75,6 +65,10 @@ async function getCities() {
   return getCitiesWithPublishedEvents();
 }
 
+async function getCategories() {
+  return getCategoriesWithPublishedEvents();
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function formatDateTimePT(d: Date | string) {
   const date = typeof d === "string" ? new Date(d) : d;
@@ -98,10 +92,11 @@ export default async function Home({
   searchParams?: Promise<{ search?: string; city?: string; category?: string }>;
 }) {
   const params = (await searchParams) ?? {};
-  const [events, featured, cities, stats] = await Promise.all([
+  const [events, featured, cities, categories, stats] = await Promise.all([
     getEvents(params),
     getFeaturedEvents(),
     getCities(),
+    getCategories(),
     getStats(),
   ]);
 
@@ -357,7 +352,13 @@ export default async function Home({
 
           <div className="mb-6 sm:mb-8">
             <Suspense fallback={<div className="h-14 rounded-2xl border border-neutral-200 bg-white animate-pulse" />}>
-              <EventsSearch cities={cities} initialSearch={params.search} initialCity={params.city} />
+              <EventsSearch
+                cities={cities}
+                categories={categories}
+                initialSearch={params.search}
+                initialCity={params.city}
+                initialCategory={params.category}
+              />
             </Suspense>
           </div>
 

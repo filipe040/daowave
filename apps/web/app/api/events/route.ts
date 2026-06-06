@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { cityMatchValues } from '@/lib/events/public-event-cities';
+import { buildPublicEventsWhere } from '@/lib/events/public-event-filters';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,29 +14,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const city = searchParams.get('city');
     const search = searchParams.get('search');
+    const category = searchParams.get('category');
 
-    const where: any = {
-      status: 'PUBLISHED',
-      archivedAt: null, // Only show non-archived events
-      endAt: { gte: new Date() },
-    };
-
-    if (city) {
-      where.city = { in: cityMatchValues(city) };
-    }
-
-    if (search) {
-      where.AND = [
-        ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
-        {
-          OR: [
-            { title: { contains: search } },
-            { description: { contains: search } },
-            { city: { contains: search } },
-          ],
-        },
-      ];
-    }
+    const where = buildPublicEventsWhere({
+      city: city ?? undefined,
+      search: search ?? undefined,
+      category: category ?? undefined,
+    });
 
     const events = await prisma.event.findMany({
       where,

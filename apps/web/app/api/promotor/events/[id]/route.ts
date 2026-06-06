@@ -4,11 +4,14 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { requirePromoter } from "@/lib/auth/guards";
 
+import { isEventCategory } from "@/lib/events/event-categories";
+
 const updateEventSchema = z.object({
   title: z.string().min(3).optional(),
   description: z.string().optional(),
   venue: z.string().optional(),
   city: z.string().optional(),
+  category: z.string().optional().nullable().or(z.literal("")),
   locationUrl: z.string().max(2048).optional().nullable().or(z.literal("")),
   startAt: z.string().transform(str => new Date(str)).optional(),
   endAt: z.string().transform(str => new Date(str)).optional(),
@@ -58,7 +61,12 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     const json = await req.json();
     const body = updateEventSchema.parse(json);
 
-    const updateData = { ...body };
+    const updateData = {
+      ...body,
+      ...(body.category !== undefined && {
+        category: body.category && isEventCategory(body.category) ? body.category : null,
+      }),
+    };
     if (body.status) {
       (updateData as any).status = body.status;
     }

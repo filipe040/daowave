@@ -205,6 +205,7 @@ export async function PUT(
     if (data.description !== undefined) updateInput.description = data.description;
     if (data.venueName !== undefined) updateInput.venue = data.venueName;
     if (data.city !== undefined) updateInput.city = data.city;
+    if (data.category !== undefined) updateInput.category = data.category || null;
     if (data.startAt !== undefined) updateInput.startAt = new Date(data.startAt);
     if (data.endAt !== undefined) updateInput.endAt = new Date(data.endAt);
     if (data.checkinMode !== undefined) updateInput.checkinMode = data.checkinMode;

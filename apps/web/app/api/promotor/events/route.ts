@@ -7,12 +7,15 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { requirePromoter } from "@/lib/auth/guards";
 
+import { isEventCategory } from "@/lib/events/event-categories";
+
 const createEventSchema = z.object({
   title: z.string().min(3, "Título demasiado curto"),
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/, "Slug inválido (use apenas letras minúsculas, números e hífens)"),
   description: z.string().default(""),
   venue: z.string().min(1, "Local obrigatório"),
   city: z.string().min(1, "Cidade obrigatória"),
+  category: z.string().optional().nullable().or(z.literal("")),
   locationUrl: z.string().max(2048).optional().or(z.literal("")),
   startAt: z.string().transform(str => new Date(str)),
   endAt: z.string().transform(str => new Date(str)),
@@ -92,6 +95,7 @@ export async function POST(req: NextRequest) {
       description: body.description,
       venue: body.venue,
       city: body.city,
+      category: body.category && isEventCategory(body.category) ? body.category : null,
       locationUrl: body.locationUrl || null,
       startAt: body.startAt,
       endAt: body.endAt,

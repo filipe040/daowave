@@ -17,6 +17,7 @@ import {
   Lightbulb,
   type LucideIcon,
 } from "lucide-react";
+import { EVENT_CATEGORIES } from "@/lib/events/event-categories";
 
 interface OrganizerOption {
   id: string;
@@ -32,17 +33,6 @@ interface EventFormProps {
   availableOrganizers?: OrganizerOption[];
   defaultPromoterId?: string;
 }
-
-const categories = [
-  "Concertos",
-  "Desporto",
-  "Nightlife",
-  "Teatro",
-  "Festivais",
-  "Conferências",
-  "Workshops",
-  "Outros",
-];
 
 const tabs: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "basic", label: "Informações Básicas", icon: FileText },
@@ -529,7 +519,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 cursor-pointer"
               >
                 <option value="">Selecione uma categoria</option>
-                {categories.map((cat) => (
+                {EVENT_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>

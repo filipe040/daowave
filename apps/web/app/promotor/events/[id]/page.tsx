@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Globe, AlertCircle, CheckCircle2, ExternalLink, Mic2, 
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { EVENT_CATEGORIES } from "@/lib/events/event-categories";
 
 interface EventDetail {
     id: string;
@@ -16,6 +17,7 @@ interface EventDetail {
     description: string;
     venue: string;
     city: string;
+    category?: string | null;
     locationUrl?: string | null;
     startAt: string;
     endAt: string;
@@ -63,6 +65,7 @@ export default function PromoterEventDetailPage() {
     const [description, setDescription] = useState("");
     const [venue, setVenue] = useState("");
     const [city, setCity] = useState("");
+    const [category, setCategory] = useState("");
     const [locationUrl, setLocationUrl] = useState("");
     const [startAt, setStartAt] = useState("");
     const [endAt, setEndAt] = useState("");
@@ -79,6 +82,7 @@ export default function PromoterEventDetailPage() {
             setDescription(data.description ?? "");
             setVenue(data.venue ?? "");
             setCity(data.city ?? "");
+            setCategory(data.category ?? "");
             setLocationUrl(data.locationUrl ?? "");
             setStartAt(toLocal(data.startAt));
             setEndAt(toLocal(data.endAt));
@@ -98,7 +102,7 @@ export default function PromoterEventDetailPage() {
             const res = await fetchWithTimeout(`/api/promotor/events/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, venue, city, locationUrl: locationUrl.trim() || null, startAt, endAt, layoutMode }),
+                body: JSON.stringify({ title, description, venue, city, category: category || null, locationUrl: locationUrl.trim() || null, startAt, endAt, layoutMode }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({})) as { error?: string };
@@ -353,6 +357,17 @@ export default function PromoterEventDetailPage() {
                                 className={inputCls}
                             />
                         </div>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <label htmlFor="category" className={labelCls}>Género / categoria</label>
+                        <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
+                            <option value="">Selecionar género…</option>
+                            {EVENT_CATEGORIES.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                        <p className="mt-2 text-xs text-neutral-500">Aparece nos filtros públicos quando o evento estiver publicado.</p>
                     </div>
 
                     <div className="px-6 py-5">

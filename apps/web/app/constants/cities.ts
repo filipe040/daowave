@@ -1,7 +1,9 @@
-/** @deprecated Use `@/lib/events/public-event-cities` */
+/** @deprecated Use `@/lib/events/public-event-filters` */
 export {
   normalizeCityFilter,
   cityMatchValues,
-  dedupeCityNames,
+  dedupeLabels as dedupeCityNames,
   getCitiesWithPublishedEvents,
-} from "@/lib/events/public-event-cities";
+  getCategoriesWithPublishedEvents,
+  buildPublicEventsWhere,
+} from "@/lib/events/public-event-filters";

@@ -6,41 +6,19 @@ import { pt } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import EventsSearch from "../components/events-search";
-import { cityMatchValues, getCitiesWithPublishedEvents } from "@/lib/events/public-event-cities";
+import {
+  buildPublicEventsWhere,
+  getCategoriesWithPublishedEvents,
+  getCitiesWithPublishedEvents,
+} from "@/lib/events/public-event-filters";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function getEvents(searchParams: { search?: string; city?: string }) {
-  const where: {
-    status: "PUBLISHED";
-    archivedAt: null;
-    endAt: { gte: Date };
-    OR?: Array<Record<string, unknown>>;
-    city?: { in: string[] };
-  } = {
-    status: "PUBLISHED",
-    archivedAt: null,
-    endAt: { gte: new Date() },
-  };
-
-  if (searchParams.search?.trim()) {
-    const q = searchParams.search.trim();
-    where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
-      { city: { contains: q } },
-      { venue: { contains: q } },
-    ];
-  }
-
-  if (searchParams.city && searchParams.city !== "ALL PORTUGAL") {
-    where.city = { in: cityMatchValues(searchParams.city) };
-  }
-
+async function getEvents(searchParams: { search?: string; city?: string; category?: string }) {
   try {
     return await prisma.event.findMany({
-      where,
+      where: buildPublicEventsWhere(searchParams),
       orderBy: { startAt: "asc" },
       select: {
         id: true,
@@ -48,6 +26,7 @@ async function getEvents(searchParams: { search?: string; city?: string }) {
         slug: true,
         city: true,
         venue: true,
+        category: true,
         startAt: true,
         endAt: true,
         bannerUrl: true,
@@ -62,10 +41,6 @@ async function getEvents(searchParams: { search?: string; city?: string }) {
   }
 }
 
-async function getCities() {
-  return getCitiesWithPublishedEvents();
-}
-
 function formatPrice(cents: number) {
   return (cents / 100).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 }
@@ -73,10 +48,14 @@ function formatPrice(cents: number) {
 export default async function EventsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ search?: string; city?: string }>;
+  searchParams?: Promise<{ search?: string; city?: string; category?: string }>;
 }) {
   const params = (await searchParams) ?? {};
-  const [events, cities] = await Promise.all([getEvents(params), getCities()]);
+  const [events, cities, categories] = await Promise.all([
+    getEvents(params),
+    getCitiesWithPublishedEvents(),
+    getCategoriesWithPublishedEvents(),
+  ]);
 
   return (
     <div className="min-h-screen mesh-gradient text-neutral-900">
@@ -89,7 +68,7 @@ export default async function EventsPage({
             Todos os eventos disponíveis
           </h1>
           <p className="mt-2 text-sm sm:text-[15px] text-neutral-600 max-w-2xl">
-            Filtra por cidade ou pesquisa pelo nome do evento.
+            Filtra por cidade, género ou pesquisa pelo nome do evento.
           </p>
         </div>
 
@@ -97,8 +76,10 @@ export default async function EventsPage({
           <Suspense fallback={<div className="h-14 rounded-2xl border border-neutral-200 bg-white animate-pulse" />}>
             <EventsSearch
               cities={cities}
+              categories={categories}
               initialSearch={params.search}
               initialCity={params.city}
+              initialCategory={params.category}
               basePath="/events"
             />
           </Suspense>
@@ -108,12 +89,12 @@ export default async function EventsPage({
           <div className="rounded-3xl border border-neutral-200 bg-white p-10 sm:p-14 text-center shadow-md">
             <Calendar className="h-14 w-14 text-neutral-300 mx-auto mb-4" strokeWidth={1.5} />
             <p className="text-[15px] sm:text-[16px] font-bold text-neutral-800">
-              {params.search || params.city
+              {params.search || params.city || params.category
                 ? "Nenhum evento encontrado para estes filtros."
                 : "Nenhum evento disponível neste momento."}
             </p>
             <p className="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
-              {params.search || params.city
+              {params.search || params.city || params.category
                 ? "Ajusta a pesquisa ou limpa os filtros."
                 : "Volta mais tarde para descobrir novos eventos na plataforma."}
             </p>
@@ -148,14 +129,16 @@ export default async function EventsPage({
                     )}
 
                     <div className="p-5 sm:p-6">
-                      <div className="flex items-center justify-between gap-3 mb-4">
+                      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-violet-700">
                           <MapPin className="h-3 w-3" />
                           {event.city || "—"}
                         </span>
-                        <span className="h-9 w-9 rounded-xl flex items-center justify-center border border-neutral-200 bg-neutral-50 text-neutral-500 group-hover:bg-violet-50 group-hover:border-violet-200 group-hover:text-violet-600 transition">
-                          <ArrowRight className="h-4 w-4" />
-                        </span>
+                        {event.category && (
+                          <span className="inline-flex rounded-full bg-neutral-100 border border-neutral-200 px-3 py-1 text-[11px] font-bold text-neutral-600">
+                            {event.category}
+                          </span>
+                        )}
                       </div>
 
                       <h2 className="text-[18px] sm:text-[20px] font-bold text-neutral-900 leading-snug line-clamp-2">
