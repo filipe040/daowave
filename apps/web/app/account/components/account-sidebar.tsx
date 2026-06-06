@@ -36,7 +36,7 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
     <>
       <div
         className={`
-          md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity
+          md:hidden fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-[60] transition-opacity
           ${mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
         `}
         onClick={onClose}
@@ -44,18 +44,18 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
       />
       <aside
         className={`
-          w-72 max-w-[85vw] fixed left-0 top-0 h-screen bg-zinc-950 border-r border-zinc-800 text-white z-[70]
+          w-72 max-w-[85vw] fixed left-0 top-0 h-screen bg-white border-r border-neutral-200 text-neutral-900 z-[70]
           transform transition-transform duration-200 ease-out
           md:translate-x-0 md:max-w-none
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800">
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-neutral-200">
           <span className="font-bold text-sm">Conta</span>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
             aria-label="Fechar menu"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
                 onClick={onClose}
                 className={`
                   flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors
-                  ${isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"}
+                  ${isActive ? "bg-violet-50 text-violet-700" : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/60"}
                 `}
                 data-testid={item.href === "/account" ? "nav-account-dashboard" : undefined}
               >
@@ -90,11 +90,11 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
           </div>
 
           {/* Home button at the bottom */}
-          <div className="pt-4 border-t border-zinc-800">
+          <div className="pt-4 border-t border-neutral-200">
             <Link
               href="/"
               onClick={onClose}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/60 transition-colors"
             >
               <Home className="h-5 w-5 shrink-0" />
               Voltar ao site

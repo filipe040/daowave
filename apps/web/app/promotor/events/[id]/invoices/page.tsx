@@ -28,7 +28,7 @@ export default function EventInvoicesPage() {
       actions={
         <Link
           href={`/promotor/events/${id}`}
-          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Voltar ao evento

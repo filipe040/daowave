@@ -30,7 +30,7 @@ export default function OrganizerDashboardShell({
   }, [mounted]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900 flex">
+    <div className="min-h-screen bg-neutral-50 flex">
       {/* Sidebar: desktop fixed, mobile drawer */}
       <OrganizerSidebar
         mobileOpen={mobileOpen}

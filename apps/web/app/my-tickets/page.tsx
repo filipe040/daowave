@@ -55,7 +55,7 @@ export default async function MyTicketsPage() {
           </p>
           <Link
             href="/auth/signin"
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-5 py-3 text-[13px] font-bold text-white shadow-md shadow-violet-500/25 transition hover:opacity-95"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-violet-600 px-5 py-3 text-[13px] font-bold text-white shadow-md shadow-violet-500/25 transition hover:opacity-95"
           >
             Entrar
           </Link>
@@ -92,7 +92,7 @@ export default async function MyTicketsPage() {
             </p>
             <Link
               href="/events"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-6 py-3 text-[13px] font-bold text-white shadow-md shadow-violet-500/25 transition hover:opacity-95"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-violet-600 px-6 py-3 text-[13px] font-bold text-white shadow-md shadow-violet-500/25 transition hover:opacity-95"
             >
               Explorar eventos <ArrowRight className="h-4 w-4" />
             </Link>

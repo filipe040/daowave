@@ -59,7 +59,7 @@ export default async function CheckoutPage({
           <p className="text-neutral-600 mb-6">Inicie sessão para concluir a compra.</p>
           <Link
             href="/auth/signin?from=/events"
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-3 text-sm font-bold text-white shadow-md"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-violet-600 px-8 py-3 text-sm font-bold text-neutral-900 shadow-md"
           >
             Iniciar sessão
           </Link>

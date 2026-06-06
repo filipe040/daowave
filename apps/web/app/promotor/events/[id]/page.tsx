@@ -25,13 +25,13 @@ interface EventDetail {
     layoutMode?: string;
 }
 
-const inputCls = "w-full rounded-2xl border border-white/10 bg-black/50 text-white placeholder:text-white/30 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner";
-const labelCls = "block text-[12px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3";
+const inputCls = "w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner";
+const labelCls = "public-label text-[12px] font-bold tracking-[0.2em] mb-3";
 
 const STATUS_COLOR: Record<string, string> = {
-    PUBLISHED: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-    DRAFT: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-    ARCHIVED: "bg-white/5 text-white/50 ring-white/10",
+    PUBLISHED: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20",
+    DRAFT: "bg-amber-500/10 text-amber-600 ring-amber-500/20",
+    ARCHIVED: "bg-neutral-100 text-neutral-600 ring-neutral-200",
     CANCELLED: "bg-red-500/10 text-red-400 ring-red-500/20",
 };
 const STATUS_LABEL: Record<string, string> = {
@@ -158,8 +158,8 @@ export default function PromoterEventDetailPage() {
     if (loading) return (
         <PageShell title="Evento">
             <div className="max-w-2xl animate-pulse space-y-3">
-                <div className="h-10 bg-white/5 rounded-xl border border-white/10" />
-                <div className="h-80 bg-white/5 rounded-[32px] border border-white/10" />
+                <div className="h-10 bg-neutral-50 rounded-xl border border-neutral-200" />
+                <div className="h-80 bg-neutral-50 rounded-[32px] border border-neutral-200" />
             </div>
         </PageShell>
     );
@@ -178,7 +178,7 @@ export default function PromoterEventDetailPage() {
         <PageShell
             title={event.title || "Evento"}
             subtitle={
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ring-1 ring-inset ${STATUS_COLOR[event.status] ?? "bg-white/5 text-white/50"}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ring-1 ring-inset ${STATUS_COLOR[event.status] ?? "bg-neutral-50 text-neutral-500"}`}>
                     {STATUS_LABEL[event.status] ?? event.status}
                 </span>
             }
@@ -188,7 +188,7 @@ export default function PromoterEventDetailPage() {
                         <Link
                             href={`/events/${event.slug}/artistas`}
                             target="_blank"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition-all"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 transition-all"
                         >
                             <Mic2 className="h-4 w-4" />
                             Ver página de artistas
@@ -197,26 +197,26 @@ export default function PromoterEventDetailPage() {
                     )}
                     <Link
                         href={`/promotor/events/${id}/bilhetes?tab=artists`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         <Mic2 className="h-4 w-4" />
                         Artistas
                     </Link>
                     <Link
                         href={`/promotor/events/${id}/bilhetes`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-white text-black hover:bg-white/90 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         Gestão de Bilhetes & Lotação
                     </Link>
                     <Link
                         href={`/promotor/events/${id}/branding`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-300 bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         Personalização
                     </Link>
                     <Link
                         href={orgId ? `/promotor/events?orgId=${orgId}` : "/promotor/events"}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Voltar
@@ -231,11 +231,11 @@ export default function PromoterEventDetailPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                             <div className="flex items-start gap-4">
                                 <div className="p-2.5 bg-amber-500/20 rounded-xl shrink-0 mt-0.5">
-                                    <AlertCircle className="h-5 w-5 text-amber-400" strokeWidth={2} />
+                                    <AlertCircle className="h-5 w-5 text-amber-600" strokeWidth={2} />
                                 </div>
                                 <div>
-                                    <p className="text-[15px] font-bold text-amber-400">Este evento é um rascunho</p>
-                                    <p className="text-[13px] text-amber-400/70 mt-1 font-medium leading-relaxed">Guarde as alterações e publique para tornar o evento visível ao público.</p>
+                                    <p className="text-[15px] font-bold text-amber-600">Este evento é um rascunho</p>
+                                    <p className="text-[13px] text-amber-600/70 mt-1 font-medium leading-relaxed">Guarde as alterações e publique para tornar o evento visível ao público.</p>
                                 </div>
                             </div>
                             <button
@@ -271,23 +271,23 @@ export default function PromoterEventDetailPage() {
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-5 justify-between">
                         <div className="flex items-center gap-4">
                             <div className="p-2.5 bg-emerald-500/20 rounded-xl shrink-0">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-400" strokeWidth={2} />
+                                <CheckCircle2 className="h-5 w-5 text-emerald-600" strokeWidth={2} />
                             </div>
-                            <p className="text-[14px] text-emerald-400 font-bold">Evento publicado e visível</p>
+                            <p className="text-[14px] text-emerald-600 font-bold">Evento publicado e visível</p>
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-0">
                             <a
                                 href={`/events/${event.slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all"
                             >
                                 Ver página
                             </a>
                             <button
                                 onClick={handleUnpublish}
                                 disabled={publishing}
-                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-40 transition-all"
+                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-40 transition-all"
                             >
                                 {publishing ? "Aguarde…" : "Meter em Rascunho"}
                             </button>
@@ -296,8 +296,8 @@ export default function PromoterEventDetailPage() {
                 )}
 
                 {/* Edit form */}
-                <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden divide-y divide-white/5 relative">
-                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden divide-y divide-neutral-200 relative">
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
                     <div className="px-6 py-5">
                         <label htmlFor="title" className={labelCls}>Título *</label>
                         <input
@@ -362,7 +362,7 @@ export default function PromoterEventDetailPage() {
                                 href="https://www.google.com/maps"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300"
+                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 hover:text-amber-700"
                             >
                                 <MapPin className="h-3.5 w-3.5" />
                                 Abrir Google Maps
@@ -377,7 +377,7 @@ export default function PromoterEventDetailPage() {
                             placeholder="https://maps.google.com/... — link Partilhar do local"
                             className={inputCls}
                         />
-                        <p className="mt-2 text-xs text-white/40">Usado no mapa da página pública. Se vazio, o mapa usa o nome do local + cidade.</p>
+                        <p className="mt-2 text-xs text-neutral-500">Usado no mapa da página pública. Se vazio, o mapa usa o nome do local + cidade.</p>
                     </div>
 
                     <div className="px-6 py-5">
@@ -386,18 +386,18 @@ export default function PromoterEventDetailPage() {
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("STANDARD")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
                             >
-                                <p className="font-bold text-white text-[14px]">Evento clássico</p>
-                                <p className="text-xs text-white/40 mt-1">Uma página com todos os bilhetes.</p>
+                                <p className="font-bold text-neutral-900 text-[14px]">Evento clássico</p>
+                                <p className="text-xs text-neutral-500 mt-1">Uma página com todos os bilhetes.</p>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("ARTISTS")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
                             >
-                                <p className="font-bold text-white text-[14px]">Bilhetes por artista</p>
-                                <p className="text-xs text-white/40 mt-1">Grelha de artistas com página individual.</p>
+                                <p className="font-bold text-neutral-900 text-[14px]">Bilhetes por artista</p>
+                                <p className="text-xs text-neutral-500 mt-1">Grelha de artistas com página individual.</p>
                             </button>
                         </div>
                     </div>
@@ -414,14 +414,14 @@ export default function PromoterEventDetailPage() {
                         />
                     </div>
 
-                    <div className="px-6 py-6 bg-black/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <p className="text-[12px] text-white/40 font-medium">
-                            URL: <span className="font-mono text-white/70">/events/{event.slug}</span>
+                    <div className="px-6 py-6 bg-neutral-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <p className="text-[12px] text-neutral-500 font-medium">
+                            URL: <span className="font-mono text-neutral-600">/events/{event.slug}</span>
                         </p>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
                         >
                             <Save className="h-4 w-4" />
                             {saving ? "A guardar…" : "Guardar alterações"}

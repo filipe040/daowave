@@ -79,23 +79,23 @@ export default function AdminMarketingPage() {
 
                 {/* STAs */}
                 <div className="lg:col-span-1">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl sticky top-24">
+                    <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-6 shadow-xl sticky top-24">
                         <div className="flex items-center gap-4 mb-4">
                             <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
                                 <Users className="h-6 w-6 text-purple-400" />
                             </div>
                             <div>
-                                <h3 className="text-white/60 text-sm font-medium">Subscritores</h3>
-                                <div className="text-3xl font-bold text-white mt-1">
+                                <h3 className="text-neutral-600 text-sm font-medium">Subscritores</h3>
+                                <div className="text-3xl font-bold text-neutral-900 mt-1">
                                     {loadingStats ? (
-                                        <Loader2 className="h-6 w-6 animate-spin text-white/20 mt-2" />
+                                        <Loader2 className="h-6 w-6 animate-spin text-neutral-400 mt-2" />
                                     ) : (
                                         <span>{stats?.totalOptedIn || 0}</span>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <p className="text-xs text-white/40 leading-relaxed">
+                        <p className="text-xs text-neutral-500 leading-relaxed">
                             Apenas utilizadores que ativaram a opção <strong>&quot;Novidades e ofertas&quot;</strong> nas configurações da conta irão receber estes emails.
                         </p>
                     </div>
@@ -103,54 +103,54 @@ export default function AdminMarketingPage() {
 
                 {/* Form */}
                 <div className="lg:col-span-2">
-                    <form onSubmit={handleSend} className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl space-y-6">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <Mail className="h-5 w-5 text-white/50" />
+                    <form onSubmit={handleSend} className="border border-neutral-200 bg-neutral-50 rounded-2xl p-6 shadow-xl space-y-6">
+                        <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-neutral-500" />
                             Nova Campanha
                         </h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-white/70 mb-1">
-                                    Assunto do Email <span className="text-red-400">*</span>
+                                <label className="public-label normal-case tracking-normal mb-1">
+                                    Assunto do Email <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     required
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                    className="public-input rounded-xl py-3"
                                     placeholder="Ex: Não perca as novidades deste verão!"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-white/70 mb-1">
-                                    Título (Dentro do email) <span className="text-red-400">*</span>
+                                <label className="public-label normal-case tracking-normal mb-1">
+                                    Título (Dentro do email) <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     required
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                    className="public-input rounded-xl py-3"
                                     placeholder="Ex: Agenda de Verão Gopass"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-white/70 mb-1">
-                                    Conteúdo Original (HTML suportado) <span className="text-red-400">*</span>
+                                <label className="public-label normal-case tracking-normal mb-1">
+                                    Conteúdo Original (HTML suportado) <span className="text-red-600">*</span>
                                 </label>
                                 <textarea
                                     required
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     rows={8}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-mono text-sm"
+                                    className="public-input rounded-xl py-3 font-mono text-sm"
                                     placeholder="<p>Olá,</p><p>Temos dezenas de novos eventos disponíveis! Veja no nosso <a href='https://tickets.daowave.pt'>site</a>.</p>"
                                 />
-                                <p className="text-[11px] text-white/30 mt-2">
+                                <p className="text-[11px] text-neutral-400 mt-2">
                                     Pode usar tags HTML simples como &lt;b&gt;, &lt;p&gt;, &lt;a href=&quot;...&quot;&gt;, &lt;br&gt;.
                                 </p>
                             </div>
@@ -164,17 +164,17 @@ export default function AdminMarketingPage() {
                         )}
 
                         {status === "error" && (
-                            <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+                            <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600">
                                 <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                                 <p className="text-sm">{errorMessage}</p>
                             </div>
                         )}
 
-                        <div className="pt-4 border-t border-white/10 flex justify-end">
+                        <div className="pt-4 border-t border-neutral-200 flex justify-end">
                             <button
                                 type="submit"
                                 disabled={sending || !stats || stats.totalOptedIn === 0}
-                                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 rounded-xl text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
+                                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 px-6 py-3 rounded-xl text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
                             >
                                 {sending ? (
                                     <><Loader2 className="h-4 w-4 animate-spin" /> A enviar...</>

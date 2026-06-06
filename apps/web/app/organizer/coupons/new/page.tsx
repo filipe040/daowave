@@ -68,12 +68,12 @@ export default function NewCouponPage() {
           Voltar para Cupões
         </Link>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Criar Cupão de Desconto</h1>
-        <p className="text-base md:text-lg text-zinc-400">Crie um cupão para aumentar as vendas</p>
+        <p className="text-base md:text-lg text-neutral-500">Crie um cupão para aumentar as vendas</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-zinc-700/50 shadow-lg space-y-6 md:space-y-8">
+      <form onSubmit={handleSubmit} className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-neutral-200 shadow-lg space-y-6 md:space-y-8">
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
+          <div className="bg-red-500/20 border border-red-500/50 text-red-600 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
@@ -84,7 +84,7 @@ export default function NewCouponPage() {
             required
             value={formData.eventId}
             onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="public-input md:px-5 md:py-4 text-base md:text-lg"
           >
             <option value="">Selecione um evento</option>
             {events.map((event) => (
@@ -107,11 +107,11 @@ export default function NewCouponPage() {
                 code: e.target.value.toUpperCase().replace(/\s/g, ""),
               })
             }
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-neutral-900 font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
             placeholder="VERAO2025"
             maxLength={20}
           />
-          <p className="text-sm text-zinc-500 mt-2">
+          <p className="text-sm text-neutral-500 mt-2">
             Apenas letras maiúsculas e números (sem espaços)
           </p>
         </div>
@@ -124,7 +124,7 @@ export default function NewCouponPage() {
               onChange={(e) =>
                 setFormData({ ...formData, discountType: e.target.value })
               }
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             >
               <option value="PERCENTAGE">Percentagem (%)</option>
               <option value="FIXED">Valor Fixo (€)</option>
@@ -152,12 +152,12 @@ export default function NewCouponPage() {
                       : parseFloat(e.target.value) * 100,
                 })
               }
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
             {formData.discountType === "PERCENTAGE" ? (
-              <p className="text-sm text-zinc-500 mt-2">Entre 1% e 100%</p>
+              <p className="text-sm text-neutral-500 mt-2">Entre 1% e 100%</p>
             ) : (
-              <p className="text-sm text-zinc-500 mt-2">
+              <p className="text-sm text-neutral-500 mt-2">
                 Valor em euros (ex: 5.00 = 5€)
               </p>
             )}
@@ -173,10 +173,10 @@ export default function NewCouponPage() {
             min={1}
             value={formData.maxUses}
             onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="public-input md:px-5 md:py-4 text-base md:text-lg"
             placeholder="Deixe em branco para ilimitado"
           />
-          <p className="text-sm text-zinc-500 mt-2">
+          <p className="text-sm text-neutral-500 mt-2">
             Número máximo de vezes que o cupão pode ser usado
           </p>
         </div>
@@ -189,7 +189,7 @@ export default function NewCouponPage() {
               required
               value={formData.startsAt}
               onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function NewCouponPage() {
               required
               value={formData.endsAt}
               onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
           </div>
         </div>
@@ -209,13 +209,13 @@ export default function NewCouponPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+            className="flex-1 bg-violet-600 hover:bg-violet-700 px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
           >
             {loading ? "A criar..." : "Criar Cupão"}
           </button>
           <Link
             href="/organizer/coupons"
-            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-zinc-700/50 hover:bg-zinc-700/50 transition-colors text-center text-base md:text-lg font-medium"
+            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-neutral-200 hover:bg-neutral-100 transition-colors text-center text-base md:text-lg font-medium"
           >
             Cancelar
           </Link>

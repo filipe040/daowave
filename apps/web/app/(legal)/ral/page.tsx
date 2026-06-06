@@ -7,7 +7,7 @@ export default function RalPage() {
 
             <p>Caso a resolução não seja alcançada, o consumidor fica habilitado de recorrer a uma Entidade de Resolução Alternativa de Litígios de Consumo aprovada. Sugerimos a:</p>
 
-            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl my-6">
+            <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-2xl my-6">
                 <h3 className="mt-0">Centro Nacional de Informação e Arbitragem de Conflitos de Consumo (CNIACC)</h3>
                 <ul className="mb-0">
                     <li><strong>Contactos Telefónicos:</strong> 213 847 484</li>

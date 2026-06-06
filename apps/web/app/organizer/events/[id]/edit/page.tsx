@@ -43,7 +43,7 @@ export default async function EditEventPage({
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold mb-2">Editar Evento</h1>
-        <p className="text-zinc-400">{event.title}</p>
+        <p className="text-neutral-500">{event.title}</p>
       </div>
 
       <EventForm eventId={id} initialData={event} />

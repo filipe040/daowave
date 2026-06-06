@@ -408,9 +408,9 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Promotor responsável (apenas quando admin cria evento) */}
       {isAdminCreate && availableOrganizers.length > 0 && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 sm:p-6 backdrop-blur-sm">
           <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-            Promotor responsável <span className="text-red-400">*</span>
+            Promotor responsável <span className="text-red-600">*</span>
           </label>
           <select
             value={promoterId}
@@ -418,7 +418,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
               setPromoterId(e.target.value);
               setErrors((prev) => ({ ...prev, promoterId: "" }));
             }}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+            className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
           >
             <option value="">Selecione um promotor</option>
             {availableOrganizers.map((org) => (
@@ -428,7 +428,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
             ))}
           </select>
           {errors.promoterId && (
-            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+            <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.promoterId}
             </p>
           )}
@@ -436,7 +436,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       )}
 
       {/* Tabs */}
-      <div className="border-b border-zinc-800 overflow-x-auto -mx-6 px-6">
+      <div className="border-b border-neutral-200 overflow-x-auto -mx-6 px-6">
         <div className="flex gap-1 sm:gap-2 min-w-max pb-1">
           {tabs.map((tab) => {
             const hasError = Object.keys(errors).some((key) => {
@@ -461,8 +461,8 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-medium ${activeTab === tab.id
                   ? "border-blue-500 text-blue-400 bg-blue-500/10"
                   : hasError
-                    ? "border-red-500/50 text-red-400 hover:border-red-500"
-                    : "border-transparent text-zinc-400 hover:text-zinc-300 hover:border-zinc-700"
+                    ? "border-red-500/50 text-red-600 hover:border-red-500"
+                    : "border-transparent text-neutral-500 hover:text-zinc-300 hover:border-neutral-200"
                   }`}
               >
                 {(() => {
@@ -479,45 +479,45 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       </div>
 
       {/* Tab Content */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6 backdrop-blur-sm shadow-lg shadow-black/20">
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 sm:p-6 backdrop-blur-sm shadow-lg shadow-black/20">
         {/* Tab 1: Basic Info */}
         {activeTab === "basic" && (
           <div className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Título do Evento <span className="text-red-400">*</span>
+                Título do Evento <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleChange("title", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Ex: Festival de Verão 2024"
               />
-              {errors.title && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              {errors.title && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.title}
               </p>}
             </div>
 
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Slug (URL) <span className="text-red-400">*</span>
+                Slug (URL) <span className="text-red-600">*</span>
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-zinc-500 text-sm whitespace-nowrap">/events/</span>
+                <span className="text-neutral-500 text-sm whitespace-nowrap">/events/</span>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => handleChange("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
-                  className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="flex-1 rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   placeholder="festival-verao-2024"
                 />
               </div>
-              {errors.slug && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              {errors.slug && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.slug}
               </p>}
-              <p className="text-zinc-500 text-xs mt-1.5">
-                URL completa: <code className="bg-zinc-800/50 px-1.5 py-0.5 rounded text-zinc-300">/events/{formData.slug || "..."}</code>
+              <p className="text-neutral-500 text-xs mt-1.5">
+                URL completa: <code className="bg-neutral-100/50 px-1.5 py-0.5 rounded text-zinc-300">/events/{formData.slug || "..."}</code>
               </p>
             </div>
 
@@ -526,7 +526,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
               <select
                 value={formData.category}
                 onChange={(e) => handleChange("category", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 cursor-pointer"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 cursor-pointer"
               >
                 <option value="">Selecione uma categoria</option>
                 {categories.map((cat) => (
@@ -539,16 +539,16 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
 
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Descrição <span className="text-red-400">*</span>
+                Descrição <span className="text-red-600">*</span>
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
                 rows={6}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 resize-y min-h-[120px]"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 resize-y min-h-[120px]"
                 placeholder="Descreva o evento em detalhe..."
               />
-              {errors.description && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              {errors.description && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.description}
               </p>}
             </div>
@@ -561,32 +561,32 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                  Cidade <span className="text-red-400">*</span>
+                  Cidade <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleChange("city", e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   placeholder="Lisboa"
                 />
-                {errors.city && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                {errors.city && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.city}
                 </p>}
               </div>
 
               <div>
                 <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                  Nome do Local <span className="text-red-400">*</span>
+                  Nome do Local <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.venueName}
                   onChange={(e) => handleChange("venueName", e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   placeholder="Pavilhão Atlântico"
                 />
-                {errors.venueName && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                {errors.venueName && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.venueName}
                 </p>}
               </div>
@@ -594,16 +594,16 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
 
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Endereço Completo <span className="text-red-400">*</span>
+                Endereço Completo <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => handleChange("address", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Rua Exemplo 123, 1000-000 Lisboa"
               />
-              {errors.address && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              {errors.address && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.address}
               </p>}
             </div>
@@ -611,30 +611,30 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                  Data e Hora de Início <span className="text-red-400">*</span>
+                  Data e Hora de Início <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="datetime-local"
                   value={formData.startAt}
                   onChange={(e) => handleChange("startAt", e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
-                {errors.startAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                {errors.startAt && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.startAt}
                 </p>}
               </div>
 
               <div>
                 <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                  Data e Hora de Fim <span className="text-red-400">*</span>
+                  Data e Hora de Fim <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="datetime-local"
                   value={formData.endAt}
                   onChange={(e) => handleChange("endAt", e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 />
-                {errors.endAt && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                {errors.endAt && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.endAt}
                 </p>}
               </div>
@@ -645,7 +645,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
               <select
                 value={formData.timezone}
                 onChange={(e) => handleChange("timezone", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
               >
                 <option value="Europe/Lisbon">Europe/Lisbon (WET/WEST)</option>
                 <option value="UTC">UTC</option>
@@ -657,7 +657,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
         {/* Tab 3: Check-in */}
         {activeTab === "checkin" && (
           <div className="space-y-4 sm:space-y-6">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 sm:p-6 backdrop-blur-sm">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 sm:p-6 backdrop-blur-sm">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -670,11 +670,11 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                       handleChange("maxEntries", null);
                     }
                   }}
-                  className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <div>
                   <div className="font-medium">Permitir sair e entrar do evento</div>
-                  <div className="text-sm text-zinc-500">
+                  <div className="text-sm text-neutral-500">
                     Se desativado, cada bilhete permite apenas uma entrada (modo SINGLE)
                   </div>
                 </div>
@@ -683,7 +683,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
 
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Modo de Check-in <span className="text-red-400">*</span>
+                Modo de Check-in <span className="text-red-600">*</span>
               </label>
               <select
                 value={formData.checkinMode}
@@ -695,18 +695,18 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   }
                 }}
                 disabled={!formData.reentryAllowed}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-zinc-700"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-neutral-200"
               >
                 <option value="SINGLE">SINGLE - Uma entrada total</option>
                 <option value="MULTI" disabled={!formData.reentryAllowed}>
                   MULTI - Múltiplas entradas (requer reentryAllowed)
                 </option>
               </select>
-              {errors.checkinMode && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+              {errors.checkinMode && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.5} /> {errors.checkinMode}
               </p>}
               {!formData.reentryAllowed && (
-                <p className="text-zinc-500 text-xs sm:text-sm mt-1.5 flex items-center gap-1.5">
+                <p className="text-neutral-500 text-xs sm:text-sm mt-1.5 flex items-center gap-1.5">
                   <Info className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                   <span>Ative &quot;Permitir sair e entrar&quot; para usar modo MULTI</span>
                 </p>
@@ -716,20 +716,20 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
             {formData.checkinMode === "MULTI" && (
               <div>
                 <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                  Máximo de Entradas <span className="text-red-400">*</span>
+                  Máximo de Entradas <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="number"
                   min="2"
                   value={formData.maxEntries || ""}
                   onChange={(e) => handleChange("maxEntries", e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   placeholder="Ex: 5"
                 />
-                {errors.maxEntries && <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                {errors.maxEntries && <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.maxEntries}
                 </p>}
-                <p className="text-zinc-500 text-xs sm:text-sm mt-1.5">
+                <p className="text-neutral-500 text-xs sm:text-sm mt-1.5">
                   Número máximo de vezes que o mesmo bilhete pode entrar no evento
                 </p>
               </div>
@@ -744,7 +744,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                     type="datetime-local"
                     value={formData.entryWindowStartAt}
                     onChange={(e) => handleChange("entryWindowStartAt", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                    className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   />
                 </div>
                 <div>
@@ -753,11 +753,11 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                     type="datetime-local"
                     value={formData.entryWindowEndAt}
                     onChange={(e) => handleChange("entryWindowEndAt", e.target.value)}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                    className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                   />
                 </div>
               </div>
-              <p className="text-zinc-500 text-xs">
+              <p className="text-neutral-500 text-xs">
                 Define uma janela de tempo durante a qual os bilhetes podem ser validados
               </p>
             </div>
@@ -774,10 +774,10 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 min="1"
                 value={formData.capacityTotal || ""}
                 onChange={(e) => handleChange("capacityTotal", e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Ex: 1000"
               />
-              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+              <p className="text-neutral-500 text-xs mt-1 flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
                 A capacidade não pode ser inferior ao total de bilhetes vendidos
               </p>
@@ -795,7 +795,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 min="0"
                 value={formData.ageRestriction || ""}
                 onChange={(e) => handleChange("ageRestriction", e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Ex: 18"
               />
             </div>
@@ -806,7 +806,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 value={formData.refundPolicy}
                 onChange={(e) => handleChange("refundPolicy", e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Descreva a política de reembolso..."
               />
             </div>
@@ -817,7 +817,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 value={formData.cancellationPolicy}
                 onChange={(e) => handleChange("cancellationPolicy", e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Descreva a política de cancelamento..."
               />
             </div>
@@ -828,24 +828,24 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 value={formData.termsText}
                 onChange={(e) => handleChange("termsText", e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Termos e condições do evento..."
               />
             </div>
 
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.consentRGPD}
                   onChange={(e) => handleChange("consentRGPD", e.target.checked)}
-                  className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <div>
                   <div className="font-medium">
-                    Consentimento RGPD <span className="text-red-400">*</span>
+                    Consentimento RGPD <span className="text-red-600">*</span>
                   </div>
-                  <div className="text-sm text-zinc-500">
+                  <div className="text-sm text-neutral-500">
                     Obrigatório para publicar o evento
                   </div>
                 </div>
@@ -863,7 +863,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   type="checkbox"
                   checked={formData.wheelchairAccess}
                   onChange={(e) => handleChange("wheelchairAccess", e.target.checked)}
-                  className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <span className="font-medium">Acesso para cadeiras de rodas</span>
               </label>
@@ -873,7 +873,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   type="checkbox"
                   checked={formData.signLanguageSupport}
                   onChange={(e) => handleChange("signLanguageSupport", e.target.checked)}
-                  className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <span className="font-medium">Suporte de Língua Gestual</span>
               </label>
@@ -883,7 +883,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   type="checkbox"
                   checked={formData.accessibleWC}
                   onChange={(e) => handleChange("accessibleWC", e.target.checked)}
-                  className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-blue-600 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <span className="font-medium">WC Acessível</span>
               </label>
@@ -895,7 +895,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 value={formData.accessibilityNotes}
                 onChange={(e) => handleChange("accessibilityNotes", e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Informações adicionais sobre acessibilidade..."
               />
             </div>
@@ -907,16 +907,16 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
           <div className="space-y-4">
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                Email de Contacto <span className="text-red-400">*</span>
+                Email de Contacto <span className="text-red-600">*</span>
               </label>
               <input
                 type="email"
                 value={formData.contactEmail}
                 onChange={(e) => handleChange("contactEmail", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="contacto@exemplo.pt"
               />
-              {errors.contactEmail && <p className="text-red-400 text-sm mt-1">{errors.contactEmail}</p>}
+              {errors.contactEmail && <p className="text-red-600 text-sm mt-1">{errors.contactEmail}</p>}
             </div>
 
             <div>
@@ -925,7 +925,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 type="tel"
                 value={formData.contactPhone || ""}
                 onChange={(e) => handleChange("contactPhone", e.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="+351 912 345 678"
               />
             </div>
@@ -936,7 +936,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                 value={formData.supportInstructions}
                 onChange={(e) => handleChange("supportInstructions", e.target.value)}
                 rows={4}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="Instruções para contacto de suporte..."
               />
             </div>
@@ -948,7 +948,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
           <div className="space-y-4">
             <div>
               <label className="block text-sm sm:text-base font-semibold mb-2 text-zinc-200">
-                URL da Imagem de Banner <span className="text-red-400">*</span> (para publicar)
+                URL da Imagem de Banner <span className="text-red-600">*</span> (para publicar)
               </label>
               <input
                 type="text"
@@ -975,7 +975,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   }
                   handleChange("bannerUrl", value);
                 }}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="https://i.imgur.com/xxx.jpg ou imgur.com/xxx"
               />
               {formData.bannerUrl && (
@@ -1001,13 +1001,13 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   />
                 </div>
               )}
-              <p className="text-zinc-500 text-xs mt-1 flex items-center gap-1.5">
+              <p className="text-neutral-500 text-xs mt-1 flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
                 Banner é obrigatório para publicar o evento
               </p>
-              <p className="text-zinc-400 text-xs mt-1 flex items-center gap-1.5">
+              <p className="text-neutral-500 text-xs mt-1 flex items-center gap-1.5">
                 <Lightbulb className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
-                Suporta links do Imgur: pode colar links como <code className="bg-zinc-800 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-zinc-800 px-1 rounded">i.imgur.com/xxx.jpg</code>
+                Suporta links do Imgur: pode colar links como <code className="bg-neutral-100 px-1 rounded">imgur.com/xxx</code> ou <code className="bg-neutral-100 px-1 rounded">i.imgur.com/xxx.jpg</code>
               </p>
             </div>
 
@@ -1023,7 +1023,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
                   handleChange("galleryUrls", urls);
                 }}
                 rows={6}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+                className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
                 placeholder="https://exemplo.com/imagem1.jpg&#10;https://exemplo.com/imagem2.jpg"
               />
             </div>
@@ -1033,14 +1033,14 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
 
       {/* Errors */}
       {errors.submit && (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-400">
+        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-600">
           {errors.submit}
         </div>
       )}
 
       {publishErrors.length > 0 && (
         <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4">
-          <div className="font-medium text-red-400 mb-2">Erros ao publicar:</div>
+          <div className="font-medium text-red-600 mb-2">Erros ao publicar:</div>
           <ul className="list-disc list-inside text-sm text-red-300 space-y-1">
             {publishErrors.map((error, i) => (
               <li key={i}>{error}</li>
@@ -1050,11 +1050,11 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+      <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-xl border border-zinc-700 bg-zinc-800 px-6 py-3 text-sm font-semibold transition-all hover:bg-zinc-700"
+          className="rounded-xl border border-neutral-200 bg-neutral-100 px-6 py-3 text-sm font-semibold transition-all hover:bg-neutral-100"
         >
           Cancelar
         </button>
@@ -1063,7 +1063,7 @@ export default function EventForm({ eventId, initialData, isAdminCreate, availab
           <button
             type="submit"
             disabled={loading}
-            className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? isAdminCreate

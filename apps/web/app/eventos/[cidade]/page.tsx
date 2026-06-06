@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ArrowLeft, Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
 
@@ -57,7 +56,6 @@ export default async function EventosPorCidadePage({
     const capitalized = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
     const events = await getEventsByCity(cidade);
 
-    // JSON-LD Schema.org ItemList
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -91,17 +89,17 @@ export default async function EventosPorCidadePage({
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
                 <Link
                     href="/events"
-                    className="inline-flex items-center gap-2 text-[13px] text-white/50 hover:text-white transition mb-8"
+                    className="inline-flex items-center gap-2 text-[13px] text-neutral-500 hover:text-violet-700 transition mb-8"
                 >
                     <ArrowLeft className="h-4 w-4" /> Todos os eventos
                 </Link>
 
                 <div className="mb-8">
-                    <div className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Por cidade</div>
-                    <h1 className="text-[28px] sm:text-[36px] font-semibold text-white">
+                    <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-1">Por cidade</div>
+                    <h1 className="text-[28px] sm:text-[36px] font-bold text-neutral-900">
                         Eventos em {capitalized}
                     </h1>
-                    <p className="mt-2 text-[14px] text-white/45">
+                    <p className="mt-2 text-[14px] text-neutral-600">
                         {events.length > 0
                             ? `${events.length} evento${events.length !== 1 ? "s" : ""} disponível${events.length !== 1 ? "eis" : ""}`
                             : "Nenhum evento disponível nesta cidade."}
@@ -109,17 +107,17 @@ export default async function EventosPorCidadePage({
                 </div>
 
                 {events.length === 0 ? (
-                    <div className="rounded-3xl border border-white/10 bg-white/4 py-16 text-center">
-                        <Ticket className="h-12 w-12 text-white/20 mx-auto mb-4" strokeWidth={1.5} />
-                        <p className="text-[14px] font-semibold text-white/60 mb-2">
+                    <div className="public-card py-16 text-center">
+                        <Ticket className="h-12 w-12 text-violet-300 mx-auto mb-4" strokeWidth={1.5} />
+                        <p className="text-[14px] font-semibold text-neutral-800 mb-2">
                             Sem eventos disponíveis em {capitalized}
                         </p>
-                        <p className="text-[13px] text-white/35 mb-6">
+                        <p className="text-[13px] text-neutral-500 mb-6">
                             Volta mais tarde ou explora eventos noutras cidades.
                         </p>
                         <Link
                             href="/events"
-                            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-black"
+                            className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-5 py-2.5 text-[13px] font-semibold text-white hover:bg-violet-700"
                         >
                             Ver todos os eventos <ArrowRight className="h-4 w-4" />
                         </Link>
@@ -127,16 +125,16 @@ export default async function EventosPorCidadePage({
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {events.map((event) => {
-                            const minPrice = (event as any).ticketLots?.length
-                                ? Math.min(...(event as any).ticketLots.map((l: { priceCents: number }) => l.priceCents))
+                            const minPrice = (event as { ticketLots?: { priceCents: number }[] }).ticketLots?.length
+                                ? Math.min(...(event as { ticketLots: { priceCents: number }[] }).ticketLots.map((l) => l.priceCents))
                                 : null;
                             return (
                                 <Link
                                     key={event.id}
                                     href={`/events/${event.slug}`}
-                                    className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/4 shadow-[0_18px_60px_rgba(0,0,0,.35)] transition-all duration-200 hover:border-white/20 active:scale-[0.99]"
+                                    className="group public-card overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-violet-200 active:scale-[0.99]"
                                 >
-                                    <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
+                                    <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                                         {event.coverImage ? (
                                             <Image
                                                 src={event.coverImage}
@@ -146,34 +144,33 @@ export default async function EventosPorCidadePage({
                                                 className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                                             />
                                         ) : (
-                                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/3" />
+                                            <div className="absolute inset-0 bg-gradient-to-br from-violet-100 to-fuchsia-50" />
                                         )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                                     </div>
 
                                     <div className="p-5">
-                                        <h2 className="text-[16px] font-semibold text-white/90 leading-snug line-clamp-2 mb-3">
+                                        <h2 className="text-[16px] font-semibold text-neutral-900 leading-snug line-clamp-2 mb-3">
                                             {event.title}
                                         </h2>
-                                        <div className="space-y-1.5 text-[12px] text-white/50">
+                                        <div className="space-y-1.5 text-[12px] text-neutral-500">
                                             <div className="flex items-center gap-1.5">
-                                                <MapPin className="h-3.5 w-3.5 text-white/30 shrink-0" />
+                                                <MapPin className="h-3.5 w-3.5 text-violet-400 shrink-0" />
                                                 {event.venue}
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <Calendar className="h-3.5 w-3.5 text-white/30 shrink-0" />
+                                                <Calendar className="h-3.5 w-3.5 text-violet-400 shrink-0" />
                                                 {formatDateTimePT(event.startAt)}
                                             </div>
                                         </div>
-                                        <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3">
+                                        <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-3">
                                             {minPrice != null ? (
-                                                <span className="text-[13px] font-semibold text-white/75">
+                                                <span className="text-[13px] font-semibold text-violet-700">
                                                     Desde {formatPrice(minPrice)}
                                                 </span>
                                             ) : (
                                                 <span />
                                             )}
-                                            <span className="text-[12px] font-medium text-white/50 group-hover:text-white transition">
+                                            <span className="text-[12px] font-medium text-neutral-500 group-hover:text-violet-700 transition">
                                                 Ver evento →
                                             </span>
                                         </div>

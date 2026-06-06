@@ -26,8 +26,8 @@ interface ManualOrder {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-    PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    PENDING_MANUAL: { label: "Pendente", className: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+    PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+    PENDING_MANUAL: { label: "Pendente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
     VOIDED: { label: "Anulado", className: "bg-red-500/10 text-red-500 border-red-500/20" },
 };
 
@@ -98,7 +98,7 @@ export default function ManualSalesPage() {
             actions={
                 <Link
                     href="/promotor/sales/manual/new"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
                 >
                     <Plus className="w-4 h-4" />
                     Nova Venda Manual
@@ -124,7 +124,7 @@ export default function ManualSalesPage() {
                             key: "createdAt",
                             label: "Data",
                             render: (o) => (
-                                <div className="text-[13px] text-white/60">
+                                <div className="text-[13px] text-neutral-600">
                                     {format(new Date(o.createdAt), "dd MMM HH:mm", { locale: pt })}
                                 </div>
                             ),
@@ -134,8 +134,8 @@ export default function ManualSalesPage() {
                             label: "Evento / Cliente",
                             render: (o) => (
                                 <div className="max-w-[200px]">
-                                    <div className="font-bold text-white uppercase tracking-tight truncate">{o.event.title}</div>
-                                    <div className="text-[11px] text-white/30 truncate">{o.buyerName || "Cliente Final"}</div>
+                                    <div className="font-bold text-neutral-900 uppercase tracking-tight truncate">{o.event.title}</div>
+                                    <div className="text-[11px] text-neutral-400 truncate">{o.buyerName || "Cliente Final"}</div>
                                 </div>
                             ),
                         },
@@ -144,8 +144,8 @@ export default function ManualSalesPage() {
                             label: "Pagamento",
                             render: (o) => (
                                 <div>
-                                    <div className="font-bold text-white text-sm">{(o.totalCents / 100).toFixed(2)}€</div>
-                                    <div className="text-[10px] text-white/30 font-black uppercase tracking-widest">{o.manualPayment.method}</div>
+                                    <div className="font-bold text-neutral-900 text-sm">{(o.totalCents / 100).toFixed(2)}€</div>
+                                    <div className="text-[10px] text-neutral-400 font-black uppercase tracking-widest">{o.manualPayment.method}</div>
                                 </div>
                             ),
                         },
@@ -165,7 +165,7 @@ export default function ManualSalesPage() {
                             key: "tickets",
                             label: "Bilhetes",
                             render: (o) => (
-                                <div className="text-[12px] font-bold text-white/40">
+                                <div className="text-[12px] font-bold text-neutral-500">
                                     {o.tickets.length} bilhete{o.tickets.length !== 1 ? 's' : ''}
                                 </div>
                             ),
@@ -176,7 +176,7 @@ export default function ManualSalesPage() {
                             {o.status === 'PENDING_MANUAL' && (
                                 <button
                                     onClick={() => handleMarkPaid(o.id)}
-                                    className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/10 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 transition-all active:scale-90"
+                                    className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/10 text-emerald-600 hover:text-emerald-300 hover:bg-emerald-500/20 transition-all active:scale-90"
                                     title="Confirmar Pagamento"
                                 >
                                     <CheckCircle2 className="w-4 h-4" />
@@ -185,7 +185,7 @@ export default function ManualSalesPage() {
                             {o.buyerEmail && o.status === 'PAID' && (
                                 <button
                                     onClick={() => handleResend(o.id)}
-                                    className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                                    className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
                                     title="Reenviar Bilhetes"
                                 >
                                     <Mail className="w-4 h-4" />

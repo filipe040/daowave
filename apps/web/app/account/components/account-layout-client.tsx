@@ -15,18 +15,18 @@ export default function AccountLayoutClient({
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent/10 blur-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-neutral-100/50" />
       </div>
 
       <AccountSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       <div className="md:pl-72 relative">
-        <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-xl">
+        <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur-xl">
           <div className="flex items-center gap-4 px-4 py-4 sm:px-6">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="md:hidden p-2 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
               aria-label="Abrir menu"
               data-testid="account-mobile-menu-toggle"
             >

@@ -74,9 +74,9 @@ export default function HelpPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 p-6 shadow-lg">
-          <h2 className="text-xl font-bold text-white mb-4">Ainda Precisa de Ajuda?</h2>
-          <p className="text-white/85 mb-4">
+        <section className="rounded-2xl bg-gradient-to-br from-violet-600 to-violet-600 p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-neutral-900 mb-4">Ainda Precisa de Ajuda?</h2>
+          <p className="text-neutral-700 mb-4">
             Se não encontrou a resposta que procura, não hesite em contactar-nos.
           </p>
           <a

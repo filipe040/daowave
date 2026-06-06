@@ -51,7 +51,7 @@ export function TicketTransferButton({ ticketId, ticketStatus }: TicketTransferB
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-[13px] font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all"
+                className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all"
             >
                 <Send className="h-4 w-4" />
                 Transferir bilhete
@@ -59,25 +59,25 @@ export function TicketTransferButton({ ticketId, ticketStatus }: TicketTransferB
 
             {open && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/40 backdrop-blur-sm px-4"
                     onClick={(e) => e.target === e.currentTarget && setOpen(false)}
                 >
-                    <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-zinc-900 p-6 shadow-2xl">
+                    <div className="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white border border-neutral-200 p-6 shadow-xl">
                         <button
                             onClick={() => setOpen(false)}
-                            className="absolute right-4 top-4 text-white/40 hover:text-white transition"
+                            className="absolute right-4 top-4 text-neutral-500 hover:text-neutral-900 transition"
                         >
                             <X className="h-5 w-5" />
                         </button>
 
-                        <h2 className="text-[18px] font-semibold text-white mb-1">Transferir bilhete</h2>
-                        <p className="text-[13px] text-white/50 mb-6">
+                        <h2 className="text-[18px] font-semibold text-neutral-900 mb-1">Transferir bilhete</h2>
+                        <p className="text-[13px] text-neutral-500 mb-6">
                             Introduz o email do destinatário. O utilizador deve estar registado na plataforma.
                         </p>
 
                         <form onSubmit={handleTransfer} className="space-y-4">
                             <div>
-                                <label className="block text-[12px] uppercase tracking-wider text-white/40 mb-1.5">
+                                <label className="block text-[12px] uppercase tracking-wider text-neutral-500 mb-1.5">
                                     Email do destinatário
                                 </label>
                                 <input
@@ -86,12 +86,12 @@ export function TicketTransferButton({ ticketId, ticketStatus }: TicketTransferB
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="email@exemplo.com"
                                     required
-                                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-[14px] text-white placeholder:text-white/25 focus:border-white/30 focus:outline-none focus:ring-0 transition"
+                                    className="public-input rounded-xl text-[14px]"
                                 />
                             </div>
 
                             <div className="rounded-xl border border-amber-500/20 bg-amber-500/8 p-3">
-                                <p className="text-[12px] text-amber-400/80">
+                                <p className="text-[12px] text-amber-600/80">
                                     ⚠️ Esta ação é irreversível. O bilhete será transferido imediatamente.
                                 </p>
                             </div>

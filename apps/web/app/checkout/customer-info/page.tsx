@@ -110,82 +110,82 @@ function CustomerInfoContent() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
       <div className="mb-8 space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white/92">Informação de Compra</h1>
-        <p className="text-base text-white/55">Preencha os seus dados para continuar para o pagamento</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900">Informação de Compra</h1>
+        <p className="text-base text-neutral-500">Preencha os seus dados para continuar para o pagamento</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)] space-y-6">
+      <form onSubmit={handleSubmit} className="rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-md shadow-md space-y-6">
         {errors.submit && (
-          <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-600">
             {errors.submit}
           </div>
         )}
 
         <div>
-          <label className="block text-sm sm:text-[14px] font-semibold mb-2 text-white/85">
-            Nome completo <span className="text-red-400">*</span>
+          <label className="public-label normal-case tracking-normal mb-2">
+            Nome completo <span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             value={formData.buyerName}
             onChange={(e) => handleChange("buyerName", e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:py-3.5 text-[14px] sm:text-[15px] focus:border-white/20 focus:bg-white/10 focus:outline-none transition-all placeholder:text-white/30 text-white"
+            className="public-input sm:py-3.5 text-[14px] sm:text-[15px]"
             placeholder="O teu nome"
             required
           />
           {errors.buyerName && (
-            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+            <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerName}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm sm:text-[14px] font-semibold mb-2 text-white/85">
-            Email <span className="text-red-400">*</span>
+          <label className="public-label normal-case tracking-normal mb-2">
+            Email <span className="text-red-600">*</span>
           </label>
           <input
             type="email"
             value={formData.buyerEmail}
             onChange={(e) => handleChange("buyerEmail", e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:py-3.5 text-[14px] sm:text-[15px] focus:border-white/20 focus:bg-white/10 focus:outline-none transition-all placeholder:text-white/30 text-white"
+            className="public-input sm:py-3.5 text-[14px] sm:text-[15px]"
             placeholder="exemplo@email.com"
             required
           />
           {errors.buyerEmail && (
-            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+            <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerEmail}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm sm:text-[14px] font-semibold mb-2 text-white/85">
-            Telemóvel (Portugal) <span className="text-red-400">*</span>
+          <label className="public-label normal-case tracking-normal mb-2">
+            Telemóvel (Portugal) <span className="text-red-600">*</span>
           </label>
           <input
             type="tel"
             value={formData.buyerPhone}
             onChange={(e) => handleChange("buyerPhone", e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:py-3.5 text-[14px] sm:text-[15px] focus:border-white/20 focus:bg-white/10 focus:outline-none transition-all placeholder:text-white/30 text-white"
+            className="public-input sm:py-3.5 text-[14px] sm:text-[15px]"
             placeholder="912 345 678"
             required
           />
           {errors.buyerPhone && (
-            <p className="text-red-400 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+            <p className="text-red-600 text-xs sm:text-sm mt-1.5 flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerPhone}
             </p>
           )}
-          <p className="text-white/40 text-[12px] mt-1.5 pl-1.5">
+          <p className="text-neutral-500 text-[12px] mt-1.5 pl-1.5">
             Formato exigido: 9XXXXXXXX ou +351 9XXXXXXXX
           </p>
         </div>
 
-        <div className="pt-4 border-t border-white/10">
+        <div className="pt-4 border-t border-neutral-200">
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-white px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
+            className="w-full rounded-full bg-violet-600 px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-neutral-900 shadow-md transition-all hover:bg-violet-700 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -206,8 +206,8 @@ export default function CustomerInfoPage() {
   return (
     <Suspense fallback={
       <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 text-center">
-        <h1 className="text-3xl font-bold text-white/92">Informação de Compra</h1>
-        <p className="mt-2 text-sm text-white/55">A carregar segurança...</p>
+        <h1 className="text-3xl font-bold text-neutral-900">Informação de Compra</h1>
+        <p className="mt-2 text-sm text-neutral-500">A carregar segurança...</p>
       </div>
     }>
       <CustomerInfoContent />

@@ -27,10 +27,10 @@ export default async function AccountDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-bold text-neutral-900 tracking-tight">
           Resumo da conta
         </h1>
-        <p className="mt-2 text-base text-white/70">
+        <p className="mt-2 text-base text-neutral-600">
           Visão geral das tuas compras e bilhetes.
         </p>
       </div>
@@ -38,22 +38,22 @@ export default async function AccountDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 mt-4" data-testid="account-dashboard-cards">
         <Link
           href="/account/orders"
-          className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-2xl transition-all duration-200 hover:bg-white/6 hover:border-white/16 shadow-[0_18px_60px_rgba(0,0,0,.45)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none"
+          className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white p-6 shadow-md transition-all duration-200 hover:bg-neutral-100 hover:border-neutral-300 shadow-md active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:outline-none"
           data-testid="card-orders"
         >
           {/* subtle hover highlight */}
           <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
+            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-neutral-100 blur-3xl" />
           </div>
 
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-[12px] font-bold uppercase tracking-wider text-white/60">Compras</p>
-              <p className="mt-2 text-4xl sm:text-5xl font-black text-white">{ordersCount}</p>
+              <p className="text-[12px] font-bold uppercase tracking-wider text-neutral-600">Compras</p>
+              <p className="mt-2 text-4xl sm:text-5xl font-black text-neutral-900">{ordersCount}</p>
             </div>
-            <ShoppingBag className="h-10 w-10 text-white/40 group-hover:text-white/70 transition-colors" />
+            <ShoppingBag className="h-10 w-10 text-neutral-500 group-hover:text-neutral-600 transition-colors" />
           </div>
-          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-white/80 group-hover:text-white transition-colors">
+          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-neutral-700 group-hover:text-neutral-900 transition-colors">
             Ver histórico
             <ArrowRight className="h-4 w-4" />
           </p>
@@ -61,22 +61,22 @@ export default async function AccountDashboardPage() {
 
         <Link
           href="/account/tickets"
-          className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-2xl transition-all duration-200 hover:bg-white/6 hover:border-white/16 shadow-[0_18px_60px_rgba(0,0,0,.45)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none"
+          className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white p-6 shadow-md transition-all duration-200 hover:bg-neutral-100 hover:border-neutral-300 shadow-md active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:outline-none"
           data-testid="card-tickets"
         >
           {/* subtle hover highlight */}
           <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
+            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-neutral-100 blur-3xl" />
           </div>
 
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-[12px] font-bold uppercase tracking-wider text-white/60">Bilhetes</p>
-              <p className="mt-2 text-4xl sm:text-5xl font-black text-white">{ticketsCount}</p>
+              <p className="text-[12px] font-bold uppercase tracking-wider text-neutral-600">Bilhetes</p>
+              <p className="mt-2 text-4xl sm:text-5xl font-black text-neutral-900">{ticketsCount}</p>
             </div>
-            <Ticket className="h-10 w-10 text-white/40 group-hover:text-white/70 transition-colors" />
+            <Ticket className="h-10 w-10 text-neutral-500 group-hover:text-neutral-600 transition-colors" />
           </div>
-          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-white/80 group-hover:text-white transition-colors">
+          <p className="relative mt-6 flex items-center gap-2 text-[14px] font-bold text-neutral-700 group-hover:text-neutral-900 transition-colors">
             Ver bilhetes
             <ArrowRight className="h-4 w-4" />
           </p>

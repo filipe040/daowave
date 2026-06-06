@@ -41,24 +41,20 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
     const pathname = usePathname();
 
     return (
-        <div className="flex flex-col h-full bg-black/40 backdrop-blur-xl border-r border-white/5 shadow-2xl">
-            {/* Logo Section */}
-            <div className="px-8 pt-10 pb-8 flex items-center justify-between">
+        <div className="flex flex-col h-full bg-white border-r border-neutral-200 shadow-sm">
+            <div className="px-6 pt-8 pb-6 border-b border-neutral-100">
                 <Link href="/promotor" onClick={onNavClick} className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-white to-white/80 p-[1px] shadow-lg shadow-white/5 group-hover:scale-105 transition-all">
-                        <div className="w-full h-full rounded-[15px] bg-black flex items-center justify-center">
-                            <Layers className="w-5 h-5 text-white" strokeWidth={2.5} />
-                        </div>
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                        <Layers className="w-5 h-5 text-white" strokeWidth={2.5} />
                     </div>
                     <div>
-                        <span className="text-[13px] font-black text-white uppercase tracking-[0.2em] leading-none block">GoPass</span>
-                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1 block">Promotor</span>
+                        <span className="text-[13px] font-black text-neutral-900 uppercase tracking-[0.15em] leading-none block">GoPass</span>
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1 block">Promotor</span>
                     </div>
                 </Link>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto no-scrollbar">
+            <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
                 {routes.map((route) => {
                     const active = route.exact
                         ? pathname === route.href
@@ -70,16 +66,16 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                             href={route.href}
                             onClick={onNavClick}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-[18px] text-[13px] font-bold transition-all duration-300 group",
+                                "flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold transition-all duration-200 group",
                                 active
-                                    ? "bg-white text-black shadow-xl shadow-white/5 scale-[1.02]"
-                                    : "text-white/40 hover:text-white hover:bg-white/5"
+                                    ? "bg-violet-600 text-white shadow-md shadow-violet-200"
+                                    : "text-neutral-600 hover:text-violet-700 hover:bg-violet-50"
                             )}
                         >
                             <route.icon
                                 className={cn(
-                                    "h-4.5 w-4.5 transition-transform duration-300",
-                                    active ? "text-black scale-110" : "text-white/20 group-hover:text-white group-hover:scale-110"
+                                    "h-4 w-4 shrink-0 transition-transform",
+                                    active ? "text-white" : "text-neutral-400 group-hover:text-violet-600"
                                 )}
                                 strokeWidth={active ? 2.5 : 2}
                             />
@@ -89,16 +85,13 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                 })}
             </nav>
 
-            {/* User / Footer Section */}
-            <div className="px-4 pb-10 pt-6 border-t border-white/5 bg-black/20">
+            <div className="px-3 pb-8 pt-4 border-t border-neutral-100">
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-3 px-4 py-4 w-full rounded-2xl text-[13px] font-bold text-white/40 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border border-transparent transition-all duration-300 group"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-[13px] font-semibold text-neutral-500 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all group"
                 >
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-                        <LogOut className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-                    </div>
-                    <span className="tracking-tight">Terminar Sessão</span>
+                    <LogOut className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
+                    <span>Terminar Sessão</span>
                 </button>
             </div>
         </div>

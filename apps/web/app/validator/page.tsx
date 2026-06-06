@@ -176,16 +176,16 @@ export default function ValidatorPage() {
   }, [scanning, handleValidate, stopScanner]);
 
   if (status === "loading") {
-    return <div className="min-h-screen bg-black grid place-items-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white"></div></div>;
+    return <div className="min-h-screen mesh-gradient grid place-items-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-violet-600"></div></div>;
   }
 
   if (!session || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
     return (
-      <div className="min-h-screen grid place-items-center px-4 bg-black">
-        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-2xl">
-          <Lock className="mx-auto h-16 w-16 text-white/30" />
-          <h2 className="mt-4 text-2xl font-semibold text-white">Acesso restrito</h2>
-          <Link href="/auth/signin" className="mt-6 block w-full rounded-full bg-white px-6 py-4 text-black font-bold">Iniciar sessão</Link>
+      <div className="min-h-screen mesh-gradient grid place-items-center px-4">
+        <div className="w-full max-w-md public-card p-8 text-center">
+          <Lock className="mx-auto h-16 w-16 text-neutral-300" />
+          <h2 className="mt-4 text-2xl font-semibold text-neutral-900">Acesso restrito</h2>
+          <Link href="/auth/signin" className="mt-6 block w-full rounded-full bg-violet-600 px-6 py-4 text-white font-bold hover:bg-violet-700">Iniciar sessão</Link>
         </div>
       </div>
     );
@@ -216,27 +216,25 @@ export default function ValidatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col pt-8 px-4 pb-20">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen mesh-gradient text-neutral-900 flex flex-col pt-8 px-4 pb-20">
+      <div className="flex justify-between items-center mb-6 max-w-lg mx-auto w-full">
         <div>
-          <h1 className="text-2xl font-bold text-white">Validar Entradas</h1>
-          <p className="text-white/50 text-sm">Pronto para ler QR codes</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Validar Entradas</h1>
+          <p className="text-neutral-500 text-sm">Pronto para ler QR codes</p>
         </div>
-        <button onClick={syncOfflineQueue} className="text-xs bg-white/10 px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2">
+        <button onClick={syncOfflineQueue} className="text-xs bg-white border border-neutral-200 px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2 text-neutral-600 shadow-sm">
           Sync Offline <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
         </button>
       </div>
 
       <div className="flex-1 flex flex-col gap-4 max-w-lg mx-auto w-full">
-        {/* Scanner Viewport */}
-        <div className="relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 shadow-2xl flex-1 max-h-[60vh] flex flex-col">
+        <div className="relative rounded-3xl overflow-hidden bg-neutral-900 border border-neutral-800 shadow-2xl flex-1 max-h-[60vh] flex flex-col">
           {scanning ? (
             <div id="reader" className="w-full h-full object-cover"></div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/40">
-              <ScanLine className="w-20 h-20 mb-4 opacity-50" />
-              <p>Câmara pendente</p>
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-neutral-400">
+              <ScanLine className="w-20 h-20 mb-4 opacity-50 text-white" />
+              <p className="text-white/70">Câmara pendente</p>
             </div>
           )}
 
@@ -244,30 +242,28 @@ export default function ValidatorPage() {
           <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none"></div>
         </div>
 
-        {/* Controls */}
         <div className="grid grid-cols-2 gap-3 mt-2">
           {!scanning ? (
-            <button onClick={() => setScanning(true)} className="col-span-2 py-4 rounded-full bg-white text-black font-bold text-lg active:scale-95">
+            <button onClick={() => setScanning(true)} className="col-span-2 py-4 rounded-full bg-violet-600 text-white font-bold text-lg active:scale-95 hover:bg-violet-700">
               Ligar Câmara
             </button>
           ) : (
-            <button onClick={() => { stopScanner(); setScanning(false); }} className="col-span-2 py-4 rounded-full bg-white/10 text-white font-bold text-lg active:scale-95 border border-white/20">
+            <button onClick={() => { stopScanner(); setScanning(false); }} className="col-span-2 py-4 rounded-full bg-neutral-800 text-white font-bold text-lg active:scale-95 border border-neutral-700">
               Pausar Câmara
             </button>
           )}
         </div>
 
-        {/* Manual Validation & Offline Mode Helper */}
-        <div className="mt-4 p-5 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-lg">
-          <h3 className="text-xs font-semibold uppercase text-white/50 mb-3">Validação Manual</h3>
+        <div className="mt-4 p-5 rounded-3xl public-card">
+          <h3 className="text-xs font-semibold uppercase text-neutral-500 mb-3">Validação Manual</h3>
           <div className="flex gap-2">
             <input
               value={manualCode}
               onChange={e => setManualCode(e.target.value)}
-              placeholder="INTRODUZA CÓDIGO (ABC-123)"
-              className="flex-1 rounded-xl bg-black/40 border border-white/10 px-4 text-white uppercase placeholder:normal-case font-mono"
+              placeholder="Introduza código (ABC-123)"
+              className="flex-1 public-input uppercase font-mono"
             />
-            <button onClick={handleManualValidate} className="px-6 py-3 rounded-xl bg-white/10 font-bold active:bg-white/20 transition-colors">
+            <button onClick={handleManualValidate} className="px-6 py-3 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors">
               Validar
             </button>
           </div>

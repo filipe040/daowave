@@ -158,14 +158,14 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
 
     return (
         <div className="flex flex-col h-full bg-transparent">
-            <div className="px-6 py-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-white/[0.02] gap-4">
+            <div className="px-6 py-5 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between bg-neutral-50 gap-4">
                 <div>
-                    <h3 className="text-[13px] font-bold text-white uppercase tracking-wider">Lotes & Preços</h3>
-                    <p className="text-xs text-white/50 mt-1">Controle o inventário (capacidade), preços e janelas de venda de cada lote.</p>
+                    <h3 className="text-[13px] font-bold text-neutral-900 uppercase tracking-wider">Lotes & Preços</h3>
+                    <p className="text-xs text-neutral-500 mt-1">Controle o inventário (capacidade), preços e janelas de venda de cada lote.</p>
                 </div>
                 <button
                     onClick={startCreate}
-                    className="inline-flex items-center justify-center gap-2 bg-white text-black px-4 py-2.5 rounded-2xl text-[13px] font-bold hover:bg-white/90 shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all shrink-0"
+                    className="inline-flex items-center justify-center gap-2 bg-violet-600 text-white hover:bg-violet-700 px-4 py-2.5 rounded-2xl text-[13px] font-bold shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all shrink-0"
                 >
                     <Plus className="h-4 w-4" />
                     Adicionar Lote
@@ -173,45 +173,45 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
             </div>
 
             {isFormOpen && (
-                <div className="p-6 sm:p-8 border-b border-white/10 bg-black/40 relative">
+                <div className="p-6 sm:p-8 border-b border-neutral-200 bg-neutral-50 relative">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-bold text-white">
+                        <h4 className="text-sm font-bold text-neutral-900">
                             {editingLotId ? "Editar lote" : "Novo lote"}
                         </h4>
                         {editingLotId && !canEdit && (
-                            <span className="text-xs text-amber-400">Sem permissão de edição</span>
+                            <span className="text-xs text-amber-600">Sem permissão de edição</span>
                         )}
                     </div>
                     <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div className="col-span-1">
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Tipo pai (Opcional)</label>
-                                <select value={formData.ticketTypeId} onChange={e => setFormData({ ...formData, ticketTypeId: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] appearance-none disabled:opacity-50">
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Tipo pai (Opcional)</label>
+                                <select value={formData.ticketTypeId} onChange={e => setFormData({ ...formData, ticketTypeId: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] appearance-none disabled:opacity-50">
                                     <option value="" className="bg-background">Sem categoria</option>
                                     {types.map(t => <option key={t.id} value={t.id} className="bg-background">{t.name}</option>)}
                                 </select>
                             </div>
                             <div className="col-span-1 sm:col-span-2">
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Nome do Lote *</label>
-                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 1ª Fase / Lote Early Bird" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Nome do Lote *</label>
+                                <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 1ª Fase / Lote Early Bird" className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div>
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Preço (€) *</label>
-                                <input required type="number" step="0.01" min="0" value={formData.priceCents} onChange={e => setFormData({ ...formData, priceCents: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 15.00" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Preço (€) *</label>
+                                <input required type="number" step="0.01" min="0" value={formData.priceCents} onChange={e => setFormData({ ...formData, priceCents: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 15.00" className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Capacidade (Stock) *</label>
-                                <input required type="number" min={minCapacity} value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 100" className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Capacidade (Stock) *</label>
+                                <input required type="number" min={minCapacity} value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 100" className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                                 {editingLotId && minCapacity > 1 && (
-                                    <p className="text-[10px] text-white/40 mt-1 ml-1">Mínimo: {minCapacity} (já vendidos)</p>
+                                    <p className="text-[10px] text-neutral-500 mt-1 ml-1">Mínimo: {minCapacity} (já vendidos)</p>
                                 )}
                             </div>
                             <div>
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Estado</label>
-                                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as "ACTIVE" | "PAUSED" })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 text-[14px] disabled:opacity-50">
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Estado</label>
+                                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as "ACTIVE" | "PAUSED" })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 px-5 text-[14px] disabled:opacity-50">
                                     <option value="ACTIVE" className="bg-background">Ativo</option>
                                     <option value="PAUSED" className="bg-background">Pausado</option>
                                 </select>
@@ -220,17 +220,17 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Início das Vendas</label>
-                                <input type="datetime-local" value={formData.startsAt} onChange={e => setFormData({ ...formData, startsAt: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Início das Vendas</label>
+                                <input type="datetime-local" value={formData.startsAt} onChange={e => setFormData({ ...formData, startsAt: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-2 ml-1">Fim das Vendas</label>
-                                <input type="datetime-local" value={formData.endsAt} onChange={e => setFormData({ ...formData, endsAt: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 text-white px-5 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Fim das Vendas</label>
+                                <input type="datetime-local" value={formData.endsAt} onChange={e => setFormData({ ...formData, endsAt: e.target.value })} disabled={!!editingLotId && !canEdit} className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
                             </div>
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">
-                            <button type="button" onClick={resetForm} className="px-5 py-2.5 text-[13px] font-bold text-white/60 hover:text-white transition-colors">Cancelar</button>
+                            <button type="button" onClick={resetForm} className="px-5 py-2.5 text-[13px] font-bold text-neutral-600 hover:text-neutral-900 transition-colors">Cancelar</button>
                             {(!editingLotId || canEdit) && (
                                 <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500 text-black text-[14px] font-bold rounded-2xl hover:bg-emerald-400 disabled:opacity-50 transition-all shadow-lg hover:-translate-y-0.5 mt-2 sm:mt-0">
                                     {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
@@ -245,7 +245,7 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="border-b border-white/10 text-[11px] uppercase tracking-wider text-white/40 font-bold bg-white/[0.02]">
+                        <tr className="border-b border-neutral-200 text-[11px] uppercase tracking-wider text-neutral-500 font-bold bg-neutral-50">
                             <th className="px-6 py-4 font-bold">Lote / Tipo</th>
                             <th className="px-6 py-4 font-bold text-right">Preço</th>
                             <th className="px-6 py-4 font-bold">Stock (Progresso)</th>
@@ -253,10 +253,10 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                             {canEdit && <th className="px-6 py-4 font-bold text-right">Ações</th>}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-neutral-200">
                         {lots.length === 0 ? (
                             <tr>
-                                <td colSpan={canEdit ? 5 : 4} className="px-6 py-12 text-center text-[13px] text-white/50 font-medium">
+                                <td colSpan={canEdit ? 5 : 4} className="px-6 py-12 text-center text-[13px] text-neutral-500 font-medium">
                                     Nenhum lote criado.
                                 </td>
                             </tr>
@@ -267,25 +267,25 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                             const isEditing = editingLotId === lot.id;
 
                             return (
-                                <tr key={lot.id} className={`hover:bg-white/[0.02] transition-colors ${isEditing ? "bg-emerald-500/5" : ""}`}>
+                                <tr key={lot.id} className={`hover:bg-neutral-50 transition-colors ${isEditing ? "bg-emerald-500/5" : ""}`}>
                                     <td className="px-6 py-5">
-                                        <div className="font-bold text-white text-[14px]">{lot.name}</div>
-                                        <div className="text-[12px] text-white/50 mt-1 font-medium">{lot.ticketType?.name || "Geral"}</div>
+                                        <div className="font-bold text-neutral-900 text-[14px]">{lot.name}</div>
+                                        <div className="text-[12px] text-neutral-500 mt-1 font-medium">{lot.ticketType?.name || "Geral"}</div>
                                     </td>
                                     <td className="px-6 py-5 text-right">
-                                        <div className="text-[14px] font-bold text-emerald-400">{formatEuros(lot.priceCents)}</div>
+                                        <div className="text-[14px] font-bold text-emerald-600">{formatEuros(lot.priceCents)}</div>
                                     </td>
                                     <td className="px-6 py-5 w-64">
                                         <div className="flex items-center justify-between text-[11px] mb-2 uppercase tracking-wider">
-                                            <span className="text-white/40 font-bold">Vendidos {sold}</span>
-                                            <span className="text-white font-bold">{capacity} max</span>
+                                            <span className="text-neutral-500 font-bold">Vendidos {sold}</span>
+                                            <span className="text-neutral-900 font-bold">{capacity} max</span>
                                         </div>
-                                        <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden border border-white/5">
+                                        <div className="w-full bg-neutral-100 rounded-full h-2 overflow-hidden border border-neutral-200">
                                             <div className="bg-emerald-500 h-full transition-all" style={{ width: `${percent}%` }} />
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 text-center">
-                                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border ${lot.status === 'ACTIVE' && lot.isActive !== false ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+                                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border ${lot.status === 'ACTIVE' && lot.isActive !== false ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border-amber-500/20'}`}>
                                             {lot.status === 'ACTIVE' && lot.isActive !== false ? "Ativo" : "Pausado"}
                                         </span>
                                     </td>
@@ -295,7 +295,7 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                                                 <button
                                                     type="button"
                                                     onClick={() => isEditing ? resetForm() : startEdit(lot)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all"
                                                 >
                                                     {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
                                                     {isEditing ? "Fechar" : "Editar"}

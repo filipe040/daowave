@@ -53,29 +53,29 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
       <div className="container mx-auto px-4 max-w-lg relative z-10">
         <CheckoutStepper currentStep={3} />
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-2xl" data-testid="page-order-success">
-        <div className="mb-6 flex justify-center"><CheckCircle className="h-20 w-20 text-emerald-400" strokeWidth={1.5} /></div>
-        <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-white/92">Pagamento concluído!</h1>
-        <p className="mb-8 text-lg text-white/60">
+        <div className="rounded-3xl border border-neutral-200 bg-white p-8 sm:p-12 text-center shadow-md shadow-2xl" data-testid="page-order-success">
+        <div className="mb-6 flex justify-center"><CheckCircle className="h-20 w-20 text-emerald-600" strokeWidth={1.5} /></div>
+        <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-neutral-900">Pagamento concluído!</h1>
+        <p className="mb-8 text-lg text-neutral-600">
           Os teus bilhetes foram emitidos com sucesso e enviados para o teu email.
         </p>
-        <div className="mx-auto mb-10 w-fit rounded-2xl border border-white/10 bg-white/5 px-8 py-5">
-          <p className="text-xs font-medium text-white/40 uppercase tracking-[0.1em] mb-1">
+        <div className="mx-auto mb-10 w-fit rounded-2xl border border-neutral-200 bg-neutral-50 px-8 py-5">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-[0.1em] mb-1">
             Bilhetes emitidos
           </p>
-          <p className="text-4xl font-bold text-white/90">{order.tickets.length}</p>
+          <p className="text-4xl font-bold text-neutral-900">{order.tickets.length}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/my-tickets"
-            className="rounded-full bg-white px-8 py-4 text-center text-[15px] font-bold text-black shadow-[0_8px_32px_rgba(255,255,255,.18)] transition-all hover:bg-white/90 hover:scale-[1.03] active:scale-[0.98]"
+            className="rounded-full bg-violet-600 px-8 py-4 text-center text-[15px] font-bold text-neutral-900 hover:bg-violet-700 shadow-md transition-all hover:scale-[1.03] active:scale-[0.98]"
           >
             Ver os meus bilhetes
           </Link>
           <Link
             href={`/events/${order.event.slug}`}
-            className="rounded-full border border-white/20 bg-white/5 px-8 py-4 text-center text-[15px] font-bold text-white/90 transition-all hover:border-white/30 hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98]"
+            className="rounded-full border border-neutral-200 bg-neutral-50 px-8 py-4 text-center text-[15px] font-bold text-neutral-700 transition-all hover:border-neutral-300 hover:bg-neutral-100 hover:scale-[1.02] active:scale-[0.98]"
           >
             Voltar ao evento
           </Link>

@@ -93,7 +93,7 @@ export default function EditCouponPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-zinc-400">A carregar...</div>
+        <div className="text-neutral-500">A carregar...</div>
       </div>
     );
   }
@@ -110,12 +110,12 @@ export default function EditCouponPage() {
             Voltar para Cupões
           </Link>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Editar Cupão</h1>
-          <p className="text-base md:text-lg text-zinc-400">Atualizar cupão de desconto</p>
+          <p className="text-base md:text-lg text-neutral-500">Atualizar cupão de desconto</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-zinc-700/50 shadow-lg space-y-6 md:space-y-8">
+        <form onSubmit={handleSubmit} className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-neutral-200 shadow-lg space-y-6 md:space-y-8">
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
+          <div className="bg-red-500/20 border border-red-500/50 text-red-600 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
@@ -132,12 +132,12 @@ export default function EditCouponPage() {
                 code: e.target.value.toUpperCase().replace(/\s/g, ""),
               })
             }
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-neutral-900 font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
             placeholder="VERAO2025"
             maxLength={20}
             readOnly
           />
-          <p className="text-sm text-zinc-500 mt-2">O código não pode ser alterado</p>
+          <p className="text-sm text-neutral-500 mt-2">O código não pode ser alterado</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -148,7 +148,7 @@ export default function EditCouponPage() {
               onChange={(e) =>
                 setFormData({ ...formData, discountType: e.target.value })
               }
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             >
               <option value="PERCENTAGE">Percentagem (%)</option>
               <option value="FIXED">Valor Fixo (€)</option>
@@ -173,7 +173,7 @@ export default function EditCouponPage() {
                   discountValue: parseFloat(e.target.value) || 0,
                 })
               }
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function EditCouponPage() {
             min={1}
             value={formData.maxUses}
             onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="public-input md:px-5 md:py-4 text-base md:text-lg"
             placeholder="Deixe em branco para ilimitado"
           />
         </div>
@@ -200,7 +200,7 @@ export default function EditCouponPage() {
               required
               value={formData.startsAt}
               onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
           </div>
 
@@ -211,7 +211,7 @@ export default function EditCouponPage() {
               required
               value={formData.endsAt}
               onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-              className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+              className="public-input md:px-5 md:py-4 text-base md:text-lg"
             />
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function EditCouponPage() {
               type="checkbox"
               checked={formData.isActive}
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="w-5 h-5 rounded border-zinc-700/50 bg-zinc-900/50 text-purple-500 focus:ring-purple-500 focus:ring-2"
+              className="w-5 h-5 rounded border-neutral-200 bg-neutral-50 text-purple-500 focus:ring-purple-500 focus:ring-2"
             />
             <span className="text-base md:text-lg text-zinc-300">Cupão ativo</span>
           </label>
@@ -232,13 +232,13 @@ export default function EditCouponPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+            className="flex-1 bg-violet-600 hover:bg-violet-700 px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
           >
             {saving ? "A guardar..." : "Guardar Alterações"}
           </button>
           <Link
             href="/organizer/coupons"
-            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-zinc-700/50 hover:bg-zinc-700/50 transition-colors text-center text-base md:text-lg font-medium"
+            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-neutral-200 hover:bg-neutral-100 transition-colors text-center text-base md:text-lg font-medium"
           >
             Cancelar
           </Link>

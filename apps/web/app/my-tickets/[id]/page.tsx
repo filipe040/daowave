@@ -67,7 +67,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       <div>
         <Link
           href="/my-tickets"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-900"
         >
           <span>←</span>
           <span>Voltar aos meus bilhetes</span>
@@ -76,29 +76,29 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8 backdrop-blur-sm">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 backdrop-blur-sm">
           <h2 className="mb-6 text-xl font-bold">Detalhes do bilhete</h2>
           <div className="space-y-4">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-              <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Tipo</span>
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Tipo</span>
               <p className="mt-1 text-lg font-semibold">{ticket.ticketLot.name}</p>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-              <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Lote</span>
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Lote</span>
               <p className="mt-1 text-lg font-semibold">{ticket.ticketLot.name}</p>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-              <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Participante</span>
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Participante</span>
               <p className="mt-1 text-lg font-semibold">{ticket.user.name || "N/A"}</p>
-              <p className="mt-1 text-sm text-zinc-500">{ticket.user.email}</p>
+              <p className="mt-1 text-sm text-neutral-500">{ticket.user.email}</p>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-              <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Status</span>
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</span>
               <div className="mt-2">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${!ticket.checkedInAt
                     ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                    : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                    : "bg-neutral-100 text-neutral-500 border border-neutral-200"
                     }`}
                 >
                   {!ticket.checkedInAt ? (
@@ -126,7 +126,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8 backdrop-blur-sm">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 backdrop-blur-sm">
           <h2 className="mb-6 text-xl font-bold">Código QR</h2>
           <div className="flex flex-col items-center space-y-6">
             <div className="rounded-xl border-4 border-white bg-white p-4 shadow-2xl">
@@ -139,8 +139,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                 unoptimized
               />
             </div>
-            <div className="w-full rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 text-center">
-              <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">
+            <div className="w-full rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-center">
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
                 Código do bilhete
               </p>
               <p className="font-mono text-xs break-all text-zinc-300">{ticket.id}</p>
@@ -148,7 +148,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             <a
               href={`/api/tickets/${ticket.id}/pdf`}
               target="_blank"
-              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-blue-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 active:scale-95"
+              className="w-full rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-3 text-center text-sm font-bold text-neutral-900 shadow-lg shadow-blue-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 active:scale-95"
             >
               📥 Descarregar PDF
             </a>
@@ -157,21 +157,21 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8 backdrop-blur-sm">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 backdrop-blur-sm">
         <h2 className="mb-6 text-xl font-bold">Informações do evento</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Data</span>
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Data</span>
             <p className="mt-1 text-base font-semibold">
               {format(new Date(ticket.event.startAt), "dd MMM yyyy 'às' HH:mm", { locale: pt })}
             </p>
           </div>
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Local</span>
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Local</span>
             <p className="mt-1 text-base font-semibold">{ticket.event.venue}</p>
           </div>
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 sm:col-span-2">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Endereço</span>
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 sm:col-span-2">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Endereço</span>
             <p className="mt-1 text-base font-semibold">
               {ticket.event.city}
             </p>

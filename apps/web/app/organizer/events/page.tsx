@@ -58,26 +58,26 @@ export default async function OrganizerEventsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Meus Eventos</h1>
-          <p className="text-zinc-400">Gerir e publicar os seus eventos</p>
+          <p className="text-neutral-500">Gerir e publicar os seus eventos</p>
         </div>
         <Link
           href="/organizer/events/new"
-          className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50"
+          className="rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50"
         >
           + Novo Evento
         </Link>
       </div>
 
       {events.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
+        <div className="rounded-xl border border-neutral-200 bg-white p-12 text-center">
           <div className="mb-4 flex justify-center">
-          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+          <Ticket className="h-14 w-14 text-neutral-500" strokeWidth={1.5} />
         </div>
-          <p className="text-lg text-zinc-400 mb-2">Ainda não criou nenhum evento</p>
-          <p className="text-sm text-zinc-500 mb-6">Comece por criar o seu primeiro evento</p>
+          <p className="text-lg text-neutral-500 mb-2">Ainda não criou nenhum evento</p>
+          <p className="text-sm text-neutral-500 mb-6">Comece por criar o seu primeiro evento</p>
           <Link
             href="/organizer/events/new"
-            className="inline-block rounded-xl bg-white px-6 py-3 text-sm font-semibold text-zinc-950 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+            className="inline-block rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-700 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
           >
             Criar Evento
           </Link>
@@ -87,12 +87,12 @@ export default async function OrganizerEventsPage() {
           {events.map((event) => (
             <div
               key={event.id}
-              className="group rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-zinc-700 hover:bg-zinc-900 transition-all"
+              className="group rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm hover:border-neutral-200 hover:bg-neutral-50 transition-all"
             >
               <div className="flex items-start justify-between">
                 <Link href={`/organizer/events/${event.id}/edit`} className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-xl font-bold group-hover:text-white transition-colors">
+                    <h2 className="text-xl font-bold group-hover:text-neutral-900 transition-colors">
                       {event.title}
                     </h2>
                     <span
@@ -101,7 +101,7 @@ export default async function OrganizerEventsPage() {
                           ? "bg-green-500/20 text-green-400"
                           : event.status === "DRAFT"
                           ? "bg-yellow-500/20 text-yellow-400"
-                          : "bg-red-500/20 text-red-400"
+                          : "bg-red-500/20 text-red-600"
                       }`}
                     >
                       {event.status === "PUBLISHED"
@@ -114,24 +114,24 @@ export default async function OrganizerEventsPage() {
                   
                   <div className="grid sm:grid-cols-2 gap-4 mt-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
-                      <span className="text-zinc-400">{event.venue}, {event.city}</span>
+                      <MapPin className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.5} />
+                      <span className="text-neutral-500">{event.venue}, {event.city}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
-                      <span className="text-zinc-400">
+                      <Calendar className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.5} />
+                      <span className="text-neutral-500">
                         {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Ticket className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
-                      <span className="text-zinc-400">
+                      <Ticket className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.5} />
+                      <span className="text-neutral-500">
                         {event._count.tickets} bilhetes vendidos
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CircleDollarSign className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
-                      <span className="text-zinc-400">
+                      <CircleDollarSign className="h-4 w-4 shrink-0 text-neutral-500" strokeWidth={1.5} />
+                      <span className="text-neutral-500">
                         {event._count.orders} encomendas pagas
                       </span>
                     </div>
@@ -147,7 +147,7 @@ export default async function OrganizerEventsPage() {
                   </Link>
                   <Link
                     href={`/organizer/events/${event.id}/edit`}
-                    className="px-4 py-2 rounded-lg border border-zinc-700/50 text-zinc-400 hover:bg-zinc-800 text-sm font-medium transition-colors whitespace-nowrap"
+                    className="px-4 py-2 rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-100 text-sm font-medium transition-colors whitespace-nowrap"
                   >
                     Editar
                   </Link>

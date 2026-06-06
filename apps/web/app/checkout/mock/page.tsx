@@ -51,24 +51,24 @@ function MockCheckoutContent() {
         <CheckoutStepper currentStep={2} />
 
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-black text-white tracking-tight">Pagamento seguro</h1>
-          <p className="text-white/45 mt-2 text-sm">Confirme para concluir a encomenda</p>
+          <h1 className="text-3xl font-black text-neutral-900 tracking-tight">Pagamento seguro</h1>
+          <p className="text-neutral-500 mt-2 text-sm">Confirme para concluir a encomenda</p>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-3xl p-8 shadow-2xl space-y-6">
+        <div className="rounded-[28px] border border-neutral-200 bg-white shadow-md p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-center gap-3 py-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
-              <CreditCard className="h-7 w-7 text-white/70" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-50 border border-neutral-200">
+              <CreditCard className="h-7 w-7 text-neutral-600" />
             </div>
           </div>
 
-          <p className="text-center text-white/60 text-sm leading-relaxed">
+          <p className="text-center text-neutral-600 text-sm leading-relaxed">
             O seu pagamento será processado de forma segura. Após confirmação, os bilhetes serão
             emitidos e enviados por email.
           </p>
 
           {error && (
-            <p className="text-center text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+            <p className="text-center text-red-600 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
               {error}
             </p>
           )}
@@ -77,7 +77,7 @@ function MockCheckoutContent() {
             onClick={handlePayment}
             disabled={processing || !orderId}
             data-testid="btn-confirm-payment"
-            className="w-full rounded-2xl bg-white px-6 py-4 text-[15px] font-bold text-black shadow-[0_12px_40px_rgba(255,255,255,0.12)] transition-all hover:bg-white/90 hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
+            className="w-full rounded-2xl bg-violet-600 px-6 py-4 text-[15px] font-bold text-neutral-900 hover:bg-violet-700 shadow-md transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {processing ? (
               <span className="flex items-center justify-center gap-2">
@@ -89,7 +89,7 @@ function MockCheckoutContent() {
             )}
           </button>
 
-          <p className="flex items-center justify-center gap-2 text-[11px] text-white/30 uppercase tracking-widest">
+          <p className="flex items-center justify-center gap-2 text-[11px] text-neutral-400 uppercase tracking-widest">
             <ShieldCheck className="h-3.5 w-3.5" />
             SSL · Pagamento encriptado
           </p>
@@ -104,7 +104,7 @@ export default function MockCheckoutPage() {
     <Suspense
       fallback={
         <div className="min-h-screen mesh-gradient flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+          <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
         </div>
       }
     >

@@ -91,22 +91,22 @@ export default async function CouponsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Cupões de Desconto</h1>
-          <p className="text-base md:text-lg text-zinc-400">Gerir cupões de desconto para os seus eventos</p>
+          <p className="text-base md:text-lg text-neutral-500">Gerir cupões de desconto para os seus eventos</p>
         </div>
         <Link
           href="/organizer/coupons/new"
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 whitespace-nowrap hover:scale-105"
+          className="bg-violet-600 hover:bg-violet-700 px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 whitespace-nowrap hover:scale-105"
         >
           + Criar Cupão
         </Link>
       </div>
 
       {coupons.length > 0 ? (
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 overflow-hidden shadow-lg">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 overflow-hidden shadow-lg">
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-zinc-900/50 border-b border-zinc-700/50">
+              <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
                   <th className="px-8 py-4 text-left text-sm font-semibold text-zinc-300">Código</th>
                   <th className="px-8 py-4 text-left text-sm font-semibold text-zinc-300">Evento</th>
@@ -130,7 +130,7 @@ export default async function CouponsPage() {
                   : `${coupon.usedCount}/∞`;
 
                   return (
-                    <tr key={coupon.id} className="hover:bg-zinc-700/30 transition-colors">
+                    <tr key={coupon.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="px-8 py-5">
                         <div className="font-mono font-bold text-lg text-purple-400">
                           {coupon.code}
@@ -156,7 +156,7 @@ export default async function CouponsPage() {
                       <td className="px-8 py-5 text-base">{usageLimit}</td>
                       <td className="px-8 py-5">
                         {isExpired ? (
-                          <span className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+                          <span className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-600 border border-red-500/30">
                             Expirado
                           </span>
                         ) : !coupon.isActive ? (
@@ -173,7 +173,7 @@ export default async function CouponsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-8 py-5 text-base text-zinc-400">
+                      <td className="px-8 py-5 text-base text-neutral-500">
                         {new Date(coupon.endsAt).toLocaleDateString("pt-PT")}
                       </td>
                       <td className="px-8 py-5 text-right">
@@ -205,7 +205,7 @@ export default async function CouponsPage() {
                   : `${coupon.usedCount}/∞`;
 
               return (
-                <div key={coupon.id} className="p-6 hover:bg-zinc-700/30 transition-colors">
+                <div key={coupon.id} className="p-6 hover:bg-neutral-50 transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="font-mono font-bold text-lg text-purple-400">
@@ -219,7 +219,7 @@ export default async function CouponsPage() {
                       </Link>
                     </div>
                     {isExpired ? (
-                      <span className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-400 border border-red-500/30 ml-3 flex-shrink-0">
+                      <span className="px-3 py-1.5 rounded-lg text-xs bg-red-500/20 text-red-600 border border-red-500/30 ml-3 flex-shrink-0">
                         Expirado
                       </span>
                     ) : !coupon.isActive ? (
@@ -236,9 +236,9 @@ export default async function CouponsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm text-zinc-400 mb-4">
+                  <div className="grid grid-cols-2 gap-3 text-sm text-neutral-500 mb-4">
                     <div>
-                      <span className="text-zinc-500 font-medium">Desconto:</span>{" "}
+                      <span className="text-neutral-500 font-medium">Desconto:</span>{" "}
                       {coupon.discountType === "PERCENTAGE" ? (
                         <span className="font-bold">{coupon.discountValue}%</span>
                       ) : (
@@ -248,10 +248,10 @@ export default async function CouponsPage() {
                       )}
                     </div>
                     <div>
-                      <span className="text-zinc-500 font-medium">Usos:</span> {usageLimit}
+                      <span className="text-neutral-500 font-medium">Usos:</span> {usageLimit}
                     </div>
                     <div className="col-span-2">
-                      <span className="text-zinc-500 font-medium">Validade:</span>{" "}
+                      <span className="text-neutral-500 font-medium">Validade:</span>{" "}
                       {new Date(coupon.endsAt).toLocaleDateString("pt-PT")}
                     </div>
                   </div>
@@ -268,17 +268,17 @@ export default async function CouponsPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-800/60 backdrop-blur-sm rounded-2xl border border-zinc-700/50 p-12 md:p-16 lg:p-20 text-center shadow-lg">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-12 md:p-16 lg:p-20 text-center shadow-lg">
           <div className="mb-6 flex justify-center">
-            <Ticket className="h-16 w-16 text-zinc-500" strokeWidth={1.5} />
+            <Ticket className="h-16 w-16 text-neutral-500" strokeWidth={1.5} />
           </div>
           <h3 className="text-2xl md:text-3xl font-semibold mb-3">Ainda não tem cupões</h3>
-          <p className="text-base md:text-lg text-zinc-400 mb-8 max-w-md mx-auto">
+          <p className="text-base md:text-lg text-neutral-500 mb-8 max-w-md mx-auto">
             Crie o seu primeiro cupão de desconto para aumentar as vendas
           </p>
           <Link
             href="/organizer/coupons/new"
-            className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-8 py-4 rounded-xl text-base md:text-lg font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+            className="inline-block bg-violet-600 hover:bg-violet-700 px-8 py-4 rounded-xl text-base md:text-lg font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
           >
             Criar Cupão
           </Link>

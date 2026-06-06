@@ -487,7 +487,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                   "border border-neutral-200 bg-neutral-50",
                   "flex items-center justify-center",
                   "text-sm font-semibold text-neutral-800",
-                  "hover:bg-white/8 transition disabled:opacity-60"
+                  "hover:bg-neutral-100 transition disabled:opacity-60"
                 )}
               >
                 {pendingAvatarPreview ? (
@@ -501,7 +501,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 )}
 
                 {uploading && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[12px] text-neutral-700">
+                  <div className="absolute inset-0 bg-neutral-900/30 flex items-center justify-center text-[12px] text-neutral-700">
                     A guardar…
                   </div>
                 )}
@@ -515,7 +515,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                     disabled={uploading}
                     className={cn(
                       "rounded-full px-4 py-2 text-[12px] font-semibold",
-                      "bg-white text-black hover:bg-zinc-100 transition disabled:opacity-60"
+                      "bg-violet-600 text-white hover:bg-violet-700 transition disabled:opacity-60"
                     )}
                   >
                     Guardar foto
@@ -559,7 +559,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 className={cn(
                   "px-4 py-2 rounded-full text-[12px] font-semibold transition",
                   activeTab === "profile"
-                    ? "bg-white text-black shadow-[0_18px_60px_rgba(0,0,0,.25)]"
+                    ? "bg-violet-600 text-white shadow-md"
                     : "text-neutral-600 hover:text-neutral-900"
                 )}
               >
@@ -571,7 +571,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 className={cn(
                   "px-4 py-2 rounded-full text-[12px] font-semibold transition",
                   activeTab === "tickets"
-                    ? "bg-white text-black shadow-[0_18px_60px_rgba(0,0,0,.25)]"
+                    ? "bg-violet-600 text-white shadow-md"
                     : "text-neutral-600 hover:text-neutral-900"
                 )}
               >
@@ -703,9 +703,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-white/20 bg-white/5 text-neutral-900",
+                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-white/10 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        "hover:bg-neutral-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       )}
                     >
                       {savingPassword ? "A alterar…" : "Alterar palavra-passe"}
@@ -724,9 +724,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       href="/privacy"
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-white/20 bg-white/5 text-neutral-900",
+                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-white/10 transition"
+                        "hover:bg-neutral-100 transition"
                       )}
                     >
                       Política de privacidade
@@ -737,9 +737,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       disabled={exporting}
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-white/20 bg-white/5 text-neutral-900",
+                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-white/10 transition disabled:opacity-50"
+                        "hover:bg-neutral-100 transition disabled:opacity-50"
                       )}
                     >
                       {exporting ? "A descarregar…" : "Descarregar os meus dados"}
@@ -758,9 +758,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                     onClick={() => signOut({ callbackUrl: "/", redirect: true })}
                     className={cn(
                       "inline-flex items-center justify-center rounded-full",
-                      "border border-white/20 bg-white/5 text-neutral-900",
+                      "border border-neutral-300 bg-neutral-50 text-neutral-900",
                       "px-5 py-3 text-[13px] font-semibold",
-                      "hover:bg-white/10 hover:text-white transition"
+                      "hover:bg-neutral-100 hover:text-neutral-900 transition"
                     )}
                   >
                     Terminar sessão
@@ -829,7 +829,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                             className={cn(
                               "px-4 py-2.5 rounded-full text-[12px] font-semibold",
                               "border border-neutral-200 bg-neutral-50 text-neutral-700",
-                              "hover:bg-white/8 hover:text-white transition"
+                              "hover:bg-neutral-100 hover:text-neutral-900 transition"
                             )}
                           >
                             Transferir
@@ -839,8 +839,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                             href={`/events/${t.event?.slug ?? t.event?.id}`}
                             className={cn(
                               "px-4 py-2.5 rounded-full text-[12px] font-semibold",
-                              "bg-white text-black",
-                              "hover:bg-zinc-100 transition"
+                              "bg-violet-600 text-white",
+                              "hover:bg-violet-700 transition"
                             )}
                           >
                             Ver evento
@@ -860,7 +860,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
       {leaveConfirm?.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm"
             onClick={() => setLeaveConfirm(null)}
             aria-hidden
           />
@@ -868,7 +868,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="leave-confirm-title"
-            className="relative rounded-2xl border border-white/10 bg-black/95 backdrop-blur-xl p-6 w-full max-w-md shadow-xl"
+            className="relative rounded-2xl border border-neutral-200 bg-white backdrop-blur-xl p-6 w-full max-w-md shadow-xl"
           >
             <h2 id="leave-confirm-title" className="text-lg font-semibold text-neutral-900">
               Guardar alterações antes de sair?
@@ -880,14 +880,14 @@ export default function AccountProfile({ user }: AccountProfileProps) {
               <button
                 type="button"
                 onClick={() => setLeaveConfirm(null)}
-                className="rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/10 transition"
+                className="rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-100 transition"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleLeaveConfirmDiscard}
-                className="rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/10 transition"
+                className="rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-100 transition"
               >
                 Não, sair sem guardar
               </button>
@@ -895,7 +895,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 type="button"
                 onClick={handleLeaveConfirmSave}
                 disabled={leaving}
-                className="rounded-full bg-white text-black px-4 py-2.5 text-sm font-semibold hover:bg-zinc-100 transition disabled:opacity-60"
+                className="rounded-full bg-violet-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-violet-700 transition disabled:opacity-60"
               >
                 {leaving ? "A guardar…" : "Sim, guardar"}
               </button>
@@ -907,11 +907,11 @@ export default function AccountProfile({ user }: AccountProfileProps) {
       {/* Transfer modal */}
       {transferingTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeTransfer} />
+          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={closeTransfer} />
           <div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-black/45 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.65)] overflow-hidden"
+            className="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white backdrop-blur-2xl shadow-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-5 border-b border-neutral-200">
@@ -945,8 +945,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                   onClick={closeTransfer}
                   className={cn(
                     "px-4 py-2.5 rounded-full text-[12px] font-semibold",
-                    "border border-neutral-200 bg-neutral-50 text-neutral-700 hover:text-white",
-                    "hover:bg-white/8 transition"
+                    "border border-neutral-200 bg-neutral-50 text-neutral-700 hover:text-neutral-900",
+                    "hover:bg-neutral-100 transition"
                   )}
                 >
                   Cancelar

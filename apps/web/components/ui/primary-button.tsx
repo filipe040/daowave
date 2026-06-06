@@ -34,9 +34,9 @@ const SecondaryButton = React.forwardRef<HTMLButtonElement, PrimaryButtonProps>(
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl border border-white/10",
-        "bg-white/5 px-5 py-3 text-sm font-semibold text-white",
-        "transition-all duration-200 hover:bg-white/10 active:scale-[0.99]",
+        "inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200",
+        "bg-white px-5 py-3 text-sm font-semibold text-neutral-700",
+        "transition-all duration-200 hover:bg-neutral-50 active:scale-[0.99]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:pointer-events-none disabled:opacity-50",
         className

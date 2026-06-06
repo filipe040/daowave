@@ -12,7 +12,7 @@ export default function CookiesPage() {
 
             <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm whitespace-nowrap">
-                    <thead className="uppercase tracking-wider border-b-2 border-white/10">
+                    <thead className="uppercase tracking-wider border-b-2 border-neutral-200">
                         <tr>
                             <th scope="col" className="px-6 py-4">Categoria</th>
                             <th scope="col" className="px-6 py-4">Descrição e Finalidade do Cookie</th>
@@ -20,7 +20,7 @@ export default function CookiesPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-neutral-200">
                             <th scope="row" className="px-6 py-4 font-medium whitespace-normal">
                                 Essenciais (Estritamente Necessários)
                             </th>
@@ -31,7 +31,7 @@ export default function CookiesPage() {
                                 Expira no termo da sessão
                             </td>
                         </tr>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-neutral-200">
                             <th scope="row" className="px-6 py-4 font-medium whitespace-normal">
                                 Analíticos ou de Desempenho (Google Analytics)
                             </th>
@@ -42,7 +42,7 @@ export default function CookiesPage() {
                                 1 dia até 2 anos
                             </td>
                         </tr>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-neutral-200">
                             <th scope="row" className="px-6 py-4 font-medium whitespace-normal">
                                 Cookies de Marketing
                             </th>

@@ -24,8 +24,8 @@ type ResultState =
     | { kind: "duplicate"; message: string; at: string; by: string | null }
     | { kind: "error"; message: string };
 
-const inputCls = "w-full rounded-2xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/30 transition-colors backdrop-blur-xl";
-const labelCls = "block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2";
+const inputCls = "public-input backdrop-blur-xl";
+const labelCls = "public-label font-bold mb-2";
 
 export default function PromoterCheckinPage() {
     const [orgs, setOrgs] = useState<Org[]>([]);
@@ -162,11 +162,11 @@ export default function PromoterCheckinPage() {
             <PageShell title="Check-in" subtitle="Validação de bilhetes">
                 <div className="max-w-xl space-y-4">
                     {/* Context selectors */}
-                    <div className="bg-white/5 backdrop-blur-2xl rounded-[24px] border border-white/10 shadow-2xl divide-y divide-white/5">
+                    <div className="rounded-3xl border border-neutral-200 bg-white shadow-md divide-y divide-neutral-200">
                         {orgs.length > 1 && (
                             <div className="px-6 py-5">
                                 <label className={labelCls}>Organização</label>
-                                <select className={inputCls} style={{ backgroundColor: '#111' }} value={orgId} onChange={(e) => { setOrgId(e.target.value); setEventId(""); setResult(null); }}>
+                                <select className={inputCls}  value={orgId} onChange={(e) => { setOrgId(e.target.value); setEventId(""); setResult(null); }}>
                                     <option value="">Selecionar…</option>
                                     {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
                                 </select>
@@ -175,9 +175,9 @@ export default function PromoterCheckinPage() {
                         <div className="px-6 py-5">
                             <label className={labelCls}>Evento</label>
                             {loadingEvents
-                                ? <div className="h-[50px] bg-white/5 rounded-2xl border border-white/10 animate-pulse" />
+                                ? <div className="h-[50px] bg-neutral-50 rounded-2xl border border-neutral-200 animate-pulse" />
                                 : (
-                                    <select className={inputCls} style={{ backgroundColor: '#111' }} value={eventId} onChange={(e) => { setEventId(e.target.value); setResult(null); }} disabled={!orgId}>
+                                    <select className={inputCls}  value={eventId} onChange={(e) => { setEventId(e.target.value); setResult(null); }} disabled={!orgId}>
                                         <option value="">{orgId ? "Selecionar evento…" : "Selecionar organização primeiro"}</option>
                                         {events.map((ev) => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
                                     </select>
@@ -186,13 +186,13 @@ export default function PromoterCheckinPage() {
                     </div>
 
                     {/* Scan form */}
-                    <div className="bg-white/5 backdrop-blur-2xl rounded-[24px] border border-white/10 shadow-2xl overflow-hidden mt-6">
-                        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
+                    <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden mt-6">
+                        <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-                                    <QrCode className="h-5 w-5 text-white/70" strokeWidth={2} />
+                                <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center">
+                                    <QrCode className="h-5 w-5 text-neutral-600" strokeWidth={2} />
                                 </div>
-                                <h2 className="text-[15px] font-bold text-white tracking-wide">Código do bilhete</h2>
+                                <h2 className="text-[15px] font-bold text-neutral-900 tracking-wide">Código do bilhete</h2>
                             </div>
                             <button
                                 type="button"
@@ -219,7 +219,7 @@ export default function PromoterCheckinPage() {
                             <button
                                 type="submit"
                                 disabled={checking || !eventId || !qrCode.trim()}
-                                className="w-full inline-flex items-center justify-center gap-2 h-[50px] rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95"
+                                className="w-full inline-flex items-center justify-center gap-2 h-[50px] rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95"
                             >
                                 {checking ? "A validar…" : "Validar bilhete"}
                             </button>
@@ -230,21 +230,21 @@ export default function PromoterCheckinPage() {
                     {result && (
                         <div className={`rounded-[24px] border backdrop-blur-xl shadow-2xl p-6 sm:p-8 mt-6 transition-all ${result.kind === "success" ? "bg-emerald-500/10 border-emerald-500/20" : result.kind === "duplicate" ? "bg-amber-500/10 border-amber-500/20" : "bg-red-500/10 border-red-500/20"}`}>
                             <div className="flex items-start gap-4 sm:gap-5">
-                                <div className={`p-3 rounded-2xl border shrink-0 ${result.kind === "success" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" : result.kind === "duplicate" ? "bg-amber-500/20 border-amber-500/30 text-amber-400" : "bg-red-500/20 border-red-500/30 text-red-400"}`}>
+                                <div className={`p-3 rounded-2xl border shrink-0 ${result.kind === "success" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-600" : result.kind === "duplicate" ? "bg-amber-500/20 border-amber-500/30 text-amber-600" : "bg-red-500/20 border-red-500/30 text-red-400"}`}>
                                     {result.kind === "success" && <CheckCircle2 className="h-6 w-6" strokeWidth={2.5} />}
                                     {result.kind === "duplicate" && <AlertTriangle className="h-6 w-6" strokeWidth={2.5} />}
                                     {result.kind === "error" && <XCircle className="h-6 w-6" strokeWidth={2.5} />}
                                 </div>
 
                                 <div className="space-y-1.5 min-w-0 pt-1">
-                                    <p className={`text-[16px] font-bold uppercase tracking-wide ${result.kind === "success" ? "text-emerald-400" : result.kind === "duplicate" ? "text-amber-400" : "text-red-400"}`}>
+                                    <p className={`text-[16px] font-bold uppercase tracking-wide ${result.kind === "success" ? "text-emerald-600" : result.kind === "duplicate" ? "text-amber-600" : "text-red-400"}`}>
                                         {result.kind === "success" ? "Bilhete válido" : result.kind === "duplicate" ? "Bilhete já utilizado" : "Bilhete inválido"}
                                     </p>
-                                    <p className="text-[14px] font-medium text-white/80">{result.message}</p>
+                                    <p className="text-[14px] font-medium text-neutral-800">{result.message}</p>
                                     {result.kind === "success" && result.ticket && (
-                                        <div className="text-[13px] text-white/60 space-y-1 pt-3 border-t border-white/10 mt-3">
-                                            {result.ticket.holder && <p><span className="font-bold text-white/40 uppercase tracking-widest text-[10px] mr-2">Titular</span> <span className="text-white">{result.ticket.holder}</span></p>}
-                                            {result.ticket.type && <p><span className="font-bold text-white/40 uppercase tracking-widest text-[10px] mr-2">Tipo</span> {result.ticket.type}</p>}
+                                        <div className="text-[13px] text-neutral-600 space-y-1 pt-3 border-t border-neutral-200 mt-3">
+                                            {result.ticket.holder && <p><span className="font-bold text-neutral-500 uppercase tracking-widest text-[10px] mr-2">Titular</span> <span className="text-neutral-900">{result.ticket.holder}</span></p>}
+                                            {result.ticket.type && <p><span className="font-bold text-neutral-500 uppercase tracking-widest text-[10px] mr-2">Tipo</span> {result.ticket.type}</p>}
                                         </div>
                                     )}
                                     {result.kind === "duplicate" && (
@@ -260,27 +260,27 @@ export default function PromoterCheckinPage() {
 
                     {/* Camera Scanner Modal inside the PageShell */}
                     {scanning && (
-                        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+                        <div className="fixed inset-0 z-[100] bg-neutral-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
                             <button
                                 onClick={() => setScanning(false)}
-                                className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-10"
+                                className="absolute top-6 right-6 p-3 bg-neutral-100 hover:bg-neutral-200 rounded-full text-neutral-900 transition-all z-10"
                             >
                                 <X className="w-6 h-6" />
                             </button>
 
                             <div className="w-full max-w-sm flex flex-col items-center">
                                 <div className="mb-6 text-center">
-                                    <h3 className="text-xl font-bold text-white mb-2">Aponte a câmara</h3>
-                                    <p className="text-sm text-white/50">Centre o QR code dentro do quadrado</p>
+                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">Aponte a câmara</h3>
+                                    <p className="text-sm text-neutral-500">Centre o QR code dentro do quadrado</p>
                                 </div>
 
-                                <div className="w-full bg-black rounded-[32px] overflow-hidden border border-white/10 relative aspect-[4/5] flex items-center justify-center dashboard-scanner-container shadow-2xl">
+                                <div className="w-full bg-black rounded-[32px] overflow-hidden border border-neutral-200 relative aspect-[4/5] flex items-center justify-center dashboard-scanner-container shadow-2xl">
                                     <div id="dashboard-reader" className="w-full h-full relative" />
                                 </div>
 
-                                <div className="mt-8 flex items-center justify-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+                                <div className="mt-8 flex items-center justify-center gap-2 px-4 py-2 bg-neutral-50 rounded-full border border-neutral-200">
                                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-[12px] font-bold text-white/60 tracking-widest uppercase">Câmara Ativa</span>
+                                    <span className="text-[12px] font-bold text-neutral-600 tracking-widest uppercase">Câmara Ativa</span>
                                 </div>
                             </div>
                         </div>

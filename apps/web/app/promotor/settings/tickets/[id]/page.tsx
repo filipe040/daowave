@@ -265,7 +265,7 @@ export default function TicketTemplateEditorPage() {
         });
     };
 
-    if (loading) return <PageShell title="Carregar Editor..."><Skeleton className="h-96 w-full rounded-2xl bg-white/5" /></PageShell>;
+    if (loading) return <PageShell title="Carregar Editor..."><Skeleton className="h-96 w-full rounded-2xl bg-neutral-100" /></PageShell>;
     if (error) return <PageShell title="Erro"><ErrorState message={error} onRetry={load} /></PageShell>;
 
     return (
@@ -287,7 +287,7 @@ export default function TicketTemplateEditorPage() {
                     )}
                     <button
                         onClick={handlePreview}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-white/10 text-white hover:bg-white/5 transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-neutral-200 text-neutral-900 hover:bg-neutral-50 transition-all"
                     >
                         <Eye className="h-4 w-4" />
                         Abrir Preview
@@ -295,7 +295,7 @@ export default function TicketTemplateEditorPage() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white/10 text-white hover:bg-white/20 disabled:opacity-50 transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-900 hover:bg-neutral-200 disabled:opacity-50 transition-all"
                     >
                         <Save className="h-4 w-4" />
                         {saving ? "A guardar..." : "Guardar"}
@@ -304,7 +304,7 @@ export default function TicketTemplateEditorPage() {
                         <button
                             onClick={handlePublish}
                             disabled={publishing}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 transition-all"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-neutral-900 hover:bg-emerald-600 disabled:opacity-50 transition-all"
                         >
                             <Send className="h-4 w-4" />
                             {publishing ? "A publicar..." : "Publicar Design"}
@@ -317,45 +317,45 @@ export default function TicketTemplateEditorPage() {
                 {/* Editor Sidebar */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* General */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <Info className="h-4 w-4" /> Geral
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Nome do Template</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Nome do Template</label>
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Layout / Preset</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Layout / Preset</label>
                                 <select
                                     value={preset}
                                     onChange={(e) => setPreset(e.target.value as TicketTemplatePreset)}
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
                                 >
                                     <option value="A4_CLASSIC">A4 Clássico — vertical, QR em baixo</option>
                                     <option value="HORIZONTAL_QR_RIGHT">Horizontal — QR à direita</option>
                                     <option value="MOBILE_PASS">Mobile Pass — estilo wallet</option>
                                 </select>
-                                <p className="text-[10px] text-white/30 mt-2 ml-1">O preview atualiza automaticamente ao alterar o preset.</p>
+                                <p className="text-[10px] text-neutral-400 mt-2 ml-1">O preview atualiza automaticamente ao alterar o preset.</p>
                             </div>
                         </div>
                     </section>
 
                     {/* Branding */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <MousePointer2 className="h-4 w-4" /> Branding
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Logo (Upload do PC)</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Logo (Upload do PC)</label>
                                 <div className="space-y-2">
-                                    <div className="relative border border-dashed border-white/20 rounded-xl p-4 bg-black/20 hover:bg-black/40 transition-colors cursor-pointer">
+                                    <div className="relative border border-dashed border-neutral-300 rounded-xl p-4 bg-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
                                         <input
                                             type="file"
                                             accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
@@ -364,31 +364,31 @@ export default function TicketTemplateEditorPage() {
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         />
                                         <div className="flex items-center gap-3 pointer-events-none">
-                                            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0">
                                                 {uploadingLogo ? (
-                                                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                                                    <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
                                                 ) : (
-                                                    <Upload className="h-4 w-4 text-white/50" />
+                                                    <Upload className="h-4 w-4 text-neutral-500" />
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-white/70">{uploadingLogo ? "A carregar..." : "Clique para fazer upload"}</p>
-                                                <p className="text-[10px] text-white/30">PNG, JPG, SVG &mdash; máx. 5MB</p>
+                                                <p className="text-xs font-bold text-neutral-600">{uploadingLogo ? "A carregar..." : "Clique para fazer upload"}</p>
+                                                <p className="text-[10px] text-neutral-400">PNG, JPG, SVG &mdash; máx. 5MB</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {theme?.brand.logoUrl && (
-                                        <div className="relative bg-black/40 rounded-xl p-3 border border-white/10 flex items-center gap-3">
+                                        <div className="relative bg-neutral-50 rounded-xl p-3 border border-neutral-200 flex items-center gap-3">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={theme.brand.logoUrl} alt="Logo" className="h-10 w-auto object-contain max-w-[80px]" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-bold text-white/70 truncate">Logo atual</p>
-                                                <p className="text-[10px] text-white/30 truncate">{theme.brand.logoUrl}</p>
+                                                <p className="text-xs font-bold text-neutral-600 truncate">Logo atual</p>
+                                                <p className="text-[10px] text-neutral-400 truncate">{theme.brand.logoUrl}</p>
                                             </div>
                                             <button
                                                 onClick={() => updateTheme('brand.logoUrl', '')}
-                                                className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                                                className="flex-shrink-0 p-1 rounded-lg hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors"
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
@@ -400,27 +400,27 @@ export default function TicketTemplateEditorPage() {
                                             value={theme?.brand.logoUrl || ""}
                                             onChange={(e) => updateTheme('brand.logoUrl', e.target.value)}
                                             placeholder="ou cole aqui um URL (https://...)"
-                                            className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white/60 focus:border-emerald-500/50 outline-none transition-all placeholder:text-white/20"
+                                            className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-xs text-neutral-600 focus:border-emerald-500/50 outline-none transition-all placeholder:text-neutral-400"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Tagline / Slogan</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tagline / Slogan</label>
                                 <input
                                     value={theme?.brand.tagline || ""}
                                     onChange={(e) => updateTheme('brand.tagline', e.target.value)}
                                     placeholder="ex: O festival mais esperado do ano"
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
                                 />
                             </div>
                         </div>
                     </section>
 
                     {/* Colors */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <Palette className="h-4 w-4" /> Cores
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
@@ -432,10 +432,10 @@ export default function TicketTemplateEditorPage() {
                                 { key: 'muted', label: 'Secundário (Muted)' },
                             ].map(({ key, label }) => (
                                 <div key={key} className={key === 'muted' ? 'col-span-2' : ''}>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">{label}</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">{label}</label>
                                     <div className="flex gap-2">
                                         <input type="color" value={(theme?.colors as any)?.[key] || '#000000'} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none flex-shrink-0" />
-                                        <input value={(theme?.colors as any)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white outline-none" />
+                                        <input value={(theme?.colors as any)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-2 py-1.5 text-xs text-neutral-900 outline-none" />
                                     </div>
                                 </div>
                             ))}
@@ -446,16 +446,16 @@ export default function TicketTemplateEditorPage() {
                 {/* Configuration Columns */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* Typography */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <TypeIcon className="h-4 w-4" /> Tipografia
                         </h3>
                         <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Fonte</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Fonte</label>
                             <select
                                 value={theme?.typography.fontFamily}
                                 onChange={(e) => updateTheme('typography.fontFamily', e.target.value)}
-                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all"
+                                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
                             >
                                 {WHITELISTED_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
                             </select>
@@ -463,17 +463,17 @@ export default function TicketTemplateEditorPage() {
                     </section>
 
                     {/* Layout & estilo */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <Layout className="h-4 w-4" /> Estilo do Cartão
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Destaque superior</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Destaque superior</label>
                                 <select
                                     value={theme?.layout?.accentStyle || "bar"}
                                     onChange={(e) => updateLayout("accentStyle", e.target.value)}
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none"
                                 >
                                     <option value="bar">Barra colorida</option>
                                     <option value="gradient">Cabeçalho gradiente</option>
@@ -481,11 +481,11 @@ export default function TicketTemplateEditorPage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Estilo do cartão</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Estilo do cartão</label>
                                 <select
                                     value={theme?.layout?.cardStyle || "elevated"}
                                     onChange={(e) => updateLayout("cardStyle", e.target.value)}
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none"
                                 >
                                     <option value="elevated">Com sombra</option>
                                     <option value="bordered">Com borda colorida</option>
@@ -493,14 +493,14 @@ export default function TicketTemplateEditorPage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Cantos arredondados</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Cantos arredondados</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {(["sm", "md", "lg"] as const).map((r) => (
                                         <button
                                             key={r}
                                             type="button"
                                             onClick={() => updateLayout("cornerRadius", r)}
-                                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.cornerRadius || "md") === r ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5"}`}
+                                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.cornerRadius || "md") === r ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}
                                         >
                                             {r === "sm" ? "Suave" : r === "md" ? "Médio" : "Forte"}
                                         </button>
@@ -511,8 +511,8 @@ export default function TicketTemplateEditorPage() {
                     </section>
 
                     {/* Blocks */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <Layout className="h-4 w-4" /> Conteúdo (Blocos)
                         </h3>
                         <div className="space-y-3">
@@ -523,8 +523,8 @@ export default function TicketTemplateEditorPage() {
                                 { id: 'showTerms', label: 'Termos e Condições' },
                                 { id: 'showSupport', label: 'Informação de Suporte' },
                             ].map(block => (
-                                <label key={block.id} className="flex items-center justify-between p-3 rounded-xl bg-black/20 border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
-                                    <span className="text-xs font-bold text-white/80">{block.label}</span>
+                                <label key={block.id} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer hover:border-neutral-200 transition-colors">
+                                    <span className="text-xs font-bold text-neutral-800">{block.label}</span>
                                     <input
                                         type="checkbox"
                                         checked={!!(theme?.blocks as any)?.[block.id]}
@@ -537,19 +537,19 @@ export default function TicketTemplateEditorPage() {
                     </section>
 
                     {/* QR Code */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <QrCode className="h-4 w-4" /> QR Code
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Tamanho</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tamanho</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {['S', 'M', 'L'].map(s => (
                                         <button
                                             key={s}
                                             onClick={() => updateTheme('qr.size', s)}
-                                            className={`py-2 rounded-xl text-xs font-bold transition-all border ${theme?.qr.size === s ? 'bg-white text-black border-white' : 'bg-white/5 text-white/40 border-white/5 hover:border-white/10'}`}
+                                            className={`py-2 rounded-xl text-xs font-bold transition-all border ${theme?.qr.size === s ? 'bg-violet-600 text-white border-violet-600' : 'bg-neutral-50 text-neutral-500 border-neutral-200 hover:border-neutral-200'}`}
                                         >
                                             {s === 'S' ? 'Pequeno' : s === 'M' ? 'Médio' : 'Grande'}
                                         </button>
@@ -557,12 +557,12 @@ export default function TicketTemplateEditorPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Legenda (Opcional)</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Legenda (Opcional)</label>
                                 <input
                                     value={theme?.qr.label || ""}
                                     onChange={(e) => updateTheme('qr.label', e.target.value)}
                                     placeholder="Validar na entrada"
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
                                 />
                             </div>
                         </div>
@@ -571,16 +571,16 @@ export default function TicketTemplateEditorPage() {
 
                 {/* Live Preview */}
                 <div className="lg:col-span-4">
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-4 sticky top-6">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sticky top-6">
                         <div className="flex items-center justify-between mb-3 px-2">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 flex items-center gap-2">
                                 <Eye className="h-4 w-4" /> Preview ao vivo
                             </h3>
                             {previewLoading && (
-                                <span className="text-[10px] text-emerald-400/80 animate-pulse">A atualizar...</span>
+                                <span className="text-[10px] text-emerald-600/80 animate-pulse">A atualizar...</span>
                             )}
                         </div>
-                        <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-900/80" style={{ height: "520px" }}>
+                        <div className="rounded-xl overflow-hidden border border-neutral-200 bg-zinc-900/80" style={{ height: "520px" }}>
                             {previewHtml ? (
                                 <iframe
                                     title="Preview do bilhete"
@@ -589,48 +589,48 @@ export default function TicketTemplateEditorPage() {
                                     sandbox="allow-same-origin"
                                 />
                             ) : (
-                                <div className="h-full flex items-center justify-center text-white/30 text-sm">
+                                <div className="h-full flex items-center justify-center text-neutral-400 text-sm">
                                     A carregar preview...
                                 </div>
                             )}
                         </div>
-                        <p className="text-[10px] text-white/30 mt-3 px-2 leading-relaxed">
+                        <p className="text-[10px] text-neutral-400 mt-3 px-2 leading-relaxed">
                             Reflete alterações instantâneas — preset, cores, blocos e layout. Guarde para aplicar em bilhetes reais.
                         </p>
                     </section>
 
                     {/* Footer */}
-                    <section className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6 mt-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             Rodapé
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">URL de Suporte</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">URL de Suporte</label>
                                 <input
                                     value={theme?.footer.supportUrl || ""}
                                     onChange={(e) => updateTheme('footer.supportUrl', e.target.value)}
                                     placeholder="https://suporte.com"
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-white/20 block mb-1.5 ml-1">Email de Suporte</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Email de Suporte</label>
                                 <input
                                     value={theme?.footer.supportEmail || ""}
                                     onChange={(e) => updateTheme('footer.supportEmail', e.target.value)}
                                     placeholder="ajuda@instante.pt"
-                                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 transition-all"
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
                                 />
                             </div>
                         </div>
                     </section>
 
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6">
-                        <h4 className="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-emerald-600 mb-2 flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4" /> Dica de Design
                         </h4>
-                        <p className="text-xs text-white/60 leading-relaxed">
+                        <p className="text-xs text-neutral-600 leading-relaxed">
                             Mantenha o contraste elevado entre a cor de fundo e a cor do texto para garantir uma leitura fácil no papel.
                             O tamanho Grande (L) do QR Code é recomendado para locais com pouca iluminação.
                         </p>

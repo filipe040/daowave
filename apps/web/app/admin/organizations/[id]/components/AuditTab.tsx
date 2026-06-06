@@ -19,10 +19,10 @@ interface AuditLog {
 }
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
-    "org.created": { label: "Criação de Org", color: "text-emerald-400" },
-    "org.status_changed": { label: "Alteração de Estado", color: "text-amber-400" },
+    "org.created": { label: "Criação de Org", color: "text-emerald-600" },
+    "org.status_changed": { label: "Alteração de Estado", color: "text-amber-600" },
     "invite.created": { label: "Convite Enviado", color: "text-sky-400" },
-    "invite.accepted": { label: "Convite Aceite", color: "text-emerald-400" },
+    "invite.accepted": { label: "Convite Aceite", color: "text-emerald-600" },
     "org.onboarding_updated": { label: "Atualização Onboarding", color: "text-indigo-400" },
 };
 
@@ -41,7 +41,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
     useEffect(() => { load(); }, [load]);
 
     return (
-        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden">
+        <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] overflow-hidden">
             <DataTable<AuditLog>
                 data={logs}
                 loading={loading}
@@ -54,7 +54,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "action",
                         label: "Ação",
                         render: (l) => {
-                            const config = ACTION_LABELS[l.action] || { label: l.action, color: "text-white/40" };
+                            const config = ACTION_LABELS[l.action] || { label: l.action, color: "text-neutral-500" };
                             return (
                                 <div className="flex items-center gap-3">
                                     <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", config.color.replace("text-", "bg-"))} />
@@ -67,7 +67,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "details",
                         label: "Detalhes",
                         render: (l) => (
-                            <div className="text-[12px] text-white/30 font-medium max-w-xs truncate">
+                            <div className="text-[12px] text-neutral-400 font-medium max-w-xs truncate">
                                 {JSON.stringify(l.metaJson)}
                             </div>
                         ),
@@ -76,7 +76,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "context",
                         label: "Origem",
                         render: (l) => (
-                            <div className="flex items-center gap-4 text-[11px] font-bold text-white/20 uppercase tracking-widest">
+                            <div className="flex items-center gap-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
                                 <span className="flex items-center gap-1">
                                     <Globe className="h-3 w-3" />
                                     {l.ip || "Sistema"}
@@ -88,7 +88,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "createdAt",
                         label: "Data",
                         render: (l) => (
-                            <span className="text-[13px] font-medium text-white/20">
+                            <span className="text-[13px] font-medium text-neutral-400">
                                 {new Date(l.createdAt).toLocaleString("pt-PT", {
                                     day: "2-digit",
                                     month: "2-digit",

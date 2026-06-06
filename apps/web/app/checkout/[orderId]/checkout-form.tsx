@@ -248,10 +248,10 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
           {appliedCoupon ? (
             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-emerald-400 font-bold text-sm font-mono">{appliedCoupon.code}</p>
-                <p className="text-emerald-400/70 text-xs">
+                <p className="text-emerald-600 font-bold text-sm font-mono">{appliedCoupon.code}</p>
+                <p className="text-emerald-600/70 text-xs">
                   −{formatEuro(appliedCoupon.discountCents)} aplicado
                 </p>
               </div>
@@ -294,7 +294,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           </h2>
           <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
 
-          <div className="mt-5 rounded-2xl border bg-white border-neutral-200 bg-white/[0.03] p-5">
+          <div className="mt-5 rounded-2xl border bg-white border-neutral-200 bg-neutral-50 p-5">
             {paymentMethod === 'card' && (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -346,7 +346,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   {['VISA', 'MC', 'AMEX'].map((brand) => (
                     <span
                       key={brand}
-                      className="rounded-md border bg-white border-neutral-200 bg-white/5 px-2 py-1 text-[10px] font-bold text-neutral-500 tracking-wider"
+                      className="rounded-md border bg-white border-neutral-200 bg-neutral-50 px-2 py-1 text-[10px] font-bold text-neutral-500 tracking-wider"
                     >
                       {brand}
                     </span>
@@ -379,11 +379,11 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   Utilize os dados abaixo no multibanco ou homebanking. O pagamento será confirmado automaticamente.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-white/5 border bg-white border-neutral-200 p-4">
+                  <div className="rounded-xl bg-neutral-50 border bg-white border-neutral-200 p-4">
                     <p className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Entidade</p>
                     <p className="text-2xl font-mono font-bold text-neutral-900">{multibancoRef.entity}</p>
                   </div>
-                  <div className="rounded-xl bg-white/5 border bg-white border-neutral-200 p-4">
+                  <div className="rounded-xl bg-neutral-50 border bg-white border-neutral-200 p-4">
                     <p className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Referência</p>
                     <p className="text-2xl font-mono font-bold text-neutral-900">{multibancoRef.reference}</p>
                   </div>
@@ -413,15 +413,15 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
         </section>
 
         {/* Total + Termos */}
-        <section className="rounded-2xl border bg-white border-neutral-200 bg-white/[0.04] p-5 space-y-4">
+        <section className="rounded-2xl border bg-white border-neutral-200 bg-neutral-50 p-5 space-y-4">
           <div className="flex justify-between text-sm">
             <span className="text-neutral-600">Subtotal</span>
             <span className="text-neutral-900">{formatEuro(totalCents)}</span>
           </div>
           {appliedCoupon && (
             <div className="flex justify-between text-sm">
-              <span className="text-emerald-400">Desconto</span>
-              <span className="text-emerald-400 font-semibold">−{formatEuro(appliedCoupon.discountCents)}</span>
+              <span className="text-emerald-600">Desconto</span>
+              <span className="text-emerald-600 font-semibold">−{formatEuro(appliedCoupon.discountCents)}</span>
             </div>
           )}
           <div className="flex justify-between items-end border-t bg-white border-neutral-200 pt-4">
@@ -433,7 +433,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           </div>
         </section>
 
-        <div className="flex items-start gap-3 bg-white/[0.03] p-4 rounded-xl border bg-white border-neutral-200">
+        <div className="flex items-start gap-3 bg-neutral-50 p-4 rounded-xl border bg-white border-neutral-200">
           <Checkbox
             id="terms"
             data-testid="checkbox-terms"
@@ -479,7 +479,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           type="submit"
           data-testid="btn-confirm-payment"
           disabled={loading || !acceptedTerms}
-          className="w-full h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-[15px] hover:opacity-95 shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-violet-600 text-white font-bold text-[15px] hover:opacity-95 shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
           size="lg"
           aria-busy={loading}
         >

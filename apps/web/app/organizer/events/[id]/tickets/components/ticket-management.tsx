@@ -72,13 +72,13 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold mb-1">Tipos de Bilhetes</h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-neutral-500">
             Crie tipos de bilhetes e lotes para o seu evento
           </p>
         </div>
         <button
           onClick={() => setShowTypeForm(true)}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30"
+          className="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30"
         >
           + Criar Tipo de Bilhete
         </button>
@@ -86,17 +86,17 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
 
       {/* Ticket Types List */}
       {ticketTypes.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
+        <div className="rounded-xl border border-neutral-200 bg-white p-12 text-center">
           <div className="mb-4 flex justify-center">
-          <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
+          <Ticket className="h-14 w-14 text-neutral-500" strokeWidth={1.5} />
         </div>
-          <p className="text-lg text-zinc-400 mb-2">Ainda não há tipos de bilhetes</p>
-          <p className="text-sm text-zinc-500 mb-6">
+          <p className="text-lg text-neutral-500 mb-2">Ainda não há tipos de bilhetes</p>
+          <p className="text-sm text-neutral-500 mb-6">
             Crie o primeiro tipo de bilhete para começar a vender
           </p>
           <button
             onClick={() => setShowTypeForm(true)}
-            className="inline-block rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105"
+            className="inline-block rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105"
           >
             Criar Tipo de Bilhete
           </button>
@@ -106,15 +106,15 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
           {ticketTypes.map((type: any) => (
             <div
               key={type.id}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm"
+              className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-1">{type.name}</h3>
                   {type.description && (
-                    <p className="text-sm text-zinc-400 mb-2">{type.description}</p>
+                    <p className="text-sm text-neutral-500 mb-2">{type.description}</p>
                   )}
-                  <div className="flex items-center gap-4 text-sm text-zinc-500">
+                  <div className="flex items-center gap-4 text-sm text-neutral-500">
                     <span>Preço base: {(type.basePrice / 100).toFixed(2)} {type.currency}</span>
                     <span>•</span>
                     <span>{(type.lots || []).length} lote(s)</span>
@@ -133,8 +133,8 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
 
               {/* Lots List */}
               {(type.lots || []).length === 0 ? (
-                <div className="mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-center">
-                  <p className="text-sm text-zinc-500 mb-3">Nenhum lote criado ainda</p>
+                <div className="mt-4 p-4 rounded-lg bg-neutral-100/50 border border-neutral-200 text-center">
+                  <p className="text-sm text-neutral-500 mb-3">Nenhum lote criado ainda</p>
                   <button
                     onClick={() => {
                       setSelectedTypeId(type.id);
@@ -158,7 +158,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
                     return (
                       <div
                         key={lot.id}
-                        className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50"
+                        className="p-4 rounded-lg bg-neutral-100/50 border border-neutral-200"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -167,7 +167,7 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
                               <span
                                 className={`text-xs px-2 py-1 rounded ${
                                   isExpired
-                                    ? "bg-red-500/20 text-red-400"
+                                    ? "bg-red-500/20 text-red-600"
                                     : isUpcoming
                                     ? "bg-blue-500/20 text-blue-400"
                                     : isActive
@@ -184,23 +184,23 @@ export default function TicketManagement({ eventId, event }: TicketManagementPro
                                   : "Inativo"}
                               </span>
                             </div>
-                            <div className="grid sm:grid-cols-2 gap-2 text-sm text-zinc-400">
+                            <div className="grid sm:grid-cols-2 gap-2 text-sm text-neutral-500">
                               <div>
-                                <span className="text-zinc-500">Preço:</span>{" "}
+                                <span className="text-neutral-500">Preço:</span>{" "}
                                 {(lot.price / 100).toFixed(2)} {type.currency}
                               </div>
                               <div>
-                                <span className="text-zinc-500">Disponível:</span> {available} /{" "}
+                                <span className="text-neutral-500">Disponível:</span> {available} /{" "}
                                 {lot.stockTotal}
                               </div>
                               <div>
-                                <span className="text-zinc-500">Início:</span>{" "}
+                                <span className="text-neutral-500">Início:</span>{" "}
                                 {format(new Date(lot.startsAt), "dd MMM yyyy, HH:mm", {
                                   locale: pt,
                                 })}
                               </div>
                               <div>
-                                <span className="text-zinc-500">Fim:</span>{" "}
+                                <span className="text-neutral-500">Fim:</span>{" "}
                                 {format(new Date(lot.endsAt), "dd MMM yyyy, HH:mm", {
                                   locale: pt,
                                 })}

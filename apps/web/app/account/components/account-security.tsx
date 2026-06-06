@@ -135,7 +135,7 @@ export default function AccountSecurity() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
+      <section className="rounded-2xl border border-neutral-200 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Sessões ativas</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Termina sessões em outros dispositivos. A sessão atual mantém-se ativa.
@@ -150,7 +150,7 @@ export default function AccountSecurity() {
               activeSessions.map((s) => (
                 <li
                   key={s.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-800 bg-zinc-950/50 px-4 py-3"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3"
                 >
                   <div className="text-sm">
                     <span className="text-muted-foreground">{s.ip ?? "—"}</span>
@@ -186,7 +186,7 @@ export default function AccountSecurity() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
+      <section className="rounded-2xl border border-neutral-200 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Alterar palavra-passe</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Usa uma palavra-passe forte com pelo menos 8 caracteres.
@@ -199,7 +199,7 @@ export default function AccountSecurity() {
               type="password"
               value={passwordForm.current}
               onChange={(e) => setPasswordForm((p) => ({ ...p, current: e.target.value }))}
-              className="mt-2 border-zinc-700 bg-zinc-950"
+              className="mt-2 border-neutral-200 bg-white"
             />
           </div>
           <div>
@@ -209,7 +209,7 @@ export default function AccountSecurity() {
               type="password"
               value={passwordForm.new}
               onChange={(e) => setPasswordForm((p) => ({ ...p, new: e.target.value }))}
-              className="mt-2 border-zinc-700 bg-zinc-950"
+              className="mt-2 border-neutral-200 bg-white"
             />
           </div>
           <div>
@@ -219,7 +219,7 @@ export default function AccountSecurity() {
               type="password"
               value={passwordForm.confirm}
               onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
-              className="mt-2 border-zinc-700 bg-zinc-950"
+              className="mt-2 border-neutral-200 bg-white"
             />
           </div>
           <Button type="submit" disabled={savingPassword} data-testid="save-password">

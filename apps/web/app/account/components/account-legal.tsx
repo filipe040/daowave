@@ -96,7 +96,7 @@ export default function AccountLegal() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6">
+      <section className="rounded-2xl border border-neutral-200 bg-background/50 p-6">
         <h2 className="text-lg font-semibold text-foreground">Exportar dados</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Descarrega uma cópia dos teus dados (perfil, encomendas, bilhetes) em JSON.
@@ -129,7 +129,7 @@ export default function AccountLegal() {
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               placeholder="APAGAR CONTA"
-              className="mt-2 border-zinc-700 bg-zinc-950"
+              className="mt-2 border-neutral-200 bg-white"
               autoComplete="off"
             />
           </div>

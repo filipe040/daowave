@@ -46,36 +46,36 @@ export function DeleteOrgModal({ org, isOpen, onClose, onDeleted }: DeleteOrgMod
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="w-full max-w-lg bg-[#0a0a0a] border border-red-500/20 rounded-[28px] p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-sm">
+            <div className="w-full max-w-lg bg-white border border-red-200 rounded-[28px] p-8 shadow-2xl">
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                            <AlertTriangle className="h-5 w-5 text-red-400" />
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white">Apagar organização</h2>
-                            <p className="text-sm text-white/40 mt-0.5">Esta ação é permanente e irreversível.</p>
+                            <h2 className="text-lg font-bold text-neutral-900">Apagar organização</h2>
+                            <p className="text-sm text-neutral-500 mt-0.5">Esta ação é permanente e irreversível.</p>
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={handleClose}
                         disabled={isDeleting}
-                        className="p-2 rounded-lg text-white/30 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40"
+                        className="p-2 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 transition-all disabled:opacity-40"
                     >
                         <X className="h-4 w-4" />
                     </button>
                 </div>
 
                 <div className="space-y-4 mb-6">
-                    <p className="text-[13px] text-white/60 leading-relaxed">
-                        Serão apagados todos os dados de <span className="text-white font-bold">{org.name}</span>,
+                    <p className="text-[13px] text-neutral-600 leading-relaxed">
+                        Serão apagados todos os dados de <span className="text-neutral-900 font-bold">{org.name}</span>,
                         incluindo {eventCount} evento(s), encomendas, bilhetes, membros e convites.
                     </p>
-                    <p className="text-[13px] text-white/60">
+                    <p className="text-[13px] text-neutral-600">
                         Para confirmar, escreva o nome da organização:{" "}
-                        <span className="text-white font-bold">{org.name}</span>
+                        <span className="text-neutral-900 font-bold">{org.name}</span>
                     </p>
                     <input
                         type="text"
@@ -83,7 +83,7 @@ export function DeleteOrgModal({ org, isOpen, onClose, onDeleted }: DeleteOrgMod
                         onChange={(e) => setConfirmName(e.target.value)}
                         placeholder={org.name}
                         disabled={isDeleting}
-                        className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-[14px] placeholder:text-white/20 focus:outline-none focus:border-red-500/40 disabled:opacity-50"
+                        className="w-full h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 text-[14px] placeholder:text-neutral-400 focus:outline-none focus:border-red-400 disabled:opacity-50"
                     />
                 </div>
 
@@ -92,7 +92,7 @@ export function DeleteOrgModal({ org, isOpen, onClose, onDeleted }: DeleteOrgMod
                         type="button"
                         onClick={handleClose}
                         disabled={isDeleting}
-                        className="px-5 h-11 rounded-xl text-[13px] font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40"
+                        className="px-5 h-11 rounded-xl text-[13px] font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-all disabled:opacity-40"
                     >
                         Cancelar
                     </button>

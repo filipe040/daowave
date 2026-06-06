@@ -24,10 +24,10 @@ interface Order {
 }
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> = {
-    PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    PENDING: { label: "Pendente", className: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+    PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+    PENDING: { label: "Pendente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
     CANCELED: { label: "Cancelado", className: "bg-red-500/10 text-red-400 border-red-500/20" },
-    REFUNDED: { label: "Refunded", className: "bg-white/5 text-white/30 border-white/10" },
+    REFUNDED: { label: "Refunded", className: "bg-neutral-100 text-neutral-500 border-neutral-200" },
 };
 
 const fmt = (cents: number, currency = "EUR") =>
@@ -82,7 +82,7 @@ export default function PromoterSalesPage() {
             actions={
                 <button
                     onClick={handleExport}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
                 >
                     <Download className="w-4 h-4" />
                     Exportar CSV
@@ -93,25 +93,25 @@ export default function PromoterSalesPage() {
                 {/* Search & Filters */}
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                     <div className="relative w-full md:max-w-md group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-white/60 transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-focus-within:text-neutral-600 transition-colors" />
                         <input
                             type="text"
                             placeholder="Pesquisar por comprador, email ou evento..."
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all text-sm"
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-2xl py-3.5 pl-11 pr-4 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200 transition-all text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 no-scrollbar">
-                        <Filter className="w-4 h-4 text-white/20 shrink-0" />
+                        <Filter className="w-4 h-4 text-neutral-400 shrink-0" />
                         {["ALL", "PAID", "PENDING", "CANCELED"].map((s) => (
                             <button
                                 key={s}
                                 onClick={() => { setStatusFilter(s); setPage(1); }}
                                 className={`px-4 py-2 rounded-xl text-[12px] font-bold uppercase tracking-widest border transition-all whitespace-nowrap ${statusFilter === s
-                                    ? "bg-white text-black border-white"
-                                    : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10"
+                                    ? "bg-violet-600 text-white border-violet-600"
+                                    : "bg-neutral-50 text-neutral-500 border-neutral-200 hover:bg-neutral-100"
                                     }`}
                             >
                                 {s === "ALL" ? "Todos" : s === "PAID" ? "Pagos" : s === "PENDING" ? "Pendentes" : "Cancelados"}
@@ -143,8 +143,8 @@ export default function PromoterSalesPage() {
                             label: "Comprador",
                             render: (o) => (
                                 <div className="min-w-0 py-1">
-                                    <div className="font-bold text-white uppercase tracking-tight truncate">{o.buyerName || "Cliente"}</div>
-                                    <div className="text-[12px] text-white/30 truncate">{o.buyerEmail || ""}</div>
+                                    <div className="font-bold text-neutral-900 uppercase tracking-tight truncate">{o.buyerName || "Cliente"}</div>
+                                    <div className="text-[12px] text-neutral-400 truncate">{o.buyerEmail || ""}</div>
                                 </div>
                             ),
                         },
@@ -153,8 +153,8 @@ export default function PromoterSalesPage() {
                             label: "Evento / Bilhetes",
                             render: (o) => (
                                 <div className="min-w-0">
-                                    <div className="text-[13px] font-medium text-white/60 truncate">{o.event.title}</div>
-                                    <div className="text-[11px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
+                                    <div className="text-[13px] font-medium text-neutral-600 truncate">{o.event.title}</div>
+                                    <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mt-0.5">
                                         {o._count.tickets} BILHETE{o._count.tickets !== 1 ? "S" : ""}
                                     </div>
                                 </div>
@@ -164,7 +164,7 @@ export default function PromoterSalesPage() {
                             key: "totalCents",
                             label: "Total",
                             render: (o) => (
-                                <span className="font-black text-white">{fmt(o.totalCents, o.currency)}</span>
+                                <span className="font-black text-neutral-900">{fmt(o.totalCents, o.currency)}</span>
                             ),
                         },
                         {
@@ -183,7 +183,7 @@ export default function PromoterSalesPage() {
                             key: "createdAt",
                             label: "Data",
                             render: (o) => (
-                                <div className="text-[12px] font-medium text-white/40 tabular-nums">
+                                <div className="text-[12px] font-medium text-neutral-500 tabular-nums">
                                     {format(new Date(o.createdAt), "dd/MM/yyyy HH:mm", { locale: pt })}
                                 </div>
                             ),
@@ -192,7 +192,7 @@ export default function PromoterSalesPage() {
                     rowActions={(o) => (
                         <Link
                             href={`/promotor/sales/${o.id}`}
-                            className="p-3 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                            className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
                             title="Ver Detalhes"
                         >
                             <Eye className="w-4 h-4" />

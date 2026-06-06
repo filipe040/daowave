@@ -52,18 +52,18 @@ function Field({
   return (
     <div>
       <label className="flex items-center gap-1.5 text-sm font-semibold mb-2 text-zinc-200">
-        {Icon && <Icon className="h-4 w-4 text-zinc-400 shrink-0" />}
+        {Icon && <Icon className="h-4 w-4 text-neutral-500 shrink-0" />}
         {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
+        {required && <span className="text-red-600 ml-0.5">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-zinc-500 mt-1.5">{hint}</p>}
+      {hint && <p className="text-xs text-neutral-500 mt-1.5">{hint}</p>}
     </div>
   );
 }
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all hover:border-zinc-600";
+  "w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all hover:border-zinc-600";
 
 const EU_COUNTRIES = [
   "Portugal", "Espanha", "França", "Alemanha", "Itália", "Países Baixos",
@@ -132,7 +132,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       {/* Identity */}
       <section>
         <h2 className="text-base font-bold text-zinc-100 mb-4 flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-emerald-400" />
+          <Building2 className="h-4 w-4 text-emerald-600" />
           Identidade da Organização
         </h2>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -145,7 +145,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               placeholder="Ex: GoPass Produções"
               required
             />
-            {errors.name && <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{errors.name}</p>}
+            {errors.name && <p className="text-red-600 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{errors.name}</p>}
           </Field>
 
           <Field label="Razão Social" icon={FileText} hint="Nome legal completo para documentos fiscais">
@@ -156,7 +156,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={inputClass}
               placeholder="Ex: GoPass Produções, Lda."
             />
-            {errors.legalName && <p className="text-red-400 text-xs mt-1">{errors.legalName}</p>}
+            {errors.legalName && <p className="text-red-600 text-xs mt-1">{errors.legalName}</p>}
           </Field>
 
           <Field label="NIF / NIPC" icon={Hash} hint="Número de Identificação Fiscal">
@@ -168,7 +168,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               placeholder="Ex: 510 123 456"
               maxLength={20}
             />
-            {errors.vatNumber && <p className="text-red-400 text-xs mt-1">{errors.vatNumber}</p>}
+            {errors.vatNumber && <p className="text-red-600 text-xs mt-1">{errors.vatNumber}</p>}
           </Field>
 
           <Field label="Slug" hint="Identificador único (não editável)">
@@ -178,7 +178,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={`${inputClass} opacity-50 cursor-not-allowed`}
               disabled
             />
-            <p className="text-xs text-zinc-500 mt-1.5">Para alterar o slug contacte o suporte.</p>
+            <p className="text-xs text-neutral-500 mt-1.5">Para alterar o slug contacte o suporte.</p>
           </Field>
         </div>
       </section>
@@ -186,7 +186,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       {/* Contacts */}
       <section>
         <h2 className="text-base font-bold text-zinc-100 mb-4 flex items-center gap-2">
-          <Mail className="h-4 w-4 text-emerald-400" />
+          <Mail className="h-4 w-4 text-emerald-600" />
           Contactos
         </h2>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -198,7 +198,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={inputClass}
               placeholder="geral@minha-organizacao.pt"
             />
-            {errors.contactEmail && <p className="text-red-400 text-xs mt-1">{errors.contactEmail}</p>}
+            {errors.contactEmail && <p className="text-red-600 text-xs mt-1">{errors.contactEmail}</p>}
           </Field>
 
           <Field label="Telefone" icon={Phone}>
@@ -219,7 +219,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={inputClass}
               placeholder="https://minha-organizacao.pt"
             />
-            {errors.website && <p className="text-red-400 text-xs mt-1">{errors.website}</p>}
+            {errors.website && <p className="text-red-600 text-xs mt-1">{errors.website}</p>}
           </Field>
         </div>
       </section>
@@ -227,7 +227,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       {/* Location */}
       <section>
         <h2 className="text-base font-bold text-zinc-100 mb-4 flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-emerald-400" />
+          <MapPin className="h-4 w-4 text-emerald-600" />
           Localização
         </h2>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       {/* Branding */}
       <section>
         <h2 className="text-base font-bold text-zinc-100 mb-4 flex items-center gap-2">
-          <ImageIcon className="h-4 w-4 text-emerald-400" />
+          <ImageIcon className="h-4 w-4 text-emerald-600" />
           Branding
         </h2>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -270,12 +270,12 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={inputClass}
               placeholder="https://cdn.exemplo.com/logo.png"
             />
-            {errors.logoUrl && <p className="text-red-400 text-xs mt-1">{errors.logoUrl}</p>}
+            {errors.logoUrl && <p className="text-red-600 text-xs mt-1">{errors.logoUrl}</p>}
           </Field>
 
           {form.logoUrl && (
             <div className="flex items-center justify-center">
-              <div className="rounded-xl border border-zinc-700 bg-zinc-800/50 p-4 w-full flex items-center justify-center">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-100/50 p-4 w-full flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={form.logoUrl}
@@ -290,11 +290,11 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       </section>
 
       {/* Status badge */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-900/40">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-200 bg-neutral-50/40">
         <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${organization.status === "ACTIVE" ? "bg-emerald-400" :
             organization.status === "PENDING" ? "bg-amber-400" : "bg-zinc-500"
           }`} />
-        <span className="text-sm text-zinc-400">
+        <span className="text-sm text-neutral-500">
           Estado da organização:&nbsp;
           <span className="font-semibold text-zinc-200">
             {organization.status === "ACTIVE" ? "Ativa" :

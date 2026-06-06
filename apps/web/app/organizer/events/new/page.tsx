@@ -49,7 +49,7 @@ export default async function NewEventPage({
         <h1 className="text-3xl font-bold mb-2">
           {templateData ? `Criar Evento a partir de "${templateData.title}"` : "Criar Novo Evento"}
         </h1>
-        <p className="text-zinc-400">
+        <p className="text-neutral-500">
           {templateData
             ? "Ajuste os campos conforme necessário"
             : "Preencha todas as informações do evento"}

@@ -22,8 +22,8 @@ function slugify(str: string) {
         .replace(/\s+/g, "-");
 }
 
-const inputCls = "w-full rounded-2xl border border-white/10 bg-black/50 text-white placeholder:text-white/30 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner";
-const labelCls = "block text-[12px] font-bold text-white/50 uppercase tracking-[0.2em] mb-3";
+const inputCls = "w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner";
+const labelCls = "public-label text-[12px] font-bold tracking-[0.2em] mb-3";
 
 export default function CreateEventPage() {
     const router = useRouter();
@@ -89,8 +89,8 @@ export default function CreateEventPage() {
     if (loadingOrgs) return (
         <PageShell title="Criar Evento">
             <div className="max-w-2xl animate-pulse space-y-3">
-                <div className="h-10 bg-white/5 rounded-xl border border-white/10" />
-                <div className="h-64 bg-white/5 rounded-[32px] border border-white/10" />
+                <div className="h-10 bg-neutral-50 rounded-xl border border-neutral-200" />
+                <div className="h-64 bg-neutral-50 rounded-[32px] border border-neutral-200" />
             </div>
         </PageShell>
     );
@@ -108,15 +108,15 @@ export default function CreateEventPage() {
             title="Criar Evento"
             subtitle="Preencha os detalhes do novo evento"
             actions={
-                <Link href={`/promotor/events${orgId ? `?orgId=${orgId}` : ""}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-all hover:-translate-y-0.5 shadow-lg active:scale-95">
+                <Link href={`/promotor/events${orgId ? `?orgId=${orgId}` : ""}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border border-neutral-200 bg-neutral-50 text-neutral-900 hover:bg-neutral-100 transition-all hover:-translate-y-0.5 shadow-lg active:scale-95">
                     <ArrowLeft className="h-4 w-4" />
                     Voltar
                 </Link>
             }
         >
             <form onSubmit={handleSubmit} className="max-w-2xl">
-                <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden divide-y divide-white/5 relative">
-                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden divide-y divide-neutral-200 relative">
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
 
                     {/* Org selector — only if >1 */}
                     {orgs.length > 1 && (
@@ -143,7 +143,7 @@ export default function CreateEventPage() {
                             onChange={(e) => { setSlug(e.target.value); setSlugManual(true); }}
                             className={`${inputCls} font-mono`}
                         />
-                        <p className="mt-3 text-xs text-white/40 font-medium">Link do Evento: tickets.daowave.pt/events/<span className="text-white font-bold">{slug || "…"}</span></p>
+                        <p className="mt-3 text-xs text-neutral-500 font-medium">Link do Evento: tickets.daowave.pt/events/<span className="text-neutral-900 font-bold">{slug || "…"}</span></p>
                     </div>
 
                     <div className="px-6 py-5 grid grid-cols-2 gap-4">
@@ -175,7 +175,7 @@ export default function CreateEventPage() {
                                 href="https://www.google.com/maps"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300"
+                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 hover:text-amber-700"
                             >
                                 <MapPin className="h-3.5 w-3.5" />
                                 Abrir Google Maps
@@ -190,7 +190,7 @@ export default function CreateEventPage() {
                             onChange={(e) => setLocationUrl(e.target.value)}
                             className={inputCls}
                         />
-                        <p className="mt-2 text-xs text-white/40">Opcional. Cole o link partilhado do Google Maps — será usado no mapa da página pública.</p>
+                        <p className="mt-2 text-xs text-neutral-500">Opcional. Cole o link partilhado do Google Maps — será usado no mapa da página pública.</p>
                     </div>
 
                     <div className="px-6 py-5">
@@ -199,18 +199,18 @@ export default function CreateEventPage() {
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("STANDARD")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
                             >
-                                <p className="font-bold text-white text-[14px]">Evento clássico</p>
-                                <p className="text-xs text-white/40 mt-1">Uma página com todos os bilhetes do evento.</p>
+                                <p className="font-bold text-neutral-900 text-[14px]">Evento clássico</p>
+                                <p className="text-xs text-neutral-500 mt-1">Uma página com todos os bilhetes do evento.</p>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("ARTISTS")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
                             >
-                                <p className="font-bold text-white text-[14px]">Bilhetes por artista</p>
-                                <p className="text-xs text-white/40 mt-1">Grid de artistas com página individual e poster (estilo festival).</p>
+                                <p className="font-bold text-neutral-900 text-[14px]">Bilhetes por artista</p>
+                                <p className="text-xs text-neutral-500 mt-1">Grid de artistas com página individual e poster (estilo festival).</p>
                             </button>
                         </div>
                     </div>
@@ -226,11 +226,11 @@ export default function CreateEventPage() {
                         </div>
                     )}
 
-                    <div className="px-8 py-6 bg-black/40 flex justify-end">
+                    <div className="px-8 py-6 bg-neutral-50 flex justify-end">
                         <button
                             type="submit"
                             disabled={submitting || !orgId}
-                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-[0_12px_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 active:scale-95"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95"
                         >
                             <Save className="h-4 w-4" />
                             {submitting ? "A criar…" : "Criar Evento"}

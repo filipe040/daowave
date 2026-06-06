@@ -44,7 +44,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
     useEffect(() => { load(); }, [load]);
 
     return (
-        <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-[32px] overflow-hidden">
+        <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] overflow-hidden">
             <DataTable<TeamMember>
                 data={members}
                 loading={loading}
@@ -58,16 +58,16 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         label: "Membro",
                         render: (m) => (
                             <div className="flex items-center gap-3">
-                                <div className="relative w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5 overflow-hidden">
+                                <div className="relative w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center border border-neutral-200 overflow-hidden">
                                     {m.user.avatarUrl ? (
                                         <Image src={m.user.avatarUrl} alt={m.user.name || ""} fill className="object-cover" unoptimized />
                                     ) : (
-                                        <Users className="h-4 w-4 text-white/20" />
+                                        <Users className="h-4 w-4 text-neutral-400" />
                                     )}
                                 </div>
                                 <div>
-                                    <div className="font-bold text-white tracking-tight">{m.user.name || "Sem nome"}</div>
-                                    <div className="text-[11px] font-medium text-white/30 uppercase tracking-widest">{m.user.email}</div>
+                                    <div className="font-bold text-neutral-900 tracking-tight">{m.user.name || "Sem nome"}</div>
+                                    <div className="text-[11px] font-medium text-neutral-400 uppercase tracking-widest">{m.user.email}</div>
                                 </div>
                             </div>
                         ),
@@ -76,8 +76,8 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         key: "role",
                         label: "Cargo",
                         render: (m) => (
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[11px] font-bold text-white/60">
-                                <Shield className="h-3 w-3 text-white/20" />
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-50 border border-neutral-200 text-[11px] font-bold text-neutral-600">
+                                <Shield className="h-3 w-3 text-neutral-400" />
                                 {ROLE_LABELS[m.role] || m.role}
                             </div>
                         ),
@@ -88,7 +88,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         render: (m) => (
                             <div className={cn(
                                 "inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest",
-                                m.user.onboardingComplete ? "text-emerald-400" : "text-amber-400"
+                                m.user.onboardingComplete ? "text-emerald-600" : "text-amber-600"
                             )}>
                                 <div className={cn("w-1 h-1 rounded-full", m.user.onboardingComplete ? "bg-emerald-400" : "bg-amber-400")} />
                                 {m.user.onboardingComplete ? "Ativo" : "Pendente Onboarding"}
@@ -99,7 +99,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         key: "joined",
                         label: "Desde",
                         render: (m) => (
-                            <span className="text-[13px] font-medium text-white/20">
+                            <span className="text-[13px] font-medium text-neutral-400">
                                 {new Date(m.createdAt).toLocaleDateString("pt-PT")}
                             </span>
                         ),
@@ -108,7 +108,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                 rowActions={(m) => (
                     <button
                         onClick={() => toast.info("Remoção de membros em desenvolvimento")}
-                        className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-rose-500/10 text-white/20 hover:text-rose-500 transition-all"
+                        className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-rose-500/10 text-neutral-400 hover:text-rose-500 transition-all"
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>

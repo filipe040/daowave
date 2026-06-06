@@ -65,7 +65,7 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
         </div>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-background/50 p-6 space-y-6">
+      <section className="rounded-2xl border border-neutral-200 bg-background/50 p-6 space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <Label className="text-base font-medium text-foreground">Emails de conta</Label>
@@ -76,7 +76,7 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyEmail}
             onClick={() => setPrefs((p) => ({ ...p, notifyEmail: !p.notifyEmail }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${prefs.notifyEmail ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${prefs.notifyEmail ? "bg-primary border-primary" : "bg-neutral-200 border-neutral-300"
               }`}
             data-testid="switch-notify-email"
           >
@@ -97,7 +97,7 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyEventReminders}
             onClick={() => setPrefs((p) => ({ ...p, notifyEventReminders: !p.notifyEventReminders }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyEventReminders ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyEventReminders ? "bg-primary border-primary" : "bg-neutral-200 border-neutral-300"
               }`}
             data-testid="switch-notify-reminders"
           >
@@ -118,7 +118,7 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.notifyTransfers}
             onClick={() => setPrefs((p) => ({ ...p, notifyTransfers: !p.notifyTransfers }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyTransfers ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.notifyTransfers ? "bg-primary border-primary" : "bg-neutral-200 border-neutral-300"
               }`}
             data-testid="switch-notify-transfers"
           >
@@ -139,7 +139,7 @@ export default function AccountNotifications({ initialPrefs }: { initialPrefs: P
             role="switch"
             aria-checked={prefs.marketingOptIn}
             onClick={() => setPrefs((p) => ({ ...p, marketingOptIn: !p.marketingOptIn }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.marketingOptIn ? "bg-primary border-primary" : "bg-zinc-700 border-zinc-600"
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border transition-colors ${prefs.marketingOptIn ? "bg-primary border-primary" : "bg-neutral-200 border-neutral-300"
               }`}
             data-testid="switch-marketing"
           >

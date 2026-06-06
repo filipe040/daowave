@@ -189,6 +189,31 @@
   .auth-label {
     @apply block text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-500 font-semibold ml-1;
   }
+
+  /* Dashboard (promotor / admin) — light cards & surfaces */
+  .dash-card {
+    @apply rounded-3xl border border-neutral-200 bg-white shadow-md;
+  }
+
+  .dash-card-muted {
+    @apply rounded-3xl border border-neutral-200 bg-neutral-50;
+  }
+
+  .dash-input {
+    @apply public-input;
+  }
+
+  .dash-label {
+    @apply public-label;
+  }
+
+  .dash-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-violet-700 active:scale-[0.99];
+  }
+
+  .dash-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.99];
+  }
 }
 
 @layer utilities {

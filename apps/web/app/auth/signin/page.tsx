@@ -339,7 +339,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="min-h-screen mesh-gradient flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-white/10" />
+          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
         </div>
       }
     >

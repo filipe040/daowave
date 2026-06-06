@@ -62,24 +62,24 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
           {error}
         </div>
       )}
-      <div className="rounded-3xl border border-white/10 bg-black/40 p-4 sm:p-5 overflow-hidden">
+      <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-4 sm:p-5 overflow-hidden">
         <PaymentElement />
       </div>
-      <div className="flex items-start space-x-3 mt-4 bg-black/40 p-4 rounded-xl border border-white/10">
+      <div className="flex items-start space-x-3 mt-4 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
         <Checkbox
           id="terms"
           checked={acceptedTerms}
           onCheckedChange={(checked: boolean) => setAcceptedTerms(checked)}
-          className="mt-1 border-white/50"
+          className="mt-1 border-neutral-300"
         />
-        <label htmlFor="terms" className="text-sm text-white/70 leading-relaxed font-normal cursor-pointer">
-          Li e aceito os <Link href="/terms" target="_blank" className="text-emerald-400 hover:underline">Termos e Condições</Link> e a <Link href="/privacy" target="_blank" className="text-emerald-400 hover:underline">Política de Privacidade</Link>.
+        <label htmlFor="terms" className="text-sm text-neutral-600 leading-relaxed font-normal cursor-pointer">
+          Li e aceito os <Link href="/terms" target="_blank" className="text-emerald-600 hover:underline">Termos e Condições</Link> e a <Link href="/privacy" target="_blank" className="text-emerald-600 hover:underline">Política de Privacidade</Link>.
         </label>
       </div>
       <button
         type="submit"
         disabled={!stripe || loading || !acceptedTerms}
-        className="w-full rounded-full bg-white px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
+        className="w-full rounded-full bg-violet-600 px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-neutral-900 shadow-md transition-all hover:bg-violet-700 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -106,15 +106,15 @@ function CheckoutContent() {
   if (!clientSecret) {
     return (
       <div className="mx-auto max-w-2xl px-4 sm:px-0">
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-12 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+        <div className="rounded-3xl border border-neutral-200 bg-white shadow-md p-12 text-center shadow-md">
           <div className="mb-4 flex justify-center">
-            <AlertTriangle className="h-14 w-14 text-amber-400" strokeWidth={1.5} />
+            <AlertTriangle className="h-14 w-14 text-amber-600" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-semibold text-white/92 mb-2">Sessão de pagamento inválida</p>
-          <p className="text-[15px] text-white/55 mb-8">A sua sessão expirou ou é inválida.</p>
+          <p className="text-xl font-semibold text-neutral-900 mb-2">Sessão de pagamento inválida</p>
+          <p className="text-[15px] text-neutral-500 mb-8">A sua sessão expirou ou é inválida.</p>
           <a
             href="/events"
-            className="inline-block rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-black transition-all hover:scale-[1.03] active:scale-[0.98] shadow-[0_8px_32px_rgba(255,255,255,.18)]"
+            className="inline-block rounded-full bg-violet-600 px-6 py-3.5 text-[14px] font-bold text-white transition-all hover:bg-violet-700 hover:scale-[1.03] active:scale-[0.98] shadow-md"
           >
             Voltar aos eventos
           </a>
@@ -126,21 +126,21 @@ function CheckoutContent() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 mb-24">
       <div className="mb-8 space-y-2 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white/92">Checkout</h1>
-        <p className="text-base text-white/55">Complete o seu pagamento de forma segura</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900">Checkout</h1>
+        <p className="text-base text-neutral-500">Complete o seu pagamento de forma segura</p>
       </div>
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+      <div className="rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-md shadow-md">
         <Elements
           stripe={stripePromise}
           options={{
             clientSecret,
             appearance: {
-              theme: "night",
+              theme: "stripe",
               variables: {
-                colorPrimary: "#ffffff",
-                colorBackground: "#09090b",
-                colorText: "#ffffff",
-                colorDanger: "#ef4444",
+                colorPrimary: "#7c3aed",
+                colorBackground: "#ffffff",
+                colorText: "#171717",
+                colorDanger: "#dc2626",
                 fontFamily: "system-ui, sans-serif",
                 spacingUnit: "4px",
                 borderRadius: "16px",
@@ -159,8 +159,8 @@ export default function CheckoutPage() {
   return (
     <Suspense fallback={
       <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 text-center">
-        <h1 className="text-3xl font-bold text-white/92">Checkout</h1>
-        <p className="mt-2 text-sm text-white/55">A carregar interface segura...</p>
+        <h1 className="text-3xl font-bold text-neutral-900">Checkout</h1>
+        <p className="mt-2 text-sm text-neutral-500">A carregar interface segura...</p>
       </div>
     }>
       <CheckoutContent />

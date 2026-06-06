@@ -14,15 +14,14 @@ interface PageShellProps {
 export function PageShell({ title, subtitle, actions, children, backButton }: PageShellProps) {
     return (
         <div className="min-h-full bg-transparent">
-            {/* Page header */}
-            <div className="bg-transparent border-b border-white/5 px-4 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16">
+            <div className="border-b border-neutral-200/80 bg-white/60 backdrop-blur-sm px-4 sm:px-8 md:px-12 py-8 sm:py-10 md:py-12">
                 <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
                     {backButton && (
                         <a
                             href={backButton.href}
-                            className="inline-flex items-center gap-2 text-white/40 hover:text-white text-[13px] font-bold transition-colors group mb-2"
+                            className="inline-flex items-center gap-2 text-neutral-500 hover:text-violet-700 text-[13px] font-bold transition-colors group mb-2"
                         >
-                            <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/5 group-hover:bg-white group-hover:text-black transition-all">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-neutral-100 group-hover:bg-violet-600 group-hover:text-white transition-all">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                                 </svg>
@@ -32,11 +31,11 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
                     )}
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div className="min-w-0 space-y-2">
-                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight -ml-1">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-neutral-900 tracking-tight">
                                 {title}
                             </h1>
                             {subtitle && (
-                                <div className="text-[14px] sm:text-[16px] md:text-[18px] text-white/40 font-medium leading-relaxed max-w-2xl">{subtitle}</div>
+                                <div className="text-[14px] sm:text-[16px] md:text-[17px] text-neutral-500 font-medium leading-relaxed max-w-2xl">{subtitle}</div>
                             )}
                         </div>
                         {actions && (
@@ -48,7 +47,6 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
                 </div>
             </div>
 
-            {/* Page content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-10 py-6 sm:py-8 space-y-6 sm:space-y-8">
                 {children}
             </div>
