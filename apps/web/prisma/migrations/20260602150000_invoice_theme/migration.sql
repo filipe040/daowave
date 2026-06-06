@@ -1,3 +1,3 @@
--- Personalização de faturas por organização e evento
-ALTER TABLE "Organization" ADD COLUMN "invoiceThemeJson" JSONB;
-ALTER TABLE "Event" ADD COLUMN "invoiceThemeJson" JSONB;
+-- Personalização de faturas por organização e evento (MySQL/MariaDB)
+ALTER TABLE `Organization` ADD COLUMN `invoiceThemeJson` JSON NULL;
+ALTER TABLE `Event` ADD COLUMN `invoiceThemeJson` JSON NULL;
