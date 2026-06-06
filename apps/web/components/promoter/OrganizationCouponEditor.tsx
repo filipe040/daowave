@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { toDatetimeLocalLisbon } from "@/lib/datetime/lisbon";
 
 const inputCls = "public-input px-5 py-3 text-sm";
 const labelCls = "public-label mb-2";
@@ -70,9 +71,7 @@ function formatDiscount(coupon: CouponData) {
 }
 
 function toDatetimeLocal(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return toDatetimeLocalLisbon(iso);
 }
 
 function emptyForm() {
@@ -86,8 +85,8 @@ function emptyForm() {
     discountValuePercent: 10,
     discountValueEuros: 5,
     maxUses: "",
-    startsAt: toDatetimeLocal(now.toISOString()),
-    endsAt: toDatetimeLocal(in30.toISOString()),
+    startsAt: toDatetimeLocalLisbon(now.toISOString()),
+    endsAt: toDatetimeLocalLisbon(in30.toISOString()),
     isActive: true,
     assignedMemberId: "",
     commissionEuros: 2,

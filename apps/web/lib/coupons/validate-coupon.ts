@@ -1,25 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import type { Coupon } from "@prisma/client";
 
+import { parseDatetimeLocalLisbon } from "../datetime/lisbon";
+
 export function normalizeCouponCode(code: string): string {
   return code.toUpperCase().trim().replace(/\s/g, "");
 }
 
-/** Interpreta datetime-local (YYYY-MM-DDTHH:mm) de forma consistente no servidor. */
+/** Interpreta datetime-local como hora de Portugal (Europe/Lisbon). */
 export function parseCouponDatetimeLocal(value: string, boundary: "start" | "end"): Date {
-  const [datePart, timePart = "00:00"] = value.split("T");
-  const [year, month, day] = datePart.split("-").map(Number);
-  const [hours, minutes] = timePart.split(":").map(Number);
-
-  return new Date(
-    year,
-    month - 1,
-    day,
-    hours,
-    minutes,
-    boundary === "end" ? 59 : 0,
-    boundary === "end" ? 999 : 0
-  );
+  return parseDatetimeLocalLisbon(value, boundary);
 }
 
 export function isWithinCouponPeriod(
