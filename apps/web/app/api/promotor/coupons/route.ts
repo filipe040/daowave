@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { requirePromoter } from "@/lib/auth/guards";
+import { canManageOrganizationCoupon, requirePromoter } from "@/lib/auth/guards";
 
 const CouponSchema = z.object({
   eventId: z.string().uuid(),
@@ -30,10 +30,28 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const { orgId } = await requirePromoter();
+    const { session, orgId, role } = await requirePromoter();
 
     if (!orgId) {
       return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
+    }
+
+    if (!canManageOrganizationCoupon(session, role)) {
+      return NextResponse.json(
+        { error: "Apenas o proprietário da organização ou um administrador pode criar cupões." },
+        { status: 403 }
+      );
+    }
+
+    const existingOrgCoupon = await prisma.coupon.findUnique({
+      where: { organizationId: orgId },
+    });
+
+    if (existingOrgCoupon) {
+      return NextResponse.json(
+        { error: "Esta organização já tem um cupão. Edite ou elimine o existente." },
+        { status: 400 }
+      );
     }
 
     const body = await req.json();
@@ -53,11 +71,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const existingCoupon = await prisma.coupon.findUnique({
+    const existingCode = await prisma.coupon.findUnique({
       where: { code: data.code },
     });
 
-    if (existingCoupon) {
+    if (existingCode) {
       return NextResponse.json(
         { error: "Código já existe" },
         { status: 400 }
@@ -66,6 +84,7 @@ export async function POST(req: Request) {
 
     const coupon = await prisma.coupon.create({
       data: {
+        organizationId: orgId,
         eventId: data.eventId,
         code: data.code,
         discountType: data.discountType,
@@ -73,6 +92,11 @@ export async function POST(req: Request) {
         maxUses: data.maxUses,
         startsAt: new Date(data.startsAt),
         endsAt: new Date(data.endsAt),
+      },
+      include: {
+        event: {
+          select: { title: true, slug: true },
+        },
       },
     });
 
@@ -94,18 +118,14 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const { orgId } = await requirePromoter();
+    const { session, orgId, role } = await requirePromoter();
 
     if (!orgId) {
-      return NextResponse.json({ coupons: [] });
+      return NextResponse.json({ coupon: null, coupons: [], canManage: false });
     }
 
-    const coupons = await prisma.coupon.findMany({
-      where: {
-        event: {
-          organizationId: orgId,
-        },
-      },
+    const coupon = await prisma.coupon.findUnique({
+      where: { organizationId: orgId },
       include: {
         event: {
           select: {
@@ -114,12 +134,17 @@ export async function GET() {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ coupons });
+    const canManage = canManageOrganizationCoupon(session, role);
+
+    return NextResponse.json({
+      coupon,
+      coupons: coupon ? [coupon] : [],
+      canManage,
+    });
   } catch (error) {
     console.error("Error fetching coupons:", error);
-    return NextResponse.json({ coupons: [] });
+    return NextResponse.json({ coupon: null, coupons: [], canManage: false });
   }
 }

@@ -16,6 +16,7 @@ import {
     Layers,
     CircleDollarSign,
     FileText,
+    Tag,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -29,6 +30,7 @@ const routes = [
     { label: "Finanças", icon: Banknote, href: "/promotor/finance" },
     { label: "Design Bilhetes", icon: Layers, href: "/promotor/settings/tickets" },
     { label: "Design Faturas", icon: FileText, href: "/promotor/settings/invoices" },
+    { label: "Cupão de desconto", icon: Tag, href: "/promotor/settings/coupon" },
     { label: "Equipa", icon: Users, href: "/promotor/team" },
     { label: "Definições", icon: Settings, href: "/promotor/settings" },
 ];

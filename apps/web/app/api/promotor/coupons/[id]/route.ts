@@ -5,12 +5,12 @@
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { canManageOrganizationCoupon, requirePromoter } from "@/lib/auth/guards";
 
 const UpdateCouponSchema = z.object({
+  eventId: z.string().uuid().optional(),
   discountType: z.enum(["PERCENTAGE", "FIXED"]),
   discountValue: z.number().positive(),
   maxUses: z.number().positive().nullable(),
@@ -34,32 +34,11 @@ const UpdateCouponSchema = z.object({
 
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || (session.user as { role?: string }).role !== "PROMOTER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
-  const organizer = await prisma.promoterProfile.findUnique({
-    where: { userId: session.user.id },
-  });
-
-  if (!organizer) {
-    return NextResponse.json({ error: "Promoter not found" }, { status: 404 });
-  }
-
-  const coupon = await prisma.coupon.findFirst({
+async function getOrgCoupon(id: string, orgId: string) {
+  return prisma.coupon.findFirst({
     where: {
       id,
-      event: {
-        promoterId: organizer.id,
-      },
+      organizationId: orgId,
     },
     include: {
       event: {
@@ -70,50 +49,57 @@ export async function GET(
       },
     },
   });
+}
 
-  if (!coupon) {
-    return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { orgId } = await requirePromoter();
+    const { id } = await params;
+
+    if (!orgId) {
+      return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
+    }
+
+    const coupon = await getOrgCoupon(id, orgId);
+
+    if (!coupon) {
+      return NextResponse.json({ error: "Cupão não encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json({ coupon });
+  } catch (error) {
+    console.error("Error fetching coupon:", error);
+    return NextResponse.json({ error: "Erro ao carregar cupão" }, { status: 500 });
   }
-
-  return NextResponse.json({ coupon });
 }
 
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || (session.user as { role?: string }).role !== "PROMOTER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
   try {
-    const organizer = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
+    const { session, orgId, role } = await requirePromoter();
+    const { id } = await params;
 
-    if (!organizer || organizer.status !== "APPROVED") {
+    if (!orgId) {
+      return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
+    }
+
+    if (!canManageOrganizationCoupon(session, role)) {
       return NextResponse.json(
-        { error: "Promoter not approved" },
+        { error: "Apenas o proprietário da organização ou um administrador pode editar cupões." },
         { status: 403 }
       );
     }
 
-    const existingCoupon = await prisma.coupon.findFirst({
-      where: {
-        id,
-        event: {
-          promoterId: organizer.id,
-        },
-      },
-    });
+    const existingCoupon = await getOrgCoupon(id, orgId);
 
     if (!existingCoupon) {
       return NextResponse.json(
-        { error: "Coupon not found or access denied" },
+        { error: "Cupão não encontrado ou acesso negado" },
         { status: 404 }
       );
     }
@@ -121,15 +107,37 @@ export async function PUT(
     const body = await req.json();
     const data = UpdateCouponSchema.parse(body);
 
+    if (data.eventId && data.eventId !== existingCoupon.eventId) {
+      const event = await prisma.event.findFirst({
+        where: {
+          id: data.eventId,
+          organizationId: orgId,
+        },
+      });
+
+      if (!event) {
+        return NextResponse.json(
+          { error: "Evento não encontrado ou acesso negado." },
+          { status: 404 }
+        );
+      }
+    }
+
     const coupon = await prisma.coupon.update({
       where: { id },
       data: {
+        ...(data.eventId ? { eventId: data.eventId } : {}),
         discountType: data.discountType,
         discountValue: data.discountValue,
         maxUses: data.maxUses,
         startsAt: new Date(data.startsAt),
         endsAt: new Date(data.endsAt),
         isActive: data.isActive,
+      },
+      include: {
+        event: {
+          select: { title: true, slug: true },
+        },
       },
     });
 
@@ -144,45 +152,36 @@ export async function PUT(
 
     console.error("Error updating coupon:", error);
     return NextResponse.json(
-      { error: "Failed to update coupon" },
+      { error: "Erro ao atualizar cupão" },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-
-  if (!session || (session.user as { role?: string }).role !== "PROMOTER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
   try {
-    const organizer = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
+    const { session, orgId, role } = await requirePromoter();
+    const { id } = await params;
 
-    if (!organizer) {
-      return NextResponse.json({ error: "Promoter not found" }, { status: 404 });
+    if (!orgId) {
+      return NextResponse.json({ error: "Organização não encontrada." }, { status: 404 });
     }
 
-    const coupon = await prisma.coupon.findFirst({
-      where: {
-        id,
-        event: {
-          promoterId: organizer.id,
-        },
-      },
-    });
+    if (!canManageOrganizationCoupon(session, role)) {
+      return NextResponse.json(
+        { error: "Apenas o proprietário da organização ou um administrador pode eliminar cupões." },
+        { status: 403 }
+      );
+    }
+
+    const coupon = await getOrgCoupon(id, orgId);
 
     if (!coupon) {
       return NextResponse.json(
-        { error: "Coupon not found or access denied" },
+        { error: "Cupão não encontrado ou acesso negado" },
         { status: 404 }
       );
     }
@@ -195,7 +194,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Error deleting coupon:", error);
     return NextResponse.json(
-      { error: "Failed to delete coupon" },
+      { error: "Erro ao eliminar cupão" },
       { status: 500 }
     );
   }

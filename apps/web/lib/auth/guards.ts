@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { can, type PermissionScope } from "./scopes";
 import { prisma } from "../prisma";
 import { MemberRole } from "@prisma/client";
+import type { Session } from "next-auth";
 
 /**
  * requireAuth: Basic guard to ensure user is logged in.
@@ -98,4 +99,15 @@ export async function getOrgContext() {
     });
 
     return membership;
+}
+
+/** Apenas owner da organização ou administrador global podem gerir cupões. */
+export function canManageOrganizationCoupon(
+    session: Session,
+    memberRole: MemberRole | null | undefined
+): boolean {
+    const globalRole = (session.user as { role?: string })?.role;
+    if (globalRole === "ADMIN") return true;
+    if (!memberRole) return false;
+    return memberRole === MemberRole.PROMOTER_OWNER || memberRole === MemberRole.OWNER;
 }

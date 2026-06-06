@@ -132,6 +132,7 @@ model Organization {
   ticketTemplates      OrganizationTicketTemplate[]
   ticketTemplateAssets TicketTemplateAsset[]
   ticketSnapshots      TicketRenderSnapshot[]
+  coupon               Coupon?
 
   @@index([slug])
   @@index([status])
@@ -844,21 +845,23 @@ enum CouponDiscountType {
 }
 
 model Coupon {
-  id            String              @id @default(uuid())
-  eventId       String
-  code          String              @unique
-  discountType  CouponDiscountType
-  discountValue Int
-  maxUses       Int?
-  usedCount     Int                 @default(0)
-  isActive      Boolean             @default(true)
-  startsAt      DateTime
-  endsAt        DateTime
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @default(now()) @updatedAt
-  
-  event         Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
+  id             String              @id @default(uuid())
+  organizationId String              @unique
+  eventId        String
+  code           String              @unique
+  discountType   CouponDiscountType
+  discountValue  Int
+  maxUses        Int?
+  usedCount      Int                 @default(0)
+  isActive       Boolean             @default(true)
+  startsAt       DateTime
+  endsAt         DateTime
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @default(now()) @updatedAt
+
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  event          Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
   @@index([eventId])
   @@index([code])
 }
