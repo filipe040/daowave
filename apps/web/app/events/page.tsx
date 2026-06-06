@@ -6,7 +6,7 @@ import { pt } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import EventsSearch from "../components/events-search";
-import { CITIES_PT, cityMatchValues } from "../constants/cities";
+import { cityMatchValues, getCitiesWithPublishedEvents } from "@/lib/events/public-event-cities";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -63,17 +63,7 @@ async function getEvents(searchParams: { search?: string; city?: string }) {
 }
 
 async function getCities() {
-  const events = await prisma.event
-    .findMany({
-      where: { status: "PUBLISHED", archivedAt: null, endAt: { gte: new Date() } },
-      select: { city: true },
-      distinct: ["city"],
-    })
-    .catch(() => []);
-  const dbCities = events.map((e) => e.city).filter(Boolean);
-  const citySet = new Set(CITIES_PT.map((c) => c.toLowerCase()));
-  const extra = dbCities.filter((c) => !citySet.has(c.toLowerCase()));
-  return [...CITIES_PT, ...extra].sort((a, b) => a.localeCompare(b, "pt-PT"));
+  return getCitiesWithPublishedEvents();
 }
 
 function formatPrice(cents: number) {

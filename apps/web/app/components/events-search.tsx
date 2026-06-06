@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition, useEffect, useRef, useCallback } from "react";
-import { CITIES_PT } from "@/app/constants/cities";
 
 interface EventsSearchProps {
   cities?: string[];
@@ -28,10 +27,13 @@ export default function EventsSearch({
   const [, startTransition] = useTransition();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const cityOptions =
-    cities.length > 0
-      ? cities
-      : [...CITIES_PT].sort((a, b) => a.localeCompare(b, "pt-PT"));
+  const cityOptions = [...cities].sort((a, b) => a.localeCompare(b, "pt-PT"));
+  const displayCityOptions =
+    city &&
+    city !== "ALL PORTUGAL" &&
+    !cityOptions.some((c) => c.toLocaleLowerCase("pt-PT") === city.toLocaleLowerCase("pt-PT"))
+      ? [...cityOptions, city].sort((a, b) => a.localeCompare(b, "pt-PT"))
+      : cityOptions;
 
   const pushFilters = useCallback(
     (nextSearch: string, nextCity: string) => {
@@ -103,26 +105,28 @@ export default function EventsSearch({
           />
         </div>
 
-        <div className="relative bg-white border border-neutral-200 rounded-2xl shadow-sm min-w-0 sm:min-w-[180px]">
-          <div className="absolute left-4 top-2 text-[10px] text-neutral-400 uppercase tracking-wider pointer-events-none font-semibold">
-            Cidade
+        {cityOptions.length > 0 ? (
+          <div className="relative bg-white border border-neutral-200 rounded-2xl shadow-sm min-w-0 sm:min-w-[180px]">
+            <div className="absolute left-4 top-2 text-[10px] text-neutral-400 uppercase tracking-wider pointer-events-none font-semibold">
+              Cidade
+            </div>
+            <select
+              value={city}
+              onChange={(e) => handleCityChange(e.target.value)}
+              className="w-full bg-transparent border-0 rounded-2xl px-4 pt-6 pb-3 text-neutral-900 focus:outline-none appearance-none cursor-pointer pr-10 text-sm font-semibold"
+            >
+              <option value="ALL PORTUGAL">Todo Portugal</option>
+              {displayCityOptions.map((cityName) => (
+                <option key={cityName} value={cityName}>
+                  {cityName}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+              {chevron}
+            </div>
           </div>
-          <select
-            value={city}
-            onChange={(e) => handleCityChange(e.target.value)}
-            className="w-full bg-transparent border-0 rounded-2xl px-4 pt-6 pb-3 text-neutral-900 focus:outline-none appearance-none cursor-pointer pr-10 text-sm font-semibold"
-          >
-            <option value="ALL PORTUGAL">Todo Portugal</option>
-            {cityOptions.map((cityName) => (
-              <option key={cityName} value={cityName}>
-                {cityName}
-              </option>
-            ))}
-          </select>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
-            {chevron}
-          </div>
-        </div>
+        ) : null}
       </div>
 
       {hasFilters && (

@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { cityMatchValues } from '@/app/constants/cities';
+import { cityMatchValues } from '@/lib/events/public-event-cities';
 
 export const dynamic = 'force-dynamic';
 

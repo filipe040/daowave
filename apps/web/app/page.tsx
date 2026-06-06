@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import EventsSearch from "./components/events-search";
 import PromoterLink from "./components/PromoterLink";
-import { CITIES_PT, cityMatchValues } from "./constants/cities";
+import { cityMatchValues, getCitiesWithPublishedEvents } from "@/lib/events/public-event-cities";
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Ticket, Users, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -72,17 +72,7 @@ async function getStats() {
 }
 
 async function getCities() {
-  const events = await prisma.event
-    .findMany({
-      where: { status: "PUBLISHED", archivedAt: null, endAt: { gte: new Date() } },
-      select: { city: true },
-      distinct: ["city"],
-    })
-    .catch(() => []);
-  const dbCities = events.map((e) => e.city).filter(Boolean);
-  const citySet = new Set(CITIES_PT.map((c) => c.toLowerCase()));
-  const extra = dbCities.filter((c) => !citySet.has(c.toLowerCase()));
-  return [...CITIES_PT, ...extra].sort((a, b) => a.localeCompare(b, "pt-PT"));
+  return getCitiesWithPublishedEvents();
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

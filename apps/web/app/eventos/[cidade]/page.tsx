@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { cityMatchValues } from "@/app/constants/cities";
+import { cityMatchValues } from "@/lib/events/public-event-cities";
 import { ArrowLeft, Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
 
 export const dynamic = "force-dynamic";
