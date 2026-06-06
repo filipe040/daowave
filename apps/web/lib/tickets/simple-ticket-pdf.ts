@@ -20,7 +20,7 @@ export async function generateSimpleTicketPDF(params: {
   preset?: TicketTemplatePreset;
 }): Promise<Buffer> {
   const qrDataUrl = params.qrPayload
-    ? await QRCode.toDataURL(params.qrPayload, { width: 480, margin: 2, errorCorrectionLevel: "M" })
+    ? await QRCode.toDataURL(params.qrPayload, { width: 256, margin: 1, errorCorrectionLevel: "M" })
     : null;
 
   return new Promise((resolve, reject) => {
@@ -46,7 +46,7 @@ export async function generateSimpleTicketPDF(params: {
 
     if (qrDataUrl) {
       const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-      const qrSize = 180;
+      const qrSize = params.preset === "MOBILE_PASS" ? 120 : params.preset === "HORIZONTAL_QR_RIGHT" ? 110 : 130;
       const qrX = (doc.page.width - qrSize) / 2;
       const qrY = doc.y;
       doc.image(Buffer.from(qrBase64, "base64"), qrX, qrY, { width: qrSize, height: qrSize });

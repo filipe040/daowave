@@ -343,8 +343,8 @@ export const TicketRenderService = {
     const theme = await inlineThemeLogo(baseTheme);
     const qrSize = qrDisplaySizePx(theme.qr.size);
     const qrDataUrl = await QRCode.toDataURL(model.ticket.qrPayload || model.ticket.code, {
-      width: qrSize * 3,
-      margin: 2,
+      width: qrSize * 2,
+      margin: 1,
       errorCorrectionLevel: "M",
     });
 

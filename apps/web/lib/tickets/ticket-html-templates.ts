@@ -10,11 +10,11 @@ function formatDateCompact(date: Date) {
 export function qrDisplaySizePx(size: ThemeJson["qr"]["size"]): number {
   switch (size) {
     case "L":
-      return 200;
-    case "M":
       return 160;
+    case "M":
+      return 128;
     default:
-      return 120;
+      return 96;
   }
 }
 
@@ -27,6 +27,10 @@ function qrImg(model: TicketRenderModel, size: number) {
     return model.ticket.qrDataUrl;
   }
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(model.ticket.qrPayload)}`;
+}
+
+function qrImgHtml(model: TicketRenderModel, size: number) {
+  return `<img src="${qrImg(model, size)}" class="qr-code" width="${size}" height="${size}" style="width:${size}px;height:${size}px;max-width:${size}px;max-height:${size}px;" alt="QR" />`;
 }
 
 function baseStyles(theme: ThemeJson, extra = "") {
@@ -89,11 +93,11 @@ function baseStyles(theme: ThemeJson, extra = "") {
     .logo { max-height: 56px; max-width: 180px; object-fit: contain; }
     .qr-code {
       display: block;
-      width: auto;
-      height: auto;
-      max-width: 100%;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      object-fit: contain;
       background: #fff;
-      padding: 12px;
+      padding: 10px;
       border-radius: 12px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     }
@@ -190,7 +194,7 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
             ${infoBlocks(theme, model)}
           </div>
           <div class="qr-section">
-            <img src="${qrImg(model, qr)}" width="${qr}" height="${qr}" class="qr-code" alt="QR" />
+            ${qrImgHtml(model, qr)}
             <div class="qr-label">${theme.qr.label || "Validar na entrada"}</div>
           </div>
           <div class="footer">${footerBlocks(theme, model)}</div>
@@ -254,7 +258,7 @@ function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): st
             <div class="footer">${footerBlocks(theme, model)}</div>
           </div>
           <div class="qr-col">
-            <img src="${qrImg(model, qr)}" width="${qr}" height="${qr}" class="qr-code" alt="QR" />
+            ${qrImgHtml(model, qr)}
             <div class="qr-label">${theme.qr.label || "Validar na entrada"}</div>
           </div>
         </div>
@@ -270,12 +274,13 @@ function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): st
     .horizontal-layout { display: flex; align-items: stretch; }
     .main-col { flex: 1; padding: 20px 24px; display: flex; flex-direction: column; min-width: 0; }
     .qr-col {
-      width: 46%; min-width: 46%;
+      flex-shrink: 0;
+      width: auto;
       background: linear-gradient(160deg, ${theme.colors.primary}18, ${theme.colors.bg});
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 20px 16px; border-left: 1px dashed ${theme.colors.muted}44;
     }
-    .qr-col .qr-code { padding: 14px; }
+    .qr-col .qr-code { padding: 10px; }
     .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
     .org-name { font-weight: 700; font-size: 16px; }
     .ticket-code { font-family: monospace; font-size: 14px; font-weight: 700; color: ${theme.colors.primary}; flex-shrink: 0; }
@@ -304,7 +309,7 @@ function renderMobilePass(model: TicketRenderModel, theme: ThemeJson): string {
             ${theme.blocks.showTicketType ? `<div><span class="label">Tipo</span><span class="value">${model.ticketLot.name}</span></div>` : ""}
           </div>
           <div class="pass-qr">
-            <img src="${qrImg(model, qr)}" width="${qr}" height="${qr}" class="qr-code" alt="QR" />
+            ${qrImgHtml(model, qr)}
             <div class="qr-label">${theme.qr.label || "Validar na entrada"}</div>
             <div class="pass-code">${model.ticket.code}</div>
           </div>
