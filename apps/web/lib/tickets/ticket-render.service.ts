@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatus } from "../ticket-templates/models";
 import crypto from "crypto";
 import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
-import { renderTicketHtml } from "./ticket-html-templates";
+import { renderTicketHtml, qrDisplaySizePx } from "./ticket-html-templates";
 import { tryRenderHtmlToPdf } from "../pdf/html-to-pdf";
 import { urlToDataUri } from "../pdf/inline-assets";
 import { safeLog } from "../security";
@@ -18,7 +18,7 @@ const DEFAULT_THEME: ThemeJson = {
     muted: "#666666",
   },
   typography: { fontFamily: "Inter" },
-  qr: { size: "M", label: "Validar na entrada" },
+  qr: { size: "L", label: "Validar na entrada" },
   blocks: {
     showBuyerName: true,
     showOrderId: true,
@@ -82,10 +82,6 @@ async function inlineThemeLogo(theme: ThemeJson): Promise<ThemeJson> {
     ...theme,
     brand: { ...theme.brand, logoUrl: inlined },
   };
-}
-
-function qrSizePx(size: ThemeJson["qr"]["size"]) {
-  return size === "L" ? 200 : size === "M" ? 150 : 100;
 }
 
 export const TicketRenderService = {
@@ -345,10 +341,11 @@ export const TicketRenderService = {
       : await this.resolveLiveRenderContext(ticketId);
 
     const theme = await inlineThemeLogo(baseTheme);
-    const qrSize = qrSizePx(theme.qr.size);
+    const qrSize = qrDisplaySizePx(theme.qr.size);
     const qrDataUrl = await QRCode.toDataURL(model.ticket.qrPayload || model.ticket.code, {
-      width: qrSize * 2,
-      margin: 1,
+      width: qrSize * 4,
+      margin: 2,
+      errorCorrectionLevel: "M",
     });
 
     const modelForHtml: TicketRenderModel = {

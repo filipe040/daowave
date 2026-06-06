@@ -2,12 +2,24 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { ThemeJson, TicketRenderModel, TicketTemplatePreset } from "../ticket-templates/models";
 
-function formatDate(date: Date) {
-  return format(date, "EEEE, d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: pt });
+function formatDateCompact(date: Date) {
+  return format(date, "d MMM yyyy · HH:mm", { locale: pt });
+}
+
+/** Tamanho de exibição do QR (px) — optimizado para leitura em PDF/email */
+export function qrDisplaySizePx(size: ThemeJson["qr"]["size"]): number {
+  switch (size) {
+    case "L":
+      return 300;
+    case "M":
+      return 240;
+    default:
+      return 180;
+  }
 }
 
 function qrSizePx(size: ThemeJson["qr"]["size"]) {
-  return size === "L" ? 200 : size === "M" ? 150 : 100;
+  return qrDisplaySizePx(size);
 }
 
 function qrImg(model: TicketRenderModel, size: number) {
@@ -32,6 +44,12 @@ function baseStyles(theme: ThemeJson, extra = "") {
       : "1px solid rgba(0,0,0,0.06)";
 
   return `
+    @page { size: A4 portrait; margin: 0; }
+    html, body {
+      width: 210mm;
+      max-height: 297mm;
+      overflow: hidden;
+    }
     body {
       font-family: '${theme.typography.fontFamily}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
@@ -40,6 +58,10 @@ function baseStyles(theme: ThemeJson, extra = "") {
       color: ${theme.colors.text};
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+    }
+    .ticket-page {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .accent-bar {
       height: 6px;
@@ -65,8 +87,12 @@ function baseStyles(theme: ThemeJson, extra = "") {
     }
     .logo { max-height: 56px; max-width: 180px; object-fit: contain; }
     .qr-code {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
       background: #fff;
-      padding: 10px;
+      padding: 12px;
       border-radius: 12px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     }
@@ -136,7 +162,7 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
         : `<div class="accent-bar"></div>`;
 
   const body = `
-    <div class="ticket-container">
+    <div class="ticket-page ticket-container">
       <div class="card">
         ${accent}
         <div class="card-inner">
@@ -158,7 +184,7 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
             </div>
             <div class="info-item">
               <div class="label">Data e Hora</div>
-              <div class="value">${formatDate(model.event.startAt)}</div>
+              <div class="value">${formatDateCompact(model.event.startAt)}</div>
             </div>
             ${infoBlocks(theme, model)}
           </div>
@@ -176,7 +202,11 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
 
   return wrapHtml(model.event.title, theme, body, `
     .ticket-container {
-      width: 210mm; min-height: 297mm; padding: 16mm; box-sizing: border-box;
+      box-sizing: border-box;
+      width: 210mm;
+      max-height: 297mm;
+      padding: 8mm 10mm;
+      margin: 0;
     }
     .card {
       background: ${theme.colors.card};
@@ -184,21 +214,28 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
       overflow: hidden;
       box-shadow: ${theme.layout?.cardStyle === "flat" ? "none" : "0 8px 32px rgba(0,0,0,0.08)"};
       border: ${theme.layout?.cardStyle === "bordered" ? `2px solid ${theme.colors.primary}44` : "1px solid rgba(0,0,0,0.06)"};
-      min-height: calc(297mm - 32mm);
-      display: flex; flex-direction: column;
+      display: flex;
+      flex-direction: column;
     }
-    .card-inner { padding: 28px 32px; flex: 1; display: flex; flex-direction: column; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; }
-    .event-title { font-size: 30px; font-weight: 700; margin: 0 0 24px; color: ${theme.colors.primary}; line-height: 1.15; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; margin-bottom: 28px; }
-    .qr-section { margin-top: auto; padding-top: 28px; border-top: 1px dashed ${theme.colors.muted}55; display: flex; flex-direction: column; align-items: center; }
+    .card-inner { padding: 20px 24px 16px; display: flex; flex-direction: column; gap: 0; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; }
+    .event-title { font-size: 24px; font-weight: 700; margin: 0 0 16px; color: ${theme.colors.primary}; line-height: 1.2; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-bottom: 12px; }
+    .qr-section {
+      padding: 16px 0 8px;
+      border-top: 1px dashed ${theme.colors.muted}55;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .footer { margin-top: 8px; padding-top: 4px; }
   `);
 }
 
 function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): string {
-  const qr = qrSizePx(theme.qr.size) + 40;
+  const qr = qrSizePx(theme.qr.size);
   const body = `
-    <div class="ticket-container">
+    <div class="ticket-page ticket-container">
       <div class="card">
         <div class="accent-bar"></div>
         <div class="horizontal-layout">
@@ -211,7 +248,7 @@ function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): st
             <h1 class="event-title">${model.event.title}</h1>
             <div class="info-stack">
               <div><div class="label">Local</div><div class="value">${model.event.venue}, ${model.event.city}</div></div>
-              <div><div class="label">Data</div><div class="value">${formatDate(model.event.startAt)}</div></div>
+              <div><div class="label">Data</div><div class="value">${formatDateCompact(model.event.startAt)}</div></div>
               ${infoBlocks(theme, model)}
             </div>
             <div class="footer">${footerBlocks(theme, model)}</div>
@@ -225,32 +262,34 @@ function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): st
     </div>`;
 
   return wrapHtml(model.event.title, theme, body, `
-    .ticket-container { width: 210mm; min-height: 148mm; padding: 12mm; box-sizing: border-box; }
+    .ticket-container { box-sizing: border-box; width: 210mm; max-height: 297mm; padding: 8mm 10mm; margin: 0; }
     .card {
       background: ${theme.colors.card}; border-radius: 16px; overflow: hidden;
       border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.07);
     }
-    .horizontal-layout { display: flex; min-height: 120mm; }
-    .main-col { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; }
+    .horizontal-layout { display: flex; align-items: stretch; }
+    .main-col { flex: 1; padding: 20px 24px; display: flex; flex-direction: column; min-width: 0; }
     .qr-col {
-      width: 42%; background: linear-gradient(160deg, ${theme.colors.primary}18, ${theme.colors.bg});
+      width: 46%; min-width: 46%;
+      background: linear-gradient(160deg, ${theme.colors.primary}18, ${theme.colors.bg});
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 24px; border-left: 1px dashed ${theme.colors.muted}44;
+      padding: 20px 16px; border-left: 1px dashed ${theme.colors.muted}44;
     }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .qr-col .qr-code { padding: 14px; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
     .org-name { font-weight: 700; font-size: 16px; }
-    .ticket-code { font-family: monospace; font-size: 15px; font-weight: 700; color: ${theme.colors.primary}; }
-    .tagline { margin: 0 0 12px; font-size: 13px; color: ${theme.colors.muted}; }
-    .event-title { font-size: 26px; font-weight: 700; margin: 0 0 20px; color: ${theme.colors.primary}; }
-    .info-stack { display: flex; flex-direction: column; gap: 14px; flex: 1; }
-    .footer { margin-top: 20px; }
+    .ticket-code { font-family: monospace; font-size: 14px; font-weight: 700; color: ${theme.colors.primary}; flex-shrink: 0; }
+    .tagline { margin: 0 0 10px; font-size: 13px; color: ${theme.colors.muted}; }
+    .event-title { font-size: 22px; font-weight: 700; margin: 0 0 14px; color: ${theme.colors.primary}; line-height: 1.2; }
+    .info-stack { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .footer { margin-top: 12px; }
   `);
 }
 
 function renderMobilePass(model: TicketRenderModel, theme: ThemeJson): string {
   const qr = qrSizePx(theme.qr.size);
   const body = `
-    <div class="pass-wrap">
+    <div class="ticket-page pass-wrap">
       <div class="pass-card">
         <div class="pass-header">
           ${theme.brand.logoUrl ? `<img src="${theme.brand.logoUrl}" class="logo" alt="" />` : `<span class="org">${model.event.organizationName}</span>`}
@@ -259,7 +298,7 @@ function renderMobilePass(model: TicketRenderModel, theme: ThemeJson): string {
           <p class="pass-label">Bilhete Digital</p>
           <h1 class="pass-title">${model.event.title}</h1>
           <div class="pass-meta">
-            <div><span class="label">Data</span><span class="value">${formatDate(model.event.startAt)}</span></div>
+            <div><span class="label">Data</span><span class="value">${formatDateCompact(model.event.startAt)}</span></div>
             <div><span class="label">Local</span><span class="value">${model.event.venue}</span></div>
             ${theme.blocks.showBuyerName ? `<div><span class="label">Titular</span><span class="value">${model.buyer.name}</span></div>` : ""}
             ${theme.blocks.showTicketType ? `<div><span class="label">Tipo</span><span class="value">${model.ticketLot.name}</span></div>` : ""}
@@ -276,30 +315,40 @@ function renderMobilePass(model: TicketRenderModel, theme: ThemeJson): string {
 
   return wrapHtml(model.event.title, theme, body, `
     .pass-wrap {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 24px; background: ${theme.colors.bg};
+      box-sizing: border-box;
+      width: 210mm;
+      max-height: 297mm;
+      padding: 10mm;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: ${theme.colors.bg};
     }
     .pass-card {
-      width: 360px; max-width: 100%; background: ${theme.colors.card};
-      border-radius: 24px; overflow: hidden;
+      width: 100%;
+      max-width: 420px;
+      background: ${theme.colors.card};
+      border-radius: 24px;
+      overflow: hidden;
       box-shadow: 0 20px 50px rgba(0,0,0,0.12);
       border: 1px solid rgba(0,0,0,0.06);
     }
     .pass-header {
       background: linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primary}cc);
-      padding: 20px 24px; text-align: center;
+      padding: 16px 20px; text-align: center;
     }
     .pass-header .logo { filter: brightness(0) invert(1); max-height: 44px; }
     .pass-header .org { color: #fff; font-weight: 700; font-size: 18px; }
-    .pass-body { padding: 24px; text-align: center; }
+    .pass-body { padding: 20px; text-align: center; }
     .pass-label { margin: 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: ${theme.colors.muted}; }
-    .pass-title { margin: 8px 0 20px; font-size: 22px; font-weight: 700; color: ${theme.colors.text}; line-height: 1.2; }
-    .pass-meta { text-align: left; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .pass-title { margin: 8px 0 16px; font-size: 20px; font-weight: 700; color: ${theme.colors.text}; line-height: 1.2; }
+    .pass-meta { text-align: left; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .pass-meta .label { display: block; font-size: 10px; }
     .pass-meta .value { display: block; font-size: 14px; font-weight: 600; }
-    .pass-qr { padding: 16px 0; border-top: 1px dashed ${theme.colors.muted}44; }
-    .pass-code { font-family: monospace; font-size: 16px; font-weight: 700; margin-top: 12px; letter-spacing: 0.05em; color: ${theme.colors.primary}; }
-    .pass-footer { padding: 12px 20px 20px; background: ${theme.colors.bg}; }
+    .pass-qr { padding: 12px 0; border-top: 1px dashed ${theme.colors.muted}44; }
+    .pass-code { font-family: monospace; font-size: 16px; font-weight: 700; margin-top: 10px; letter-spacing: 0.05em; color: ${theme.colors.primary}; }
+    .pass-footer { padding: 10px 16px 16px; background: ${theme.colors.bg}; }
   `);
 }
 
