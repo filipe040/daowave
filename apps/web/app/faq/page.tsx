@@ -71,18 +71,18 @@ export default function FAQPage() {
             <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-[13px] text-white/50 hover:text-white transition mb-10"
+                    className="inline-flex items-center gap-2 text-[13px] text-neutral-500 hover:text-violet-600 font-semibold transition mb-10"
                 >
                     <ArrowLeft className="h-4 w-4" /> Início
                 </Link>
 
-                <div className="text-[11px] uppercase tracking-wider text-white/40 mb-2">Apoio</div>
-                <h1 className="text-[32px] sm:text-[40px] font-semibold text-white leading-tight mb-4">
+                <div className="text-[11px] uppercase tracking-wider text-violet-600 font-bold mb-2">Apoio</div>
+                <h1 className="text-[32px] sm:text-[40px] font-black text-neutral-900 leading-tight mb-4">
                     Perguntas Frequentes
                 </h1>
-                <p className="text-[15px] text-white/50 mb-12">
+                <p className="text-[15px] text-neutral-600 mb-12">
                     Não encontras o que procuras?{" "}
-                    <a href="mailto:suporte@gopass.pt" className="text-white/80 hover:text-white underline underline-offset-2">
+                    <a href="mailto:suporte@gopass.pt" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">
                         Contacta-nos
                     </a>
                     .
@@ -91,22 +91,22 @@ export default function FAQPage() {
                 <div className="space-y-10">
                     {FAQS.map((section) => (
                         <div key={section.category}>
-                            <h2 className="text-[12px] uppercase tracking-wider text-white/35 mb-4">
+                            <h2 className="text-[12px] uppercase tracking-wider text-neutral-500 font-bold mb-4">
                                 {section.category}
                             </h2>
                             <div className="space-y-3">
                                 {section.items.map((item) => (
                                     <details
                                         key={item.q}
-                                        className="group rounded-2xl border border-white/10 bg-white/4 open:bg-white/6 transition-colors"
+                                        className="group rounded-2xl border border-neutral-200 bg-white open:border-violet-200 open:shadow-md transition-all"
                                     >
-                                        <summary className="cursor-pointer px-5 py-4 text-[14px] font-medium text-white/80 group-open:text-white flex items-start justify-between gap-4 select-none">
+                                        <summary className="cursor-pointer px-5 py-4 text-[14px] font-semibold text-neutral-800 group-open:text-violet-800 flex items-start justify-between gap-4 select-none">
                                             {item.q}
-                                            <span className="shrink-0 text-white/30 group-open:text-white/60 group-open:rotate-180 transition-transform duration-200 mt-0.5">
+                                            <span className="shrink-0 text-neutral-400 group-open:text-violet-500 group-open:rotate-180 transition-transform duration-200 mt-0.5">
                                                 ↓
                                             </span>
                                         </summary>
-                                        <p className="px-5 pb-5 text-[13px] text-white/55 leading-relaxed border-t border-white/8 pt-3">
+                                        <p className="px-5 pb-5 text-[13px] text-neutral-600 leading-relaxed border-t border-neutral-100 pt-3">
                                             {item.a}
                                         </p>
                                     </details>

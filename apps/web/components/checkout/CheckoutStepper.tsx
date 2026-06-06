@@ -21,15 +21,15 @@ export function CheckoutStepper({ currentStep }: { currentStep: 1 | 2 | 3 }) {
                     done
                       ? "bg-emerald-500 text-black"
                       : active
-                        ? "bg-white text-black ring-4 ring-white/20"
-                        : "bg-white/10 text-white/40"
+                        ? "bg-violet-600 text-white ring-4 ring-violet-200"
+                        : "bg-neutral-100 text-neutral-500"
                   }`}
                 >
                   {done ? <Check className="h-4 w-4" strokeWidth={3} /> : step.id}
                 </span>
                 <span
                   className={`hidden sm:block text-[13px] font-semibold tracking-wide ${
-                    active ? "text-white" : done ? "text-white/70" : "text-white/35"
+                    active ? "text-neutral-900" : done ? "text-neutral-700" : "text-neutral-400"
                   }`}
                 >
                   {step.label}
@@ -37,7 +37,7 @@ export function CheckoutStepper({ currentStep }: { currentStep: 1 | 2 | 3 }) {
               </div>
               {index < STEPS.length - 1 && (
                 <div
-                  className={`h-px w-8 sm:w-16 ${done ? "bg-emerald-500/60" : "bg-white/10"}`}
+                  className={`h-px w-8 sm:w-16 ${done ? "bg-emerald-400" : "bg-neutral-200"}`}
                   aria-hidden
                 />
               )}

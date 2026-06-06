@@ -170,8 +170,24 @@
   .ui-btn-secondary {
     @apply ui-btn border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100;
   }
-  .dark .ui-btn-secondary {
-    @apply border-white/10 bg-white/5 text-white hover:bg-white/10;
+  .public-card {
+    @apply rounded-3xl border border-neutral-200 bg-white shadow-md;
+  }
+
+  .public-input {
+    @apply w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-violet-400 focus:ring-2 focus:ring-violet-100;
+  }
+
+  .public-label {
+    @apply block text-[11px] uppercase tracking-wider text-neutral-500 font-semibold mb-2;
+  }
+
+  .auth-input {
+    @apply h-11 sm:h-12 rounded-xl sm:rounded-2xl border border-neutral-200 bg-white text-[13px] sm:text-[14px] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-violet-100 focus-visible:border-violet-400 px-4;
+  }
+
+  .auth-label {
+    @apply block text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-500 font-semibold ml-1;
   }
 }
 

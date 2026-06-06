@@ -187,12 +187,12 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Secção: Dados */}
         <section>
-          <h2 className="text-[11px] font-bold text-white/45 uppercase tracking-[0.2em] mb-5">
+          <h2 className="text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-5">
             1. Dados do comprador
           </h2>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="buyerName" className="text-white/70 font-medium text-sm ml-1">
+              <Label htmlFor="buyerName" className="text-neutral-600 font-medium text-sm ml-1">
                 Nome completo *
               </Label>
               <Input
@@ -201,14 +201,14 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                 required
                 value={formData.buyerName}
                 onChange={(e) => setFormData({ ...formData, buyerName: e.target.value })}
-                className="h-12 bg-white/5 border-white/10 text-white rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+                className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-violet-200 placeholder:text-neutral-400"
                 placeholder="João Silva"
               />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="buyerEmail" className="text-white/70 font-medium text-sm ml-1">
+                <Label htmlFor="buyerEmail" className="text-neutral-600 font-medium text-sm ml-1">
                   Email *
                 </Label>
                 <Input
@@ -218,12 +218,12 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   required
                   value={formData.buyerEmail}
                   onChange={(e) => setFormData({ ...formData, buyerEmail: e.target.value })}
-                  className="h-12 bg-white/5 border-white/10 text-white rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+                  className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-violet-200 placeholder:text-neutral-400"
                   placeholder="joao@email.com"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="buyerPhone" className="text-white/70 font-medium text-sm ml-1">
+                <Label htmlFor="buyerPhone" className="text-neutral-600 font-medium text-sm ml-1">
                   Telefone
                 </Label>
                 <Input
@@ -231,7 +231,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   type="tel"
                   value={formData.buyerPhone}
                   onChange={(e) => setFormData({ ...formData, buyerPhone: e.target.value })}
-                  className="h-12 bg-white/5 border-white/10 text-white rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-white/20 placeholder:text-white/30"
+                  className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-violet-200 placeholder:text-neutral-400"
                   placeholder="+351 912 345 678"
                 />
               </div>
@@ -241,7 +241,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
         {/* Secção: Cupão */}
         <section>
-          <Label className="text-white/70 font-medium text-sm ml-1 flex items-center gap-1.5 mb-3">
+          <Label className="text-neutral-600 font-medium text-sm ml-1 flex items-center gap-1.5 mb-3">
             <Tag className="h-3.5 w-3.5" />
             Código de desconto
           </Label>
@@ -255,7 +255,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   −{formatEuro(appliedCoupon.discountCents)} aplicado
                 </p>
               </div>
-              <button type="button" onClick={handleRemoveCoupon} className="text-white/40 hover:text-white/70">
+              <button type="button" onClick={handleRemoveCoupon} className="text-neutral-500 hover:text-neutral-600">
                 <XCircle className="h-5 w-5" />
               </button>
             </div>
@@ -265,7 +265,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                 value={couponCode}
                 onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
-                className="h-11 bg-white/5 border-white/10 text-white rounded-xl px-4 font-mono uppercase placeholder:normal-case placeholder:text-white/30"
+                className="h-11 bg-white border-neutral-200 text-neutral-900 rounded-xl px-4 font-mono uppercase placeholder:normal-case placeholder:text-neutral-400"
                 placeholder="CÓDIGO20"
               />
               <Button
@@ -273,14 +273,14 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                 variant="outline"
                 onClick={handleApplyCoupon}
                 disabled={!couponCode.trim() || couponLoading}
-                className="h-11 px-5 rounded-xl border-white/15 bg-white/5 text-white hover:bg-white/10 shrink-0"
+                className="h-11 px-5 rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100 shrink-0"
               >
                 {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
               </Button>
             </div>
           )}
           {couponError && (
-            <p className="text-red-400 text-xs mt-2 ml-1 flex items-center gap-1">
+            <p className="text-red-600 text-xs mt-2 ml-1 flex items-center gap-1">
               <XCircle className="h-3.5 w-3.5" />
               {couponError}
             </p>
@@ -289,16 +289,16 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
         {/* Secção: Pagamento */}
         <section>
-          <h2 className="text-[11px] font-bold text-white/45 uppercase tracking-[0.2em] mb-5">
+          <h2 className="text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-5">
             2. Método de pagamento
           </h2>
           <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="mt-5 rounded-2xl border bg-white border-neutral-200 bg-white/[0.03] p-5">
             {paymentMethod === 'card' && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-white/60 text-xs ml-1">Número do cartão</Label>
+                  <Label className="text-neutral-600 text-xs ml-1">Número do cartão</Label>
                   <Input
                     inputMode="numeric"
                     autoComplete="cc-number"
@@ -307,12 +307,12 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                     onChange={(e) =>
                       setFormData({ ...formData, cardNumber: formatCardNumber(e.target.value) })
                     }
-                    className="h-12 bg-white/5 border-white/10 text-white rounded-xl font-mono tracking-wider"
+                    className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl font-mono tracking-wider"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs ml-1">Validade</Label>
+                    <Label className="text-neutral-600 text-xs ml-1">Validade</Label>
                     <Input
                       inputMode="numeric"
                       autoComplete="cc-exp"
@@ -324,11 +324,11 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                         if (v.length >= 3) v = `${v.slice(0, 2)}/${v.slice(2)}`;
                         setFormData({ ...formData, cardExpiry: v });
                       }}
-                      className="h-12 bg-white/5 border-white/10 text-white rounded-xl font-mono"
+                      className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl font-mono"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs ml-1">CVC</Label>
+                    <Label className="text-neutral-600 text-xs ml-1">CVC</Label>
                     <Input
                       inputMode="numeric"
                       autoComplete="cc-csc"
@@ -338,7 +338,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                       onChange={(e) =>
                         setFormData({ ...formData, cardCvc: e.target.value.replace(/\D/g, '').slice(0, 4) })
                       }
-                      className="h-12 bg-white/5 border-white/10 text-white rounded-xl font-mono"
+                      className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl font-mono"
                     />
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
                   {['VISA', 'MC', 'AMEX'].map((brand) => (
                     <span
                       key={brand}
-                      className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-bold text-white/40 tracking-wider"
+                      className="rounded-md border bg-white border-neutral-200 bg-white/5 px-2 py-1 text-[10px] font-bold text-neutral-500 tracking-wider"
                     >
                       {brand}
                     </span>
@@ -357,17 +357,17 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
             {paymentMethod === 'mbway' && (
               <div className="space-y-3">
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-neutral-600">
                   Receberá uma notificação no telemóvel para autorizar o pagamento.
                 </p>
                 <div className="space-y-2">
-                  <Label className="text-white/60 text-xs ml-1">Número MB WAY *</Label>
+                  <Label className="text-neutral-600 text-xs ml-1">Número MB WAY *</Label>
                   <Input
                     type="tel"
                     placeholder="912 345 678"
                     value={formData.mbwayPhone}
                     onChange={(e) => setFormData({ ...formData, mbwayPhone: e.target.value })}
-                    className="h-12 bg-white/5 border-white/10 text-white rounded-xl"
+                    className="h-12 bg-white border-neutral-200 text-neutral-900 rounded-xl"
                   />
                 </div>
               </div>
@@ -375,22 +375,22 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
             {paymentMethod === 'multibanco' && (
               <div className="space-y-4">
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-neutral-600">
                   Utilize os dados abaixo no multibanco ou homebanking. O pagamento será confirmado automaticamente.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Entidade</p>
-                    <p className="text-2xl font-mono font-bold text-white">{multibancoRef.entity}</p>
+                  <div className="rounded-xl bg-white/5 border bg-white border-neutral-200 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Entidade</p>
+                    <p className="text-2xl font-mono font-bold text-neutral-900">{multibancoRef.entity}</p>
                   </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Referência</p>
-                    <p className="text-2xl font-mono font-bold text-white">{multibancoRef.reference}</p>
+                  <div className="rounded-xl bg-white/5 border bg-white border-neutral-200 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1">Referência</p>
+                    <p className="text-2xl font-mono font-bold text-neutral-900">{multibancoRef.reference}</p>
                   </div>
                 </div>
                 <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
                   <p className="text-sm text-emerald-300">
-                    Montante: <strong className="text-white">{formatEuro(effectiveTotal)}</strong>
+                    Montante: <strong className="text-neutral-900">{formatEuro(effectiveTotal)}</strong>
                   </p>
                 </div>
               </div>
@@ -398,7 +398,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
 
             {paymentMethod === 'paypal' && (
               <div className="text-center py-4">
-                <p className="text-sm text-white/60 mb-4">
+                <p className="text-sm text-neutral-600 mb-4">
                   Será redirecionado para o PayPal para concluir o pagamento em segurança.
                 </p>
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#0070ba]/20 border border-[#0070ba]/40 px-5 py-2.5">
@@ -413,10 +413,10 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
         </section>
 
         {/* Total + Termos */}
-        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 space-y-4">
+        <section className="rounded-2xl border bg-white border-neutral-200 bg-white/[0.04] p-5 space-y-4">
           <div className="flex justify-between text-sm">
-            <span className="text-white/60">Subtotal</span>
-            <span className="text-white">{formatEuro(totalCents)}</span>
+            <span className="text-neutral-600">Subtotal</span>
+            <span className="text-neutral-900">{formatEuro(totalCents)}</span>
           </div>
           {appliedCoupon && (
             <div className="flex justify-between text-sm">
@@ -424,16 +424,16 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
               <span className="text-emerald-400 font-semibold">−{formatEuro(appliedCoupon.discountCents)}</span>
             </div>
           )}
-          <div className="flex justify-between items-end border-t border-white/10 pt-4">
-            <span className="text-white font-semibold">Total</span>
+          <div className="flex justify-between items-end border-t bg-white border-neutral-200 pt-4">
+            <span className="text-neutral-900 font-semibold">Total</span>
             <div className="text-right">
-              <span className="text-3xl font-black text-white tracking-tight">{formatEuro(effectiveTotal)}</span>
-              <p className="text-[11px] text-white/40 mt-0.5">IVA incluído</p>
+              <span className="text-3xl font-black text-neutral-900 tracking-tight">{formatEuro(effectiveTotal)}</span>
+              <p className="text-[11px] text-neutral-500 mt-0.5">IVA incluído</p>
             </div>
           </div>
         </section>
 
-        <div className="flex items-start gap-3 bg-white/[0.03] p-4 rounded-xl border border-white/10">
+        <div className="flex items-start gap-3 bg-white/[0.03] p-4 rounded-xl border bg-white border-neutral-200">
           <Checkbox
             id="terms"
             data-testid="checkbox-terms"
@@ -441,13 +441,13 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
             onCheckedChange={(checked: boolean) => setAcceptedTerms(checked)}
             className="mt-0.5"
           />
-          <Label htmlFor="terms" className="text-sm text-white/65 leading-relaxed font-normal cursor-pointer">
+          <Label htmlFor="terms" className="text-sm text-neutral-600 leading-relaxed font-normal cursor-pointer">
             Li e aceito os{' '}
-            <Link href="/terms" target="_blank" className="text-white underline underline-offset-2 hover:text-white/80">
+            <Link href="/terms" target="_blank" className="text-neutral-900 underline underline-offset-2 hover:text-neutral-800">
               Termos e Condições
             </Link>{' '}
             e a{' '}
-            <Link href="/privacy" target="_blank" className="text-white underline underline-offset-2 hover:text-white/80">
+            <Link href="/privacy" target="_blank" className="text-neutral-900 underline underline-offset-2 hover:text-neutral-800">
               Política de Privacidade
             </Link>
             .
@@ -464,7 +464,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-6 py-2 text-[11px] text-white/30 uppercase tracking-widest">
+        <div className="flex items-center justify-center gap-6 py-2 text-[11px] text-neutral-400 uppercase tracking-widest">
           <span className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5" />
             SSL 256-bit
@@ -479,7 +479,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           type="submit"
           data-testid="btn-confirm-payment"
           disabled={loading || !acceptedTerms}
-          className="w-full h-14 rounded-2xl bg-white text-black font-bold text-[15px] hover:bg-white/90 shadow-[0_12px_40px_rgba(255,255,255,0.12)] transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-[15px] hover:opacity-95 shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
           size="lg"
           aria-busy={loading}
         >
@@ -499,7 +499,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
           )}
         </Button>
 
-        <p className="text-center text-[11px] text-white/25 leading-relaxed">
+        <p className="text-center text-[11px] text-neutral-400 leading-relaxed">
           Os seus dados de pagamento são encriptados e nunca são armazenados nos nossos servidores.
         </p>
       </form>

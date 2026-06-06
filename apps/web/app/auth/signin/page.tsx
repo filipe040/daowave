@@ -231,10 +231,10 @@ function SignInContent() {
                 id="signin-google"
                 onClick={() => handleOAuth("google")}
                 disabled={anyLoading}
-                className="relative w-full flex items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold text-white transition-all hover:bg-white/10 hover:border-white/25 active:scale-[0.98] disabled:opacity-50"
+                className="relative w-full flex items-center justify-center gap-3 rounded-full border border-neutral-200 bg-neutral-50 px-6 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold text-neutral-800 transition-all hover:bg-neutral-100 hover:border-neutral-300 active:scale-[0.98] disabled:opacity-50"
               >
                 {oauthLoading === "google" ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  <Loader2 className="h-4 w-4 animate-spin text-neutral-700" />
                 ) : (
                   <GoogleIcon className="h-4 w-4" />
                 )}
@@ -243,15 +243,14 @@ function SignInContent() {
             </div>
 
             <div className="flex items-center gap-4 py-5 sm:py-6">
-              <span className="flex-1 border-t border-white/10" />
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-bold">ou email</span>
-              <span className="flex-1 border-t border-white/10" />
+              <span className="flex-1 border-t border-neutral-200" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold">ou email</span>
+              <span className="flex-1 border-t border-neutral-200" />
             </div>
 
-            {/* Email / Password Form */}
             <form id="signin-form" onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="block text-[10px] sm:text-[11px] uppercase tracking-wider text-white/40 ml-1">
+                <Label htmlFor="email" className="auth-label">
                   Endereço de Email
                 </Label>
                 <Input
@@ -260,16 +259,16 @@ function SignInContent() {
                   type="email"
                   required
                   placeholder="exemplo@email.com"
-                  className="h-11 sm:h-12 rounded-xl sm:rounded-2xl border-white/10 bg-white/5 text-[13px] sm:text-[14px] text-white placeholder:text-white/20 focus-visible:ring-white/20 px-4"
+                  className="auth-input"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1">
-                  <Label htmlFor="password" className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/40">
+                  <Label htmlFor="password" className="auth-label mb-0">
                     Palavra-passe
                   </Label>
-                  <Link href="/auth/forgot-password" title="Recuperar palavra-passe" className="text-[10px] sm:text-[11px] text-white/30 hover:text-white transition-colors">
+                  <Link href="/auth/forgot-password" title="Recuperar palavra-passe" className="text-[10px] sm:text-[11px] text-violet-600 hover:text-violet-700 font-semibold transition-colors">
                     Esqueceu-se?
                   </Link>
                 </div>
@@ -280,12 +279,12 @@ function SignInContent() {
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
-                    className="h-11 sm:h-12 pr-12 rounded-xl sm:rounded-2xl border-white/10 bg-white/5 text-[13px] sm:text-[14px] text-white placeholder:text-white/20 focus-visible:ring-white/20 px-4"
+                    className="auth-input pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors"
                   >
                     {showPassword ? (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18" /></svg>
@@ -300,7 +299,7 @@ function SignInContent() {
                 id="signin-submit"
                 type="submit"
                 disabled={anyLoading}
-                className="w-full h-11 sm:h-12 rounded-full mt-2 text-[13px] sm:text-[14px] font-bold bg-white text-black hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50"
+                className="w-full h-11 sm:h-12 rounded-full mt-2 text-[13px] sm:text-[14px] font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-95 shadow-md transition-all disabled:opacity-50"
               >
                 {credLoading ? (
                   <>
@@ -315,18 +314,18 @@ function SignInContent() {
           </div>
 
           <div className="mt-8 text-center space-y-4">
-            <p className="text-[13px] sm:text-[14px] text-white/40">
+            <p className="text-[13px] sm:text-[14px] text-neutral-600">
               Não tem conta?{" "}
-              <Link href="/auth/signup" className="text-white hover:text-white/80 font-bold transition-all underline underline-offset-4">
+              <Link href="/auth/signup" className="text-violet-600 hover:text-violet-700 font-bold transition-all underline underline-offset-4">
                 Criar conta gratuita
               </Link>
             </p>
 
-            <p className="text-[10px] sm:text-[11px] text-white/20 leading-relaxed px-6">
+            <p className="text-[10px] sm:text-[11px] text-neutral-400 leading-relaxed px-6">
               Ao entrar, aceita os nossos{" "}
-              <Link href="/terms" className="underline hover:text-white/40">Termos</Link>{" "}
+              <Link href="/terms" className="underline hover:text-neutral-600">Termos</Link>{" "}
               e a nossa{" "}
-              <Link href="/privacy" className="underline hover:text-white/40">Política de Privacidade</Link>.
+              <Link href="/privacy" className="underline hover:text-neutral-600">Política de Privacidade</Link>.
             </p>
           </div>
         </div>
