@@ -7,7 +7,7 @@ export default function OrganizationCouponPage() {
   return (
     <PageShell
       title="Cupão de desconto"
-      subtitle="Um cupão por organização — atribua a um evento para usar no checkout"
+      subtitle="Um cupão por organização — atribua a um evento e promotor para comissões em €"
     >
       <OrganizationCouponEditor />
     </PageShell>

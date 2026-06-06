@@ -217,6 +217,8 @@ model OrganizationMember {
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedCoupons Coupon[]
+  couponCommissions CouponCommission[]
 
   @@unique([organizationId, userId])
   @@index([userId])
@@ -520,6 +522,7 @@ model Order {
   tickets         Ticket[]
   payments        Payment[]
   manualPayment   ManualPayment?
+  couponCommission CouponCommission?
 
   @@index([userId])
   @@index([eventId])
@@ -853,6 +856,8 @@ model Coupon {
   discountValue  Int
   maxUses        Int?
   usedCount      Int                 @default(0)
+  assignedMemberId String?
+  commissionCents  Int?
   isActive       Boolean             @default(true)
   startsAt       DateTime
   endsAt         DateTime
@@ -861,9 +866,29 @@ model Coupon {
 
   organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   event          Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  assignedMember OrganizationMember? @relation(fields: [assignedMemberId], references: [id], onDelete: SetNull)
+  commissions    CouponCommission[]
 
   @@index([eventId])
   @@index([code])
+  @@index([assignedMemberId])
+}
+
+model CouponCommission {
+  id          String   @id @default(uuid())
+  couponId    String
+  orderId     String   @unique
+  memberId    String
+  amountCents Int
+  createdAt   DateTime @default(now())
+
+  coupon Coupon             @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order  Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  member OrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([memberId])
+  @@index([createdAt])
 }
 
 model EventAsset {

@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { canManageOrganizationCoupon, requirePromoter } from "@/lib/auth/guards";
+import {
+  couponAssignmentFields,
+  couponInclude,
+  getCouponCommissionStats,
+  resolveCouponAssignment,
+} from "@/lib/coupons/coupon-assignment";
 
 const CouponSchema = z.object({
   eventId: z.string().uuid(),
@@ -11,6 +17,7 @@ const CouponSchema = z.object({
   maxUses: z.number().positive().nullable(),
   startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
   endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
+  ...couponAssignmentFields,
 }).refine((data) => {
   if (data.discountType === "PERCENTAGE") {
     return data.discountValue >= 1 && data.discountValue <= 100;
@@ -82,6 +89,20 @@ export async function POST(req: Request) {
       );
     }
 
+    let assignment: { assignedMemberId: string | null; commissionCents: number | null };
+    try {
+      assignment = await resolveCouponAssignment(
+        orgId,
+        data.assignedMemberId ?? null,
+        data.commissionCents ?? null
+      );
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "Atribuição inválida" },
+        { status: 400 }
+      );
+    }
+
     const coupon = await prisma.coupon.create({
       data: {
         organizationId: orgId,
@@ -92,12 +113,10 @@ export async function POST(req: Request) {
         maxUses: data.maxUses,
         startsAt: new Date(data.startsAt),
         endsAt: new Date(data.endsAt),
+        assignedMemberId: assignment.assignedMemberId,
+        commissionCents: assignment.commissionCents,
       },
-      include: {
-        event: {
-          select: { title: true, slug: true },
-        },
-      },
+      include: couponInclude,
     });
 
     return NextResponse.json({ coupon }, { status: 201 });
@@ -126,22 +145,19 @@ export async function GET() {
 
     const coupon = await prisma.coupon.findUnique({
       where: { organizationId: orgId },
-      include: {
-        event: {
-          select: {
-            title: true,
-            slug: true,
-          },
-        },
-      },
+      include: couponInclude,
     });
 
     const canManage = canManageOrganizationCoupon(session, role);
+    const commissionStats = coupon
+      ? await getCouponCommissionStats(coupon.id)
+      : { totalCommissionCents: 0, commissionCount: 0 };
 
     return NextResponse.json({
       coupon,
       coupons: coupon ? [coupon] : [],
       canManage,
+      commissionStats,
     });
   } catch (error) {
     console.error("Error fetching coupons:", error);

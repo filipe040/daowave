@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Tag, Save, Trash2, Loader2, ShieldAlert } from "lucide-react";
+import { Tag, Save, Trash2, Loader2, ShieldAlert, Euro } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,12 @@ const labelCls = "public-label mb-2";
 interface EventOption {
   id: string;
   title: string;
+}
+
+interface TeamMemberOption {
+  id: string;
+  role: string;
+  user: { id: string; name: string | null; email: string };
 }
 
 interface CouponData {
@@ -26,7 +32,22 @@ interface CouponData {
   isActive: boolean;
   startsAt: string;
   endsAt: string;
+  assignedMemberId: string | null;
+  commissionCents: number | null;
   event?: { title: string; slug: string };
+  assignedMember?: {
+    id: string;
+    user: { name: string | null; email: string };
+  } | null;
+}
+
+interface CommissionStats {
+  totalCommissionCents: number;
+  commissionCount: number;
+}
+
+function formatEuro(cents: number) {
+  return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
 function toDatetimeLocal(iso: string) {
@@ -49,6 +70,8 @@ function emptyForm() {
     startsAt: toDatetimeLocal(now.toISOString()),
     endsAt: toDatetimeLocal(in30.toISOString()),
     isActive: true,
+    assignedMemberId: "",
+    commissionEuros: 2,
   };
 }
 
@@ -59,21 +82,32 @@ export function OrganizationCouponEditor() {
   const [canManage, setCanManage] = useState(false);
   const [coupon, setCoupon] = useState<CouponData | null>(null);
   const [events, setEvents] = useState<EventOption[]>([]);
+  const [members, setMembers] = useState<TeamMemberOption[]>([]);
+  const [commissionStats, setCommissionStats] = useState<CommissionStats>({
+    totalCommissionCents: 0,
+    commissionCount: 0,
+  });
   const [form, setForm] = useState(emptyForm());
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [couponRes, eventsRes] = await Promise.all([
+      const [couponRes, eventsRes, teamRes] = await Promise.all([
         fetch("/api/promotor/coupons"),
         fetch("/api/promotor/events?select=all"),
+        fetch("/api/promotor/team"),
       ]);
 
       const couponData = couponRes.ok ? await couponRes.json() : null;
       const eventsData = eventsRes.ok ? await eventsRes.json() : null;
+      const teamData = teamRes.ok ? await teamRes.json() : null;
 
       setCanManage(!!couponData?.canManage);
       setEvents(eventsData?.events ?? []);
+      setMembers(teamData?.data ?? []);
+      setCommissionStats(
+        couponData?.commissionStats ?? { totalCommissionCents: 0, commissionCount: 0 }
+      );
 
       const c = couponData?.coupon as CouponData | null;
       setCoupon(c ?? null);
@@ -89,6 +123,8 @@ export function OrganizationCouponEditor() {
           startsAt: toDatetimeLocal(c.startsAt),
           endsAt: toDatetimeLocal(c.endsAt),
           isActive: c.isActive,
+          assignedMemberId: c.assignedMemberId ?? "",
+          commissionEuros: c.commissionCents ? c.commissionCents / 100 : 2,
         });
       } else {
         setForm(emptyForm());
@@ -104,22 +140,41 @@ export function OrganizationCouponEditor() {
     load();
   }, [load]);
 
-  const buildPayload = () => ({
-    eventId: form.eventId,
-    code: form.code.toUpperCase().replace(/\s/g, ""),
-    discountType: form.discountType,
-    discountValue:
-      form.discountType === "PERCENTAGE"
-        ? form.discountValuePercent
-        : Math.round(form.discountValueEuros * 100),
-    maxUses: form.maxUses ? parseInt(form.maxUses, 10) : null,
-    startsAt: form.startsAt,
-    endsAt: form.endsAt,
-    isActive: form.isActive,
-  });
+  const buildPayload = () => {
+    const assignedMemberId = form.assignedMemberId || null;
+    return {
+      eventId: form.eventId,
+      code: form.code.toUpperCase().replace(/\s/g, ""),
+      discountType: form.discountType,
+      discountValue:
+        form.discountType === "PERCENTAGE"
+          ? form.discountValuePercent
+          : Math.round(form.discountValueEuros * 100),
+      maxUses: form.maxUses ? parseInt(form.maxUses, 10) : null,
+      startsAt: form.startsAt,
+      endsAt: form.endsAt,
+      isActive: form.isActive,
+      assignedMemberId,
+      commissionCents: assignedMemberId
+        ? Math.round(form.commissionEuros * 100)
+        : null,
+    };
+  };
+
+  const validateAssignment = (): string | null => {
+    if (form.assignedMemberId && (!form.commissionEuros || form.commissionEuros <= 0)) {
+      return "Indique a comissão em € para o promotor selecionado.";
+    }
+    return null;
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const assignmentError = validateAssignment();
+    if (assignmentError) {
+      toast.error(assignmentError);
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch("/api/promotor/coupons", {
@@ -141,6 +196,11 @@ export function OrganizationCouponEditor() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!coupon) return;
+    const assignmentError = validateAssignment();
+    if (assignmentError) {
+      toast.error(assignmentError);
+      return;
+    }
     setSaving(true);
     try {
       const { code: _code, ...rest } = buildPayload();
@@ -194,7 +254,7 @@ export function OrganizationCouponEditor() {
           <h3 className="font-semibold text-neutral-900 mb-1">Sem cupão configurado</h3>
           <p className="text-sm text-neutral-600 leading-relaxed">
             Cada organização pode ter um cupão de desconto. Apenas o proprietário da organização
-            ou um administrador da plataforma pode criar e atribuir o cupão a um evento.
+            ou um administrador da plataforma pode criar e atribuir o cupão a um evento e promotor.
           </p>
         </div>
       </div>
@@ -203,9 +263,33 @@ export function OrganizationCouponEditor() {
 
   const readOnly = !canManage && !!coupon;
   const isEdit = !!coupon;
+  const assignedLabel = coupon?.assignedMember
+    ? coupon.assignedMember.user.name || coupon.assignedMember.user.email
+    : null;
 
   return (
     <div className="max-w-2xl space-y-6">
+      {isEdit && coupon?.assignedMemberId && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex gap-3">
+          <Euro className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-emerald-900">Comissões do promotor</p>
+            <p className="text-sm text-emerald-800 mt-1">
+              {assignedLabel ?? "Promotor atribuído"} —{" "}
+              <strong>{formatEuro(commissionStats.totalCommissionCents)}</strong> acumulados em{" "}
+              {commissionStats.commissionCount} utilizaç
+              {commissionStats.commissionCount === 1 ? "ão" : "ões"}
+              {coupon.commissionCents != null && (
+                <span className="block text-emerald-700/80 mt-1">
+                  {formatEuro(coupon.commissionCents)} por utilização do código{" "}
+                  <span className="font-mono">{coupon.code}</span>
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
         <div className="flex items-start gap-3 mb-6">
           <div className="h-10 w-10 rounded-xl bg-violet-100 flex items-center justify-center">
@@ -216,7 +300,8 @@ export function OrganizationCouponEditor() {
               {isEdit ? "Cupão da organização" : "Criar cupão de desconto"}
             </h2>
             <p className="text-sm text-neutral-500 mt-1">
-              Cada promotor tem direito a um cupão, atribuído a um evento específico.
+              Um cupão por organização. Pode atribuir a um promotor da equipa para receber comissão
+              em € cada vez que o código for usado no checkout.
               {coupon && (
                 <span className="block mt-1">
                   Utilizações: {coupon.usedCount}
@@ -270,6 +355,52 @@ export function OrganizationCouponEditor() {
                 Apenas letras maiúsculas e números (máx. 20)
               </p>
             )}
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50/80 p-4 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-neutral-900">Comissão do promotor (opcional)</p>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Atribua o cupão a um membro da equipa. Quando clientes usarem o código, recebe a
+                comissão definida.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className={labelCls}>Promotor da equipa</Label>
+                <select
+                  disabled={readOnly}
+                  value={form.assignedMemberId}
+                  onChange={(e) =>
+                    setForm({ ...form, assignedMemberId: e.target.value })
+                  }
+                  className={inputCls}
+                >
+                  <option value="">Nenhum (sem comissão)</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.user.name || member.user.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className={labelCls}>Comissão por utilização (€)</Label>
+                <Input
+                  type="number"
+                  disabled={readOnly || !form.assignedMemberId}
+                  min={0.01}
+                  step={0.01}
+                  value={form.commissionEuros}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      commissionEuros: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

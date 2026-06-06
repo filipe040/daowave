@@ -13,6 +13,7 @@ import { generateTicketCode } from "@/lib/utils";
 import { getQRPayload } from "@/lib/qr/generate";
 import { checkoutConfirmSchema } from "@/lib/security/validation";
 import { sendTicketsEmail } from "@/lib/email-service";
+import { recordCouponCommission } from "@/lib/coupons/coupon-commission";
 
 export const dynamic = "force-dynamic";
 
@@ -101,8 +102,8 @@ export async function POST(
 
     // Validate coupon server-side (if provided)
     const couponId = typeof b.couponId === "string" ? b.couponId : undefined;
-    const discountCents = typeof b.discountCents === "number" ? b.discountCents : 0;
     let verifiedDiscount = 0;
+    let couponApplied = false;
 
     if (couponId) {
       const now = new Date();
@@ -118,6 +119,7 @@ export async function POST(
 
       if (coupon) {
         if (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) {
+          couponApplied = true;
           const baseTotal = order.items.reduce(
             (sum, item) => sum + item.quantity * item.unitPriceCents,
             0
@@ -149,12 +151,13 @@ export async function POST(
         },
       });
 
-      // Increment coupon usage
-      if (couponId && verifiedDiscount > 0) {
+      // Increment coupon usage + register affiliate commission
+      if (couponId && couponApplied) {
         await tx.coupon.update({
           where: { id: couponId },
           data: { usedCount: { increment: 1 } },
         });
+        await recordCouponCommission(tx, couponId, order.id);
       }
 
       for (const item of order.items) {

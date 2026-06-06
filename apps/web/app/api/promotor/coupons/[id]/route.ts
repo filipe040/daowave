@@ -8,6 +8,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { canManageOrganizationCoupon, requirePromoter } from "@/lib/auth/guards";
+import {
+  couponAssignmentFields,
+  couponInclude,
+  resolveCouponAssignment,
+} from "@/lib/coupons/coupon-assignment";
 
 const UpdateCouponSchema = z.object({
   eventId: z.string().uuid().optional(),
@@ -17,6 +22,7 @@ const UpdateCouponSchema = z.object({
   startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
   endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
   isActive: z.boolean(),
+  ...couponAssignmentFields,
 }).refine((data) => {
   if (data.discountType === "PERCENTAGE") {
     return data.discountValue >= 1 && data.discountValue <= 100;
@@ -40,14 +46,7 @@ async function getOrgCoupon(id: string, orgId: string) {
       id,
       organizationId: orgId,
     },
-    include: {
-      event: {
-        select: {
-          title: true,
-          slug: true,
-        },
-      },
-    },
+    include: couponInclude,
   });
 }
 
@@ -123,6 +122,24 @@ export async function PUT(
       }
     }
 
+    let assignment: { assignedMemberId: string | null; commissionCents: number | null };
+    try {
+      assignment = await resolveCouponAssignment(
+        orgId,
+        data.assignedMemberId !== undefined
+          ? data.assignedMemberId
+          : existingCoupon.assignedMemberId,
+        data.commissionCents !== undefined
+          ? data.commissionCents
+          : existingCoupon.commissionCents
+      );
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "Atribuição inválida" },
+        { status: 400 }
+      );
+    }
+
     const coupon = await prisma.coupon.update({
       where: { id },
       data: {
@@ -133,12 +150,10 @@ export async function PUT(
         startsAt: new Date(data.startsAt),
         endsAt: new Date(data.endsAt),
         isActive: data.isActive,
+        assignedMemberId: assignment.assignedMemberId,
+        commissionCents: assignment.commissionCents,
       },
-      include: {
-        event: {
-          select: { title: true, slug: true },
-        },
-      },
+      include: couponInclude,
     });
 
     return NextResponse.json({ coupon });
