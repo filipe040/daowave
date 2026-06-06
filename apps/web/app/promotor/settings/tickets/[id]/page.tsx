@@ -25,7 +25,8 @@ import {
     X
 } from "lucide-react";
 import Link from "next/link";
-import { ThemeJson, TicketTemplatePreset, TicketTemplateStatus, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
+import { ThemeJson, TicketTemplatePreset, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
+import { normalizeTicketTheme } from "@/lib/ticket-templates/default-theme";
 
 export default function TicketTemplateEditorPage() {
     const params = useParams();
@@ -53,15 +54,7 @@ export default function TicketTemplateEditorPage() {
     const [previewLoading, setPreviewLoading] = useState(false);
     const previewDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const normalizeTheme = (raw: ThemeJson): ThemeJson => ({
-        ...raw,
-        layout: {
-            accentStyle: "bar",
-            cardStyle: "elevated",
-            cornerRadius: "md",
-            ...(raw.layout || {}),
-        },
-    });
+    const normalizeTheme = (raw: ThemeJson): ThemeJson => normalizeTicketTheme(raw);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -248,22 +241,28 @@ export default function TicketTemplateEditorPage() {
         });
     };
 
-    const updateLayout = (key: "accentStyle" | "cardStyle" | "cornerRadius", value: string) => {
+    const updateLayout = (key: string, value: string) => {
         if (!theme) return;
         setTheme((prev) => {
             if (!prev) return prev;
-            return {
+            return normalizeTicketTheme({
                 ...prev,
-                layout: {
-                    accentStyle: "bar",
-                    cardStyle: "elevated",
-                    cornerRadius: "md",
-                    ...(prev.layout || {}),
-                    [key]: value,
-                },
-            };
+                layout: { ...(prev.layout || {}), [key]: value },
+            });
         });
     };
+
+    const Toggle = ({ id, label }: { id: string; label: string }) => (
+        <label className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer hover:border-neutral-300 transition-colors">
+            <span className="text-xs font-bold text-neutral-800">{label}</span>
+            <input
+                type="checkbox"
+                checked={Boolean((theme?.blocks as Record<string, unknown>)?.[id])}
+                onChange={(e) => updateTheme(`blocks.${id}`, e.target.checked)}
+                className="w-4 h-4 accent-emerald-500"
+            />
+        </label>
+    );
 
     if (loading) return <PageShell title="Carregar Editor..."><Skeleton className="h-96 w-full rounded-2xl bg-neutral-100" /></PageShell>;
     if (error) return <PageShell title="Erro"><ErrorState message={error} onRetry={load} /></PageShell>;
@@ -407,6 +406,51 @@ export default function TicketTemplateEditorPage() {
                             </div>
 
                             <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Imagem de fundo do cartão (URL)</label>
+                                <input
+                                    value={theme?.brand.backgroundUrl || ""}
+                                    onChange={(e) => updateTheme('brand.backgroundUrl', e.target.value)}
+                                    placeholder="https://... ou /uploads/..."
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-xs text-neutral-600 focus:border-emerald-500/50 outline-none transition-all placeholder:text-neutral-400"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Marca de água (texto)</label>
+                                <input
+                                    value={theme?.brand.watermarkText || ""}
+                                    onChange={(e) => updateTheme('brand.watermarkText', e.target.value)}
+                                    placeholder="ex: VIP"
+                                    maxLength={24}
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tamanho do logo</label>
+                                    <select value={theme?.brand.logoSize || "md"} onChange={(e) => updateTheme('brand.logoSize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
+                                        <option value="sm">Pequeno</option>
+                                        <option value="md">Médio</option>
+                                        <option value="lg">Grande</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Posição do logo</label>
+                                    <select value={theme?.brand.logoPosition || "left"} onChange={(e) => updateTheme('brand.logoPosition', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
+                                        <option value="left">Esquerda</option>
+                                        <option value="center">Centro</option>
+                                        <option value="right">Direita</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Estilo do cabeçalho</label>
+                                <select value={theme?.brand.headerStyle || "standard"} onChange={(e) => updateTheme('brand.headerStyle', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="standard">Standard (logo + tagline)</option>
+                                    <option value="minimal">Minimal (sem tagline)</option>
+                                    <option value="bold">Bold (texto grande)</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tagline / Slogan</label>
                                 <input
                                     value={theme?.brand.tagline || ""}
@@ -426,16 +470,18 @@ export default function TicketTemplateEditorPage() {
                         <div className="grid grid-cols-2 gap-4">
                             {[
                                 { key: 'primary', label: 'Primária (Destaque)' },
+                                { key: 'accent', label: 'Cor de destaque / barra' },
                                 { key: 'text', label: 'Texto' },
-                                { key: 'bg', label: 'Fundo' },
-                                { key: 'card', label: 'Cartão' },
-                                { key: 'muted', label: 'Secundário (Muted)' },
+                                { key: 'bg', label: 'Fundo da página' },
+                                { key: 'card', label: 'Fundo do cartão' },
+                                { key: 'muted', label: 'Texto secundário' },
+                                { key: 'qrBackground', label: 'Fundo do QR' },
                             ].map(({ key, label }) => (
-                                <div key={key} className={key === 'muted' ? 'col-span-2' : ''}>
+                                <div key={key} className={key === 'muted' || key === 'qrBackground' ? 'col-span-2' : ''}>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">{label}</label>
                                     <div className="flex gap-2">
-                                        <input type="color" value={(theme?.colors as any)?.[key] || '#000000'} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none flex-shrink-0" />
-                                        <input value={(theme?.colors as any)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-2 py-1.5 text-xs text-neutral-900 outline-none" />
+                                        <input type="color" value={(theme?.colors as Record<string, string>)?.[key] || '#000000'} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none flex-shrink-0" />
+                                        <input value={(theme?.colors as Record<string, string>)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-2 py-1.5 text-xs text-neutral-900 outline-none" />
                                     </div>
                                 </div>
                             ))}
@@ -450,15 +496,50 @@ export default function TicketTemplateEditorPage() {
                         <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
                             <TypeIcon className="h-4 w-4" /> Tipografia
                         </h3>
-                        <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Fonte</label>
-                            <select
-                                value={theme?.typography.fontFamily}
-                                onChange={(e) => updateTheme('typography.fontFamily', e.target.value)}
-                                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                            >
-                                {WHITELISTED_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
-                            </select>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Fonte</label>
+                                <select
+                                    value={theme?.typography.fontFamily}
+                                    onChange={(e) => updateTheme('typography.fontFamily', e.target.value)}
+                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
+                                >
+                                    {WHITELISTED_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Título do evento</label>
+                                    <select value={theme?.typography.titleSize || "md"} onChange={(e) => updateTheme('typography.titleSize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
+                                        <option value="sm">Pequeno</option>
+                                        <option value="md">Médio</option>
+                                        <option value="lg">Grande</option>
+                                        <option value="xl">Extra grande</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Texto geral</label>
+                                    <select value={theme?.typography.bodySize || "md"} onChange={(e) => updateTheme('typography.bodySize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
+                                        <option value="sm">Pequeno</option>
+                                        <option value="md">Médio</option>
+                                        <option value="lg">Grande</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Peso do título</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {(["semibold", "bold", "extrabold"] as const).map((w) => (
+                                        <button key={w} type="button" onClick={() => updateTheme('typography.titleWeight', w)} className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.typography.titleWeight || "bold") === w ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}>
+                                            {w === "semibold" ? "600" : w === "bold" ? "700" : "800"}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <label className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer">
+                                <span className="text-xs font-bold text-neutral-800">Labels em maiúsculas</span>
+                                <input type="checkbox" checked={theme?.typography.uppercaseLabels !== false} onChange={(e) => updateTheme('typography.uppercaseLabels', e.target.checked)} className="w-4 h-4 accent-emerald-500" />
+                            </label>
                         </div>
                     </section>
 
@@ -507,6 +588,51 @@ export default function TicketTemplateEditorPage() {
                                     ))}
                                 </div>
                             </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Largura do bilhete</label>
+                                <select value={theme?.layout?.pageWidth || "standard"} onChange={(e) => updateLayout("pageWidth", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="compact">Compacto</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="wide">Largo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Margem exterior</label>
+                                <select value={theme?.layout?.pagePadding || "md"} onChange={(e) => updateLayout("pagePadding", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="none">Nenhuma</option>
+                                    <option value="sm">Pequena</option>
+                                    <option value="md">Média</option>
+                                    <option value="lg">Grande</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Alinhamento do conteúdo</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {(["left", "center"] as const).map((a) => (
+                                        <button key={a} type="button" onClick={() => updateLayout("contentAlign", a)} className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.contentAlign || "left") === a ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}>
+                                            {a === "left" ? "Esquerda" : "Centro"}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Separador (linha)</label>
+                                <select value={theme?.layout?.dividerStyle || "dashed"} onChange={(e) => updateLayout("dividerStyle", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="dashed">Tracejado</option>
+                                    <option value="solid">Sólido</option>
+                                    <option value="dotted">Pontilhado</option>
+                                    <option value="none">Sem linha</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Padrão de fundo</label>
+                                <select value={theme?.layout?.backgroundPattern || "none"} onChange={(e) => updateLayout("backgroundPattern", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="none">Nenhum</option>
+                                    <option value="dots">Pontos</option>
+                                    <option value="grid">Grelha</option>
+                                    <option value="diagonal">Diagonal</option>
+                                </select>
+                            </div>
                         </div>
                     </section>
 
@@ -516,23 +642,27 @@ export default function TicketTemplateEditorPage() {
                             <Layout className="h-4 w-4" /> Conteúdo (Blocos)
                         </h3>
                         <div className="space-y-3">
-                            {[
-                                { id: 'showBuyerName', label: 'Nome do Comprador' },
-                                { id: 'showOrderId', label: 'ID da Encomenda' },
-                                { id: 'showTicketType', label: 'Tipo de Bilhete' },
-                                { id: 'showTerms', label: 'Termos e Condições' },
-                                { id: 'showSupport', label: 'Informação de Suporte' },
-                            ].map(block => (
-                                <label key={block.id} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer hover:border-neutral-200 transition-colors">
-                                    <span className="text-xs font-bold text-neutral-800">{block.label}</span>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!(theme?.blocks as any)?.[block.id]}
-                                        onChange={(e) => updateTheme(`blocks.${block.id}`, e.target.checked)}
-                                        className="w-4 h-4 accent-emerald-500"
-                                    />
-                                </label>
-                            ))}
+                            <Toggle id="showEventTitle" label="Título do evento" />
+                            <Toggle id="showVenue" label="Local / venue" />
+                            <Toggle id="showCity" label="Cidade" />
+                            <Toggle id="showDate" label="Data e hora" />
+                            <Toggle id="showTicketCode" label="Código do bilhete" />
+                            <Toggle id="showOrganization" label="Nome / logo da organização" />
+                            <Toggle id="showBuyerName" label="Nome do comprador" />
+                            <Toggle id="showTicketType" label="Tipo de bilhete" />
+                            <Toggle id="showOrderId" label="ID da encomenda" />
+                            <Toggle id="showTerms" label="Termos e condições" />
+                            <Toggle id="showSupport" label="Informação de suporte" />
+                        </div>
+                        <div className="mt-4 space-y-3">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Badge / etiqueta superior</label>
+                                <input value={theme?.blocks.badgeText || ""} onChange={(e) => updateTheme('blocks.badgeText', e.target.value)} placeholder="Bilhete Digital" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Texto legal personalizado</label>
+                                <textarea value={theme?.blocks.customTerms || ""} onChange={(e) => updateTheme('blocks.customTerms', e.target.value)} placeholder="Deixe vazio para usar o texto padrão..." rows={3} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none resize-y" />
+                            </div>
                         </div>
                     </section>
 
@@ -565,6 +695,51 @@ export default function TicketTemplateEditorPage() {
                                     className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
                                 />
                             </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Moldura do QR</label>
+                                <select value={theme?.qr.frameStyle || "light"} onChange={(e) => updateTheme('qr.frameStyle', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="none">Sem moldura</option>
+                                    <option value="light">Sombra suave</option>
+                                    <option value="accent">Borda colorida</option>
+                                    <option value="bold">Destaque forte</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Cantos do QR</label>
+                                <select value={theme?.qr.borderRadius || "md"} onChange={(e) => updateTheme('qr.borderRadius', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
+                                    <option value="none">Retos</option>
+                                    <option value="sm">Suaves</option>
+                                    <option value="md">Médios</option>
+                                    <option value="lg">Arredondados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Textos / labels */}
+                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
+                            <Type className="h-4 w-4" /> Textos dos campos
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { key: "labelBadge", label: "Badge", placeholder: "Bilhete Digital" },
+                                { key: "labelVenue", label: "Local", placeholder: "Local" },
+                                { key: "labelDate", label: "Data", placeholder: "Data e Hora" },
+                                { key: "labelBuyer", label: "Titular", placeholder: "Titular" },
+                                { key: "labelTicketType", label: "Tipo", placeholder: "Tipo de Bilhete" },
+                                { key: "labelTicketCode", label: "Código", placeholder: "Código" },
+                            ].map(({ key, label, placeholder }) => (
+                                <div key={key}>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1 ml-1">{label}</label>
+                                    <input
+                                        value={(theme?.copy as Record<string, string>)?.[key] || ""}
+                                        onChange={(e) => updateTheme(`copy.${key}`, e.target.value)}
+                                        placeholder={placeholder}
+                                        className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none"
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </section>
                 </div>

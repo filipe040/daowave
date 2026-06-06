@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ThemeJson, themeJsonSchema, TicketTemplateStatus, TicketTemplatePreset } from "./models";
+import { DEFAULT_TICKET_THEME, normalizeTicketTheme } from "./default-theme";
 import { createAuditLog } from "@/lib/security";
 
 export const TicketTemplateService = {
@@ -26,27 +27,7 @@ export const TicketTemplateService = {
      * Create a DRAFT template with default values
      */
     async createDraft(organizationId: string, name: string, preset: TicketTemplatePreset = "A4_CLASSIC") {
-        const defaultTheme: ThemeJson = {
-            brand: { logoUrl: "", tagline: "" },
-            colors: {
-                bg: "#ffffff",
-                card: "#ffffff",
-                text: "#111111",
-                primary: "#19c37d",
-                muted: "#666666",
-            },
-            typography: { fontFamily: "Inter" },
-            qr: { size: "M", label: "Validar na entrada" },
-            blocks: {
-                showBuyerName: true,
-                showOrderId: true,
-                showTicketType: true,
-                showTerms: true,
-                showSupport: true,
-            },
-            footer: { supportUrl: "", supportEmail: "" },
-            layout: { accentStyle: "bar", cardStyle: "elevated", cornerRadius: "md" },
-        };
+        const defaultTheme: ThemeJson = DEFAULT_TICKET_THEME;
 
         return prisma.organizationTicketTemplate.create({
             data: {
@@ -69,7 +50,7 @@ export const TicketTemplateService = {
 
         let updatedTheme = existing.themeJson as unknown as ThemeJson;
         if (data.themeJson) {
-            updatedTheme = data.themeJson as ThemeJson;
+            updatedTheme = normalizeTicketTheme(data.themeJson as ThemeJson);
             themeJsonSchema.parse(updatedTheme);
         }
 

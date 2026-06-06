@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatus } from "../ticket-templates/models";
+import { DEFAULT_TICKET_THEME, mergeTicketTheme, normalizeTicketTheme } from "../ticket-templates/default-theme";
 import crypto from "crypto";
 import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
 import { renderTicketHtml, qrDisplaySizePx } from "./ticket-html-templates";
@@ -8,45 +9,27 @@ import { urlToDataUri } from "../pdf/inline-assets";
 import { safeLog } from "../security";
 import QRCode from "qrcode";
 
-const DEFAULT_THEME: ThemeJson = {
-  brand: { logoUrl: "", tagline: "" },
-  colors: {
-    bg: "#ffffff",
-    card: "#ffffff",
-    text: "#111111",
-    primary: "#19c37d",
-    muted: "#666666",
-  },
-  typography: { fontFamily: "Inter" },
-  qr: { size: "M", label: "Validar na entrada" },
-  blocks: {
-    showBuyerName: true,
-    showOrderId: true,
-    showTicketType: true,
-    showTerms: true,
-    showSupport: true,
-  },
-  footer: { supportUrl: "", supportEmail: "" },
-  layout: { accentStyle: "bar", cardStyle: "elevated", cornerRadius: "md" },
-};
+const DEFAULT_THEME: ThemeJson = DEFAULT_TICKET_THEME;
 
 function mergeTheme(theme?: ThemeJson): ThemeJson {
-  const safeTheme: ThemeJson = {
-    brand: { ...DEFAULT_THEME.brand, ...(theme?.brand || {}) },
-    colors: { ...DEFAULT_THEME.colors, ...(theme?.colors || {}) },
-    typography: { ...DEFAULT_THEME.typography, ...(theme?.typography || {}) },
-    qr: { ...DEFAULT_THEME.qr, ...(theme?.qr || {}) },
-    blocks: { ...DEFAULT_THEME.blocks, ...(theme?.blocks || {}) },
-    footer: { ...DEFAULT_THEME.footer, ...(theme?.footer || {}) },
-    layout: { ...DEFAULT_THEME.layout, ...(theme?.layout || {}) },
-  };
+  return mergeTicketTheme(normalizeTicketTheme(theme));
+}
 
-  if (safeTheme.brand.logoUrl && safeTheme.brand.logoUrl.startsWith("/")) {
-    const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    safeTheme.brand.logoUrl = `${baseUrl}${safeTheme.brand.logoUrl}`;
+async function inlineThemeAssets(theme: ThemeJson): Promise<ThemeJson> {
+  let next = theme;
+  if (theme.brand.logoUrl) {
+    const inlined = await urlToDataUri(theme.brand.logoUrl);
+    if (inlined) {
+      next = { ...next, brand: { ...next.brand, logoUrl: inlined } };
+    }
   }
-
-  return safeTheme;
+  if (theme.brand.backgroundUrl) {
+    const inlinedBg = await urlToDataUri(theme.brand.backgroundUrl);
+    if (inlinedBg) {
+      next = { ...next, brand: { ...next.brand, backgroundUrl: inlinedBg } };
+    }
+  }
+  return next;
 }
 
 async function fetchActiveTemplateForTicket(ticketId: string) {
@@ -75,13 +58,7 @@ async function fetchActiveTemplateForTicket(ticketId: string) {
 }
 
 async function inlineThemeLogo(theme: ThemeJson): Promise<ThemeJson> {
-  if (!theme.brand.logoUrl) return theme;
-  const inlined = await urlToDataUri(theme.brand.logoUrl);
-  if (!inlined) return theme;
-  return {
-    ...theme,
-    brand: { ...theme.brand, logoUrl: inlined },
-  };
+  return inlineThemeAssets(theme);
 }
 
 export const TicketRenderService = {

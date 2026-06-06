@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePromoter } from "@/lib/auth/guards";
 import { TicketRenderService } from "@/lib/tickets/ticket-render.service";
 import { ThemeJson, TicketTemplatePreset, themeJsonSchema, TICKET_TEMPLATE_PRESETS } from "@/lib/ticket-templates/models";
+import { normalizeTicketTheme } from "@/lib/ticket-templates/default-theme";
 import { safeLog } from "@/lib/security";
 import { z } from "zod";
 
@@ -71,7 +72,10 @@ export async function POST(req: NextRequest) {
     try {
         await requirePromoter();
         const body = await req.json();
-        const parsed = draftPreviewSchema.parse(body);
+        const parsed = draftPreviewSchema.parse({
+            ...body,
+            themeJson: normalizeTicketTheme(body.themeJson),
+        });
         const ticketId = parsed.ticketId || "SAMPLE";
 
         const html = await TicketRenderService.renderHtmlDraft(
