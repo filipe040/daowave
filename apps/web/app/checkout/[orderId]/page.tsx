@@ -53,7 +53,7 @@ export default async function CheckoutPage({
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="min-h-screen mesh-gradient flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-white mb-3">Sessão necessária</h1>
           <p className="text-white/50 mb-6">Inicie sessão para concluir a compra.</p>
@@ -77,7 +77,7 @@ export default async function CheckoutPage({
 
   if (order.status === 'PAID') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="min-h-screen mesh-gradient flex items-center justify-center px-4">
         <div className="text-center max-w-md rounded-3xl border border-white/10 bg-white/5 p-10">
           <h1 className="text-2xl font-bold text-white mb-3">Pedido já pago</h1>
           <p className="text-white/50 mb-6">Este pedido já foi processado com sucesso.</p>
@@ -97,7 +97,7 @@ export default async function CheckoutPage({
   const ticketCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div data-testid="page-checkout" className="min-h-screen bg-black pt-24 pb-16 relative overflow-hidden">
+    <div data-testid="page-checkout" className="min-h-screen mesh-gradient pt-24 pb-16 relative overflow-hidden">
       <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-emerald-500/8 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-32 w-[500px] h-[500px] bg-blue-500/8 blur-[100px] rounded-full pointer-events-none" />
 

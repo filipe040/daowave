@@ -1,0 +1,2 @@
+ALTER TABLE `Event` ADD COLUMN `locationUrl` VARCHAR(2048) NULL;
+ALTER TABLE `EventArtist` ADD COLUMN `locationUrl` VARCHAR(2048) NULL;

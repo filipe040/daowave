@@ -3,46 +3,41 @@
 @tailwind utilities;
 
 /* =========================================================
-   EASYTICKET DESIGN SYSTEM – Dark Premium / Liquid Glass
-   - Near-black base, glass cards, soft shadows
-   - Contrast: primary 85–95%, secondary 60–75%, tertiary 40–55%
-   - Short tokens for components: --bg, --card, --text, --muted, --accent, etc.
+   GOPASS DESIGN SYSTEM – Light & Vibrant (public)
+   Dashboard areas use .dark for the premium dark theme
    ========================================================= */
 
 @layer base {
   :root {
-    /* Short-name tokens (design system) */
-    --bg: 225 18% 5%;
-    --card: 225 16% 8%;
-    --border: 0 0% 100% / 0.10;
-    --text: 0 0% 96%;
-    --muted: 220 10% 55%;
-    --accent: 213 94% 56%;
-    --accent2: 270 60% 55%;
+    --bg: 240 20% 98%;
+    --card: 0 0% 100%;
+    --border: 240 10% 90%;
+    --text: 240 10% 10%;
+    --muted: 240 5% 46%;
+    --accent: 262 83% 58%;
+    --accent2: 24 95% 53%;
     --danger: 0 72% 51%;
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
 
-    /* Extended (Tailwind compatibility) */
-    --background: 225 18% 5%;
-    --foreground: 0 0% 96%;
-    --muted: 225 12% 14%;
-    --muted-foreground: 220 10% 65%;
-    --card: 225 16% 8%;
-    --card-foreground: 0 0% 96%;
-    --popover: 225 16% 9%;
-    --popover-foreground: 0 0% 96%;
-    --border: 0 0% 100% / 0.10;
-    --input: 0 0% 100% / 0.10;
-    --primary: 213 94% 56%;
+    --background: 240 20% 98%;
+    --foreground: 240 10% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    --input: 240 10% 90%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 100% / 0.06;
-    --secondary-foreground: 0 0% 96%;
-    --accent: 0 0% 100% / 0.06;
-    --accent-foreground: 0 0% 96%;
+    --secondary: 262 60% 96%;
+    --secondary-foreground: 262 50% 30%;
+    --accent: 262 60% 96%;
+    --accent-foreground: 262 50% 30%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 213 94% 56%;
+    --ring: 262 83% 58%;
 
     --radius: 1.25rem;
     --radius-md: 0.875rem;
@@ -51,16 +46,50 @@
     --radius-2xl: 1.75rem;
     --radius-3xl: 2rem;
 
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08), 0 12px 40px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 8px 32px rgba(15, 23, 42, 0.1), 0 24px 64px rgba(15, 23, 42, 0.08);
+
+    --glass: 0 0% 100% / 0.72;
+    --glass-strong: 0 0% 100% / 0.88;
+
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
+  }
+
+  .dark {
+    --bg: 225 18% 5%;
+    --card: 225 16% 8%;
+    --border: 0 0% 100% / 0.10;
+    --text: 0 0% 96%;
+    --muted: 220 10% 55%;
+    --accent: 213 94% 56%;
+    --accent2: 270 60% 55%;
+
+    --background: 225 18% 5%;
+    --foreground: 0 0% 96%;
+    --muted: 225 12% 14%;
+    --muted-foreground: 220 10% 65%;
+    --card: 225 16% 8%;
+    --card-foreground: 0 0% 96%;
+    --popover: 225 16% 9%;
+    --popover-foreground: 0 0% 96%;
+    --input: 0 0% 100% / 0.10;
+    --primary: 213 94% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 100% / 0.06;
+    --secondary-foreground: 0 0% 96%;
+    --accent: 0 0% 100% / 0.06;
+    --accent-foreground: 0 0% 96%;
+    --ring: 213 94% 56%;
+
     --shadow-sm: 0 10px 26px rgba(0,0,0,.35);
     --shadow-md: 0 18px 60px rgba(0,0,0,.45);
     --shadow-lg: 0 28px 90px rgba(0,0,0,.55);
 
     --glass: 0 0% 100% / 0.05;
     --glass-strong: 0 0% 100% / 0.08;
-
-    --ease: cubic-bezier(.2,.8,.2,1);
-    --dur-1: 120ms;
-    --dur-2: 180ms;
   }
 
   * {
@@ -89,12 +118,14 @@
 
 @layer components {
   .ui-card {
-    @apply rounded-2xl border border-white/10 bg-card text-card-foreground;
+    @apply rounded-2xl border bg-card text-card-foreground;
+    border-color: hsl(var(--border));
     box-shadow: var(--shadow-sm);
   }
 
   .ui-glass {
-    @apply rounded-2xl border border-white/10;
+    @apply rounded-2xl border;
+    border-color: hsl(var(--border));
     background: hsl(var(--glass));
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -102,9 +133,14 @@
   }
 
   .ui-input {
-    @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-all;
+    @apply w-full rounded-2xl border bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition-all;
+    border-color: hsl(var(--input));
     transition-duration: var(--dur-2);
     transition-timing-function: var(--ease);
+  }
+  .dark .ui-input {
+    @apply bg-white/5 text-white placeholder:text-white/40;
+    border-color: hsl(0 0% 100% / 0.10);
   }
   .ui-input:focus {
     border-color: hsl(var(--ring) / 0.45);
@@ -132,7 +168,10 @@
   }
 
   .ui-btn-secondary {
-    @apply ui-btn border-white/10 bg-white/5 text-white hover:bg-white/10;
+    @apply ui-btn border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100;
+  }
+  .dark .ui-btn-secondary {
+    @apply border-white/10 bg-white/5 text-white hover:bg-white/10;
   }
 }
 
@@ -145,6 +184,14 @@
 
   .shadow-premium {
     box-shadow: var(--shadow-md);
+  }
+
+  .mesh-gradient {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(262 83% 58% / 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, hsl(24 95% 53% / 0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 100%, hsl(199 89% 48% / 0.06), transparent),
+      hsl(var(--background));
   }
 
   .animate-fade-in {

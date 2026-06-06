@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function SobreNosPage() {
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen mesh-gradient text-neutral-900">
             <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                 <Link
                     href="/"

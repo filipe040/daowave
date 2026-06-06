@@ -17,15 +17,15 @@ export const metadata: Metadata = {
 export function generateViewport() {
   return {
     themeColor: [
-      { media: "(prefers-color-scheme: dark)", color: "#0B0C0F" },
-      { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
+      { media: "(prefers-color-scheme: dark)", color: "#7c3aed" },
+      { media: "(prefers-color-scheme: light)", color: "#fafafa" },
     ] as const,
   };
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt" className="dark" suppressHydrationWarning>
+    <html lang="pt" suppressHydrationWarning>
       <body className="min-h-screen bg-[hsl(var(--background))] text-foreground antialiased">
         <Providers>
           <div className="min-h-screen flex flex-col">

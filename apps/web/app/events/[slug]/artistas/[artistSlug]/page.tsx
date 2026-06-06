@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { EventArtistService } from "@/lib/services/event-artist.service";
+import { resolveEventLocation } from "@/lib/maps";
 import { formatPerformanceDateTime, daysUntil } from "@/lib/utils";
 import { Calendar, Home, MapPin } from "lucide-react";
 import { ArtistTicketSelector } from "./artist-ticket-selector";
@@ -25,6 +26,7 @@ export default async function ArtistDetailPage({
             venue: true,
             city: true,
             archivedAt: true,
+            locationUrl: true,
         },
     });
 
@@ -33,9 +35,8 @@ export default async function ArtistDetailPage({
     const artist = await EventArtistService.getBySlug(event.id, artistSlug);
     if (!artist || !artist.isPublished) notFound();
 
-    const venue = artist.venue || event.venue;
+    const { venueDisplay, mapEmbedUrl } = resolveEventLocation(event, artist);
     const days = daysUntil(artist.performanceAt);
-    const mapQuery = encodeURIComponent(`${venue}, ${event.city}, Portugal`);
 
     return (
         <div className="min-h-screen bg-[#f5f5f7] text-neutral-900">
@@ -95,7 +96,7 @@ export default async function ArtistDetailPage({
                             </div>
                             <div className="flex items-start gap-3">
                                 <MapPin className="h-5 w-5 text-neutral-400 mt-0.5 shrink-0" />
-                                <p className="font-semibold text-neutral-900">{venue}</p>
+                                <p className="font-semibold text-neutral-900">{venueDisplay}</p>
                             </div>
                         </div>
                     </div>
@@ -118,14 +119,14 @@ export default async function ArtistDetailPage({
 
                         <section>
                             <h2 className="text-lg font-bold text-neutral-900 mb-2">Localização</h2>
-                            <p className="text-neutral-600 mb-4">{venue}</p>
+                            <p className="text-neutral-600 mb-4">{venueDisplay}</p>
                             <div className="rounded-2xl overflow-hidden ring-1 ring-black/[0.08] h-64 bg-neutral-200">
                                 <iframe
                                     title="Mapa"
                                     className="w-full h-full border-0"
                                     loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade"
-                                    src={`https://maps.google.com/maps?q=${mapQuery}&z=15&output=embed`}
+                                    src={mapEmbedUrl}
                                 />
                             </div>
                         </section>

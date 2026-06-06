@@ -42,7 +42,7 @@ function MockCheckoutContent() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-24 pb-16 relative overflow-hidden">
+    <div className="min-h-screen mesh-gradient pt-24 pb-16 relative overflow-hidden">
       <PaymentProcessingOverlay active={processing} />
 
       <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[500px] h-[500px] bg-emerald-500/8 blur-[120px] rounded-full pointer-events-none" />
@@ -103,7 +103,7 @@ export default function MockCheckoutPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="min-h-screen mesh-gradient flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-white/20" />
         </div>
       }

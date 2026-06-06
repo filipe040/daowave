@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
-import { Plus, Check, Loader2, Pencil, X, Trash2, Mic2, ExternalLink } from "lucide-react";
+import { Plus, Check, Loader2, Pencil, X, Trash2, Mic2, ExternalLink, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
@@ -16,6 +16,7 @@ interface Artist {
     bio: string | null;
     performanceAt: string;
     venue: string | null;
+    locationUrl: string | null;
     sortOrder: number;
     badgeLabel: string | null;
     isPublished: boolean;
@@ -48,13 +49,24 @@ const EMPTY_FORM = {
     bio: "",
     performanceAt: "",
     venue: "",
+    locationUrl: "",
     badgeLabel: "",
     priceCents: "",
     capacity: "100",
     lotName: "Bilhete Normal",
 };
 
-export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; eventSlug?: string }) {
+export default function ArtistsTab({
+    eventId,
+    eventSlug,
+    layoutMode = "STANDARD",
+    onLayoutModeChange,
+}: {
+    eventId: string;
+    eventSlug?: string;
+    layoutMode?: string;
+    onLayoutModeChange?: (mode: string) => void;
+}) {
     const [artists, setArtists] = useState<Artist[]>([]);
     const [canEdit, setCanEdit] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -75,7 +87,12 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
             setArtists(data.artists);
             setCanEdit(!!data.meta?.canEdit);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Erro");
+            const msg = err instanceof Error ? err.message : "Erro";
+            setError(
+                msg.includes("carregar")
+                    ? "Não foi possível carregar artistas. Se acabou de atualizar a plataforma, peça ao administrador para correr as migrations da base de dados."
+                    : msg
+            );
         } finally {
             setLoading(false);
         }
@@ -106,6 +123,7 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
             bio: artist.bio || "",
             performanceAt: new Date(artist.performanceAt).toISOString().slice(0, 16),
             venue: artist.venue || "",
+            locationUrl: artist.locationUrl || "",
             badgeLabel: artist.badgeLabel || "",
             priceCents: lot ? String(lot.priceCents / 100) : "",
             capacity: lot ? String(lot.capacity || 100) : "100",
@@ -130,6 +148,7 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
                 bio: formData.bio.trim() || undefined,
                 performanceAt: new Date(formData.performanceAt).toISOString(),
                 venue: formData.venue.trim() || undefined,
+                locationUrl: formData.locationUrl.trim() || undefined,
                 badgeLabel: formData.badgeLabel.trim() || undefined,
                 priceCents: price,
                 capacity,
@@ -151,6 +170,9 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
             }
 
             toast.success(editingId ? "Artista atualizado" : "Artista criado");
+            if (layoutMode !== "ARTISTS") {
+                onLayoutModeChange?.("ARTISTS");
+            }
             resetForm();
             await load();
         } catch (err: unknown) {
@@ -203,6 +225,15 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
 
     return (
         <div className="p-6 sm:p-8">
+            {layoutMode !== "ARTISTS" && (
+                <div className="mb-6 rounded-2xl border border-violet-500/30 bg-violet-500/10 p-4 sm:p-5">
+                    <p className="text-[14px] font-bold text-violet-200">Modo bilhetes por artista</p>
+                    <p className="text-[13px] text-violet-200/70 mt-1 leading-relaxed">
+                        Adicione artistas abaixo — ao criar o primeiro, a página pública passa automaticamente para o layout em grelha (estilo festival).
+                    </p>
+                </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -227,11 +258,16 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
                     <button
                         type="button"
                         onClick={() => { resetForm(); setIsFormOpen(true); }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-white text-black hover:bg-white/90 transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-white text-black hover:bg-white/90 transition-all shrink-0"
                     >
                         <Plus className="h-4 w-4" />
                         Adicionar Artista
                     </button>
+                )}
+                {!canEdit && (
+                    <p className="text-[12px] text-amber-400/80 font-medium max-w-xs text-right">
+                        Apenas proprietários ou gestores da organização podem adicionar artistas.
+                    </p>
                 )}
             </div>
 
@@ -262,8 +298,30 @@ export default function ArtistsTab({ eventId, eventSlug }: { eventId: string; ev
                             <input required type="datetime-local" value={formData.performanceAt} onChange={(e) => setFormData({ ...formData, performanceAt: e.target.value })} className="w-full rounded-xl border border-white/10 bg-black/50 text-white px-4 py-2.5 text-sm" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5 block">Local (opcional)</label>
+                            <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5 block">Nome do local (opcional)</label>
                             <input value={formData.venue} onChange={(e) => setFormData({ ...formData, venue: e.target.value })} className="w-full rounded-xl border border-white/10 bg-black/50 text-white px-4 py-2.5 text-sm" placeholder="Usa o do evento se vazio" />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Link do mapa (Google Maps)</label>
+                                <a
+                                    href="https://www.google.com/maps"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:text-amber-300"
+                                >
+                                    <MapPin className="h-3 w-3" />
+                                    Abrir Maps
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                            </div>
+                            <input
+                                type="url"
+                                value={formData.locationUrl}
+                                onChange={(e) => setFormData({ ...formData, locationUrl: e.target.value })}
+                                className="w-full rounded-xl border border-white/10 bg-black/50 text-white px-4 py-2.5 text-sm"
+                                placeholder="https://maps.google.com/... — substitui o mapa do evento para este artista"
+                            />
                         </div>
                         <div>
                             <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5 block">Preço (€) *</label>

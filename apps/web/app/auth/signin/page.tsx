@@ -148,22 +148,20 @@ function SignInContent() {
   const anyLoading = credLoading || !!oauthLoading;
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black overflow-x-hidden">
-      {/* Background glow from Home */}
+    <div className="min-h-screen mesh-gradient text-neutral-900 selection:bg-white selection:text-black overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-white/5 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-white/3 blur-3xl opacity-50" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-violet-400/15 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl" />
       </div>
 
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 sm:px-6">
 
-        {/* Header / Logo */}
         <div className="mb-8 text-center w-full max-w-[400px]">
-          <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
+          <Link href="/" className="inline-flex items-center gap-2 text-neutral-500 hover:text-violet-600 transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
             <ArrowLeft className="h-4 w-4" /> Voltar ao início
           </Link>
-          <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight uppercase">GoPass</h1>
-          <p className="mt-2 text-[13px] sm:text-[14px] text-white/45">Entre na sua conta para continuar</p>
+          <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-neutral-900">GoPass</h1>
+          <p className="mt-2 text-[13px] sm:text-[14px] text-neutral-500">Entre na sua conta para continuar</p>
         </div>
 
         <div className="w-full max-w-[400px]">
@@ -210,7 +208,7 @@ function SignInContent() {
           )}
 
           {/* Main Card */}
-          <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="rounded-[24px] sm:rounded-[32px] border border-neutral-200 bg-white p-6 sm:p-8 shadow-xl">
 
             <div className="space-y-3 sm:space-y-4">
               {/* Apple OAuth */}
@@ -341,7 +339,7 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="min-h-screen mesh-gradient flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-white/10" />
         </div>
       }

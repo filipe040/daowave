@@ -442,7 +442,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen mesh-gradient text-neutral-900">
       {/* background glow */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full bg-indigo-500/10 blur-3xl" />

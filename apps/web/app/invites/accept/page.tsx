@@ -76,7 +76,7 @@ function InviteAcceptContent() {
 
     if (loading || status === "loading") {
         return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+            <div className="min-h-screen mesh-gradient flex flex-col items-center justify-center p-6">
                 <Loader2 className="h-8 w-8 text-white/20 animate-spin mb-4" />
                 <p className="text-white/40 font-medium">A carregar...</p>
             </div>
@@ -85,7 +85,7 @@ function InviteAcceptContent() {
 
     if (error || !invite) {
         return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+            <div className="min-h-screen mesh-gradient flex flex-col items-center justify-center p-6 text-center">
                 <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-6">
                     <Building2 className="h-8 w-8 text-rose-500" />
                 </div>
@@ -178,7 +178,7 @@ function InviteAcceptContent() {
 export default function InviteAcceptPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+            <div className="min-h-screen mesh-gradient flex flex-col items-center justify-center p-6">
                 <Loader2 className="h-8 w-8 text-white/20 animate-spin mb-4" />
                 <p className="text-white/40 font-medium">A carregar...</p>
             </div>

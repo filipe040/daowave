@@ -47,7 +47,7 @@ export default async function OrderSuccessPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="min-h-screen bg-black pt-24 pb-16 relative overflow-hidden">
+    <div className="min-h-screen mesh-gradient pt-24 pb-16 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 max-w-lg relative z-10">

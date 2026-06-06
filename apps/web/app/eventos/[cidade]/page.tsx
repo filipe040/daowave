@@ -82,7 +82,7 @@ export default async function EventosPorCidadePage({
     };
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen mesh-gradient text-neutral-900">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

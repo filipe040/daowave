@@ -8,7 +8,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-full flex bg-black">
+        <div className="dark h-full flex bg-black">
             {/* Desktop sidebar */}
             <div className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 z-30">
                 <AdminSidebar />

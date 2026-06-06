@@ -116,29 +116,31 @@ export default async function Home({
   ]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen mesh-gradient text-neutral-900">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-white/10 py-16 sm:py-20 md:py-24">
-        {/* Background glow */}
+      <section className="relative overflow-hidden border-b border-neutral-200/60 py-16 sm:py-20 md:py-28">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-white/4 blur-[120px]" />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-white/3 blur-3xl" />
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-violet-400/20 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-400/15 blur-3xl" />
+          <div className="absolute top-1/2 left-0 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
         </div>
 
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-[12px] text-white/90 backdrop-blur-xl mb-8">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            <span className="uppercase tracking-wider font-semibold">Plataforma de bilhetes</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-5 py-2 text-[12px] text-violet-700 mb-8">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="uppercase tracking-wider font-bold">Plataforma de bilhetes</span>
           </div>
 
-          <h1 className="text-[42px] sm:text-[60px] md:text-[72px] lg:text-[84px] font-black tracking-tight text-white leading-[1.05] mb-6">
+          <h1 className="text-[42px] sm:text-[60px] md:text-[72px] lg:text-[80px] font-black tracking-tight leading-[1.05] mb-6">
             A tua próxima
             <br />
-            <span className="text-white/70">experiência começa aqui.</span>
+            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-500 bg-clip-text text-transparent">
+              experiência começa aqui.
+            </span>
           </h1>
 
-          <p className="mt-5 text-[16px] sm:text-[20px] text-white/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-[16px] sm:text-[20px] text-neutral-600 max-w-2xl mx-auto leading-relaxed">
             Descobre eventos em Portugal, compra em segundos e entra com QR code.
             Simples. Rápido. Seguro.
           </p>
@@ -148,10 +150,10 @@ export default async function Home({
               href="/events"
               className={cn(
                 "inline-flex items-center justify-center gap-2 rounded-full",
-                "bg-white px-6 py-3.5",
-                "text-[14px] font-semibold text-black",
-                "shadow-[0_8px_32px_rgba(255,255,255,.25)]",
-                "transition-all hover:shadow-[0_8px_40px_rgba(255,255,255,.35)] hover:bg-white/95"
+                "bg-gradient-to-r from-violet-600 to-fuchsia-500 px-7 py-3.5",
+                "text-[14px] font-bold text-white",
+                "shadow-lg shadow-violet-500/30",
+                "transition-all hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-0.5"
               )}
             >
               Ver eventos <ArrowRight className="h-4 w-4" />
@@ -159,8 +161,8 @@ export default async function Home({
             <PromoterLink
               className={cn(
                 "inline-flex items-center justify-center rounded-full",
-                "border border-white/20 bg-white/10 px-6 py-3.5",
-                "text-[15px] font-bold text-white shadow-sm hover:bg-white/20 transition-all"
+                "border-2 border-neutral-200 bg-white px-7 py-3.5",
+                "text-[15px] font-bold text-neutral-800 shadow-sm hover:border-violet-300 hover:bg-violet-50 transition-all"
               )}
             >
               Sou promotor
@@ -170,48 +172,47 @@ export default async function Home({
       </section>
 
       {/* ── TRUST LAYER ────────────────────────────────────────────────────── */}
-      <section className="border-b border-white/8 bg-white/[0.02] py-10 sm:py-12">
+      <section className="border-b border-neutral-200/60 bg-white/60 backdrop-blur-sm py-10 sm:py-12">
         <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 gap-4 sm:gap-8 text-center mb-8">
             <div>
-              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-black text-violet-600 leading-none">
                 +{stats.totalTickets.toLocaleString("pt-PT")}
               </div>
-              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-neutral-500 font-semibold">
                 Bilhetes vendidos
               </div>
             </div>
             <div>
-              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-black text-fuchsia-600 leading-none">
                 +{stats.totalEvents}
               </div>
-              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-neutral-500 font-semibold">
                 Eventos realizados
               </div>
             </div>
             <div>
-              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-bold text-white leading-none">
+              <div className="text-[32px] sm:text-[44px] md:text-[52px] font-black text-orange-500 leading-none">
                 +{stats.totalPromoters}
               </div>
-              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-white/40">
+              <div className="mt-2 text-[11px] sm:text-[12px] uppercase tracking-widest text-neutral-500 font-semibold">
                 Promotores ativos
               </div>
             </div>
           </div>
 
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-[13px] font-semibold text-emerald-800">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
               Compra segura e protegida
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90">
+            <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-[13px] font-semibold text-neutral-700 shadow-sm">
               <span className="text-[15px]">💳</span>
               Visa · Mastercard · MB Way
             </div>
             <Link
               href="/politica-reembolsos"
-              className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-[13px] font-medium text-white/90 hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-[13px] font-semibold text-neutral-700 shadow-sm hover:border-violet-200 hover:bg-violet-50 transition-colors"
             >
               Política de Reembolsos
             </Link>
@@ -221,16 +222,16 @@ export default async function Home({
 
       {/* ── EVENTOS EM DESTAQUE ─────────────────────────────────────────────── */}
       {featured.length > 0 && (
-        <section className="py-12 sm:py-16 border-b border-white/8">
+        <section className="py-12 sm:py-16 border-b border-neutral-200/60 bg-white/40">
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-6 sm:mb-8">
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-white/40 mb-1">Não percas</div>
-                <h2 className="text-[22px] sm:text-[28px] font-semibold text-white/90">Eventos em Destaque</h2>
+                <div className="text-[11px] uppercase tracking-wider text-violet-600 font-bold mb-1">Não percas</div>
+                <h2 className="text-[22px] sm:text-[28px] font-bold text-neutral-900">Eventos em Destaque</h2>
               </div>
               <Link
                 href="/events"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/50 hover:text-white transition"
+                className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-violet-600 hover:text-violet-700 transition"
               >
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -247,13 +248,12 @@ export default async function Home({
                     href={`/events/${event.slug}`}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl",
-                      "border border-white/10 bg-white/5",
-                      "shadow-[0_18px_60px_rgba(0,0,0,.4)]",
-                      "transition-all duration-200 hover:border-white/20 active:scale-[0.99]"
+                      "border border-neutral-200 bg-white",
+                      "shadow-md hover:shadow-xl",
+                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1 active:scale-[0.99]"
                     )}
                   >
-                    {/* Cover Image */}
-                    <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
+                    <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                       {event.bannerUrl || event.coverImage ? (
                         <Image
                           src={event.bannerUrl || event.coverImage!}
@@ -264,41 +264,38 @@ export default async function Home({
                           unoptimized
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/3 flex items-center justify-center">
-                          <Ticket className="h-8 w-8 text-white/20" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-100 to-fuchsia-50 flex items-center justify-center">
+                          <Ticket className="h-8 w-8 text-violet-300" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
 
-                    {/* Body */}
                     <div className="relative p-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-[15px] sm:text-[16px] font-semibold text-white/92 leading-snug line-clamp-2 flex-1">
-                          {event.title}
-                        </h3>
-                      </div>
+                      <h3 className="text-[15px] sm:text-[16px] font-bold text-neutral-900 leading-snug line-clamp-2">
+                        {event.title}
+                      </h3>
 
-                      <div className="mt-3 space-y-2 text-[14px] text-white/70">
+                      <div className="mt-3 space-y-2 text-[14px] text-neutral-600">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-white/50 shrink-0" />
+                          <MapPin className="h-4 w-4 text-violet-500 shrink-0" />
                           <span className="line-clamp-1 font-medium">{event.venue}, {event.city}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-white/50 shrink-0" />
+                          <Calendar className="h-4 w-4 text-violet-500 shrink-0" />
                           <span className="font-medium">{formatDateTimePT(event.startAt)}</span>
                         </div>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4">
+                      <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
                         {minPrice != null ? (
-                          <span className="text-[15px] font-bold text-white">
+                          <span className="text-[15px] font-bold text-violet-700">
                             Desde {formatPrice(minPrice)}
                           </span>
                         ) : (
-                          <span className="text-[14px] font-medium text-white/60">Consultar preço</span>
+                          <span className="text-[14px] font-medium text-neutral-500">Consultar preço</span>
                         )}
-                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white/80 group-hover:text-white transition group-hover:translate-x-1">
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-violet-600 group-hover:translate-x-1 transition-transform">
                           Ver evento <ArrowRight className="h-4 w-4" />
                         </span>
                       </div>
@@ -312,43 +309,36 @@ export default async function Home({
       )}
 
       {/* ── COMO FUNCIONA ───────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24 border-b border-white/8">
+      <section className="py-16 sm:py-24 border-b border-neutral-200/60">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-[11px] uppercase tracking-wider text-white/40 mb-3">Simples como deve ser</div>
-          <h2 className="text-[28px] sm:text-[36px] font-bold text-white/95 mb-12 sm:mb-20">
+          <div className="text-[11px] uppercase tracking-wider text-violet-600 font-bold mb-3">Simples como deve ser</div>
+          <h2 className="text-[28px] sm:text-[36px] font-black text-neutral-900 mb-12 sm:mb-20">
             Como funciona
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             {[
-              {
-                step: "01",
-                icon: Ticket,
-                title: "Escolhe o teu evento",
-                desc: "Navega entre os eventos disponíveis em Portugal e filtra por cidade ou categoria.",
-              },
-              {
-                step: "02",
-                icon: ShieldCheck,
-                title: "Compra em segundos",
-                desc: "Pagamento seguro com cartão ou MB Way. Confirmação imediata por email.",
-              },
-              {
-                step: "03",
-                icon: Zap,
-                title: "Entra com QR Code",
-                desc: "Mostra o teu QR no telemóvel na entrada. Sem impressões, sem filas.",
-              },
+              { step: "01", icon: Ticket, color: "violet", title: "Escolhe o teu evento", desc: "Navega entre os eventos disponíveis em Portugal e filtra por cidade ou categoria." },
+              { step: "02", icon: ShieldCheck, color: "emerald", title: "Compra em segundos", desc: "Pagamento seguro com cartão ou MB Way. Confirmação imediata por email." },
+              { step: "03", icon: Zap, color: "orange", title: "Entra com QR Code", desc: "Mostra o teu QR no telemóvel na entrada. Sem impressões, sem filas." },
             ].map((item) => (
-              <div key={item.step} className="relative rounded-3xl border border-white/10 bg-white/5 p-8 text-left shadow-lg hover:border-white/20 transition-colors">
-                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/10">
-                  <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                    <item.icon className="h-6 w-6 text-white" strokeWidth={2} />
+              <div key={item.step} className="relative rounded-3xl border border-neutral-200 bg-white p-8 text-left shadow-md hover:shadow-lg hover:border-violet-200 transition-all">
+                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-neutral-100">
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                    item.color === "violet" ? "bg-violet-100 text-violet-600" :
+                    item.color === "emerald" ? "bg-emerald-100 text-emerald-600" :
+                    "bg-orange-100 text-orange-600"
+                  }`}>
+                    <item.icon className="h-6 w-6" strokeWidth={2} />
                   </div>
-                  <span className="text-[14px] font-bold tracking-widest text-emerald-400">PASSO {item.step}</span>
+                  <span className={`text-[14px] font-black tracking-widest ${
+                    item.color === "violet" ? "text-violet-600" :
+                    item.color === "emerald" ? "text-emerald-600" :
+                    "text-orange-600"
+                  }`}>PASSO {item.step}</span>
                 </div>
-                <h3 className="text-[18px] font-bold text-white mb-3">{item.title}</h3>
-                <p className="text-[15px] font-medium text-white/70 leading-relaxed">{item.desc}</p>
+                <h3 className="text-[18px] font-bold text-neutral-900 mb-3">{item.title}</h3>
+                <p className="text-[15px] text-neutral-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -360,34 +350,34 @@ export default async function Home({
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 sm:mb-8">
             <div>
-              <h2 className="text-[22px] sm:text-[26px] font-semibold text-white/90">
+              <h2 className="text-[22px] sm:text-[26px] font-bold text-neutral-900">
                 Todos os eventos
               </h2>
-              <p className="mt-1 text-[13px] text-white/45">
+              <p className="mt-1 text-[13px] text-neutral-500">
                 Filtra por cidade ou pesquisa pelo nome do evento.
               </p>
             </div>
             <Link
               href="/events"
-              className="inline-flex items-center gap-2 text-[13px] font-semibold text-white/50 hover:text-white transition"
+              className="inline-flex items-center gap-2 text-[13px] font-semibold text-violet-600 hover:text-violet-700 transition"
             >
               Ver listagem completa <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           <div className="mb-6 sm:mb-8">
-            <Suspense fallback={<div className="h-14 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl animate-pulse" />}>
+            <Suspense fallback={<div className="h-14 rounded-2xl border border-neutral-200 bg-white animate-pulse" />}>
               <EventsSearch cities={cities} initialSearch={params.search} initialCity={params.city} />
             </Suspense>
           </div>
 
           {events.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl py-14 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
-              <Calendar className="h-12 w-12 text-white/25 mx-auto mb-3" strokeWidth={1.5} />
-              <p className="text-[14px] font-semibold text-white/70">
+            <div className="rounded-3xl border border-neutral-200 bg-white py-14 text-center shadow-md">
+              <Calendar className="h-12 w-12 text-neutral-300 mx-auto mb-3" strokeWidth={1.5} />
+              <p className="text-[14px] font-semibold text-neutral-700">
                 Não encontrámos eventos para os filtros selecionados.
               </p>
-              <p className="mt-1 text-[13px] text-white/40 max-w-md mx-auto">
+              <p className="mt-1 text-[13px] text-neutral-500 max-w-md mx-auto">
                 Ajusta a pesquisa ou volta mais tarde. Novos eventos entram regularmente.
               </p>
             </div>
@@ -403,17 +393,13 @@ export default async function Home({
                     href={`/events/${event.slug}`}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl",
-                      "border border-white/10 bg-white/4 backdrop-blur-2xl",
-                      "shadow-[0_18px_60px_rgba(0,0,0,.35)]",
-                      "transition-all duration-200 hover:bg-white/6 hover:border-white/16 active:scale-[0.99]"
+                      "border border-neutral-200 bg-white",
+                      "shadow-md hover:shadow-xl",
+                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1 active:scale-[0.99]"
                     )}
                   >
-                    <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/6 blur-3xl" />
-                    </div>
-
                     {event.bannerUrl || event.coverImage ? (
-                      <div className="relative aspect-[16/9] overflow-hidden bg-white/5">
+                      <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                         <Image
                           src={event.bannerUrl || event.coverImage!}
                           alt={event.title}
@@ -422,37 +408,37 @@ export default async function Home({
                           className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                           unoptimized
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                       </div>
                     ) : (
-                      <div className="aspect-[16/9] bg-white/5" />
+                      <div className="aspect-[16/9] bg-gradient-to-br from-violet-50 to-fuchsia-50" />
                     )}
 
                     <div className="relative p-5 sm:p-6">
-                      <h3 className="text-[16px] sm:text-[17px] font-semibold text-white/92 leading-snug line-clamp-2">
+                      <h3 className="text-[16px] sm:text-[17px] font-bold text-neutral-900 leading-snug line-clamp-2">
                         {event.title}
                       </h3>
 
-                      <div className="mt-3 space-y-2 text-[14px] text-white/70">
+                      <div className="mt-3 space-y-2 text-[14px] text-neutral-600">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-white/50 shrink-0" />
+                          <MapPin className="h-4 w-4 text-violet-500 shrink-0" />
                           <span className="line-clamp-1 font-medium">{event.venue}, {event.city}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-white/50 shrink-0" />
+                          <Calendar className="h-4 w-4 text-violet-500 shrink-0" />
                           <span className="font-medium">{formatDateTimePT(event.startAt)}</span>
                         </div>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4">
+                      <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
                         {minPrice != null ? (
-                          <span className="text-[15px] font-bold text-white">
+                          <span className="text-[15px] font-bold text-violet-700">
                             Desde {formatPrice(minPrice)}
                           </span>
                         ) : (
-                          <span className="text-[14px] font-medium text-white/60">{event.promoter?.brandName || "Promotor"}</span>
+                          <span className="text-[14px] font-medium text-neutral-500">{event.promoter?.brandName || "Promotor"}</span>
                         )}
-                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white/80 group-hover:text-white transition group-hover:translate-x-1">
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-violet-600 group-hover:translate-x-1 transition-transform">
                           Ver detalhes <ArrowRight className="h-4 w-4" />
                         </span>
                       </div>
@@ -466,21 +452,21 @@ export default async function Home({
       </section>
 
       {/* ── PROMOTOR CTA ────────────────────────────────────────────────────── */}
-      <section className="border-t border-white/8 py-12 sm:py-16">
+      <section className="border-t border-neutral-200/60 py-12 sm:py-16">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/4 backdrop-blur-2xl p-8 sm:p-12 text-center shadow-[0_18px_60px_rgba(0,0,0,.45)]">
-            <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/4 blur-3xl" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 p-8 sm:p-12 text-center shadow-xl shadow-violet-500/25">
+            <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
             <div className="relative">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] text-white/50 mb-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-4 py-1.5 text-[11px] text-white mb-5">
                 <Users className="h-3 w-3" />
-                <span className="uppercase tracking-wider">Para promotores</span>
+                <span className="uppercase tracking-wider font-bold">Para promotores</span>
               </div>
-              <h2 className="text-[22px] sm:text-[30px] font-semibold text-white/90">
-                Es promotor de eventos?
+              <h2 className="text-[22px] sm:text-[30px] font-black text-white">
+                És promotor de eventos?
               </h2>
-              <p className="mt-3 text-[14px] sm:text-[15px] text-white/50 max-w-xl mx-auto leading-relaxed">
+              <p className="mt-3 text-[14px] sm:text-[15px] text-white/85 max-w-xl mx-auto leading-relaxed">
                 Cria o teu evento, configura a bilhética e começa a vender. Gestão, analytics e
                 check-in num só lugar.
               </p>
@@ -488,17 +474,17 @@ export default async function Home({
                 <PromoterLink
                   className={cn(
                     "inline-flex items-center justify-center gap-2 rounded-full",
-                    "bg-white px-6 py-3.5",
-                    "text-[14px] font-semibold text-black",
-                    "shadow-[0_8px_32px_rgba(255,255,255,.18)]",
-                    "transition-all hover:shadow-[0_8px_40px_rgba(255,255,255,.28)] hover:scale-105"
+                    "bg-white px-7 py-3.5",
+                    "text-[14px] font-bold text-violet-700",
+                    "shadow-lg",
+                    "transition-all hover:shadow-xl hover:-translate-y-0.5"
                   )}
                 >
                   Aceder ao painel <ArrowRight className="h-4 w-4" />
                 </PromoterLink>
                 <Link
                   href="/sobre-nos"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[14px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 bg-white/10 px-7 py-3.5 text-[14px] font-bold text-white hover:bg-white/20 transition-all"
                 >
                   Saber mais
                 </Link>

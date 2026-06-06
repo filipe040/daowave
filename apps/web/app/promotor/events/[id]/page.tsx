@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { ArrowLeft, Save, Globe, AlertCircle, CheckCircle2, ExternalLink, Mic2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, AlertCircle, CheckCircle2, ExternalLink, Mic2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
@@ -16,6 +16,7 @@ interface EventDetail {
     description: string;
     venue: string;
     city: string;
+    locationUrl?: string | null;
     startAt: string;
     endAt: string;
     status: string;
@@ -62,8 +63,10 @@ export default function PromoterEventDetailPage() {
     const [description, setDescription] = useState("");
     const [venue, setVenue] = useState("");
     const [city, setCity] = useState("");
+    const [locationUrl, setLocationUrl] = useState("");
     const [startAt, setStartAt] = useState("");
     const [endAt, setEndAt] = useState("");
+    const [layoutMode, setLayoutMode] = useState<"STANDARD" | "ARTISTS">("STANDARD");
 
     const load = useCallback(async () => {
         setLoading(true); setError(null);
@@ -76,8 +79,10 @@ export default function PromoterEventDetailPage() {
             setDescription(data.description ?? "");
             setVenue(data.venue ?? "");
             setCity(data.city ?? "");
+            setLocationUrl(data.locationUrl ?? "");
             setStartAt(toLocal(data.startAt));
             setEndAt(toLocal(data.endAt));
+            setLayoutMode((data.layoutMode as "STANDARD" | "ARTISTS") || "STANDARD");
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro ao carregar evento");
         } finally {
@@ -93,7 +98,7 @@ export default function PromoterEventDetailPage() {
             const res = await fetchWithTimeout(`/api/promotor/events/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, venue, city, startAt, endAt }),
+                body: JSON.stringify({ title, description, venue, city, locationUrl: locationUrl.trim() || null, startAt, endAt, layoutMode }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({})) as { error?: string };
@@ -190,6 +195,13 @@ export default function PromoterEventDetailPage() {
                             <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                     )}
+                    <Link
+                        href={`/promotor/events/${id}/bilhetes?tab=artists`}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                    >
+                        <Mic2 className="h-4 w-4" />
+                        Artistas
+                    </Link>
                     <Link
                         href={`/promotor/events/${id}/bilhetes`}
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-white text-black hover:bg-white/90 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
@@ -340,6 +352,53 @@ export default function PromoterEventDetailPage() {
                                 placeholder="Lisboa"
                                 className={inputCls}
                             />
+                        </div>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <div className="flex items-center justify-between mb-3">
+                            <label htmlFor="locationUrl" className={labelCls + " mb-0"}>Link do mapa (Google Maps)</label>
+                            <a
+                                href="https://www.google.com/maps"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300"
+                            >
+                                <MapPin className="h-3.5 w-3.5" />
+                                Abrir Google Maps
+                                <ExternalLink className="h-3 w-3" />
+                            </a>
+                        </div>
+                        <input
+                            id="locationUrl"
+                            type="url"
+                            value={locationUrl}
+                            onChange={(e) => setLocationUrl(e.target.value)}
+                            placeholder="https://maps.google.com/... — link Partilhar do local"
+                            className={inputCls}
+                        />
+                        <p className="mt-2 text-xs text-white/40">Usado no mapa da página pública. Se vazio, o mapa usa o nome do local + cidade.</p>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <label className={labelCls}>Tipo de página pública</label>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setLayoutMode("STANDARD")}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                            >
+                                <p className="font-bold text-white text-[14px]">Evento clássico</p>
+                                <p className="text-xs text-white/40 mt-1">Uma página com todos os bilhetes.</p>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLayoutMode("ARTISTS")}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-white bg-white/10 ring-1 ring-white/20" : "border-white/10 bg-black/30 hover:bg-white/5"}`}
+                            >
+                                <p className="font-bold text-white text-[14px]">Bilhetes por artista</p>
+                                <p className="text-xs text-white/40 mt-1">Grelha de artistas com página individual.</p>
+                            </button>
                         </div>
                     </div>
 

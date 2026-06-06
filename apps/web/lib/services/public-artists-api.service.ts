@@ -6,6 +6,7 @@ import {
     formatShortDayMonth,
     daysUntil,
 } from "../utils";
+import { resolveEventLocation } from "../maps";
 
 export type PublicArtistDto = {
     id: string;
@@ -19,6 +20,8 @@ export type PublicArtistDto = {
     daysUntil: number;
     venue: string | null;
     venueDisplay: string;
+    locationUrl: string | null;
+    mapEmbedUrl: string;
     badgeLabel: string | null;
     price: {
         cents: number | null;
@@ -45,6 +48,7 @@ export type PublicArtistsPayload = {
         venue: string;
         city: string;
         layoutMode: string;
+        locationUrl: string | null;
         urls: {
             eventPage: string;
             artistsPage: string;
@@ -94,7 +98,7 @@ export async function buildPublicArtistsPayload(
                 available = Math.max(0, capacity - lot.soldCount - (holds._sum.qty || 0));
             }
 
-            const venueDisplay = artist.venue || data.event.venue;
+            const loc = resolveEventLocation(data.event, artist);
             const ticketPagePath = `${artistsPagePath}/${artist.slug}`;
 
             return {
@@ -108,7 +112,9 @@ export async function buildPublicArtistsPayload(
                 shortDate: formatShortDayMonth(artist.performanceAt),
                 daysUntil: daysUntil(artist.performanceAt),
                 venue: artist.venue,
-                venueDisplay,
+                venueDisplay: loc.venueDisplay,
+                locationUrl: loc.locationUrl,
+                mapEmbedUrl: loc.mapEmbedUrl,
                 badgeLabel: artist.badgeLabel,
                 price: {
                     cents: minPriceCents,
@@ -139,6 +145,7 @@ export async function buildPublicArtistsPayload(
             venue: data.event.venue,
             city: data.event.city,
             layoutMode: data.event.layoutMode,
+            locationUrl: data.event.locationUrl ?? null,
             urls: {
                 eventPage: `${base}/events/${data.event.slug}`,
                 artistsPage: `${base}${artistsPagePath}`,

@@ -287,6 +287,7 @@ model Event {
   description String      @db.Text
   venue       String
   city        String
+  locationUrl String?  @db.VarChar(2048) // Link Google Maps para o mapa na página pública
   startAt     DateTime
   endAt       DateTime
   coverImage  String?
@@ -402,6 +403,7 @@ model EventArtist {
   bio           String?  @db.Text
   performanceAt DateTime
   venue         String?
+  locationUrl   String?  @db.VarChar(2048) // Link Google Maps (substitui mapa por morada)
   sortOrder     Int      @default(0)
   badgeLabel    String?
   isPublished   Boolean  @default(true)

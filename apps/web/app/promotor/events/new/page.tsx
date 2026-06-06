@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
-import { ArrowLeft, Building2, Save } from "lucide-react";
+import { ArrowLeft, Building2, Save, MapPin, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
@@ -43,6 +43,7 @@ export default function CreateEventPage() {
     const [description, setDescription] = useState("");
     const [venue, setVenue] = useState("");
     const [city, setCity] = useState("");
+    const [locationUrl, setLocationUrl] = useState("");
     const [startAt, setStartAt] = useState("");
     const [endAt, setEndAt] = useState("");
     const [layoutMode, setLayoutMode] = useState<"STANDARD" | "ARTISTS">("STANDARD");
@@ -72,7 +73,7 @@ export default function CreateEventPage() {
             const res = await fetchWithTimeout("/api/promotor/events", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, slug, description, venue, city, startAt, endAt, orgId, layoutMode }),
+                body: JSON.stringify({ title, slug, description, venue, city, locationUrl: locationUrl.trim() || undefined, startAt, endAt, orgId, layoutMode }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({})) as { error?: string };
@@ -165,6 +166,31 @@ export default function CreateEventPage() {
                             <label htmlFor="city" className={labelCls}>Cidade *</label>
                             <input id="city" required placeholder="Lisboa" value={city} onChange={(e) => setCity(e.target.value)} className={inputCls} />
                         </div>
+                    </div>
+
+                    <div className="px-6 py-5">
+                        <div className="flex items-center justify-between mb-3">
+                            <label htmlFor="locationUrl" className={labelCls + " mb-0"}>Link do mapa (Google Maps)</label>
+                            <a
+                                href="https://www.google.com/maps"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300"
+                            >
+                                <MapPin className="h-3.5 w-3.5" />
+                                Abrir Google Maps
+                                <ExternalLink className="h-3 w-3" />
+                            </a>
+                        </div>
+                        <input
+                            id="locationUrl"
+                            type="url"
+                            placeholder="https://maps.google.com/... ou link Partilhar do Google Maps"
+                            value={locationUrl}
+                            onChange={(e) => setLocationUrl(e.target.value)}
+                            className={inputCls}
+                        />
+                        <p className="mt-2 text-xs text-white/40">Opcional. Cole o link partilhado do Google Maps — será usado no mapa da página pública.</p>
                     </div>
 
                     <div className="px-6 py-5">

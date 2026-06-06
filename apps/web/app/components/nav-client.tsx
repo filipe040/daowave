@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import { Ticket } from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
   USER: "Utilizador",
@@ -90,92 +91,82 @@ export default function NavClient() {
     <Link
       href="/account"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2 py-1.5 sm:px-3 sm:py-2 transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black ${compact ? "w-full" : ""}`}
+      className={`flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-2 py-1.5 sm:px-3 sm:py-2 transition-all hover:border-violet-200 hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${compact ? "w-full" : ""}`}
     >
-      <div className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 rounded-full overflow-hidden border border-white/10 bg-white/10 flex items-center justify-center">
+      <div className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 rounded-full overflow-hidden border border-violet-100 bg-violet-50 flex items-center justify-center">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs font-bold text-white/90">{initials}</span>
+          <span className="text-xs font-bold text-violet-700">{initials}</span>
         )}
       </div>
       <div className="min-w-0 text-left">
-        <p className="truncate text-sm font-semibold text-white/90 max-w-[120px] sm:max-w-[140px]">
+        <p className="truncate text-sm font-semibold text-neutral-900 max-w-[120px] sm:max-w-[140px]">
           {displayName || "Conta"}
         </p>
-        <p className="text-[10px] sm:text-xs uppercase tracking-wider text-white/50">
+        <p className="text-[10px] sm:text-xs uppercase tracking-wider text-neutral-500">
           {roleLabel}
         </p>
       </div>
     </Link>
   );
 
+  const navLinkCls = "text-neutral-600 font-semibold text-sm uppercase tracking-wide hover:text-violet-600 transition-colors";
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/80 backdrop-blur-xl shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <span className="text-white font-bold text-lg md:text-xl uppercase tracking-tight">
+        <div className="flex items-center justify-between h-16 md:h-[72px]">
+          <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-500/25">
+              <Ticket className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-neutral-900 font-black text-lg md:text-xl tracking-tight">
               GoPass
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
-            <Link
-              href="/events"
-              className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
-            >
-              DESCOBRIR
+          <nav className="hidden lg:flex items-center gap-8 xl:gap-10 absolute left-1/2 transform -translate-x-1/2">
+            <Link href="/events" className={navLinkCls}>
+              Descobrir
             </Link>
             {session && (
-              <Link
-                href="/my-tickets"
-                className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
-              >
-                MEUS BILHETES
+              <Link href="/my-tickets" className={navLinkCls}>
+                Meus bilhetes
               </Link>
             )}
-            <Link
-              href="/help"
-              className="text-white font-medium text-sm xl:text-base uppercase tracking-wide hover:opacity-70 transition-opacity"
-            >
-              AJUDA
+            <Link href="/help" className={navLinkCls}>
+              Ajuda
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {session ? (
               <div className="flex items-center gap-3 lg:gap-4">
                 <div className="hidden lg:flex items-center gap-3 xl:gap-4">
                   {role === "PROMOTER" && (
-                    <Link
-                      href="/organizer"
-                      className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
-                    >
-                      PROMOTOR
+                    <Link href="/organizer" className={navLinkCls}>
+                      Promotor
                     </Link>
                   )}
                   {role === "ADMIN" && (
-                    <Link
-                      href="/admin"
-                      className="text-white font-medium text-sm uppercase tracking-wide hover:opacity-70 transition-opacity"
-                    >
-                      ADMIN
+                    <Link href="/admin" className={navLinkCls}>
+                      Admin
                     </Link>
                   )}
                   <UserBlock />
                   <button
                     onClick={handleSignOut}
-                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-white transition-all hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-neutral-700 transition-all hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
                   >
-                    SAIR
+                    Sair
                   </button>
                 </div>
 
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden text-white p-2"
+                  className="lg:hidden text-neutral-700 p-2 rounded-lg hover:bg-neutral-100"
                   aria-label="Menu"
                   type="button"
                 >
@@ -192,13 +183,13 @@ export default function NavClient() {
               <>
                 <Link
                   href="/auth/signin"
-                  className="hidden lg:block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors"
+                  className="hidden lg:inline-flex bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-md shadow-violet-500/25"
                 >
-                  ENTRAR
+                  Entrar
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden text-white p-2"
+                  className="lg:hidden text-neutral-700 p-2 rounded-lg hover:bg-neutral-100"
                   aria-label="Menu"
                   type="button"
                 >
@@ -216,78 +207,54 @@ export default function NavClient() {
         </div>
 
         {mobileMenuOpen && (
-          <nav className="lg:hidden pb-6 pt-4 border-t border-white/10 space-y-4">
+          <nav className="lg:hidden pb-6 pt-4 border-t border-neutral-200 space-y-3">
             {session && (
-              <div className="pb-4 border-b border-white/10">
+              <div className="pb-4 border-b border-neutral-200">
                 <UserBlock compact onClick={() => setMobileMenuOpen(false)} />
               </div>
             )}
-            <Link
-              href="/events"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-            >
-              DESCOBRIR
+            <Link href="/events" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+              Descobrir
             </Link>
             {session ? (
               <>
-                <Link
-                  href="/my-tickets"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-                >
-                  MEUS BILHETES
+                <Link href="/my-tickets" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+                  Meus bilhetes
                 </Link>
                 {role === "PROMOTER" && (
-                  <Link
-                    href="/organizer"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-                  >
-                    PROMOTOR
+                  <Link href="/organizer" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+                    Promotor
                   </Link>
                 )}
                 {role === "ADMIN" && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-                  >
-                    ADMIN
+                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+                    Admin
                   </Link>
                 )}
-                <Link
-                  href="/help"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-                >
-                  AJUDA
+                <Link href="/help" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+                  Ajuda
                 </Link>
                 <button
                   onClick={() => {
                     handleSignOut();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors mt-4"
+                  className="w-full bg-neutral-900 text-white font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-xl hover:bg-neutral-800 transition-colors mt-4"
                 >
-                  SAIR
+                  Sair
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/help"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-white font-medium text-sm uppercase tracking-wide py-2 hover:opacity-70 transition-opacity"
-                >
-                  AJUDA
+                <Link href="/help" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${navLinkCls}`}>
+                  Ajuda
                 </Link>
                 <Link
                   href="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block bg-white text-black font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-lg hover:bg-zinc-100 transition-colors text-center mt-4"
+                  className="block bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-sm uppercase tracking-wide px-6 py-2.5 rounded-xl text-center mt-4"
                 >
-                  ENTRAR
+                  Entrar
                 </Link>
               </>
             )}

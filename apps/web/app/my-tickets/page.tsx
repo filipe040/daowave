@@ -45,7 +45,7 @@ export default async function MyTicketsPage() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="min-h-screen mesh-gradient flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 text-center shadow-[0_18px_60px_rgba(0,0,0,.55)]">
           <div className="text-[11px] uppercase tracking-wider text-white/45">Sessão</div>
           <h1 className="mt-2 text-2xl font-semibold text-white/90">Acesso necessário</h1>
@@ -66,7 +66,7 @@ export default async function MyTicketsPage() {
   const tickets = await getTickets(session.user.id);
 
   return (
-    <div className="min-h-screen bg-black text-white" data-testid="page-my-tickets">
+    <div className="min-h-screen mesh-gradient text-neutral-900" data-testid="page-my-tickets">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {/* Header */}
         <div className="mb-8 sm:mb-10">

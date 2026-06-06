@@ -1,44 +1,38 @@
+import Link from "next/link";
+import { Ticket } from "lucide-react";
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-white/10 bg-zinc-950">
+    <footer className="mt-auto border-t border-neutral-200 bg-white">
       <div className="container mx-auto px-4">
-        {/* Top */}
         <div className="py-10 md:py-12">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center">
-                  <div className="grid grid-cols-2 gap-1">
-                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
-                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
-                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
-                    <span className="h-1.5 w-1.5 rounded-sm bg-white/80" />
-                  </div>
+                <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-500/20">
+                  <Ticket className="h-5 w-5 text-white" strokeWidth={2.5} />
                 </div>
-
                 <div className="min-w-0">
-                  <h3 className="text-base md:text-lg font-semibold tracking-wide text-white/90">
+                  <h3 className="text-base md:text-lg font-bold tracking-tight text-neutral-900">
                     GoPass
                   </h3>
-                  <p className="text-[11px] md:text-xs uppercase tracking-wider text-white/40">
+                  <p className="text-[11px] md:text-xs uppercase tracking-wider text-neutral-500">
                     Bilhética &amp; acesso
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 text-sm leading-relaxed text-white/55">
+              <p className="mt-4 text-sm leading-relaxed text-neutral-600">
                 Marketplace de bilhética para eventos em Portugal. QR codes assinados e validação em tempo real.
               </p>
 
-              {/* Trust chips */}
               <div className="mt-5 flex flex-wrap gap-2">
                 {["QR assinado", "Check-in realtime", "Pagamentos seguros"].map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/60"
+                    className="rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-[11px] font-medium text-violet-700"
                   >
                     {t}
                   </span>
@@ -46,119 +40,50 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Buyers */}
             <div>
-              <h4 className="text-sm font-semibold text-white/85">Para Compradores</h4>
+              <h4 className="text-sm font-bold text-neutral-900">Para Compradores</h4>
               <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <a href="/events" className="text-white/55 hover:text-white transition">
-                    Explorar eventos
-                  </a>
-                </li>
-                <li>
-                  <a href="/my-tickets" className="text-white/55 hover:text-white transition">
-                    Meus bilhetes
-                  </a>
-                </li>
-                <li>
-                  <a href="/help" className="text-white/55 hover:text-white transition">
-                    Ajuda
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="text-sm font-semibold text-white/85">Legal</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <a href="/terms" className="text-white/55 hover:text-white transition">
-                    Termos e Condições
-                  </a>
-                </li>
-                <li>
-                  <a href="/privacy" className="text-white/55 hover:text-white transition">
-                    Política de Privacidade
-                  </a>
-                </li>
-                <li>
-                  <a href="/cookies" className="text-white/55 hover:text-white transition">
-                    Política de Cookies
-                  </a>
-                </li>
-                <li>
-                  <a href="/ral" className="text-white/55 hover:text-white transition">
-                    Resolução de Litígios (RAL)
-                  </a>
-                </li>
-              </ul>
-
-              {/* <div className="mt-6">
-                <a href="https://www.livroreclamacoes.pt" target="_blank" rel="noopener noreferrer" className="inline-block transition hover:opacity-80">
-                  <img src="https://www.livroreclamacoes.pt/assets/images/logo_lre.png" alt="Livro de Reclamações Eletrónico" className="h-10 object-contain bg-white px-2 py-1 rounded-md" />
-                </a>
-              </div> */}
-            </div>
-
-            {/* Promoters */}
-            <div>
-              <h4 className="text-sm font-semibold text-white/85">Para Promotores</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <a
-                    href="/auth/signin?register=organizer"
-                    className="text-white/55 hover:text-white transition"
-                  >
-                    Criar conta
-                  </a>
-                </li>
-                <li>
-                  <a href="/organizer" className="text-white/55 hover:text-white transition">
-                    Área do promotor
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/organizer/events/new"
-                    className="text-white/55 hover:text-white transition"
-                  >
-                    Criar evento
-                  </a>
-                </li>
+                <li><Link href="/events" className="text-neutral-600 hover:text-violet-600 transition">Explorar eventos</Link></li>
+                <li><Link href="/my-tickets" className="text-neutral-600 hover:text-violet-600 transition">Meus bilhetes</Link></li>
+                <li><Link href="/help" className="text-neutral-600 hover:text-violet-600 transition">Ajuda</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-sm font-semibold text-white/85">Suporte</h4>
+              <h4 className="text-sm font-bold text-neutral-900">Legal</h4>
               <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <a href="/sobre-nos" className="text-white/55 hover:text-white transition">
-                    Sobre Nós
-                  </a>
-                </li>
-                <li>
-                  <a href="/faq" className="text-white/55 hover:text-white transition">
-                    Perguntas Frequentes
-                  </a>
-                </li>
-                <li>
-                  <a href="mailto:suporte@gopass.pt" className="text-white/55 hover:text-white transition">
-                    suporte@gopass.pt
-                  </a>
-                </li>
+                <li><Link href="/terms" className="text-neutral-600 hover:text-violet-600 transition">Termos e Condições</Link></li>
+                <li><Link href="/privacy" className="text-neutral-600 hover:text-violet-600 transition">Política de Privacidade</Link></li>
+                <li><Link href="/cookies" className="text-neutral-600 hover:text-violet-600 transition">Política de Cookies</Link></li>
+                <li><Link href="/ral" className="text-neutral-600 hover:text-violet-600 transition">Resolução de Litígios (RAL)</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-neutral-900">Para Promotores</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li><Link href="/auth/signin?register=organizer" className="text-neutral-600 hover:text-violet-600 transition">Criar conta</Link></li>
+                <li><Link href="/organizer" className="text-neutral-600 hover:text-violet-600 transition">Área do promotor</Link></li>
+                <li><Link href="/organizer/events/new" className="text-neutral-600 hover:text-violet-600 transition">Criar evento</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-neutral-900">Suporte</h4>
+              <ul className="mt-4 space-y-2 text-sm">
+                <li><Link href="/sobre-nos" className="text-neutral-600 hover:text-violet-600 transition">Sobre Nós</Link></li>
+                <li><Link href="/faq" className="text-neutral-600 hover:text-violet-600 transition">Perguntas Frequentes</Link></li>
+                <li><a href="mailto:suporte@gopass.pt" className="text-neutral-600 hover:text-violet-600 transition">suporte@gopass.pt</a></li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-white/10 py-6">
+        <div className="border-t border-neutral-200 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-white/45">
+            <p className="text-sm text-neutral-500">
               © {year} GoPass. Todos os direitos reservados.
             </p>
-
             <div className="flex items-center gap-2">
               {[
                 { label: "Facebook", href: "#" },
@@ -168,7 +93,7 @@ export default function Footer() {
                 <a
                   key={s.label}
                   href={s.href}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/55 hover:text-white hover:bg-white/8 transition"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-violet-600 hover:border-violet-200 hover:bg-violet-50 transition"
                   aria-label={s.label}
                 >
                   <span className="text-xs font-semibold">{s.label === "Instagram" ? "IG" : s.label === "Facebook" ? "FB" : "X"}</span>

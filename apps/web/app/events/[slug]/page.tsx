@@ -133,7 +133,7 @@ export default async function EventPage({
 
   return (
     <div
-      className="min-h-screen bg-black text-white"
+      className="min-h-screen mesh-gradient text-neutral-900"
       style={{ fontFamily: 'var(--event-font)' }}
     >
       <script
@@ -154,10 +154,9 @@ export default async function EventPage({
         .border-event-primary { border-color: ${primaryColor}; }
       ` }} />
 
-      {/* Background illumination */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div
-          className="absolute -top-[10%] -right-[10%] h-[500px] w-[500px] rounded-full blur-[120px] opacity-20"
+          className="absolute -top-[10%] -right-[10%] h-[500px] w-[500px] rounded-full blur-[120px] opacity-15"
           style={{ backgroundColor: primaryColor }}
         />
         <div
@@ -167,7 +166,7 @@ export default async function EventPage({
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-20">
-        <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
+        <div className="bg-white rounded-[32px] border border-neutral-200 overflow-hidden shadow-xl">
           {/* Banner customizado ou cover image */}
           {event.bannerUrl ? (
             <div className="relative h-64 sm:h-96 w-full group">
@@ -193,7 +192,7 @@ export default async function EventPage({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             </div>
           ) : (
-            <div className="h-40 bg-gradient-to-br from-white/10 to-white/5" />
+            <div className="h-40 bg-gradient-to-br from-violet-50 to-fuchsia-50" />
           )}
 
           <div className="p-6 sm:p-10 md:p-16">
@@ -207,7 +206,7 @@ export default async function EventPage({
                   Evento de {event.organization?.name || event.promoter?.brandName || 'Organização'}
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white tracking-tight leading-[1.1]">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8 text-neutral-900 tracking-tight leading-[1.1]">
                   {event.title}
                 </h1>
 
@@ -215,40 +214,40 @@ export default async function EventPage({
                   <section>
                     {event.useCustomLandingPage && event.landingPageContent ? (
                       <div 
-                        className="custom-landing-page prose prose-invert prose-emerald max-w-none text-white/85 leading-[1.7] prose-headings:text-white prose-a:text-white"
+                        className="custom-landing-page prose prose-neutral max-w-none text-neutral-700 leading-[1.7]"
                         dangerouslySetInnerHTML={{ __html: event.landingPageContent }}
                       />
                     ) : (
                       <>
-                        <h2 className="text-[12px] font-black text-white/50 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
-                        <p className="text-white/85 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
+                        <h2 className="text-[12px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
+                        <p className="text-neutral-700 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
                           {event.description}
                         </p>
                       </>
                     )}
                   </section>
 
-                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/10">
+                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-neutral-200">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-                        <MapPin className="h-5 w-5 text-white/90" strokeWidth={2} />
+                      <div className="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
+                        <MapPin className="h-5 w-5 text-violet-600" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[12px] font-bold text-white/50 uppercase tracking-widest mb-1.5">Localização</p>
-                        <p className="text-white font-semibold text-[15px]">{event.venue}</p>
-                        <p className="text-[14px] text-white/70">{event.city}</p>
+                        <p className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Localização</p>
+                        <p className="text-neutral-900 font-semibold text-[15px]">{event.venue}</p>
+                        <p className="text-[14px] text-neutral-600">{event.city}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-                        <Calendar className="h-5 w-5 text-white/90" strokeWidth={2} />
+                      <div className="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
+                        <Calendar className="h-5 w-5 text-violet-600" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[12px] font-bold text-white/50 uppercase tracking-widest mb-1.5">Data e Hora</p>
-                        <p className="text-white font-semibold text-[15px]">{formatDate(event.startAt)}</p>
+                        <p className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Data e Hora</p>
+                        <p className="text-neutral-900 font-semibold text-[15px]">{formatDate(event.startAt)}</p>
                         {event.endAt && (
-                          <p className="text-[14px] text-white/70">até {formatDate(event.endAt)}</p>
+                          <p className="text-[14px] text-neutral-600">até {formatDate(event.endAt)}</p>
                         )}
                       </div>
                     </div>
@@ -258,11 +257,10 @@ export default async function EventPage({
 
               <aside className="relative">
                 <div className="sticky top-24">
-                  <TicketSelector event={event} ticketLots={event.ticketLots} />
+                  <TicketSelector event={event} ticketLots={event.ticketLots} variant="light" />
 
-                  {/* Trust Footer */}
                   <div className="mt-6 text-center">
-                    <p className="text-[11px] text-white/30 flex items-center justify-center gap-2">
+                    <p className="text-[11px] text-neutral-400 flex items-center justify-center gap-2">
                       <span className="h-1 w-1 rounded-full bg-emerald-500" />
                       Pagamento seguro via MB WAY / Cartão
                     </p>

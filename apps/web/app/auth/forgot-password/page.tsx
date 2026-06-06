@@ -123,7 +123,7 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
+    <div className="min-h-screen mesh-gradient text-neutral-900 selection:bg-white selection:text-black font-sans">
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-white/10" /></div>}>
         <ForgotPasswordContent />
       </Suspense>

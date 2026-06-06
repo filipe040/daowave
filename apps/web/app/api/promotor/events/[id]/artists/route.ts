@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requirePromoter } from "@/lib/auth/guards";
 import {
     assertPromoterEventAccess,
-    canEditTicketInventory,
+    canManageTicketContent,
     TicketManagementAccessError,
 } from "@/lib/auth/ticket-management";
 import { EventArtistService } from "@/lib/services/event-artist.service";
@@ -17,6 +17,7 @@ const createSchema = z.object({
     bio: z.string().optional(),
     performanceAt: z.string().transform((s) => new Date(s)),
     venue: z.string().optional(),
+    locationUrl: z.string().max(2048).optional().or(z.literal("")),
     sortOrder: z.number().int().optional(),
     badgeLabel: z.string().optional(),
     priceCents: z.number().int().min(0),
@@ -38,7 +39,7 @@ export async function GET(
         const artists = await EventArtistService.getByEvent(eventId);
         return NextResponse.json({
             artists,
-            meta: { canEdit: canEditTicketInventory(globalRole, role) },
+            meta: { canEdit: canManageTicketContent(globalRole, role) },
         });
     } catch (error: unknown) {
         if (error instanceof TicketManagementAccessError) {
@@ -57,9 +58,9 @@ export async function POST(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canEditTicketInventory(globalRole, role)) {
+        if (!canManageTicketContent(globalRole, role)) {
             return NextResponse.json(
-                { error: "Apenas o proprietário da organização ou administrador pode gerir artistas." },
+                { error: "Sem permissão para gerir artistas neste evento." },
                 { status: 403 }
             );
         }
@@ -73,6 +74,7 @@ export async function POST(
             imageUrl: body.imageUrl || null,
             bio: body.bio ?? null,
             venue: body.venue ?? null,
+            locationUrl: body.locationUrl || null,
             badgeLabel: body.badgeLabel ?? null,
         });
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requirePromoter } from "@/lib/auth/guards";
 import {
     assertPromoterEventAccess,
-    canEditTicketInventory,
+    canManageTicketContent,
     TicketManagementAccessError,
 } from "@/lib/auth/ticket-management";
 import { EventArtistService } from "@/lib/services/event-artist.service";
@@ -17,6 +17,7 @@ const updateSchema = z.object({
     bio: z.string().optional().nullable(),
     performanceAt: z.string().transform((s) => new Date(s)).optional(),
     venue: z.string().optional().nullable(),
+    locationUrl: z.string().max(2048).optional().nullable().or(z.literal("")),
     sortOrder: z.number().int().optional(),
     badgeLabel: z.string().optional().nullable(),
     isPublished: z.boolean().optional(),
@@ -33,7 +34,7 @@ export async function PATCH(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canEditTicketInventory(globalRole, role)) {
+        if (!canManageTicketContent(globalRole, role)) {
             return NextResponse.json({ error: "Sem permissão para editar artistas." }, { status: 403 });
         }
 
@@ -44,6 +45,7 @@ export async function PATCH(
         const artist = await EventArtistService.update(artistId, {
             ...body,
             imageUrl: body.imageUrl === "" ? null : body.imageUrl,
+            locationUrl: body.locationUrl === "" ? null : body.locationUrl,
         });
 
         return NextResponse.json(artist);
@@ -67,7 +69,7 @@ export async function DELETE(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canEditTicketInventory(globalRole, role)) {
+        if (!canManageTicketContent(globalRole, role)) {
             return NextResponse.json({ error: "Sem permissão para apagar artistas." }, { status: 403 });
         }
 

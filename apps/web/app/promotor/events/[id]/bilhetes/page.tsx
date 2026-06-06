@@ -20,9 +20,18 @@ const TABS = [
 
 export default function BilhetesPage() {
     const { id } = useParams<{ id: string }>();
+
     const [activeTab, setActiveTab] = useState("artists");
     const [eventSlug, setEventSlug] = useState<string | undefined>();
     const [layoutMode, setLayoutMode] = useState<string>("STANDARD");
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get("tab");
+        if (tab === "artists" || tab === "types" || tab === "lots" || tab === "seats") {
+            setActiveTab(tab);
+        }
+    }, []);
 
     useEffect(() => {
         fetchWithTimeout(`/api/promotor/events/${id}`)
@@ -30,16 +39,9 @@ export default function BilhetesPage() {
             .then((data) => {
                 setEventSlug(data.slug);
                 setLayoutMode(data.layoutMode || "STANDARD");
-                if (data.layoutMode !== "ARTISTS") {
-                    setActiveTab("types");
-                }
             })
             .catch(() => {});
     }, [id]);
-
-    const visibleTabs = layoutMode === "ARTISTS"
-        ? TABS.filter((t) => t.id === "artists" || t.id === "lots")
-        : TABS.filter((t) => t.id !== "artists");
 
     return (
         <PageShell
@@ -47,7 +49,7 @@ export default function BilhetesPage() {
             subtitle={
                 layoutMode === "ARTISTS"
                     ? "Modo artistas: configure cada artista com poster, data e preço."
-                    : "Configure os tipos de bilhetes, preços e a planta da sala."
+                    : "Configure bilhetes, artistas, preços e mapa de lugares."
             }
             actions={
                 <Link
@@ -61,7 +63,7 @@ export default function BilhetesPage() {
         >
             <div className="max-w-5xl space-y-6">
                 <div className="p-1.5 bg-white/5 border border-white/10 rounded-2xl inline-flex w-full sm:w-auto overflow-x-auto no-scrollbar shadow-inner">
-                    {visibleTabs.map((tab) => {
+                    {TABS.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
                         return (
@@ -82,7 +84,14 @@ export default function BilhetesPage() {
 
                 <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[32px] shadow-2xl overflow-hidden min-h-[400px] relative">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    {activeTab === "artists" && <ArtistsTab eventId={id} eventSlug={eventSlug} />}
+                    {activeTab === "artists" && (
+                        <ArtistsTab
+                            eventId={id}
+                            eventSlug={eventSlug}
+                            layoutMode={layoutMode}
+                            onLayoutModeChange={setLayoutMode}
+                        />
+                    )}
                     {activeTab === "types" && <TicketTypesTab eventId={id} />}
                     {activeTab === "lots" && <TicketLotsTab eventId={id} />}
                     {activeTab === "seats" && <SeatMapsTab eventId={id} />}

@@ -6,6 +6,12 @@ export function canEditTicketInventory(globalRole?: string, orgRole?: string | n
   return orgRole === "PROMOTER_OWNER" || orgRole === "OWNER";
 }
 
+/** Criar/editar tipos, lotes e artistas (OWNER, MANAGER, etc.) */
+export function canManageTicketContent(globalRole?: string, orgRole?: string | null): boolean {
+  if (globalRole === "ADMIN") return true;
+  return ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(orgRole || "");
+}
+
 export class TicketManagementAccessError extends Error {
   status: number;
   constructor(message: string, status = 403) {

@@ -14,6 +14,7 @@ export type CreateEventInput = {
   description: string;
   venue: string;
   city: string;
+  locationUrl?: string | null;
   startAt: Date;
   endAt: Date;
   bannerUrl?: string | null;
@@ -30,6 +31,7 @@ export type UpdateEventInput = Partial<{
   description: string;
   venue: string;
   city: string;
+  locationUrl: string | null;
   startAt: Date;
   endAt: Date;
   bannerUrl: string | null;
@@ -151,6 +153,7 @@ export const EventService = {
       description: input.description,
       venue: input.venue,
       city: input.city,
+      ...(input.locationUrl !== undefined && { locationUrl: input.locationUrl }),
       startAt: input.startAt,
       endAt: input.endAt,
       status: "DRAFT",
@@ -174,6 +177,7 @@ export const EventService = {
     if (input.description !== undefined) data.description = input.description;
     if (input.venue !== undefined) data.venue = input.venue;
     if (input.city !== undefined) data.city = input.city;
+    if (input.locationUrl !== undefined) data.locationUrl = input.locationUrl;
     if (input.startAt !== undefined) data.startAt = input.startAt;
     if (input.endAt !== undefined) data.endAt = input.endAt;
     if (input.bannerUrl !== undefined) data.bannerUrl = input.bannerUrl;

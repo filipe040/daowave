@@ -7,6 +7,7 @@ export type CreateEventArtistInput = {
     bio?: string | null;
     performanceAt: Date;
     venue?: string | null;
+    locationUrl?: string | null;
     sortOrder?: number;
     badgeLabel?: string | null;
     priceCents: number;
@@ -21,6 +22,7 @@ export type UpdateEventArtistInput = Partial<{
     bio: string | null;
     performanceAt: Date;
     venue: string | null;
+    locationUrl: string | null;
     sortOrder: number;
     badgeLabel: string | null;
     isPublished: boolean;
@@ -85,6 +87,7 @@ export class EventArtistService {
                 venue: true,
                 city: true,
                 layoutMode: true,
+                locationUrl: true,
             },
         });
         if (!event) return null;
@@ -150,6 +153,7 @@ export class EventArtistService {
                     bio: input.bio ?? null,
                     performanceAt: input.performanceAt,
                     venue: input.venue ?? null,
+                    locationUrl: input.locationUrl ?? null,
                     sortOrder: input.sortOrder ?? 0,
                     badgeLabel: input.badgeLabel ?? null,
                     ticketTypeId: ticketType.id,
@@ -158,6 +162,13 @@ export class EventArtistService {
                     ticketType: { include: { ticketLots: true } },
                 },
             });
+
+            if (event.layoutMode !== "ARTISTS") {
+                await tx.event.update({
+                    where: { id: eventId },
+                    data: { layoutMode: "ARTISTS" },
+                });
+            }
 
             return { artist, lot };
         });
@@ -214,6 +225,7 @@ export class EventArtistService {
                     ...(input.bio !== undefined && { bio: input.bio }),
                     ...(input.performanceAt !== undefined && { performanceAt: input.performanceAt }),
                     ...(input.venue !== undefined && { venue: input.venue }),
+                    ...(input.locationUrl !== undefined && { locationUrl: input.locationUrl }),
                     ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
                     ...(input.badgeLabel !== undefined && { badgeLabel: input.badgeLabel }),
                     ...(input.isPublished !== undefined && { isPublished: input.isPublished }),

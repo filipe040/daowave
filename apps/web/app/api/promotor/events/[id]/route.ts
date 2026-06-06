@@ -9,6 +9,7 @@ const updateEventSchema = z.object({
   description: z.string().optional(),
   venue: z.string().optional(),
   city: z.string().optional(),
+  locationUrl: z.string().max(2048).optional().nullable().or(z.literal("")),
   startAt: z.string().transform(str => new Date(str)).optional(),
   endAt: z.string().transform(str => new Date(str)).optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED']).optional(),
