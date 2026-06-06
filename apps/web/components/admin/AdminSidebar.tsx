@@ -13,6 +13,7 @@ import {
     LogOut,
     ScrollText,
     Mail,
+    Home,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -68,7 +69,14 @@ export function AdminSidebar() {
                 })}
             </nav>
 
-            <div className="px-3 pb-8 border-t border-neutral-100 pt-4">
+            <div className="px-3 pb-8 border-t border-neutral-100 pt-4 space-y-1">
+                <Link
+                    href="/"
+                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-neutral-600 hover:bg-violet-50 hover:text-violet-700 transition-all duration-200"
+                >
+                    <Home className="h-4 w-4 shrink-0 text-neutral-400" strokeWidth={1.5} />
+                    <span>Voltar ao início</span>
+                </Link>
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"

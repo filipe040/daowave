@@ -17,6 +17,7 @@ import {
     CircleDollarSign,
     FileText,
     Tag,
+    Home,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -87,7 +88,15 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                 })}
             </nav>
 
-            <div className="px-3 pb-8 pt-4 border-t border-neutral-100">
+            <div className="px-3 pb-8 pt-4 border-t border-neutral-100 space-y-1">
+                <Link
+                    href="/"
+                    onClick={onNavClick}
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-[13px] font-semibold text-neutral-600 hover:text-violet-700 hover:bg-violet-50 border border-transparent hover:border-violet-100 transition-all group"
+                >
+                    <Home className="h-4 w-4 text-neutral-400 group-hover:text-violet-600 transition-colors" strokeWidth={2} />
+                    <span>Voltar ao início</span>
+                </Link>
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-[13px] font-semibold text-neutral-500 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all group"

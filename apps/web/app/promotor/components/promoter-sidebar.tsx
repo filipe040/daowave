@@ -353,7 +353,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               )}
             >
               <Home className="h-4 w-4" />
-              <span className="text-sm font-medium">Voltar ao site</span>
+              <span className="text-sm font-medium">Voltar ao início</span>
             </Link>
 
             <button

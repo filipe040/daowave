@@ -97,7 +97,7 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/60 transition-colors"
             >
               <Home className="h-5 w-5 shrink-0" />
-              Voltar ao site
+              Voltar ao início
             </Link>
           </div>
         </nav>

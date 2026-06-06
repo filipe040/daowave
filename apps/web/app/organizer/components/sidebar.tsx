@@ -106,7 +106,7 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
             >
               <Home className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-              <span className="text-sm font-medium">Voltar ao site</span>
+              <span className="text-sm font-medium">Voltar ao início</span>
             </Link>
           </div>
 
