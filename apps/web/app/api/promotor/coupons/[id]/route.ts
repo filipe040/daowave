@@ -13,6 +13,7 @@ import {
   couponInclude,
   resolveCouponAssignment,
 } from "@/lib/coupons/coupon-assignment";
+import { parseCouponDatetimeLocal } from "@/lib/coupons/validate-coupon";
 
 const UpdateCouponSchema = z.object({
   eventId: z.string().uuid().optional(),
@@ -147,8 +148,8 @@ export async function PUT(
         discountType: data.discountType,
         discountValue: data.discountValue,
         maxUses: data.maxUses,
-        startsAt: new Date(data.startsAt),
-        endsAt: new Date(data.endsAt),
+        startsAt: parseCouponDatetimeLocal(data.startsAt, "start"),
+        endsAt: parseCouponDatetimeLocal(data.endsAt, "end"),
         isActive: data.isActive,
         assignedMemberId: assignment.assignedMemberId,
         commissionCents: assignment.commissionCents,

@@ -78,17 +78,6 @@ export async function POST(req: Request) {
 
     // Check if Coupon table exists (migration applied)
     try {
-      const existingOrgCoupon = await prisma.coupon.findUnique({
-        where: { organizationId: event.organizationId },
-      });
-
-      if (existingOrgCoupon) {
-        return NextResponse.json(
-          { error: "Esta organização já tem um cupão." },
-          { status: 400 }
-        );
-      }
-
       // Check if code already exists
       const existingCoupon = await prisma.coupon.findUnique({
         where: { code: data.code },

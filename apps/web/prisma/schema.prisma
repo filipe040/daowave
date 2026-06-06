@@ -132,7 +132,7 @@ model Organization {
   ticketTemplates      OrganizationTicketTemplate[]
   ticketTemplateAssets TicketTemplateAsset[]
   ticketSnapshots      TicketRenderSnapshot[]
-  coupon               Coupon?
+  coupons              Coupon[]
 
   @@index([slug])
   @@index([status])
@@ -848,9 +848,9 @@ enum CouponDiscountType {
 }
 
 model Coupon {
-  id             String              @id @default(uuid())
-  organizationId String              @unique
-  eventId        String
+  id               String             @id @default(uuid())
+  organizationId   String
+  eventId          String
   code           String              @unique
   discountType   CouponDiscountType
   discountValue  Int
@@ -869,6 +869,7 @@ model Coupon {
   assignedMember OrganizationMember? @relation(fields: [assignedMemberId], references: [id], onDelete: SetNull)
   commissions    CouponCommission[]
 
+  @@index([organizationId])
   @@index([eventId])
   @@index([code])
   @@index([assignedMemberId])

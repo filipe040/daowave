@@ -61,3 +61,26 @@ export async function getCouponCommissionStats(couponId: string) {
     commissionCount: agg._count,
   };
 }
+
+export async function getBulkCouponCommissionStats(couponIds: string[]) {
+  if (couponIds.length === 0) {
+    return new Map<string, { totalCommissionCents: number; commissionCount: number }>();
+  }
+
+  const rows = await prisma.couponCommission.groupBy({
+    by: ["couponId"],
+    where: { couponId: { in: couponIds } },
+    _sum: { amountCents: true },
+    _count: true,
+  });
+
+  return new Map(
+    rows.map((row) => [
+      row.couponId,
+      {
+        totalCommissionCents: row._sum.amountCents ?? 0,
+        commissionCount: row._count,
+      },
+    ])
+  );
+}

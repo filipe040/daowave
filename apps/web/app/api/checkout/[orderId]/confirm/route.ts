@@ -14,6 +14,7 @@ import { getQRPayload } from "@/lib/qr/generate";
 import { checkoutConfirmSchema } from "@/lib/security/validation";
 import { sendTicketsEmail } from "@/lib/email-service";
 import { recordCouponCommission } from "@/lib/coupons/coupon-commission";
+import { validateCouponForCheckout } from "@/lib/coupons/validate-coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -105,37 +106,25 @@ export async function POST(
     let verifiedDiscount = 0;
     let couponApplied = false;
 
+    const baseTotal = order.items.reduce(
+      (sum, item) => sum + item.quantity * item.unitPriceCents,
+      0
+    );
+
     if (couponId) {
-      const now = new Date();
-      const coupon = await prisma.coupon.findFirst({
-        where: {
-          id: couponId,
-          eventId: order.eventId,
-          isActive: true,
-          startsAt: { lte: now },
-          endsAt: { gte: now },
-        },
+      const couponResult = await validateCouponForCheckout({
+        couponId,
+        eventId: order.eventId,
+        totalCents: baseTotal,
       });
 
-      if (coupon) {
-        if (coupon.maxUses === null || coupon.usedCount < coupon.maxUses) {
-          couponApplied = true;
-          const baseTotal = order.items.reduce(
-            (sum, item) => sum + item.quantity * item.unitPriceCents,
-            0
-          );
-          if (coupon.discountType === "PERCENTAGE") {
-            verifiedDiscount = Math.floor((baseTotal * coupon.discountValue) / 100);
-          } else {
-            verifiedDiscount = Math.min(coupon.discountValue, baseTotal);
-          }
-        }
+      if (couponResult.ok) {
+        couponApplied = true;
+        verifiedDiscount = couponResult.discountCents;
       }
     }
 
-    const finalTotal = Math.max(0,
-      order.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0) - verifiedDiscount
-    );
+    const finalTotal = Math.max(0, baseTotal - verifiedDiscount);
 
     await prisma.$transaction(async (tx) => {
       await tx.order.update({
