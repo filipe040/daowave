@@ -69,8 +69,26 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!event.organizationId) {
+      return NextResponse.json(
+        { error: "Evento sem organização. Use /api/promotor/coupons." },
+        { status: 400 }
+      );
+    }
+
     // Check if Coupon table exists (migration applied)
     try {
+      const existingOrgCoupon = await prisma.coupon.findUnique({
+        where: { organizationId: event.organizationId },
+      });
+
+      if (existingOrgCoupon) {
+        return NextResponse.json(
+          { error: "Esta organização já tem um cupão." },
+          { status: 400 }
+        );
+      }
+
       // Check if code already exists
       const existingCoupon = await prisma.coupon.findUnique({
         where: { code: data.code },
@@ -85,6 +103,7 @@ export async function POST(req: Request) {
 
       const coupon = await prisma.coupon.create({
         data: {
+          organizationId: event.organizationId,
           eventId: data.eventId,
           code: data.code,
           discountType: data.discountType,
