@@ -38,8 +38,9 @@ export async function generateSimpleTicketPDF(params: {
       const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
       const qrSize = 160;
       const qrX = (doc.page.width - qrSize) / 2;
-      doc.image(Buffer.from(qrBase64, "base64"), qrX, doc.y, { width: qrSize, height: qrSize });
-      doc.moveDown(10);
+      const qrY = doc.y;
+      doc.image(Buffer.from(qrBase64, "base64"), qrX, qrY, { width: qrSize, height: qrSize });
+      doc.y = qrY + qrSize + 24;
     }
 
     doc.fontSize(10).text("Apresente este documento ou o QR Code na entrada do evento.", {

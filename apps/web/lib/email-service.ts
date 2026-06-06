@@ -21,7 +21,7 @@ import {
 } from "./email-templates-transactional";
 import { getMarketingCampaignTemplate } from "./email-templates";
 import { getEmailQueue } from "./queue/email.queue";
-import { generateSimpleTicketPDF } from "./tickets/simple-ticket-pdf";
+import { TicketRenderService } from "./tickets/ticket-render.service";
 import { buildInvoiceData, generateInvoicePDF } from "./invoice/invoice-pdf.service";
 
 export type EmailTemplate =
@@ -716,19 +716,11 @@ export async function sendTicketsEmail(
       safeLog.error("Invoice PDF generation failed", { orderId, error: pdfErr.message });
     }
 
-    // -- Ticket PDFs (pdfkit + QR) --
+    // -- Ticket PDFs (template do dashboard via TicketRenderService) --
     for (const ticket of tickets) {
       const filename = `bilhete-${ticket.code}.pdf`;
       try {
-        const ticketPdf = await generateSimpleTicketPDF({
-          code: ticket.code,
-          eventTitle: event.title,
-          eventDate: event.startAt,
-          venue: event.venue || "",
-          city: event.city || "",
-          buyerName: recipientName,
-          qrPayload: ticket.qrPayload || ticket.code,
-        });
+        const ticketPdf = await TicketRenderService.renderPdf(ticket.id);
         attachments.push({ filename, content: ticketPdf, contentType: "application/pdf" });
       } catch (ticketPdfErr: any) {
         safeLog.error("Ticket PDF generation failed", {

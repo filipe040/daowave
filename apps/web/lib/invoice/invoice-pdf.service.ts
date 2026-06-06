@@ -1,10 +1,12 @@
 /**
- * Invoice PDF Generator — HTML preview + PDFKit para envio por email
+ * Invoice PDF Generator — HTML (Playwright) + PDFKit fallback
  */
 
-import PDFDocument from "pdfkit";
 import type { ResolvedInvoiceTheme } from "./invoice-theme";
 import { resolveInvoiceTheme } from "./invoice-theme";
+import { generateInvoicePdfKit } from "./invoice-pdfkit";
+import { tryRenderHtmlToPdf } from "../pdf/html-to-pdf";
+import { safeLog } from "../security";
 
 export interface InvoiceData {
   invoiceNumber: string;
@@ -227,132 +229,19 @@ export function generateInvoiceHtml(data: InvoiceData): string {
 }
 
 /**
- * Gera PDF branded via PDFKit (fiável em produção, sem Playwright)
+ * Gera PDF branded — HTML via Playwright (igual ao preview), fallback PDFKit
  */
 export async function generateInvoicePDF(data: InvoiceData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const t = data.theme;
-    const doc = new PDFDocument({ size: "A4", margin: 48 });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk) => chunks.push(chunk));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-
-    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-
-    // Barra de acento
-    doc.rect(0, 0, doc.page.width, 8).fill(t.primaryColor);
-
-    doc.y = 48;
-
-    // Cabeçalho
-    doc.fontSize(22).fillColor(t.textColor).text(t.brandName, { continued: false });
-    doc.fontSize(10).fillColor(t.mutedColor).text(t.tagline.toUpperCase());
-    doc.moveDown(0.3);
-    doc.fontSize(9).fillColor("#059669").text("● PAGO", { align: "left" });
-
-    doc.fontSize(10).fillColor(t.primaryColor).text("FATURA / RECIBO", 0, 48, {
-      align: "right",
-      width: pageWidth,
-    });
-    doc.fontSize(16).fillColor(t.textColor).text(data.invoiceNumber, { align: "right" });
-    doc.fontSize(10).fillColor(t.mutedColor).text(
-      data.issuedAt.toLocaleDateString("pt-PT", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }),
-      { align: "right" }
-    );
-
-    doc.moveDown(2);
-    doc.moveTo(48, doc.y).lineTo(doc.page.width - 48, doc.y).strokeColor("#E4E4E7").stroke();
-    doc.moveDown(1.5);
-
-    const colWidth = pageWidth / 2 - 12;
-    const leftX = doc.page.margins.left;
-    const rightX = leftX + colWidth + 24;
-    const partiesY = doc.y;
-
-    doc.fontSize(8).fillColor(t.mutedColor).text("VENDEDOR", leftX, partiesY);
-    doc.fontSize(12).fillColor(t.textColor).text(data.sellerName, leftX, partiesY + 14);
-    doc.fontSize(10).fillColor(t.mutedColor).text(data.sellerAddress, leftX, doc.y + 2, {
-      width: colWidth,
-    });
-    if (data.sellerNif) {
-      doc.text(`NIF: ${data.sellerNif}`, leftX, doc.y + 2, { width: colWidth });
-    }
-
-    doc.fontSize(8).fillColor(t.mutedColor).text("COMPRADOR", rightX, partiesY);
-    doc.fontSize(12).fillColor(t.textColor).text(data.buyerName, rightX, partiesY + 14);
-    doc.fontSize(10).fillColor(t.mutedColor).text(data.buyerEmail, rightX, doc.y + 2, {
-      width: colWidth,
-    });
-    doc.text(
-      data.buyerNif ? `NIF: ${data.buyerNif}` : "Consumidor final",
-      rightX,
-      doc.y + 2,
-      { width: colWidth }
-    );
-
-    doc.moveDown(2);
-    doc.fontSize(8).fillColor(t.mutedColor).text("DESCRIÇÃO DOS SERVIÇOS");
-    doc.moveDown(0.5);
-
-    for (const item of data.items) {
-      doc.fontSize(10).fillColor(t.textColor).text(
-        `${item.quantity}x ${item.description}`,
-        { width: pageWidth - 80 }
-      );
-      doc.fontSize(10).fillColor(t.textColor).text(
-        formatCurrency(item.totalCents, data.currency),
-        { align: "right", width: pageWidth }
-      );
-      doc.moveDown(0.3);
-    }
-
-    doc.moveDown(1);
-    const ivaRate = 0.23;
-    const baseAmount = Math.round(data.totalCents / (1 + ivaRate));
-    const ivaAmount = data.totalCents - baseAmount;
-
-    doc.fontSize(10).fillColor(t.mutedColor).text("Subtotal (sem IVA)", { continued: true });
-    doc.fillColor(t.textColor).text(formatCurrency(baseAmount, data.currency), { align: "right" });
-    doc.fillColor(t.mutedColor).text("IVA 23%", { continued: true });
-    doc.fillColor(t.textColor).text(formatCurrency(ivaAmount, data.currency), { align: "right" });
-    doc.moveDown(0.3);
-    doc.fontSize(14).fillColor(t.primaryColor).text("Total", { continued: true });
-    doc.text(formatCurrency(data.totalCents, data.currency), { align: "right" });
-
-    if (data.paymentMethod) {
-      doc.moveDown(0.5);
-      doc.fontSize(9).fillColor(t.mutedColor).text(
-        `Método de pagamento: ${data.paymentMethod}`,
-        { align: "right" }
-      );
-    }
-
-    doc.moveDown(2);
-    doc.fontSize(8).fillColor(t.mutedColor).text(
-      "Nota fiscal: IVA incluído à taxa de 23%. Este documento serve de fatura/recibo nos termos do Decreto-Lei n.º 256/2003.",
-      { width: pageWidth, align: "justify" }
-    );
-    doc.text(`Referência: ${data.orderId.substring(0, 8).toUpperCase()}`, { width: pageWidth });
-
-    doc.moveDown(2);
-    doc.fontSize(9).fillColor(t.textColor).text(t.brandName);
-    if (t.websiteUrl) {
-      doc.fontSize(8).fillColor(t.primaryColor).text(t.websiteUrl.replace(/^https?:\/\//, ""));
-    }
-    if (t.footerText) {
-      doc.fontSize(8).fillColor(t.mutedColor).text(t.footerText);
-    }
-    if (t.showPlatformCredit) {
-      doc.fontSize(7).fillColor(t.mutedColor).text("Emitido via GoPass · tickets.daowave.pt");
-    }
-
-    doc.end();
+  const html = generateInvoiceHtml(data);
+  const fromHtml = await tryRenderHtmlToPdf(html, {
+    margin: { top: "0", right: "0", bottom: "0", left: "0" },
   });
+  if (fromHtml) {
+    return fromHtml;
+  }
+
+  safeLog.warn("Invoice PDF: a usar fallback PDFKit (instale Playwright na VPS para design completo)");
+  return generateInvoicePdfKit(data);
 }
 
 export function buildInvoiceData(order: {

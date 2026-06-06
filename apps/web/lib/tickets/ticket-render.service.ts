@@ -3,6 +3,8 @@ import { ThemeJson, TicketRenderModel, TicketTemplatePreset, TicketTemplateStatu
 import crypto from "crypto";
 import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
 import { renderTicketHtml } from "./ticket-html-templates";
+import { tryRenderHtmlToPdf } from "../pdf/html-to-pdf";
+import { safeLog } from "../security";
 
 const DEFAULT_THEME: ThemeJson = {
   brand: { logoUrl: "", tagline: "" },
@@ -270,37 +272,30 @@ export const TicketRenderService = {
   },
 
   /**
-   * Renders the ticket to PDF buffer (Playwright when available, pdfkit fallback)
+   * Renders the ticket to PDF buffer (HTML template via Playwright, pdfkit fallback)
    */
   async renderPdf(ticketId: string, templateId?: string): Promise<Buffer> {
     const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
     const html = renderTicketHtml(preset, model, theme);
 
-    try {
-      const { chromium } = await import("playwright");
-      const browser = await chromium.launch({ headless: true });
-      try {
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: "networkidle" });
-        const pdfBuffer = await page.pdf({
-          format: "A4",
-          printBackground: true,
-          margin: { top: "0", right: "0", bottom: "0", left: "0" },
-        });
-        return Buffer.from(pdfBuffer);
-      } finally {
-        await browser.close();
-      }
-    } catch {
-      return generateSimpleTicketPDF({
-        code: model.ticket.code,
-        eventTitle: model.event.title,
-        eventDate: model.event.startAt,
-        venue: model.event.venue,
-        city: model.event.city,
-        buyerName: model.buyer.name,
-        qrPayload: model.ticket.qrPayload || model.ticket.code,
-      });
+    const fromHtml = await tryRenderHtmlToPdf(html, {
+      margin: { top: "0", right: "0", bottom: "0", left: "0" },
+    });
+    if (fromHtml) {
+      return fromHtml;
     }
+
+    safeLog.warn("Ticket PDF: a usar fallback basico (instale Playwright na VPS para o design do dashboard)", {
+      ticketId,
+    });
+    return generateSimpleTicketPDF({
+      code: model.ticket.code,
+      eventTitle: model.event.title,
+      eventDate: model.event.startAt,
+      venue: model.event.venue,
+      city: model.event.city,
+      buyerName: model.buyer.name,
+      qrPayload: model.ticket.qrPayload || model.ticket.code,
+    });
   },
 };
