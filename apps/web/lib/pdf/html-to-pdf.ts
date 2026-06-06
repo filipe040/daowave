@@ -56,6 +56,10 @@ async function getBrowser(): Promise<Browser> {
 export type HtmlToPdfOptions = {
   format?: "A4" | "Letter";
   margin?: { top?: string; right?: string; bottom?: string; left?: string };
+  /** Recorta o PDF às dimensões do elemento (ex.: .ticket-page) */
+  fitSelector?: string;
+  width?: string;
+  height?: string;
 };
 
 export async function renderHtmlToPdf(
@@ -66,24 +70,49 @@ export async function renderHtmlToPdf(
   const page = await browser.newPage();
 
   try {
+    await page.setViewportSize({ width: 920, height: 1400 });
+
     await page.setContent(html, {
       waitUntil: "load",
       timeout: 45_000,
     });
 
-    // Breve pausa para layout/CSS (sem depender de networkidle ou fontes externas)
     await new Promise((resolve) => setTimeout(resolve, 300));
 
+    const margin = options?.margin ?? {
+      top: "0",
+      right: "0",
+      bottom: "0",
+      left: "0",
+    };
+
+    if (options?.fitSelector) {
+      const box = await page.evaluate((selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return null;
+        return { width: rect.width, height: rect.height };
+      }, options.fitSelector);
+
+      if (box) {
+        const pdfBuffer = await page.pdf({
+          width: `${Math.ceil(box.width)}px`,
+          height: `${Math.ceil(box.height)}px`,
+          printBackground: true,
+          margin,
+        });
+        return Buffer.from(pdfBuffer);
+      }
+    }
+
     const pdfBuffer = await page.pdf({
-      format: options?.format ?? "A4",
+      ...(options?.width && options?.height
+        ? { width: options.width, height: options.height }
+        : { format: options?.format ?? "A4" }),
       printBackground: true,
-      preferCSSPageSize: true,
-      margin: options?.margin ?? {
-        top: "10mm",
-        right: "10mm",
-        bottom: "12mm",
-        left: "10mm",
-      },
+      preferCSSPageSize: !options?.format && !options?.width,
+      margin,
     });
     return Buffer.from(pdfBuffer);
   } finally {

@@ -18,7 +18,7 @@ const DEFAULT_THEME: ThemeJson = {
     muted: "#666666",
   },
   typography: { fontFamily: "Inter" },
-  qr: { size: "L", label: "Validar na entrada" },
+  qr: { size: "M", label: "Validar na entrada" },
   blocks: {
     showBuyerName: true,
     showOrderId: true,
@@ -343,7 +343,7 @@ export const TicketRenderService = {
     const theme = await inlineThemeLogo(baseTheme);
     const qrSize = qrDisplaySizePx(theme.qr.size);
     const qrDataUrl = await QRCode.toDataURL(model.ticket.qrPayload || model.ticket.code, {
-      width: qrSize * 4,
+      width: qrSize * 3,
       margin: 2,
       errorCorrectionLevel: "M",
     });
@@ -357,6 +357,7 @@ export const TicketRenderService = {
 
     const fromHtml = await tryRenderHtmlToPdf(html, {
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
+      fitSelector: ".ticket-page",
     });
     if (fromHtml) {
       return fromHtml;
@@ -373,6 +374,7 @@ export const TicketRenderService = {
       city: model.event.city,
       buyerName: model.buyer.name,
       qrPayload: model.ticket.qrPayload || model.ticket.code,
+      preset,
     });
   },
 };

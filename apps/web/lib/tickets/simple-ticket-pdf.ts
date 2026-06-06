@@ -1,5 +1,13 @@
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
+import type { TicketTemplatePreset } from "../ticket-templates/models";
+
+/** Dimensões em pontos PDF (~mm × 2.835) */
+const PAGE_BY_PRESET: Record<TicketTemplatePreset, [number, number]> = {
+  A4_CLASSIC: [538, 720],
+  HORIZONTAL_QR_RIGHT: [538, 320],
+  MOBILE_PASS: [340, 520],
+};
 
 export async function generateSimpleTicketPDF(params: {
   code: string;
@@ -9,13 +17,15 @@ export async function generateSimpleTicketPDF(params: {
   city: string;
   buyerName: string;
   qrPayload?: string;
+  preset?: TicketTemplatePreset;
 }): Promise<Buffer> {
   const qrDataUrl = params.qrPayload
-    ? await QRCode.toDataURL(params.qrPayload, { width: 960, margin: 2, errorCorrectionLevel: "M" })
+    ? await QRCode.toDataURL(params.qrPayload, { width: 480, margin: 2, errorCorrectionLevel: "M" })
     : null;
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
+    const pageSize = PAGE_BY_PRESET[params.preset ?? "A4_CLASSIC"];
+    const doc = new PDFDocument({ size: pageSize, margin: 36 });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -36,7 +46,7 @@ export async function generateSimpleTicketPDF(params: {
 
     if (qrDataUrl) {
       const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-      const qrSize = 260;
+      const qrSize = 180;
       const qrX = (doc.page.width - qrSize) / 2;
       const qrY = doc.y;
       doc.image(Buffer.from(qrBase64, "base64"), qrX, qrY, { width: qrSize, height: qrSize });

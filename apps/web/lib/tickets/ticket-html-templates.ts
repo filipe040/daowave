@@ -6,15 +6,15 @@ function formatDateCompact(date: Date) {
   return format(date, "d MMM yyyy · HH:mm", { locale: pt });
 }
 
-/** Tamanho de exibição do QR (px) — optimizado para leitura em PDF/email */
+/** Tamanho de exibição do QR (px) no PDF/email */
 export function qrDisplaySizePx(size: ThemeJson["qr"]["size"]): number {
   switch (size) {
     case "L":
-      return 300;
+      return 200;
     case "M":
-      return 240;
+      return 160;
     default:
-      return 180;
+      return 120;
   }
 }
 
@@ -44,11 +44,12 @@ function baseStyles(theme: ThemeJson, extra = "") {
       : "1px solid rgba(0,0,0,0.06)";
 
   return `
-    @page { size: A4 portrait; margin: 0; }
+    @page { size: auto; margin: 0; }
     html, body {
-      width: 210mm;
-      max-height: 297mm;
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      width: fit-content;
+      height: fit-content;
     }
     body {
       font-family: '${theme.typography.fontFamily}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -203,9 +204,8 @@ function renderA4Classic(model: TicketRenderModel, theme: ThemeJson): string {
   return wrapHtml(model.event.title, theme, body, `
     .ticket-container {
       box-sizing: border-box;
-      width: 210mm;
-      max-height: 297mm;
-      padding: 8mm 10mm;
+      width: 190mm;
+      padding: 6mm;
       margin: 0;
     }
     .card {
@@ -262,7 +262,7 @@ function renderHorizontalQrRight(model: TicketRenderModel, theme: ThemeJson): st
     </div>`;
 
   return wrapHtml(model.event.title, theme, body, `
-    .ticket-container { box-sizing: border-box; width: 210mm; max-height: 297mm; padding: 8mm 10mm; margin: 0; }
+    .ticket-container { box-sizing: border-box; width: 190mm; padding: 5mm; margin: 0; }
     .card {
       background: ${theme.colors.card}; border-radius: 16px; overflow: hidden;
       border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.07);
@@ -316,18 +316,14 @@ function renderMobilePass(model: TicketRenderModel, theme: ThemeJson): string {
   return wrapHtml(model.event.title, theme, body, `
     .pass-wrap {
       box-sizing: border-box;
-      width: 210mm;
-      max-height: 297mm;
-      padding: 10mm;
+      width: fit-content;
+      padding: 5mm;
       margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: ${theme.colors.bg};
     }
     .pass-card {
-      width: 100%;
-      max-width: 420px;
+      width: 400px;
+      max-width: 100%;
       background: ${theme.colors.card};
       border-radius: 24px;
       overflow: hidden;

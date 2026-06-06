@@ -12,7 +12,8 @@
     "db:generate": "npm --workspace apps/web run db:generate",
     "db:migrate:deploy": "npm --workspace apps/web run db:migrate:deploy",
     "db:seed": "npm --workspace apps/web run db:seed",
-    "seed:dao-wave": "npm --workspace apps/web run seed:dao-wave"
+    "seed:dao-wave": "npm --workspace apps/web run seed:dao-wave",
+    "pdf:setup": "npm --workspace apps/web run pdf:setup"
   },
   "devDependencies": {
     "prisma": "^5.20.0"
