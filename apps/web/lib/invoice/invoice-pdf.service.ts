@@ -1,26 +1,23 @@
 /**
- * Invoice PDF Generator
- * Generates a Portuguese-compliant invoice/receipt PDF using Playwright
+ * Invoice PDF Generator — HTML preview + PDFKit para envio por email
  */
 
-import { chromium } from "playwright";
+import PDFDocument from "pdfkit";
+import type { ResolvedInvoiceTheme } from "./invoice-theme";
+import { resolveInvoiceTheme } from "./invoice-theme";
 
 export interface InvoiceData {
-  invoiceNumber: string; // e.g. "REC-2026-00123"
+  invoiceNumber: string;
   issuedAt: Date;
-  // Seller
   sellerName: string;
   sellerAddress: string;
   sellerNif?: string;
-  // Buyer
   buyerName: string;
   buyerEmail: string;
   buyerNif?: string;
-  // Order
   orderId: string;
   currency: string;
   paymentMethod?: string;
-  // Line items
   items: Array<{
     description: string;
     quantity: number;
@@ -28,142 +25,151 @@ export interface InvoiceData {
     totalCents: number;
   }>;
   totalCents: number;
+  theme: ResolvedInvoiceTheme;
 }
 
 function formatCurrency(cents: number, currency = "EUR"): string {
-  return new Intl.NumberFormat("pt-PT", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat("pt-PT", {
+    style: "currency",
+    currency,
+  }).format(cents / 100);
 }
 
-function generateInvoiceHtml(data: InvoiceData): string {
-  const rows = data.items.map(item => `
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function generateInvoiceHtml(data: InvoiceData): string {
+  const t = data.theme;
+  const rows = data.items
+    .map(
+      (item) => `
     <tr>
-      <td class="desc">${item.description}</td>
+      <td class="desc">${escapeHtml(item.description)}</td>
       <td class="center">${item.quantity}</td>
       <td class="right">${formatCurrency(item.unitPriceCents, data.currency)}</td>
       <td class="right total-cell">${formatCurrency(item.totalCents, data.currency)}</td>
     </tr>
-  `).join("");
+  `
+    )
+    .join("");
 
-  // IVA 23% included in price (ticket sales in Portugal)
   const ivaRate = 0.23;
   const baseAmount = Math.round(data.totalCents / (1 + ivaRate));
   const ivaAmount = data.totalCents - baseAmount;
+
+  const logoBlock = t.logoUrl
+    ? `<img src="${escapeHtml(t.logoUrl)}" alt="" class="logo" />`
+    : `<div class="brand-text">${escapeHtml(t.brandName)}</div>`;
+
+  const platformFooter = t.showPlatformCredit
+    ? `<div class="platform-credit">Emitido via GoPass · tickets.daowave.pt</div>`
+    : "";
+
+  const customFooter = t.footerText
+    ? `<div class="custom-footer">${escapeHtml(t.footerText)}</div>`
+    : "";
+
+  const websiteLine = t.websiteUrl
+    ? `<div class="footer-website">${escapeHtml(t.websiteUrl.replace(/^https?:\/\//, ""))}</div>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fatura/Recibo ${data.invoiceNumber}</title>
+<title>Fatura/Recibo ${escapeHtml(data.invoiceNumber)}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#09090b;color:#f4f4f5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .page{width:210mm;min-height:297mm;margin:0 auto;background:#09090b;padding:40px}
-  
-  /* Header */
-  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid #27272a}
-  .brand{font-size:28px;font-weight:900;letter-spacing:-.06em;color:#fff}
-  .brand span{color:#10b981}
-  .brand-sub{font-size:11px;color:#71717a;margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+  body{font-family:'Inter',system-ui,sans-serif;background:${t.backgroundColor};color:${t.textColor};-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{width:210mm;min-height:297mm;margin:0 auto;background:${t.backgroundColor};padding:0}
+  .accent-bar{height:6px;background:linear-gradient(90deg,${t.primaryColor},${t.secondaryColor})}
+  .content{padding:40px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:28px;border-bottom:1px solid #E4E4E7}
+  .logo{max-height:56px;max-width:200px;object-fit:contain}
+  .brand-text{font-size:26px;font-weight:800;letter-spacing:-.04em;color:${t.textColor}}
+  .brand-sub{font-size:11px;color:${t.mutedColor};margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
   .invoice-meta{text-align:right}
-  .invoice-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#10b981;margin-bottom:8px}
-  .invoice-number{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em}
-  .invoice-date{font-size:13px;color:#a1a1aa;margin-top:4px}
-  
-  /* Parties */
-  .parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:40px}
-  .party-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#71717a;margin-bottom:8px}
-  .party-name{font-size:16px;font-weight:700;color:#f4f4f5;margin-bottom:4px}
-  .party-detail{font-size:13px;color:#a1a1aa;line-height:1.6}
-  
-  /* Table */
-  .table-wrap{margin-bottom:32px}
-  .table-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#71717a;margin-bottom:12px}
-  table{width:100%;border-collapse:collapse}
-  thead tr{background:#111113;border-radius:8px}
-  thead th{padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#71717a;text-align:left}
+  .invoice-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${t.primaryColor};margin-bottom:6px}
+  .invoice-number{font-size:20px;font-weight:800;color:${t.textColor}}
+  .invoice-date{font-size:13px;color:${t.mutedColor};margin-top:4px}
+  .status-badge{display:inline-flex;align-items:center;gap:6px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#059669;margin-top:12px}
+  .status-dot{width:6px;height:6px;background:#10B981;border-radius:50%}
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:36px}
+  .party-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${t.mutedColor};margin-bottom:8px}
+  .party-name{font-size:16px;font-weight:700;color:${t.textColor};margin-bottom:4px}
+  .party-detail{font-size:13px;color:${t.mutedColor};line-height:1.6}
+  .table-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${t.mutedColor};margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;margin-bottom:28px}
+  thead tr{background:#F4F4F5}
+  thead th{padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${t.mutedColor};text-align:left}
   thead th.right,thead th.center{text-align:right}
   thead th.center{text-align:center}
-  tbody tr{border-bottom:1px solid #18181b}
-  tbody tr:last-child{border-bottom:none}
-  tbody td{padding:14px 16px;font-size:14px;color:#d4d4d8;vertical-align:top}
-  tbody td.center{text-align:center;color:#f4f4f5;font-weight:600}
-  tbody td.right{text-align:right;color:#f4f4f5}
-  tbody td.total-cell{font-weight:700;color:#f4f4f5}
+  tbody tr{border-bottom:1px solid #F4F4F5}
+  tbody td{padding:14px 16px;font-size:14px;color:${t.textColor};vertical-align:top}
+  tbody td.center{text-align:center;font-weight:600}
+  tbody td.right{text-align:right}
+  tbody td.total-cell{font-weight:700}
   tbody td.desc{max-width:280px;line-height:1.5}
-  
-  /* Totals */
-  .totals{margin-left:auto;width:280px;border:1px solid #27272a;border-radius:12px;overflow:hidden}
-  .total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid #1e1e21}
+  .totals{margin-left:auto;width:280px;border:1px solid #E4E4E7;border-radius:12px;overflow:hidden}
+  .total-row{display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #F4F4F5}
   .total-row:last-child{border-bottom:none}
-  .total-row.main{background:#111113;padding:16px 20px}
-  .total-label{font-size:13px;color:#a1a1aa}
-  .total-value{font-size:13px;color:#f4f4f5;font-weight:600}
-  .total-row.main .total-label{font-size:14px;font-weight:700;color:#fff}
-  .total-row.main .total-value{font-size:18px;font-weight:900;color:#10b981}
-  
-  /* Payment badge */
-  .payment-info{margin-top:12px;display:flex;align-items:center;gap:8px;justify-content:flex-end}
-  .payment-badge{background:#111113;border:1px solid #27272a;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:#a1a1aa;text-transform:uppercase;letter-spacing:.06em}
-  
-  /* IVA Note */
-  .iva-note{margin-top:40px;padding:16px 20px;background:#111113;border:1px solid #27272a;border-radius:10px}
-  .iva-note p{font-size:12px;color:#71717a;line-height:1.6}
-  .iva-note strong{color:#a1a1aa}
-  
-  /* Footer */
-  .footer{margin-top:40px;padding-top:24px;border-top:1px solid #27272a;display:flex;justify-content:space-between;align-items:center}
-  .footer-brand{font-size:13px;font-weight:700;color:#f4f4f5}
-  .footer-brand span{color:#10b981}
-  .footer-right{font-size:11px;color:#71717a;text-align:right}
-  
-  /* Status badge */
-  .status-badge{display:inline-flex;align-items:center;gap:6px;background:#052e16;border:1px solid #166534;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#4ade80;letter-spacing:.04em}
-  .status-dot{width:6px;height:6px;background:#10b981;border-radius:50%}
+  .total-row.main{background:${t.primaryColor}10;padding:16px 20px}
+  .total-label{font-size:13px;color:${t.mutedColor}}
+  .total-value{font-size:13px;font-weight:600;color:${t.textColor}}
+  .total-row.main .total-label{font-size:14px;font-weight:700;color:${t.textColor}}
+  .total-row.main .total-value{font-size:18px;font-weight:800;color:${t.primaryColor}}
+  .payment-info{margin-top:12px;display:flex;align-items:center;gap:8px;justify-content:flex-end;font-size:12px;color:${t.mutedColor}}
+  .payment-badge{background:#F4F4F5;border-radius:6px;padding:5px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .iva-note{margin-top:32px;padding:16px 20px;background:#FAFAFA;border:1px solid #E4E4E7;border-radius:10px;font-size:12px;color:${t.mutedColor};line-height:1.6}
+  .iva-note strong{color:${t.textColor}}
+  .footer{margin-top:36px;padding-top:24px;border-top:1px solid #E4E4E7;display:flex;justify-content:space-between;align-items:flex-end}
+  .footer-brand{font-size:14px;font-weight:700;color:${t.textColor}}
+  .footer-right{font-size:11px;color:${t.mutedColor};text-align:right;line-height:1.6}
+  .platform-credit{font-size:10px;color:${t.mutedColor};margin-top:8px;opacity:.8}
+  .custom-footer{font-size:11px;color:${t.mutedColor};margin-top:4px}
+  .footer-website{font-size:11px;color:${t.primaryColor};margin-top:2px}
 </style>
 </head>
 <body>
 <div class="page">
-
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <div class="brand">DÃO<span>WAVE</span></div>
-      <div class="brand-sub">Bilhética Digital</div>
-      <div style="margin-top:12px">
+  <div class="accent-bar"></div>
+  <div class="content">
+    <div class="header">
+      <div>
+        ${logoBlock}
+        <div class="brand-sub">${escapeHtml(t.tagline)}</div>
         <span class="status-badge"><span class="status-dot"></span>PAGO</span>
       </div>
-    </div>
-    <div class="invoice-meta">
-      <div class="invoice-title">Fatura / Recibo</div>
-      <div class="invoice-number">${data.invoiceNumber}</div>
-      <div class="invoice-date">${data.issuedAt.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })}</div>
-    </div>
-  </div>
-
-  <!-- Parties -->
-  <div class="parties">
-    <div>
-      <div class="party-label">Vendedor</div>
-      <div class="party-name">${data.sellerName}</div>
-      <div class="party-detail">
-        ${data.sellerAddress}<br>
-        ${data.sellerNif ? `NIF: ${data.sellerNif}` : ""}
+      <div class="invoice-meta">
+        <div class="invoice-title">Fatura / Recibo</div>
+        <div class="invoice-number">${escapeHtml(data.invoiceNumber)}</div>
+        <div class="invoice-date">${data.issuedAt.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })}</div>
       </div>
     </div>
-    <div>
-      <div class="party-label">Comprador</div>
-      <div class="party-name">${data.buyerName}</div>
-      <div class="party-detail">
-        ${data.buyerEmail}<br>
-        ${data.buyerNif ? `NIF: ${data.buyerNif}` : "Consumidor final"}
+    <div class="parties">
+      <div>
+        <div class="party-label">Vendedor</div>
+        <div class="party-name">${escapeHtml(data.sellerName)}</div>
+        <div class="party-detail">
+          ${escapeHtml(data.sellerAddress)}<br>
+          ${data.sellerNif ? `NIF: ${escapeHtml(data.sellerNif)}` : ""}
+        </div>
+      </div>
+      <div>
+        <div class="party-label">Comprador</div>
+        <div class="party-name">${escapeHtml(data.buyerName)}</div>
+        <div class="party-detail">
+          ${escapeHtml(data.buyerEmail)}<br>
+          ${data.buyerNif ? `NIF: ${escapeHtml(data.buyerNif)}` : "Consumidor final"}
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Items -->
-  <div class="table-wrap">
     <div class="table-label">Descrição dos Serviços</div>
     <table>
       <thead>
@@ -174,85 +180,181 @@ function generateInvoiceHtml(data: InvoiceData): string {
           <th class="right">Total</th>
         </tr>
       </thead>
-      <tbody>
-        ${rows}
-      </tbody>
+      <tbody>${rows}</tbody>
     </table>
-  </div>
-
-  <!-- Totals -->
-  <div class="totals">
-    <div class="total-row">
-      <span class="total-label">Subtotal (sem IVA)</span>
-      <span class="total-value">${formatCurrency(baseAmount, data.currency)}</span>
+    <div class="totals">
+      <div class="total-row">
+        <span class="total-label">Subtotal (sem IVA)</span>
+        <span class="total-value">${formatCurrency(baseAmount, data.currency)}</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">IVA 23%</span>
+        <span class="total-value">${formatCurrency(ivaAmount, data.currency)}</span>
+      </div>
+      <div class="total-row main">
+        <span class="total-label">Total</span>
+        <span class="total-value">${formatCurrency(data.totalCents, data.currency)}</span>
+      </div>
     </div>
-    <div class="total-row">
-      <span class="total-label">IVA 23%</span>
-      <span class="total-value">${formatCurrency(ivaAmount, data.currency)}</span>
+    ${
+      data.paymentMethod
+        ? `<div class="payment-info">Método de pagamento: <span class="payment-badge">${escapeHtml(data.paymentMethod)}</span></div>`
+        : ""
+    }
+    <div class="iva-note">
+      <p>
+        <strong>Nota fiscal:</strong> IVA incluído no preço à taxa de 23% (Artigo 18.º do CIVA).<br>
+        Referência de encomenda: <strong>${escapeHtml(data.orderId.substring(0, 8).toUpperCase())}</strong><br>
+        Este documento serve de fatura/recibo nos termos do Decreto-Lei n.º 256/2003 de 21 de outubro.
+      </p>
     </div>
-    <div class="total-row main">
-      <span class="total-label">Total</span>
-      <span class="total-value">${formatCurrency(data.totalCents, data.currency)}</span>
-    </div>
-  </div>
-
-  ${data.paymentMethod ? `
-  <div class="payment-info">
-    <span style="font-size:12px;color:#71717a">Método de pagamento:</span>
-    <span class="payment-badge">${data.paymentMethod}</span>
-  </div>` : ""}
-
-  <!-- IVA Note -->
-  <div class="iva-note">
-    <p>
-      <strong>Nota fiscal:</strong> IVA incluído no preço à taxa de 23% (Artigo 18.º do CIVA).<br>
-      Referência de encomenda: <strong>${data.orderId.substring(0, 8).toUpperCase()}</strong><br>
-      Este documento serve de fatura/recibo nos termos do Decreto-Lei n.º 256/2003 de 21 de outubro.
-    </p>
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div>
-      <div class="footer-brand">DÃO<span>WAVE</span></div>
-      <div style="font-size:11px;color:#71717a;margin-top:2px">tickets.daowave.pt</div>
-    </div>
-    <div class="footer-right">
-      <div>Documento gerado automaticamente</div>
-      <div>${data.issuedAt.toLocaleString("pt-PT", { timeZone: "Europe/Lisbon" })}</div>
+    <div class="footer">
+      <div>
+        <div class="footer-brand">${escapeHtml(t.brandName)}</div>
+        ${websiteLine}
+        ${customFooter}
+        ${platformFooter}
+      </div>
+      <div class="footer-right">
+        <div>Documento gerado automaticamente</div>
+        <div>${data.issuedAt.toLocaleString("pt-PT", { timeZone: "Europe/Lisbon" })}</div>
+      </div>
     </div>
   </div>
-
 </div>
 </body>
 </html>`;
 }
 
 /**
- * Generate invoice PDF as a Buffer using Playwright (headless Chromium)
+ * Gera PDF branded via PDFKit (fiável em produção, sem Playwright)
  */
 export async function generateInvoicePDF(data: InvoiceData): Promise<Buffer> {
-  let browser;
-  try {
-    browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.setContent(generateInvoiceHtml(data), { waitUntil: "networkidle" });
+  return new Promise((resolve, reject) => {
+    const t = data.theme;
+    const doc = new PDFDocument({ size: "A4", margin: 48 });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
 
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "0", bottom: "0", left: "0", right: "0" },
+    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+    // Barra de acento
+    doc.rect(0, 0, doc.page.width, 8).fill(t.primaryColor);
+
+    doc.y = 48;
+
+    // Cabeçalho
+    doc.fontSize(22).fillColor(t.textColor).text(t.brandName, { continued: false });
+    doc.fontSize(10).fillColor(t.mutedColor).text(t.tagline.toUpperCase());
+    doc.moveDown(0.3);
+    doc.fontSize(9).fillColor("#059669").text("● PAGO", { align: "left" });
+
+    doc.fontSize(10).fillColor(t.primaryColor).text("FATURA / RECIBO", 0, 48, {
+      align: "right",
+      width: pageWidth,
     });
+    doc.fontSize(16).fillColor(t.textColor).text(data.invoiceNumber, { align: "right" });
+    doc.fontSize(10).fillColor(t.mutedColor).text(
+      data.issuedAt.toLocaleDateString("pt-PT", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      { align: "right" }
+    );
 
-    return Buffer.from(pdfBuffer);
-  } finally {
-    await browser?.close();
-  }
+    doc.moveDown(2);
+    doc.moveTo(48, doc.y).lineTo(doc.page.width - 48, doc.y).strokeColor("#E4E4E7").stroke();
+    doc.moveDown(1.5);
+
+    const colWidth = pageWidth / 2 - 12;
+    const leftX = doc.page.margins.left;
+    const rightX = leftX + colWidth + 24;
+    const partiesY = doc.y;
+
+    doc.fontSize(8).fillColor(t.mutedColor).text("VENDEDOR", leftX, partiesY);
+    doc.fontSize(12).fillColor(t.textColor).text(data.sellerName, leftX, partiesY + 14);
+    doc.fontSize(10).fillColor(t.mutedColor).text(data.sellerAddress, leftX, doc.y + 2, {
+      width: colWidth,
+    });
+    if (data.sellerNif) {
+      doc.text(`NIF: ${data.sellerNif}`, leftX, doc.y + 2, { width: colWidth });
+    }
+
+    doc.fontSize(8).fillColor(t.mutedColor).text("COMPRADOR", rightX, partiesY);
+    doc.fontSize(12).fillColor(t.textColor).text(data.buyerName, rightX, partiesY + 14);
+    doc.fontSize(10).fillColor(t.mutedColor).text(data.buyerEmail, rightX, doc.y + 2, {
+      width: colWidth,
+    });
+    doc.text(
+      data.buyerNif ? `NIF: ${data.buyerNif}` : "Consumidor final",
+      rightX,
+      doc.y + 2,
+      { width: colWidth }
+    );
+
+    doc.moveDown(2);
+    doc.fontSize(8).fillColor(t.mutedColor).text("DESCRIÇÃO DOS SERVIÇOS");
+    doc.moveDown(0.5);
+
+    for (const item of data.items) {
+      doc.fontSize(10).fillColor(t.textColor).text(
+        `${item.quantity}x ${item.description}`,
+        { width: pageWidth - 80 }
+      );
+      doc.fontSize(10).fillColor(t.textColor).text(
+        formatCurrency(item.totalCents, data.currency),
+        { align: "right", width: pageWidth }
+      );
+      doc.moveDown(0.3);
+    }
+
+    doc.moveDown(1);
+    const ivaRate = 0.23;
+    const baseAmount = Math.round(data.totalCents / (1 + ivaRate));
+    const ivaAmount = data.totalCents - baseAmount;
+
+    doc.fontSize(10).fillColor(t.mutedColor).text("Subtotal (sem IVA)", { continued: true });
+    doc.fillColor(t.textColor).text(formatCurrency(baseAmount, data.currency), { align: "right" });
+    doc.fillColor(t.mutedColor).text("IVA 23%", { continued: true });
+    doc.fillColor(t.textColor).text(formatCurrency(ivaAmount, data.currency), { align: "right" });
+    doc.moveDown(0.3);
+    doc.fontSize(14).fillColor(t.primaryColor).text("Total", { continued: true });
+    doc.text(formatCurrency(data.totalCents, data.currency), { align: "right" });
+
+    if (data.paymentMethod) {
+      doc.moveDown(0.5);
+      doc.fontSize(9).fillColor(t.mutedColor).text(
+        `Método de pagamento: ${data.paymentMethod}`,
+        { align: "right" }
+      );
+    }
+
+    doc.moveDown(2);
+    doc.fontSize(8).fillColor(t.mutedColor).text(
+      "Nota fiscal: IVA incluído à taxa de 23%. Este documento serve de fatura/recibo nos termos do Decreto-Lei n.º 256/2003.",
+      { width: pageWidth, align: "justify" }
+    );
+    doc.text(`Referência: ${data.orderId.substring(0, 8).toUpperCase()}`, { width: pageWidth });
+
+    doc.moveDown(2);
+    doc.fontSize(9).fillColor(t.textColor).text(t.brandName);
+    if (t.websiteUrl) {
+      doc.fontSize(8).fillColor(t.primaryColor).text(t.websiteUrl.replace(/^https?:\/\//, ""));
+    }
+    if (t.footerText) {
+      doc.fontSize(8).fillColor(t.mutedColor).text(t.footerText);
+    }
+    if (t.showPlatformCredit) {
+      doc.fontSize(7).fillColor(t.mutedColor).text("Emitido via GoPass · tickets.daowave.pt");
+    }
+
+    doc.end();
+  });
 }
 
-/**
- * Build InvoiceData from an order record
- */
 export function buildInvoiceData(order: {
   id: string;
   totalCents: number;
@@ -262,7 +364,22 @@ export function buildInvoiceData(order: {
   buyerEmail?: string | null;
   paymentProvider?: string | null;
   user: { name?: string | null; email: string };
-  event: { title: string; organization?: { name?: string | null; address?: string | null; nif?: string | null } | null };
+  event: {
+    title: string;
+    logoUrl?: string | null;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    invoiceThemeJson?: unknown;
+    organization?: {
+      name?: string | null;
+      legalName?: string | null;
+      address?: string | null;
+      vatNumber?: string | null;
+      logoUrl?: string | null;
+      website?: string | null;
+      invoiceThemeJson?: unknown;
+    } | null;
+  };
   items: Array<{
     quantity: number;
     unitPriceCents: number;
@@ -271,26 +388,60 @@ export function buildInvoiceData(order: {
 }): InvoiceData {
   const invoiceNumber = `REC-${order.createdAt.getFullYear()}-${order.id.substring(0, 8).toUpperCase()}`;
   const org = order.event.organization;
+  const theme = resolveInvoiceTheme({
+    organization: org,
+    event: order.event,
+  });
 
   return {
     invoiceNumber,
     issuedAt: order.createdAt,
-    sellerName: org?.name || "GoPass",
+    sellerName: org?.legalName || org?.name || theme.brandName,
     sellerAddress: org?.address || "Portugal",
-    sellerNif: (org as any)?.nif || undefined,
+    sellerNif: org?.vatNumber || undefined,
     buyerName: order.buyerName || order.user.name || "Consumidor final",
     buyerEmail: order.buyerEmail || order.user.email,
     orderId: order.id,
     currency: order.currency || "EUR",
     paymentMethod: order.paymentProvider
-      ? order.paymentProvider.replace("_", " ")
+      ? order.paymentProvider.replace(/_/g, " ")
       : undefined,
-    items: order.items.map(item => ({
+    items: order.items.map((item) => ({
       description: `Bilhete — ${order.event.title} (${item.ticketLot.name})`,
       quantity: item.quantity,
       unitPriceCents: item.unitPriceCents,
       totalCents: item.quantity * item.unitPriceCents,
     })),
     totalCents: order.totalCents,
+    theme,
+  };
+}
+
+export function buildSampleInvoiceData(
+  theme: ResolvedInvoiceTheme,
+  org?: { name?: string | null; address?: string | null; vatNumber?: string | null }
+): InvoiceData {
+  const now = new Date();
+  return {
+    invoiceNumber: `REC-${now.getFullYear()}-PREVIEW01`,
+    issuedAt: now,
+    sellerName: org?.name || theme.brandName,
+    sellerAddress: org?.address || "Portugal",
+    sellerNif: org?.vatNumber || undefined,
+    buyerName: "João Silva",
+    buyerEmail: "cliente@exemplo.pt",
+    orderId: "00000000-0000-0000-0000-000000000001",
+    currency: "EUR",
+    paymentMethod: "Cartão",
+    items: [
+      {
+        description: "Bilhete — Festival Exemplo (Passe Geral)",
+        quantity: 2,
+        unitPriceCents: 2500,
+        totalCents: 5000,
+      },
+    ],
+    totalCents: 5000,
+    theme,
   };
 }

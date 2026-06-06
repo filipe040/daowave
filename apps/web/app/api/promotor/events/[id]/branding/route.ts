@@ -7,8 +7,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requirePromoter } from "@/lib/auth/guards";
 import { EventService } from "@/lib/services/event.service";
+import { normalizeInvoiceThemeInput } from "@/lib/invoice/invoice-theme";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +62,7 @@ export async function PATCH(
     const bannerUrl = typeof body.bannerUrl === "string" ? body.bannerUrl.trim() || null : undefined;
     const fontFamily = typeof body.fontFamily === "string" ? body.fontFamily.trim() || null : undefined;
     const ticketTemplateId = typeof body.ticketTemplateId === "string" ? body.ticketTemplateId.trim() || null : undefined;
+    const invoiceThemeJsonRaw = body.invoiceThemeJson;
     
     // Landing Page fields
     const landingPageContent = typeof body.landingPageContent === "string" ? body.landingPageContent : undefined;
@@ -98,6 +101,7 @@ export async function PATCH(
       landingPageContent?: string | null;
       useCustomLandingPage?: boolean;
       ticketTemplateId?: string | null;
+      invoiceThemeJson?: Prisma.InputJsonValue | typeof Prisma.DbNull;
     } = {};
     
     if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
@@ -108,6 +112,20 @@ export async function PATCH(
     if (landingPageContent !== undefined) updateData.landingPageContent = landingPageContent;
     if (useCustomLandingPage !== undefined) updateData.useCustomLandingPage = useCustomLandingPage;
     if (ticketTemplateId !== undefined) updateData.ticketTemplateId = ticketTemplateId;
+
+    if (invoiceThemeJsonRaw !== undefined) {
+      if (invoiceThemeJsonRaw === null) {
+        updateData.invoiceThemeJson = Prisma.DbNull;
+      } else {
+        try {
+          updateData.invoiceThemeJson = normalizeInvoiceThemeInput(
+            invoiceThemeJsonRaw
+          ) as Prisma.InputJsonValue;
+        } catch {
+          return NextResponse.json({ error: "Tema de fatura inválido" }, { status: 400 });
+        }
+      }
+    }
 
     await prisma.event.update({
       where: { id: eventId },

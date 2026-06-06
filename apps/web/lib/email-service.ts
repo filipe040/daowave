@@ -21,7 +21,8 @@ import {
 } from "./email-templates-transactional";
 import { getMarketingCampaignTemplate } from "./email-templates";
 import { getEmailQueue } from "./queue/email.queue";
-import { generateSimpleTicketPDF, generateSimpleInvoicePDF } from "./tickets/simple-ticket-pdf";
+import { generateSimpleTicketPDF } from "./tickets/simple-ticket-pdf";
+import { buildInvoiceData, generateInvoicePDF } from "./invoice/invoice-pdf.service";
 
 export type EmailTemplate =
   | "verify-email"
@@ -700,23 +701,11 @@ export async function sendTicketsEmail(
 
     const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
 
-    // -- Invoice PDF (pdfkit — fiável em produção) --
+    // -- Invoice PDF (branded por organização/evento) --
     const invoiceNumber = `REC-${order.createdAt.getFullYear()}-${order.id.substring(0, 8).toUpperCase()}`;
     try {
-      const invoicePdf = await generateSimpleInvoicePDF({
-        invoiceNumber,
-        eventTitle: event.title,
-        orderId: order.id,
-        buyerName: recipientName,
-        buyerEmail: recipientEmail,
-        totalCents: order.totalCents,
-        currency: order.currency,
-        items: order.items.map((item) => ({
-          name: item.ticketLot.name,
-          quantity: item.quantity,
-          unitPriceCents: item.unitPriceCents,
-        })),
-      });
+      const invoiceData = buildInvoiceData(order);
+      const invoicePdf = await generateInvoicePDF(invoiceData);
       attachments.push({
         filename: `fatura-${invoiceNumber}.pdf`,
         content: invoicePdf,

@@ -30,6 +30,7 @@ import {
   CalendarCheck,
   CreditCard,
   FileCheck,
+  FileText,
   Shield,
   PlusCircle,
   Home,
@@ -145,6 +146,12 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               href: `${baseEvent}/assets`,
               icon: Images,
               activeMatch: (p) => p.includes("/assets"),
+            },
+            {
+              label: "Design de faturas",
+              href: `${baseEvent}/invoices`,
+              icon: FileText,
+              activeMatch: (p) => p.includes("/invoices"),
             },
             {
               label: "Definições do evento",
