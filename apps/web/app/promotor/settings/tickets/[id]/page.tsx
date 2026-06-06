@@ -18,15 +18,89 @@ import {
     CheckCircle2,
     QrCode,
     Info,
-    Type as TypeIcon,
     MousePointer2,
     Upload,
-    Image as ImageIcon,
-    X
+    X,
+    ChevronDown,
+    Layers,
+    Sparkles,
+    FileText,
 } from "lucide-react";
-import Link from "next/link";
 import { ThemeJson, TicketTemplatePreset, WHITELISTED_FONTS } from "@/lib/ticket-templates/models";
 import { normalizeTicketTheme } from "@/lib/ticket-templates/default-theme";
+
+type EditorTab = "geral" | "marca" | "visual" | "conteudo";
+
+const TABS: { id: EditorTab; label: string; icon: typeof Info }[] = [
+    { id: "geral", label: "Geral", icon: Info },
+    { id: "marca", label: "Marca", icon: MousePointer2 },
+    { id: "visual", label: "Visual", icon: Palette },
+    { id: "conteudo", label: "Conteúdo", icon: FileText },
+];
+
+const sectionClass =
+    "bg-white border border-neutral-200/80 rounded-2xl shadow-sm overflow-hidden";
+const sectionHeadClass =
+    "flex items-center gap-2 px-4 sm:px-5 py-3.5 border-b border-neutral-100 bg-neutral-50/80";
+const sectionBodyClass = "p-4 sm:p-5 space-y-4";
+const labelClass = "text-[11px] font-bold uppercase tracking-wide text-neutral-500 block mb-2";
+const inputClass =
+    "w-full bg-white border border-neutral-200 rounded-xl px-3 sm:px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all";
+const selectClass = inputClass;
+
+function Chip({
+    active,
+    onClick,
+    children,
+}: {
+    active: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
+                active
+                    ? "bg-violet-600 text-white border-violet-600 shadow-sm"
+                    : "bg-white text-neutral-600 border-neutral-200 hover:border-violet-200 hover:bg-violet-50/50"
+            }`}
+        >
+            {children}
+        </button>
+    );
+}
+
+function Section({
+    title,
+    icon: Icon,
+    children,
+    defaultOpen = true,
+}: {
+    title: string;
+    icon: typeof Info;
+    children: React.ReactNode;
+    defaultOpen?: boolean;
+}) {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+        <div className={sectionClass}>
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className={`${sectionHeadClass} w-full text-left lg:cursor-default`}
+            >
+                <Icon className="h-4 w-4 text-violet-600 shrink-0" />
+                <span className="text-sm font-bold text-neutral-800 flex-1">{title}</span>
+                <ChevronDown
+                    className={`h-4 w-4 text-neutral-400 transition-transform lg:hidden ${open ? "rotate-180" : ""}`}
+                />
+            </button>
+            <div className={`${sectionBodyClass} ${open ? "block" : "hidden lg:block"}`}>{children}</div>
+        </div>
+    );
+}
 
 export default function TicketTemplateEditorPage() {
     const params = useParams();
@@ -40,15 +114,12 @@ export default function TicketTemplateEditorPage() {
     const [archiving, setArchiving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [activeTab, setActiveTab] = useState<EditorTab>("geral");
+    const [previewExpanded, setPreviewExpanded] = useState(true);
 
-    // Form State
     const [name, setName] = useState("");
     const [preset, setPreset] = useState<TicketTemplatePreset>("A4_CLASSIC");
     const [theme, setTheme] = useState<ThemeJson | null>(null);
-
-    // Selection for preview
-    const [sampleTicketId, setSampleTicketId] = useState<string>("");
-    const [sampleTickets, setSampleTickets] = useState<any[]>([]);
 
     const [previewHtml, setPreviewHtml] = useState("");
     const [previewLoading, setPreviewLoading] = useState(false);
@@ -67,16 +138,6 @@ export default function TicketTemplateEditorPage() {
             setName(tJson.name);
             setPreset(tJson.preset || "A4_CLASSIC");
             setTheme(normalizeTheme(tJson.themeJson));
-
-            // Load sample tickets for preview
-            const eRes = await fetchWithTimeout("/api/promotor/events");
-            if (eRes.ok) {
-                const events = await eRes.json();
-                // Just pick some tickets from the first event that has them
-                // In a real app, this would be more sophisticated
-                const ticketsRes = await fetchWithTimeout("/api/promotor/sales"); // Assuming this might work or similar
-                // For now, let's keep it simple
-            }
         } catch (err: any) {
             setError(err instanceof Error ? err.message : "Erro ao carregar");
         } finally {
@@ -100,9 +161,7 @@ export default function TicketTemplateEditorPage() {
                     ticketId: "SAMPLE",
                 }),
             });
-            if (res.ok) {
-                setPreviewHtml(await res.text());
-            }
+            if (res.ok) setPreviewHtml(await res.text());
         } catch {
             /* preview opcional */
         } finally {
@@ -113,9 +172,7 @@ export default function TicketTemplateEditorPage() {
     useEffect(() => {
         if (!theme) return;
         if (previewDebounce.current) clearTimeout(previewDebounce.current);
-        previewDebounce.current = setTimeout(() => {
-            refreshPreview(preset, theme);
-        }, 350);
+        previewDebounce.current = setTimeout(() => refreshPreview(preset, theme), 350);
         return () => {
             if (previewDebounce.current) clearTimeout(previewDebounce.current);
         };
@@ -147,9 +204,7 @@ export default function TicketTemplateEditorPage() {
         if (!confirm("Ao publicar este design, ele passará a ser o oficial para todos os novos bilhetes da organização. Continuar?")) return;
         setPublishing(true);
         try {
-            const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}/publish`, {
-                method: "POST",
-            });
+            const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}/publish`, { method: "POST" });
             if (!res.ok) throw new Error("Erro ao publicar");
             toast.success("Design publicado com sucesso!");
             await load();
@@ -164,9 +219,7 @@ export default function TicketTemplateEditorPage() {
         if (!confirm("Tem a certeza que deseja apagar (arquivar) este template? Esta ação não pode ser desfeita.")) return;
         setArchiving(true);
         try {
-            const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}`, {
-                method: "DELETE",
-            });
+            const res = await fetchWithTimeout(`/api/promotor/ticket-templates/${id}`, { method: "DELETE" });
             if (!res.ok) {
                 const errJson = await res.json().catch(() => ({}));
                 throw new Error(errJson.error || "Erro ao apagar o template");
@@ -197,7 +250,7 @@ export default function TicketTemplateEditorPage() {
                 throw new Error(err.error || "Erro ao fazer upload");
             }
             const data = await res.json();
-            updateTheme('brand.logoUrl', data.url);
+            updateTheme("brand.logoUrl", data.url);
             toast.success("Logo carregado!", { id: toastId });
         } catch (err: any) {
             toast.error(err.message || "Falha no upload", { id: toastId });
@@ -253,563 +306,744 @@ export default function TicketTemplateEditorPage() {
     };
 
     const Toggle = ({ id, label }: { id: string; label: string }) => (
-        <label className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer hover:border-neutral-300 transition-colors">
-            <span className="text-xs font-bold text-neutral-800">{label}</span>
+        <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-neutral-50/80 border border-neutral-100 cursor-pointer hover:border-violet-200 hover:bg-violet-50/30 transition-colors">
+            <span className="text-sm font-medium text-neutral-800">{label}</span>
             <input
                 type="checkbox"
                 checked={Boolean((theme?.blocks as Record<string, unknown>)?.[id])}
                 onChange={(e) => updateTheme(`blocks.${id}`, e.target.checked)}
-                className="w-4 h-4 accent-emerald-500"
+                className="w-4 h-4 accent-violet-600 shrink-0"
             />
         </label>
     );
 
-    if (loading) return <PageShell title="Carregar Editor..."><Skeleton className="h-96 w-full rounded-2xl bg-neutral-100" /></PageShell>;
-    if (error) return <PageShell title="Erro"><ErrorState message={error} onRetry={load} /></PageShell>;
+    const statusBadge =
+        template?.status === "ACTIVE" ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                <CheckCircle2 className="h-3 w-3" /> Ativo
+            </span>
+        ) : template?.status === "ARCHIVED" ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-500">
+                <Archive className="h-3 w-3" /> Arquivado
+            </span>
+        ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200/60">
+                Rascunho
+            </span>
+        );
+
+    const renderGeral = () => (
+        <div className="space-y-4 sm:space-y-5">
+            <Section title="Informações básicas" icon={Info}>
+                <div>
+                    <label className={labelClass}>Nome do template</label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+                </div>
+                <div>
+                    <label className={labelClass}>Layout / preset</label>
+                    <select
+                        value={preset}
+                        onChange={(e) => setPreset(e.target.value as TicketTemplatePreset)}
+                        className={selectClass}
+                    >
+                        <option value="A4_CLASSIC">A4 Clássico — vertical, QR em baixo</option>
+                        <option value="HORIZONTAL_QR_RIGHT">Horizontal — QR à direita</option>
+                        <option value="MOBILE_PASS">Mobile Pass — estilo wallet</option>
+                    </select>
+                    <p className="text-xs text-neutral-400 mt-2">O preview atualiza ao mudar o preset.</p>
+                </div>
+            </Section>
+
+            <Section title="Rodapé e suporte" icon={Layers}>
+                <div>
+                    <label className={labelClass}>URL de suporte</label>
+                    <input
+                        value={theme?.footer.supportUrl || ""}
+                        onChange={(e) => updateTheme("footer.supportUrl", e.target.value)}
+                        placeholder="https://suporte.com"
+                        className={inputClass}
+                    />
+                </div>
+                <div>
+                    <label className={labelClass}>Email de suporte</label>
+                    <input
+                        value={theme?.footer.supportEmail || ""}
+                        onChange={(e) => updateTheme("footer.supportEmail", e.target.value)}
+                        placeholder="ajuda@exemplo.pt"
+                        className={inputClass}
+                    />
+                </div>
+            </Section>
+        </div>
+    );
+
+    const renderMarca = () => (
+        <div className="space-y-4 sm:space-y-5">
+            <Section title="Logo e identidade" icon={MousePointer2}>
+                <div>
+                    <label className={labelClass}>Upload do logo</label>
+                    <div className="relative border-2 border-dashed border-neutral-200 rounded-xl p-4 sm:p-5 bg-neutral-50/50 hover:border-violet-300 hover:bg-violet-50/20 transition-colors cursor-pointer">
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                            onChange={handleLogoUpload}
+                            disabled={uploadingLogo}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                        <div className="flex items-center gap-3 pointer-events-none">
+                            <div className="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center shrink-0">
+                                {uploadingLogo ? (
+                                    <div className="w-4 h-4 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                                ) : (
+                                    <Upload className="h-4 w-4 text-violet-600" />
+                                )}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-neutral-800">
+                                    {uploadingLogo ? "A carregar..." : "Clique para fazer upload"}
+                                </p>
+                                <p className="text-xs text-neutral-500">PNG, JPG, SVG — máx. 5MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {theme?.brand.logoUrl && (
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 bg-neutral-50/50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={theme.brand.logoUrl} alt="Logo" className="h-10 w-auto object-contain max-w-[72px] shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-neutral-700">Logo atual</p>
+                            <p className="text-[11px] text-neutral-400 truncate">{theme.brand.logoUrl}</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => updateTheme("brand.logoUrl", "")}
+                            className="p-2 rounded-lg hover:bg-white text-neutral-400 hover:text-neutral-800 transition-colors shrink-0"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                )}
+
+                <div>
+                    <label className={labelClass}>URL do logo (alternativa)</label>
+                    <input
+                        value={theme?.brand.logoUrl || ""}
+                        onChange={(e) => updateTheme("brand.logoUrl", e.target.value)}
+                        placeholder="https://..."
+                        className={inputClass}
+                    />
+                </div>
+
+                <div>
+                    <label className={labelClass}>Tagline / slogan</label>
+                    <input
+                        value={theme?.brand.tagline || ""}
+                        onChange={(e) => updateTheme("brand.tagline", e.target.value)}
+                        placeholder="O festival mais esperado do ano"
+                        className={inputClass}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>Tamanho do logo</label>
+                        <select
+                            value={theme?.brand.logoSize || "md"}
+                            onChange={(e) => updateTheme("brand.logoSize", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="sm">Pequeno</option>
+                            <option value="md">Médio</option>
+                            <option value="lg">Grande</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Posição do logo</label>
+                        <select
+                            value={theme?.brand.logoPosition || "left"}
+                            onChange={(e) => updateTheme("brand.logoPosition", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="left">Esquerda</option>
+                            <option value="center">Centro</option>
+                            <option value="right">Direita</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label className={labelClass}>Estilo do cabeçalho</label>
+                    <select
+                        value={theme?.brand.headerStyle || "standard"}
+                        onChange={(e) => updateTheme("brand.headerStyle", e.target.value)}
+                        className={selectClass}
+                    >
+                        <option value="standard">Standard (logo + tagline)</option>
+                        <option value="minimal">Minimal (sem tagline)</option>
+                        <option value="bold">Bold (texto grande)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className={labelClass}>Imagem de fundo do cartão (URL)</label>
+                    <input
+                        value={theme?.brand.backgroundUrl || ""}
+                        onChange={(e) => updateTheme("brand.backgroundUrl", e.target.value)}
+                        placeholder="https://... ou /uploads/..."
+                        className={inputClass}
+                    />
+                </div>
+
+                <div>
+                    <label className={labelClass}>Marca de água (texto)</label>
+                    <input
+                        value={theme?.brand.watermarkText || ""}
+                        onChange={(e) => updateTheme("brand.watermarkText", e.target.value)}
+                        placeholder="ex: VIP"
+                        maxLength={24}
+                        className={inputClass}
+                    />
+                </div>
+            </Section>
+        </div>
+    );
+
+    const renderVisual = () => (
+        <div className="space-y-4 sm:space-y-5">
+            <Section title="Paleta de cores" icon={Palette}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                        { key: "primary", label: "Primária" },
+                        { key: "accent", label: "Destaque / barra" },
+                        { key: "text", label: "Texto" },
+                        { key: "bg", label: "Fundo da página" },
+                        { key: "card", label: "Fundo do cartão" },
+                        { key: "muted", label: "Texto secundário" },
+                        { key: "qrBackground", label: "Fundo do QR" },
+                    ].map(({ key, label }) => (
+                        <div key={key} className={key === "qrBackground" ? "sm:col-span-2" : ""}>
+                            <label className={labelClass}>{label}</label>
+                            <div className="flex gap-2 items-center">
+                                <input
+                                    type="color"
+                                    value={(theme?.colors as Record<string, string>)?.[key] || "#000000"}
+                                    onChange={(e) => updateTheme(`colors.${key}`, e.target.value)}
+                                    className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-200 cursor-pointer shrink-0"
+                                />
+                                <input
+                                    value={(theme?.colors as Record<string, string>)?.[key] || ""}
+                                    onChange={(e) => updateTheme(`colors.${key}`, e.target.value)}
+                                    className={`${inputClass} font-mono text-xs`}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            <Section title="Tipografia" icon={Type}>
+                <div>
+                    <label className={labelClass}>Fonte</label>
+                    <select
+                        value={theme?.typography.fontFamily}
+                        onChange={(e) => updateTheme("typography.fontFamily", e.target.value)}
+                        className={selectClass}
+                    >
+                        {WHITELISTED_FONTS.map((f) => (
+                            <option key={f} value={f}>
+                                {f}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>Título do evento</label>
+                        <select
+                            value={theme?.typography.titleSize || "md"}
+                            onChange={(e) => updateTheme("typography.titleSize", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="sm">Pequeno</option>
+                            <option value="md">Médio</option>
+                            <option value="lg">Grande</option>
+                            <option value="xl">Extra grande</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Texto geral</label>
+                        <select
+                            value={theme?.typography.bodySize || "md"}
+                            onChange={(e) => updateTheme("typography.bodySize", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="sm">Pequeno</option>
+                            <option value="md">Médio</option>
+                            <option value="lg">Grande</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label className={labelClass}>Peso do título</label>
+                    <div className="flex flex-wrap gap-2">
+                        {(["semibold", "bold", "extrabold"] as const).map((w) => (
+                            <Chip
+                                key={w}
+                                active={(theme?.typography.titleWeight || "bold") === w}
+                                onClick={() => updateTheme("typography.titleWeight", w)}
+                            >
+                                {w === "semibold" ? "600" : w === "bold" ? "700" : "800"}
+                            </Chip>
+                        ))}
+                    </div>
+                </div>
+                <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-neutral-50/80 border border-neutral-100 cursor-pointer">
+                    <span className="text-sm font-medium text-neutral-800">Labels em maiúsculas</span>
+                    <input
+                        type="checkbox"
+                        checked={theme?.typography.uppercaseLabels !== false}
+                        onChange={(e) => updateTheme("typography.uppercaseLabels", e.target.checked)}
+                        className="w-4 h-4 accent-violet-600"
+                    />
+                </label>
+            </Section>
+
+            <Section title="Estilo do cartão" icon={Layout}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>Destaque superior</label>
+                        <select
+                            value={theme?.layout?.accentStyle || "bar"}
+                            onChange={(e) => updateLayout("accentStyle", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="bar">Barra colorida</option>
+                            <option value="gradient">Cabeçalho gradiente</option>
+                            <option value="none">Sem destaque</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Estilo do cartão</label>
+                        <select
+                            value={theme?.layout?.cardStyle || "elevated"}
+                            onChange={(e) => updateLayout("cardStyle", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="elevated">Com sombra</option>
+                            <option value="bordered">Com borda colorida</option>
+                            <option value="flat">Plano</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Largura</label>
+                        <select
+                            value={theme?.layout?.pageWidth || "standard"}
+                            onChange={(e) => updateLayout("pageWidth", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="compact">Compacto</option>
+                            <option value="standard">Standard</option>
+                            <option value="wide">Largo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Margem exterior</label>
+                        <select
+                            value={theme?.layout?.pagePadding || "md"}
+                            onChange={(e) => updateLayout("pagePadding", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="none">Nenhuma</option>
+                            <option value="sm">Pequena</option>
+                            <option value="md">Média</option>
+                            <option value="lg">Grande</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Separador</label>
+                        <select
+                            value={theme?.layout?.dividerStyle || "dashed"}
+                            onChange={(e) => updateLayout("dividerStyle", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="dashed">Tracejado</option>
+                            <option value="solid">Sólido</option>
+                            <option value="dotted">Pontilhado</option>
+                            <option value="none">Sem linha</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Padrão de fundo</label>
+                        <select
+                            value={theme?.layout?.backgroundPattern || "none"}
+                            onChange={(e) => updateLayout("backgroundPattern", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="none">Nenhum</option>
+                            <option value="dots">Pontos</option>
+                            <option value="grid">Grelha</option>
+                            <option value="diagonal">Diagonal</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label className={labelClass}>Cantos arredondados</label>
+                    <div className="flex flex-wrap gap-2">
+                        {(["sm", "md", "lg"] as const).map((r) => (
+                            <Chip
+                                key={r}
+                                active={(theme?.layout?.cornerRadius || "md") === r}
+                                onClick={() => updateLayout("cornerRadius", r)}
+                            >
+                                {r === "sm" ? "Suave" : r === "md" ? "Médio" : "Forte"}
+                            </Chip>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <label className={labelClass}>Alinhamento</label>
+                    <div className="flex flex-wrap gap-2">
+                        {(["left", "center"] as const).map((a) => (
+                            <Chip
+                                key={a}
+                                active={(theme?.layout?.contentAlign || "left") === a}
+                                onClick={() => updateLayout("contentAlign", a)}
+                            >
+                                {a === "left" ? "Esquerda" : "Centro"}
+                            </Chip>
+                        ))}
+                    </div>
+                </div>
+            </Section>
+
+            <Section title="QR Code" icon={QrCode}>
+                <div>
+                    <label className={labelClass}>Tamanho</label>
+                    <div className="flex flex-wrap gap-2">
+                        {(["S", "M", "L"] as const).map((s) => (
+                            <Chip key={s} active={theme?.qr.size === s} onClick={() => updateTheme("qr.size", s)}>
+                                {s === "S" ? "Pequeno" : s === "M" ? "Médio" : "Grande"}
+                            </Chip>
+                        ))}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>Moldura</label>
+                        <select
+                            value={theme?.qr.frameStyle || "light"}
+                            onChange={(e) => updateTheme("qr.frameStyle", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="none">Sem moldura</option>
+                            <option value="light">Sombra suave</option>
+                            <option value="accent">Borda colorida</option>
+                            <option value="bold">Destaque forte</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Cantos do QR</label>
+                        <select
+                            value={theme?.qr.borderRadius || "md"}
+                            onChange={(e) => updateTheme("qr.borderRadius", e.target.value)}
+                            className={selectClass}
+                        >
+                            <option value="none">Retos</option>
+                            <option value="sm">Suaves</option>
+                            <option value="md">Médios</option>
+                            <option value="lg">Arredondados</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label className={labelClass}>Legenda</label>
+                    <input
+                        value={theme?.qr.label || ""}
+                        onChange={(e) => updateTheme("qr.label", e.target.value)}
+                        placeholder="Validar na entrada"
+                        className={inputClass}
+                    />
+                </div>
+            </Section>
+        </div>
+    );
+
+    const renderConteudo = () => (
+        <div className="space-y-4 sm:space-y-5">
+            <Section title="Blocos visíveis" icon={Layout} defaultOpen>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Toggle id="showEventTitle" label="Título do evento" />
+                    <Toggle id="showVenue" label="Local" />
+                    <Toggle id="showCity" label="Cidade" />
+                    <Toggle id="showDate" label="Data e hora" />
+                    <Toggle id="showTicketCode" label="Código do bilhete" />
+                    <Toggle id="showOrganization" label="Organização" />
+                    <Toggle id="showBuyerName" label="Comprador" />
+                    <Toggle id="showTicketType" label="Tipo de bilhete" />
+                    <Toggle id="showOrderId" label="ID encomenda" />
+                    <Toggle id="showTerms" label="Termos" />
+                    <Toggle id="showSupport" label="Suporte" />
+                </div>
+            </Section>
+
+            <Section title="Textos personalizados" icon={Type}>
+                <div>
+                    <label className={labelClass}>Badge / etiqueta</label>
+                    <input
+                        value={theme?.blocks.badgeText || ""}
+                        onChange={(e) => updateTheme("blocks.badgeText", e.target.value)}
+                        placeholder="Bilhete Digital"
+                        className={inputClass}
+                    />
+                </div>
+                <div>
+                    <label className={labelClass}>Texto legal</label>
+                    <textarea
+                        value={theme?.blocks.customTerms || ""}
+                        onChange={(e) => updateTheme("blocks.customTerms", e.target.value)}
+                        placeholder="Deixe vazio para o texto padrão..."
+                        rows={3}
+                        className={`${inputClass} resize-y min-h-[80px]`}
+                    />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    {[
+                        { key: "labelBadge", label: "Badge", placeholder: "Bilhete Digital" },
+                        { key: "labelVenue", label: "Local", placeholder: "Local" },
+                        { key: "labelDate", label: "Data", placeholder: "Data e Hora" },
+                        { key: "labelBuyer", label: "Titular", placeholder: "Titular" },
+                        { key: "labelTicketType", label: "Tipo", placeholder: "Tipo de Bilhete" },
+                        { key: "labelTicketCode", label: "Código", placeholder: "Código" },
+                    ].map(({ key, label, placeholder }) => (
+                        <div key={key}>
+                            <label className={labelClass}>{label}</label>
+                            <input
+                                value={(theme?.copy as Record<string, string>)?.[key] || ""}
+                                onChange={(e) => updateTheme(`copy.${key}`, e.target.value)}
+                                placeholder={placeholder}
+                                className={inputClass}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            <div className="rounded-2xl border border-violet-200/60 bg-gradient-to-br from-violet-50 to-white p-4 sm:p-5">
+                <h4 className="text-sm font-bold text-violet-800 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" /> Dica
+                </h4>
+                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                    Use contraste elevado entre fundo e texto. QR tamanho L funciona melhor em locais com pouca luz.
+                </p>
+            </div>
+        </div>
+    );
+
+    const tabContent = () => {
+        switch (activeTab) {
+            case "marca":
+                return renderMarca();
+            case "visual":
+                return renderVisual();
+            case "conteudo":
+                return renderConteudo();
+            default:
+                return renderGeral();
+        }
+    };
+
+    const previewPanel = (
+        <div className={`${sectionClass} flex flex-col`}>
+            <div className={`${sectionHeadClass} justify-between`}>
+                <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-violet-600" />
+                    <span className="text-sm font-bold text-neutral-800">Preview ao vivo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {previewLoading && (
+                        <span className="text-[11px] text-violet-600 font-medium animate-pulse">A atualizar...</span>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => setPreviewExpanded((v) => !v)}
+                        className="lg:hidden p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+                        aria-label={previewExpanded ? "Recolher preview" : "Expandir preview"}
+                    >
+                        <ChevronDown className={`h-4 w-4 transition-transform ${previewExpanded ? "rotate-180" : ""}`} />
+                    </button>
+                </div>
+            </div>
+            <div className={`p-3 sm:p-4 ${previewExpanded ? "block" : "hidden lg:block"}`}>
+                <div className="rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900/5 shadow-inner min-h-[220px] h-[38vh] sm:h-[42vh] lg:h-[min(520px,calc(100vh-12rem))] xl:min-h-[480px]">
+                    {previewHtml ? (
+                        <iframe
+                            title="Preview do bilhete"
+                            srcDoc={previewHtml}
+                            className="w-full h-full border-0 bg-white"
+                            sandbox="allow-same-origin"
+                        />
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center gap-2 text-neutral-400">
+                            <div className="w-8 h-8 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                            <span className="text-sm">A carregar preview...</span>
+                        </div>
+                    )}
+                </div>
+                <p className="text-xs text-neutral-500 mt-3 leading-relaxed">
+                    Alterações refletem-se aqui em tempo real. Guarde e publique para aplicar nos bilhetes.
+                </p>
+                <button
+                    type="button"
+                    onClick={handlePreview}
+                    className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 text-neutral-800 hover:bg-neutral-50 transition-all"
+                >
+                    <Eye className="h-4 w-4" />
+                    Abrir em ecrã completo
+                </button>
+            </div>
+        </div>
+    );
+
+    if (loading) {
+        return (
+            <PageShell title="Editor de bilhetes">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_minmax(300px,380px)] gap-6">
+                    <Skeleton className="h-[480px] w-full rounded-2xl" />
+                    <Skeleton className="h-[520px] w-full rounded-2xl hidden xl:block" />
+                </div>
+            </PageShell>
+        );
+    }
+
+    if (error) {
+        return (
+            <PageShell title="Erro">
+                <ErrorState message={error} onRetry={load} />
+            </PageShell>
+        );
+    }
 
     return (
         <PageShell
-            title={name}
-            subtitle={`v${template.version} • ${template.status === 'ACTIVE' ? 'Ativo' : 'Rascunho'}`}
+            title={name || "Editor de bilhetes"}
+            subtitle={
+                <span className="flex flex-wrap items-center gap-2">
+                    {statusBadge}
+                    <span className="text-neutral-400">·</span>
+                    <span>v{template.version}</span>
+                </span>
+            }
             backButton={{ href: "/promotor/settings/tickets", label: "Voltar aos designs" }}
             actions={
-                <div className="flex items-center gap-3 flex-wrap">
-                    {template.status !== 'ARCHIVED' && (
+                <div className="hidden lg:flex items-center gap-2 flex-wrap">
+                    {template.status !== "ARCHIVED" && (
                         <button
+                            type="button"
                             onClick={handleDelete}
                             disabled={archiving}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-red-500/20 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-all"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-all"
                         >
                             <Archive className="h-4 w-4" />
                             Apagar
                         </button>
                     )}
                     <button
-                        onClick={handlePreview}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-neutral-200 text-neutral-900 hover:bg-neutral-50 transition-all"
-                    >
-                        <Eye className="h-4 w-4" />
-                        Abrir Preview
-                    </button>
-                    <button
+                        type="button"
                         onClick={handleSave}
                         disabled={saving}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-900 hover:bg-neutral-200 disabled:opacity-50 transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 disabled:opacity-50 transition-all shadow-sm"
                     >
                         <Save className="h-4 w-4" />
                         {saving ? "A guardar..." : "Guardar"}
                     </button>
-                    {template.status !== 'ACTIVE' && (
+                    {template.status !== "ACTIVE" && (
                         <button
+                            type="button"
                             onClick={handlePublish}
                             disabled={publishing}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-500 text-neutral-900 hover:bg-emerald-600 disabled:opacity-50 transition-all"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 transition-all shadow-sm"
                         >
                             <Send className="h-4 w-4" />
-                            {publishing ? "A publicar..." : "Publicar Design"}
+                            {publishing ? "A publicar..." : "Publicar"}
                         </button>
                     )}
                 </div>
             }
         >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Editor Sidebar */}
-                <div className="lg:col-span-4 space-y-6">
-                    {/* General */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <Info className="h-4 w-4" /> Geral
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Nome do Template</label>
-                                <input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Layout / Preset</label>
-                                <select
-                                    value={preset}
-                                    onChange={(e) => setPreset(e.target.value as TicketTemplatePreset)}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                                >
-                                    <option value="A4_CLASSIC">A4 Clássico — vertical, QR em baixo</option>
-                                    <option value="HORIZONTAL_QR_RIGHT">Horizontal — QR à direita</option>
-                                    <option value="MOBILE_PASS">Mobile Pass — estilo wallet</option>
-                                </select>
-                                <p className="text-[10px] text-neutral-400 mt-2 ml-1">O preview atualiza automaticamente ao alterar o preset.</p>
+            <div className="pb-24 lg:pb-0">
+                <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] gap-5 xl:gap-6 items-start">
+                    {/* Preview — primeiro no mobile */}
+                    <div className="order-1 xl:order-2 xl:sticky xl:top-4">{previewPanel}</div>
+
+                    {/* Editor */}
+                    <div className="order-2 xl:order-1 min-w-0 space-y-4">
+                        {/* Tabs */}
+                        <div className="sticky top-0 z-20 -mx-1 px-1 pt-1 pb-2 bg-gradient-to-b from-white via-white to-transparent">
+                            <div
+                                className="flex gap-1.5 overflow-x-auto no-scrollbar p-1.5 bg-neutral-100/80 border border-neutral-200/80 rounded-2xl backdrop-blur-sm"
+                                role="tablist"
+                            >
+                                {TABS.map(({ id, label, icon: Icon }) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={activeTab === id}
+                                        onClick={() => setActiveTab(id)}
+                                        className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+                                            activeTab === id
+                                                ? "bg-white text-violet-700 shadow-sm border border-violet-100"
+                                                : "text-neutral-600 hover:text-neutral-900 hover:bg-white/60"
+                                        }`}
+                                    >
+                                        <Icon className="h-4 w-4 shrink-0" />
+                                        {label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    </section>
 
-                    {/* Branding */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <MousePointer2 className="h-4 w-4" /> Branding
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Logo (Upload do PC)</label>
-                                <div className="space-y-2">
-                                    <div className="relative border border-dashed border-neutral-300 rounded-xl p-4 bg-neutral-50 hover:bg-neutral-50 transition-colors cursor-pointer">
-                                        <input
-                                            type="file"
-                                            accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
-                                            onChange={handleLogoUpload}
-                                            disabled={uploadingLogo}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        />
-                                        <div className="flex items-center gap-3 pointer-events-none">
-                                            <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                                                {uploadingLogo ? (
-                                                    <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
-                                                ) : (
-                                                    <Upload className="h-4 w-4 text-neutral-500" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-bold text-neutral-600">{uploadingLogo ? "A carregar..." : "Clique para fazer upload"}</p>
-                                                <p className="text-[10px] text-neutral-400">PNG, JPG, SVG &mdash; máx. 5MB</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {theme?.brand.logoUrl && (
-                                        <div className="relative bg-neutral-50 rounded-xl p-3 border border-neutral-200 flex items-center gap-3">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={theme.brand.logoUrl} alt="Logo" className="h-10 w-auto object-contain max-w-[80px]" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-bold text-neutral-600 truncate">Logo atual</p>
-                                                <p className="text-[10px] text-neutral-400 truncate">{theme.brand.logoUrl}</p>
-                                            </div>
-                                            <button
-                                                onClick={() => updateTheme('brand.logoUrl', '')}
-                                                className="flex-shrink-0 p-1 rounded-lg hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    <div className="relative">
-                                        <input
-                                            value={theme?.brand.logoUrl || ""}
-                                            onChange={(e) => updateTheme('brand.logoUrl', e.target.value)}
-                                            placeholder="ou cole aqui um URL (https://...)"
-                                            className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-xs text-neutral-600 focus:border-emerald-500/50 outline-none transition-all placeholder:text-neutral-400"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Imagem de fundo do cartão (URL)</label>
-                                <input
-                                    value={theme?.brand.backgroundUrl || ""}
-                                    onChange={(e) => updateTheme('brand.backgroundUrl', e.target.value)}
-                                    placeholder="https://... ou /uploads/..."
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-xs text-neutral-600 focus:border-emerald-500/50 outline-none transition-all placeholder:text-neutral-400"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Marca de água (texto)</label>
-                                <input
-                                    value={theme?.brand.watermarkText || ""}
-                                    onChange={(e) => updateTheme('brand.watermarkText', e.target.value)}
-                                    placeholder="ex: VIP"
-                                    maxLength={24}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tamanho do logo</label>
-                                    <select value={theme?.brand.logoSize || "md"} onChange={(e) => updateTheme('brand.logoSize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
-                                        <option value="sm">Pequeno</option>
-                                        <option value="md">Médio</option>
-                                        <option value="lg">Grande</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Posição do logo</label>
-                                    <select value={theme?.brand.logoPosition || "left"} onChange={(e) => updateTheme('brand.logoPosition', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
-                                        <option value="left">Esquerda</option>
-                                        <option value="center">Centro</option>
-                                        <option value="right">Direita</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Estilo do cabeçalho</label>
-                                <select value={theme?.brand.headerStyle || "standard"} onChange={(e) => updateTheme('brand.headerStyle', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="standard">Standard (logo + tagline)</option>
-                                    <option value="minimal">Minimal (sem tagline)</option>
-                                    <option value="bold">Bold (texto grande)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tagline / Slogan</label>
-                                <input
-                                    value={theme?.brand.tagline || ""}
-                                    onChange={(e) => updateTheme('brand.tagline', e.target.value)}
-                                    placeholder="ex: O festival mais esperado do ano"
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                                />
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Colors */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <Palette className="h-4 w-4" /> Cores
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            {[
-                                { key: 'primary', label: 'Primária (Destaque)' },
-                                { key: 'accent', label: 'Cor de destaque / barra' },
-                                { key: 'text', label: 'Texto' },
-                                { key: 'bg', label: 'Fundo da página' },
-                                { key: 'card', label: 'Fundo do cartão' },
-                                { key: 'muted', label: 'Texto secundário' },
-                                { key: 'qrBackground', label: 'Fundo do QR' },
-                            ].map(({ key, label }) => (
-                                <div key={key} className={key === 'muted' || key === 'qrBackground' ? 'col-span-2' : ''}>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">{label}</label>
-                                    <div className="flex gap-2">
-                                        <input type="color" value={(theme?.colors as Record<string, string>)?.[key] || '#000000'} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="w-8 h-8 rounded-lg overflow-hidden border-none flex-shrink-0" />
-                                        <input value={(theme?.colors as Record<string, string>)?.[key] || ''} onChange={(e) => updateTheme(`colors.${key}`, e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl px-2 py-1.5 text-xs text-neutral-900 outline-none" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                </div>
-
-                {/* Configuration Columns */}
-                <div className="lg:col-span-4 space-y-6">
-                    {/* Typography */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <TypeIcon className="h-4 w-4" /> Tipografia
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Fonte</label>
-                                <select
-                                    value={theme?.typography.fontFamily}
-                                    onChange={(e) => updateTheme('typography.fontFamily', e.target.value)}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 focus:border-emerald-500/50 outline-none transition-all"
-                                >
-                                    {WHITELISTED_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Título do evento</label>
-                                    <select value={theme?.typography.titleSize || "md"} onChange={(e) => updateTheme('typography.titleSize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
-                                        <option value="sm">Pequeno</option>
-                                        <option value="md">Médio</option>
-                                        <option value="lg">Grande</option>
-                                        <option value="xl">Extra grande</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Texto geral</label>
-                                    <select value={theme?.typography.bodySize || "md"} onChange={(e) => updateTheme('typography.bodySize', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none">
-                                        <option value="sm">Pequeno</option>
-                                        <option value="md">Médio</option>
-                                        <option value="lg">Grande</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Peso do título</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {(["semibold", "bold", "extrabold"] as const).map((w) => (
-                                        <button key={w} type="button" onClick={() => updateTheme('typography.titleWeight', w)} className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.typography.titleWeight || "bold") === w ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}>
-                                            {w === "semibold" ? "600" : w === "bold" ? "700" : "800"}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <label className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer">
-                                <span className="text-xs font-bold text-neutral-800">Labels em maiúsculas</span>
-                                <input type="checkbox" checked={theme?.typography.uppercaseLabels !== false} onChange={(e) => updateTheme('typography.uppercaseLabels', e.target.checked)} className="w-4 h-4 accent-emerald-500" />
-                            </label>
-                        </div>
-                    </section>
-
-                    {/* Layout & estilo */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <Layout className="h-4 w-4" /> Estilo do Cartão
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Destaque superior</label>
-                                <select
-                                    value={theme?.layout?.accentStyle || "bar"}
-                                    onChange={(e) => updateLayout("accentStyle", e.target.value)}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none"
-                                >
-                                    <option value="bar">Barra colorida</option>
-                                    <option value="gradient">Cabeçalho gradiente</option>
-                                    <option value="none">Sem destaque</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Estilo do cartão</label>
-                                <select
-                                    value={theme?.layout?.cardStyle || "elevated"}
-                                    onChange={(e) => updateLayout("cardStyle", e.target.value)}
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none"
-                                >
-                                    <option value="elevated">Com sombra</option>
-                                    <option value="bordered">Com borda colorida</option>
-                                    <option value="flat">Plano (sem sombra)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Cantos arredondados</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {(["sm", "md", "lg"] as const).map((r) => (
-                                        <button
-                                            key={r}
-                                            type="button"
-                                            onClick={() => updateLayout("cornerRadius", r)}
-                                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.cornerRadius || "md") === r ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}
-                                        >
-                                            {r === "sm" ? "Suave" : r === "md" ? "Médio" : "Forte"}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Largura do bilhete</label>
-                                <select value={theme?.layout?.pageWidth || "standard"} onChange={(e) => updateLayout("pageWidth", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="compact">Compacto</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="wide">Largo</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Margem exterior</label>
-                                <select value={theme?.layout?.pagePadding || "md"} onChange={(e) => updateLayout("pagePadding", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="none">Nenhuma</option>
-                                    <option value="sm">Pequena</option>
-                                    <option value="md">Média</option>
-                                    <option value="lg">Grande</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Alinhamento do conteúdo</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {(["left", "center"] as const).map((a) => (
-                                        <button key={a} type="button" onClick={() => updateLayout("contentAlign", a)} className={`py-2 rounded-xl text-xs font-bold border transition-all ${(theme?.layout?.contentAlign || "left") === a ? "bg-violet-600 text-white border-violet-600" : "bg-neutral-50 text-neutral-500 border-neutral-200"}`}>
-                                            {a === "left" ? "Esquerda" : "Centro"}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Separador (linha)</label>
-                                <select value={theme?.layout?.dividerStyle || "dashed"} onChange={(e) => updateLayout("dividerStyle", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="dashed">Tracejado</option>
-                                    <option value="solid">Sólido</option>
-                                    <option value="dotted">Pontilhado</option>
-                                    <option value="none">Sem linha</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Padrão de fundo</label>
-                                <select value={theme?.layout?.backgroundPattern || "none"} onChange={(e) => updateLayout("backgroundPattern", e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="none">Nenhum</option>
-                                    <option value="dots">Pontos</option>
-                                    <option value="grid">Grelha</option>
-                                    <option value="diagonal">Diagonal</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Blocks */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <Layout className="h-4 w-4" /> Conteúdo (Blocos)
-                        </h3>
-                        <div className="space-y-3">
-                            <Toggle id="showEventTitle" label="Título do evento" />
-                            <Toggle id="showVenue" label="Local / venue" />
-                            <Toggle id="showCity" label="Cidade" />
-                            <Toggle id="showDate" label="Data e hora" />
-                            <Toggle id="showTicketCode" label="Código do bilhete" />
-                            <Toggle id="showOrganization" label="Nome / logo da organização" />
-                            <Toggle id="showBuyerName" label="Nome do comprador" />
-                            <Toggle id="showTicketType" label="Tipo de bilhete" />
-                            <Toggle id="showOrderId" label="ID da encomenda" />
-                            <Toggle id="showTerms" label="Termos e condições" />
-                            <Toggle id="showSupport" label="Informação de suporte" />
-                        </div>
-                        <div className="mt-4 space-y-3">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Badge / etiqueta superior</label>
-                                <input value={theme?.blocks.badgeText || ""} onChange={(e) => updateTheme('blocks.badgeText', e.target.value)} placeholder="Bilhete Digital" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none" />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Texto legal personalizado</label>
-                                <textarea value={theme?.blocks.customTerms || ""} onChange={(e) => updateTheme('blocks.customTerms', e.target.value)} placeholder="Deixe vazio para usar o texto padrão..." rows={3} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none resize-y" />
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* QR Code */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <QrCode className="h-4 w-4" /> QR Code
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Tamanho</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {['S', 'M', 'L'].map(s => (
-                                        <button
-                                            key={s}
-                                            onClick={() => updateTheme('qr.size', s)}
-                                            className={`py-2 rounded-xl text-xs font-bold transition-all border ${theme?.qr.size === s ? 'bg-violet-600 text-white border-violet-600' : 'bg-neutral-50 text-neutral-500 border-neutral-200 hover:border-neutral-200'}`}
-                                        >
-                                            {s === 'S' ? 'Pequeno' : s === 'M' ? 'Médio' : 'Grande'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Legenda (Opcional)</label>
-                                <input
-                                    value={theme?.qr.label || ""}
-                                    onChange={(e) => updateTheme('qr.label', e.target.value)}
-                                    placeholder="Validar na entrada"
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Moldura do QR</label>
-                                <select value={theme?.qr.frameStyle || "light"} onChange={(e) => updateTheme('qr.frameStyle', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="none">Sem moldura</option>
-                                    <option value="light">Sombra suave</option>
-                                    <option value="accent">Borda colorida</option>
-                                    <option value="bold">Destaque forte</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Cantos do QR</label>
-                                <select value={theme?.qr.borderRadius || "md"} onChange={(e) => updateTheme('qr.borderRadius', e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm outline-none">
-                                    <option value="none">Retos</option>
-                                    <option value="sm">Suaves</option>
-                                    <option value="md">Médios</option>
-                                    <option value="lg">Arredondados</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Textos / labels */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            <Type className="h-4 w-4" /> Textos dos campos
-                        </h3>
-                        <div className="space-y-3">
-                            {[
-                                { key: "labelBadge", label: "Badge", placeholder: "Bilhete Digital" },
-                                { key: "labelVenue", label: "Local", placeholder: "Local" },
-                                { key: "labelDate", label: "Data", placeholder: "Data e Hora" },
-                                { key: "labelBuyer", label: "Titular", placeholder: "Titular" },
-                                { key: "labelTicketType", label: "Tipo", placeholder: "Tipo de Bilhete" },
-                                { key: "labelTicketCode", label: "Código", placeholder: "Código" },
-                            ].map(({ key, label, placeholder }) => (
-                                <div key={key}>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1 ml-1">{label}</label>
-                                    <input
-                                        value={(theme?.copy as Record<string, string>)?.[key] || ""}
-                                        onChange={(e) => updateTheme(`copy.${key}`, e.target.value)}
-                                        placeholder={placeholder}
-                                        className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 text-sm outline-none"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                </div>
-
-                {/* Live Preview */}
-                <div className="lg:col-span-4">
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sticky top-6">
-                        <div className="flex items-center justify-between mb-3 px-2">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 flex items-center gap-2">
-                                <Eye className="h-4 w-4" /> Preview ao vivo
-                            </h3>
-                            {previewLoading && (
-                                <span className="text-[10px] text-emerald-600/80 animate-pulse">A atualizar...</span>
-                            )}
-                        </div>
-                        <div className="rounded-xl overflow-hidden border border-neutral-200 bg-zinc-900/80" style={{ height: "520px" }}>
-                            {previewHtml ? (
-                                <iframe
-                                    title="Preview do bilhete"
-                                    srcDoc={previewHtml}
-                                    className="w-full h-full border-0 bg-white"
-                                    sandbox="allow-same-origin"
-                                />
-                            ) : (
-                                <div className="h-full flex items-center justify-center text-neutral-400 text-sm">
-                                    A carregar preview...
-                                </div>
-                            )}
-                        </div>
-                        <p className="text-[10px] text-neutral-400 mt-3 px-2 leading-relaxed">
-                            Reflete alterações instantâneas — preset, cores, blocos e layout. Guarde para aplicar em bilhetes reais.
-                        </p>
-                    </section>
-
-                    {/* Footer */}
-                    <section className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6 mt-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500 mb-4 flex items-center gap-2">
-                            Rodapé
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">URL de Suporte</label>
-                                <input
-                                    value={theme?.footer.supportUrl || ""}
-                                    onChange={(e) => updateTheme('footer.supportUrl', e.target.value)}
-                                    placeholder="https://suporte.com"
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1.5 ml-1">Email de Suporte</label>
-                                <input
-                                    value={theme?.footer.supportEmail || ""}
-                                    onChange={(e) => updateTheme('footer.supportEmail', e.target.value)}
-                                    placeholder="ajuda@instante.pt"
-                                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-neutral-900 outline-none focus:border-emerald-500/50 transition-all"
-                                />
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6">
-                        <h4 className="text-sm font-bold text-emerald-600 mb-2 flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4" /> Dica de Design
-                        </h4>
-                        <p className="text-xs text-neutral-600 leading-relaxed">
-                            Mantenha o contraste elevado entre a cor de fundo e a cor do texto para garantir uma leitura fácil no papel.
-                            O tamanho Grande (L) do QR Code é recomendado para locais com pouca iluminação.
-                        </p>
+                        {tabContent()}
                     </div>
+                </div>
+            </div>
+
+            {/* Barra fixa mobile / tablet */}
+            <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden border-t border-neutral-200 bg-white/95 backdrop-blur-md px-4 py-3 safe-area-pb shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+                <div className="max-w-7xl mx-auto flex items-center gap-2">
+                    {template.status !== "ARCHIVED" && (
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={archiving}
+                            className="p-2.5 rounded-xl border border-red-200 text-red-600 shrink-0"
+                            aria-label="Apagar"
+                        >
+                            <Archive className="h-5 w-5" />
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border border-neutral-200 bg-white text-neutral-900 disabled:opacity-50"
+                    >
+                        <Save className="h-4 w-4" />
+                        {saving ? "A guardar..." : "Guardar"}
+                    </button>
+                    {template.status !== "ACTIVE" && (
+                        <button
+                            type="button"
+                            onClick={handlePublish}
+                            disabled={publishing}
+                            className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold bg-violet-600 text-white disabled:opacity-50"
+                        >
+                            <Send className="h-4 w-4" />
+                            {publishing ? "..." : "Publicar"}
+                        </button>
+                    )}
                 </div>
             </div>
         </PageShell>
