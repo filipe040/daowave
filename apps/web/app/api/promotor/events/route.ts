@@ -29,7 +29,10 @@ export async function GET(req: NextRequest) {
     }
 
     const page = Number(req.nextUrl.searchParams.get("page")) || 1;
-    const data = await EventService.getByOrganization(orgId, page);
+    const limit = Number(req.nextUrl.searchParams.get("limit")) || 20;
+    const search = req.nextUrl.searchParams.get("search") || undefined;
+    const status = req.nextUrl.searchParams.get("status") || undefined;
+    const data = await EventService.getByOrganization(orgId, page, limit, { search, status });
 
     return NextResponse.json(data);
   } catch (error: any) {

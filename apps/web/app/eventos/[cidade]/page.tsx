@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import { cityMatchValues } from "@/app/constants/cities";
 import { ArrowLeft, Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -18,12 +19,13 @@ function formatPrice(cents: number) {
 }
 
 async function getEventsByCity(cidade: string) {
+    const cityName = decodeURIComponent(cidade).trim();
     return prisma.event.findMany({
         where: {
             status: "PUBLISHED",
             archivedAt: null,
             endAt: { gte: new Date() },
-            city: decodeURIComponent(cidade),
+            city: { in: cityMatchValues(cityName) },
         },
         include: {
             ticketLots: { select: { priceCents: true }, where: { isActive: true } },

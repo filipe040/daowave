@@ -87,12 +87,32 @@ export const EventService = {
   async getByOrganization(
     organizationId: string,
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
+    filters?: { search?: string; status?: string }
   ): Promise<{ events: Event[]; total: number; pages: number }> {
     const skip = (page - 1) * limit;
+    const where: Prisma.EventWhereInput = { organizationId };
+
+    if (filters?.status === "ARCHIVED") {
+      where.archivedAt = { not: null };
+    } else if (filters?.status && filters.status !== "ALL") {
+      where.status = filters.status as EventStatus;
+      where.archivedAt = null;
+    }
+
+    const q = filters?.search?.trim();
+    if (q) {
+      where.OR = [
+        { title: { contains: q } },
+        { city: { contains: q } },
+        { venue: { contains: q } },
+        { slug: { contains: q } },
+      ];
+    }
+
     const [events, total] = await Promise.all([
       prisma.event.findMany({
-        where: { organizationId },
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
@@ -106,13 +126,13 @@ export const EventService = {
           },
         },
       }),
-      prisma.event.count({ where: { organizationId } }),
+      prisma.event.count({ where }),
     ]);
 
     return {
       events: events as Event[],
       total,
-      pages: Math.ceil(total / limit),
+      pages: Math.max(1, Math.ceil(total / limit)),
     };
   },
 

@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cityMatchValues } from '@/app/constants/cities';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,14 +22,19 @@ export async function GET(request: Request) {
     };
 
     if (city) {
-      where.city = { contains: city };
+      where.city = { in: cityMatchValues(city) };
     }
 
     if (search) {
-      where.OR = [
-        { title: { contains: search } },
-        { description: { contains: search } },
-        { city: { contains: search } },
+      where.AND = [
+        ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+        {
+          OR: [
+            { title: { contains: search } },
+            { description: { contains: search } },
+            { city: { contains: search } },
+          ],
+        },
       ];
     }
 

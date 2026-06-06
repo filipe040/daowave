@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import EventsSearch from "./components/events-search";
 import PromoterLink from "./components/PromoterLink";
-import { CITIES_PT } from "./constants/cities";
+import { CITIES_PT, cityMatchValues } from "./constants/cities";
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Ticket, Users, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -19,13 +19,13 @@ async function getEvents(searchParams: { search?: string; city?: string; categor
   };
   if (searchParams.search) {
     where.OR = [
-      { title: { contains: searchParams.search, mode: "insensitive" } },
-      { description: { contains: searchParams.search, mode: "insensitive" } },
-      { city: { contains: searchParams.search, mode: "insensitive" } },
+      { title: { contains: searchParams.search } },
+      { description: { contains: searchParams.search } },
+      { city: { contains: searchParams.search } },
     ];
   }
   if (searchParams.city && searchParams.city !== "ALL PORTUGAL") {
-    where.city = { contains: searchParams.city, mode: "insensitive" };
+    where.city = { in: cityMatchValues(searchParams.city) };
   }
   return prisma.event
     .findMany({
