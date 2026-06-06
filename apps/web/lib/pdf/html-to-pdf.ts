@@ -10,21 +10,44 @@ type Browser = import("playwright").Browser;
 let browserInstance: Browser | null = null;
 let browserLaunchPromise: Promise<Browser> | null = null;
 
+async function launchBrowser(): Promise<Browser> {
+  const { chromium } = await import("playwright");
+
+  const executablePath =
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
+    process.env.CHROME_PATH ||
+    undefined;
+
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--font-render-hinting=none",
+    ],
+  });
+
+  return browser;
+}
+
 async function getBrowser(): Promise<Browser> {
   if (browserInstance?.isConnected()) {
     return browserInstance;
   }
 
   if (!browserLaunchPromise) {
-    browserLaunchPromise = (async () => {
-      const { chromium } = await import("playwright");
-      const browser = await chromium.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    browserLaunchPromise = launchBrowser()
+      .then((browser) => {
+        browserInstance = browser;
+        return browser;
+      })
+      .catch((err) => {
+        browserLaunchPromise = null;
+        throw err;
       });
-      browserInstance = browser;
-      return browser;
-    })();
   }
 
   return browserLaunchPromise;
@@ -43,10 +66,18 @@ export async function renderHtmlToPdf(
   const page = await browser.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: "networkidle" });
+    await page.setContent(html, {
+      waitUntil: "load",
+      timeout: 45_000,
+    });
+
+    // Breve pausa para layout/CSS (sem depender de networkidle ou fontes externas)
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const pdfBuffer = await page.pdf({
       format: options?.format ?? "A4",
       printBackground: true,
+      preferCSSPageSize: true,
       margin: options?.margin ?? {
         top: "10mm",
         right: "10mm",
@@ -85,6 +116,11 @@ export async function tryRenderHtmlToPdf(
   html: string,
   options?: HtmlToPdfOptions
 ): Promise<Buffer | null> {
+  if (!isPlaywrightAvailable()) {
+    safeLog.warn("HTML to PDF: Playwright não instalado (npm run pdf:setup)");
+    return null;
+  }
+
   try {
     return await renderHtmlToPdf(html, options);
   } catch (err) {

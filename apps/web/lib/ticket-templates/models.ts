@@ -76,6 +76,8 @@ export interface TicketRenderModel {
         code: string;
         qrPayload: string;
         status: string;
+        /** Data URI embutido para PDF (evita API externa) */
+        qrDataUrl?: string;
     };
     event: {
         title: string;

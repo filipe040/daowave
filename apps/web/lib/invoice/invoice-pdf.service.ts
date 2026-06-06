@@ -6,6 +6,7 @@ import type { ResolvedInvoiceTheme } from "./invoice-theme";
 import { resolveInvoiceTheme } from "./invoice-theme";
 import { generateInvoicePdfKit } from "./invoice-pdfkit";
 import { tryRenderHtmlToPdf } from "../pdf/html-to-pdf";
+import { urlToDataUri } from "../pdf/inline-assets";
 import { safeLog } from "../security";
 
 export interface InvoiceData {
@@ -86,9 +87,8 @@ export function generateInvoiceHtml(data: InvoiceData): string {
 <meta charset="utf-8">
 <title>Fatura/Recibo ${escapeHtml(data.invoiceNumber)}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',system-ui,sans-serif;background:${t.backgroundColor};color:${t.textColor};-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:${t.backgroundColor};color:${t.textColor};-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page{width:210mm;min-height:297mm;margin:0 auto;background:${t.backgroundColor};padding:0}
   .accent-bar{height:6px;background:linear-gradient(90deg,${t.primaryColor},${t.secondaryColor})}
   .content{padding:40px}
@@ -232,7 +232,15 @@ export function generateInvoiceHtml(data: InvoiceData): string {
  * Gera PDF branded — HTML via Playwright (igual ao preview), fallback PDFKit
  */
 export async function generateInvoicePDF(data: InvoiceData): Promise<Buffer> {
-  const html = generateInvoiceHtml(data);
+  let theme = data.theme;
+  if (theme.logoUrl) {
+    const inlined = await urlToDataUri(theme.logoUrl);
+    if (inlined) {
+      theme = { ...theme, logoUrl: inlined };
+    }
+  }
+
+  const html = generateInvoiceHtml({ ...data, theme });
   const fromHtml = await tryRenderHtmlToPdf(html, {
     margin: { top: "0", right: "0", bottom: "0", left: "0" },
   });
@@ -241,7 +249,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Buffer> {
   }
 
   safeLog.warn("Invoice PDF: a usar fallback PDFKit (instale Playwright na VPS para design completo)");
-  return generateInvoicePdfKit(data);
+  return generateInvoicePdfKit({ ...data, theme });
 }
 
 export function buildInvoiceData(order: {

@@ -4,7 +4,9 @@ import crypto from "crypto";
 import { generateSimpleTicketPDF } from "./simple-ticket-pdf";
 import { renderTicketHtml } from "./ticket-html-templates";
 import { tryRenderHtmlToPdf } from "../pdf/html-to-pdf";
+import { urlToDataUri } from "../pdf/inline-assets";
 import { safeLog } from "../security";
+import QRCode from "qrcode";
 
 const DEFAULT_THEME: ThemeJson = {
   brand: { logoUrl: "", tagline: "" },
@@ -45,6 +47,45 @@ function mergeTheme(theme?: ThemeJson): ThemeJson {
   }
 
   return safeTheme;
+}
+
+async function fetchActiveTemplateForTicket(ticketId: string) {
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    include: { event: true },
+  });
+
+  if (!ticket?.event.organizationId) {
+    return null;
+  }
+
+  if (ticket.event.ticketTemplateId) {
+    const assigned = await prisma.organizationTicketTemplate.findUnique({
+      where: { id: ticket.event.ticketTemplateId },
+    });
+    if (assigned) return assigned;
+  }
+
+  return prisma.organizationTicketTemplate.findFirst({
+    where: {
+      organizationId: ticket.event.organizationId,
+      status: TicketTemplateStatus.ACTIVE,
+    },
+  });
+}
+
+async function inlineThemeLogo(theme: ThemeJson): Promise<ThemeJson> {
+  if (!theme.brand.logoUrl) return theme;
+  const inlined = await urlToDataUri(theme.brand.logoUrl);
+  if (!inlined) return theme;
+  return {
+    ...theme,
+    brand: { ...theme.brand, logoUrl: inlined },
+  };
+}
+
+function qrSizePx(size: ThemeJson["qr"]["size"]) {
+  return size === "L" ? 200 : size === "M" ? 150 : 100;
 }
 
 export const TicketRenderService = {
@@ -224,6 +265,30 @@ export const TicketRenderService = {
   },
 
   /**
+   * Template ACTIVE atual (ignora snapshot antigo — usa design do dashboard)
+   */
+  async resolveLiveRenderContext(
+    ticketId: string
+  ): Promise<{ model: TicketRenderModel; preset: TicketTemplatePreset; theme: ThemeJson }> {
+    const model = await this.buildRenderModel(ticketId);
+    const activeTemplate = await fetchActiveTemplateForTicket(ticketId);
+
+    if (!activeTemplate) {
+      return {
+        model,
+        preset: "A4_CLASSIC",
+        theme: mergeTheme(DEFAULT_THEME),
+      };
+    }
+
+    return {
+      model,
+      preset: activeTemplate.preset as TicketTemplatePreset,
+      theme: mergeTheme(activeTemplate.themeJson as ThemeJson),
+    };
+  },
+
+  /**
    * Resolve template theme + preset for rendering
    */
   async resolveRenderContext(
@@ -275,8 +340,23 @@ export const TicketRenderService = {
    * Renders the ticket to PDF buffer (HTML template via Playwright, pdfkit fallback)
    */
   async renderPdf(ticketId: string, templateId?: string): Promise<Buffer> {
-    const { model, preset, theme } = await this.resolveRenderContext(ticketId, templateId);
-    const html = renderTicketHtml(preset, model, theme);
+    const { model, preset, theme: baseTheme } = templateId
+      ? await this.resolveRenderContext(ticketId, templateId)
+      : await this.resolveLiveRenderContext(ticketId);
+
+    const theme = await inlineThemeLogo(baseTheme);
+    const qrSize = qrSizePx(theme.qr.size);
+    const qrDataUrl = await QRCode.toDataURL(model.ticket.qrPayload || model.ticket.code, {
+      width: qrSize * 2,
+      margin: 1,
+    });
+
+    const modelForHtml: TicketRenderModel = {
+      ...model,
+      ticket: { ...model.ticket, qrDataUrl },
+    };
+
+    const html = renderTicketHtml(preset, modelForHtml, theme);
 
     const fromHtml = await tryRenderHtmlToPdf(html, {
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
@@ -285,7 +365,7 @@ export const TicketRenderService = {
       return fromHtml;
     }
 
-    safeLog.warn("Ticket PDF: a usar fallback basico (instale Playwright na VPS para o design do dashboard)", {
+    safeLog.warn("Ticket PDF: a usar fallback basico (npm run pdf:setup na VPS para design do dashboard)", {
       ticketId,
     });
     return generateSimpleTicketPDF({

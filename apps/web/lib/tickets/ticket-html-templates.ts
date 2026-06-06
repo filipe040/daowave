@@ -11,6 +11,9 @@ function qrSizePx(size: ThemeJson["qr"]["size"]) {
 }
 
 function qrImg(model: TicketRenderModel, size: number) {
+  if (model.ticket.qrDataUrl) {
+    return model.ticket.qrDataUrl;
+  }
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(model.ticket.qrPayload)}`;
 }
 
@@ -30,7 +33,7 @@ function baseStyles(theme: ThemeJson, extra = "") {
 
   return `
     body {
-      font-family: '${theme.typography.fontFamily}', sans-serif;
+      font-family: '${theme.typography.fontFamily}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 0;
       background: ${theme.colors.bg};
@@ -114,7 +117,6 @@ function wrapHtml(title: string, theme: ThemeJson, body: string, extraCss = "") 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${title}</title>
-  <link href="https://fonts.googleapis.com/css2?family=${theme.typography.fontFamily}:wght@400;600;700&display=swap" rel="stylesheet">
   <style>${baseStyles(theme, extraCss)}</style>
 </head>
 <body>${body}</body>
