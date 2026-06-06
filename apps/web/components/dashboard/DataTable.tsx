@@ -9,6 +9,7 @@ export interface Column<T> {
     key: keyof T | string;
     label: string;
     className?: string;
+    hideOnMobile?: boolean;
     render?: (row: T) => ReactNode;
 }
 
@@ -27,7 +28,10 @@ interface DataTableProps<T> {
     total?: number;
     onPageChange?: (page: number) => void;
     rowActions?: (row: T) => ReactNode;
+    mobileCard?: (row: T) => ReactNode;
 }
+
+const cellPad = "px-4 sm:px-6 lg:px-8";
 
 export function DataTable<T>({
     columns,
@@ -44,22 +48,39 @@ export function DataTable<T>({
     total,
     onPageChange,
     rowActions,
+    mobileCard,
 }: DataTableProps<T>) {
     if (loading) {
         return (
-            <div className="dash-card overflow-hidden animate-pulse">
-                <div className="px-8 py-5 border-b border-neutral-100 flex gap-8">
-                    {columns.map((col) => (
-                        <div key={String(col.key)} className="h-3 w-20 bg-neutral-200 rounded" />
+            <div className="space-y-6">
+                {mobileCard && (
+                    <div className="md:hidden space-y-3 animate-pulse">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="dash-card p-4 space-y-3">
+                                <div className="h-4 w-3/4 bg-neutral-200 rounded" />
+                                <div className="h-3 w-1/2 bg-neutral-100 rounded" />
+                                <div className="flex gap-2">
+                                    <div className="h-6 w-16 bg-neutral-100 rounded-full" />
+                                    <div className="h-6 w-16 bg-neutral-100 rounded-full" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div className={`dash-card overflow-hidden animate-pulse ${mobileCard ? "hidden md:block" : ""}`}>
+                    <div className={`${cellPad} py-4 border-b border-neutral-100 flex gap-6`}>
+                        {columns.map((col) => (
+                            <div key={String(col.key)} className="h-3 w-20 bg-neutral-200 rounded" />
+                        ))}
+                    </div>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className={`${cellPad} py-5 border-b border-neutral-100 last:border-0 flex gap-6`}>
+                            <div className="h-4 w-32 bg-neutral-200 rounded" />
+                            <div className="h-4 w-24 bg-neutral-100 rounded" />
+                            <div className="h-4 w-16 bg-neutral-100 rounded" />
+                        </div>
                     ))}
                 </div>
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="px-8 py-6 border-b border-neutral-100 last:border-0 flex gap-8">
-                        <div className="h-4 w-32 bg-neutral-200 rounded" />
-                        <div className="h-4 w-24 bg-neutral-100 rounded" />
-                        <div className="h-4 w-16 bg-neutral-100 rounded" />
-                    </div>
-                ))}
             </div>
         );
     }
@@ -71,21 +92,38 @@ export function DataTable<T>({
     }
 
     return (
-        <div className="space-y-6">
-            <div className="dash-card overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+        <div className="space-y-4 sm:space-y-6">
+            {mobileCard && (
+                <div className="md:hidden space-y-3">
+                    {data.map((row) => (
+                        <div
+                            key={String(row[keyField])}
+                            className="dash-card p-4 sm:p-5 hover:shadow-lg transition-shadow"
+                        >
+                            {mobileCard(row)}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className={`dash-card overflow-hidden ${mobileCard ? "hidden md:block" : ""}`}>
+                <div className="overflow-x-auto -mx-px">
+                    <table className="w-full min-w-[640px] text-sm">
                         <thead>
                             <tr className="border-b border-neutral-100 bg-neutral-50/80">
                                 {columns.map((col) => (
                                     <th
                                         key={String(col.key)}
-                                        className={`px-8 py-5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em] whitespace-nowrap ${col.className ?? ""}`}
+                                        className={`${cellPad} py-4 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em] whitespace-nowrap ${col.className ?? ""}`}
                                     >
                                         {col.label}
                                     </th>
                                 ))}
-                                {rowActions && <th className="px-8 py-5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em]">Ações</th>}
+                                {rowActions && (
+                                    <th className={`${cellPad} py-4 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em]`}>
+                                        Ações
+                                    </th>
+                                )}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-100">
@@ -97,7 +135,7 @@ export function DataTable<T>({
                                     {columns.map((col) => (
                                         <td
                                             key={String(col.key)}
-                                            className={`px-8 py-6 text-neutral-800 font-medium ${col.className ?? ""}`}
+                                            className={`${cellPad} py-5 text-neutral-800 font-medium ${col.className ?? ""}`}
                                         >
                                             {col.render
                                                 ? col.render(row)
@@ -105,8 +143,8 @@ export function DataTable<T>({
                                         </td>
                                     ))}
                                     {rowActions && (
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center justify-end gap-3 opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <td className={`${cellPad} py-5`}>
+                                            <div className="flex items-center justify-end gap-2 sm:gap-3 opacity-70 group-hover:opacity-100 transition-opacity">
                                                 {rowActions(row)}
                                             </div>
                                         </td>
@@ -119,18 +157,21 @@ export function DataTable<T>({
             </div>
 
             {onPageChange && (
-                <div className="flex items-center justify-between px-2">
-                    <p className="text-[13px] text-neutral-500">
-                        Página <span className="text-neutral-900 font-bold">{page}</span> de <span className="text-neutral-900 font-bold">{totalPages}</span>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
+                    <p className="text-[12px] sm:text-[13px] text-neutral-500 text-center sm:text-left">
+                        Página <span className="text-neutral-900 font-bold">{page}</span> de{" "}
+                        <span className="text-neutral-900 font-bold">{totalPages}</span>
                         {total !== undefined && (
-                            <span className="ml-2 font-normal text-neutral-400">| {total} resultados</span>
+                            <span className="block sm:inline sm:ml-2 font-normal text-neutral-400">
+                                {total} resultado{total !== 1 ? "s" : ""}
+                            </span>
                         )}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                             disabled={page <= 1}
                             onClick={() => onPageChange(page - 1)}
-                            className="dash-btn-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="dash-btn-secondary flex-1 sm:flex-none disabled:opacity-40 disabled:cursor-not-allowed text-[13px] py-2.5"
                         >
                             <ChevronLeft className="h-4 w-4" />
                             Anterior
@@ -138,7 +179,7 @@ export function DataTable<T>({
                         <button
                             disabled={page >= totalPages}
                             onClick={() => onPageChange(page + 1)}
-                            className="dash-btn-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="dash-btn-secondary flex-1 sm:flex-none disabled:opacity-40 disabled:cursor-not-allowed text-[13px] py-2.5"
                         >
                             Próximo
                             <ChevronRight className="h-4 w-4" />

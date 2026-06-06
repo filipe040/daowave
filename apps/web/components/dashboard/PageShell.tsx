@@ -31,7 +31,7 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
                     )}
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div className="min-w-0 space-y-2">
-                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-neutral-900 tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tight break-words">
                                 {title}
                             </h1>
                             {subtitle && (
@@ -39,7 +39,7 @@ export function PageShell({ title, subtitle, actions, children, backButton }: Pa
                             )}
                         </div>
                         {actions && (
-                            <div className="flex flex-wrap items-center gap-3 shrink-0 pb-1 mt-2 lg:mt-0">
+                            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 shrink-0 pb-1 mt-2 lg:mt-0 w-full lg:w-auto">
                                 {actions}
                             </div>
                         )}

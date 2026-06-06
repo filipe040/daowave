@@ -95,9 +95,9 @@ export default function PromoterEventsPage() {
             actions={
                 <Link
                     href="/promotor/events/new"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
+                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-3 rounded-2xl text-[13px] sm:text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 shrink-0" />
                     Novo Evento
                 </Link>
             }
@@ -153,6 +153,63 @@ export default function PromoterEventsPage() {
                     totalPages={totalPages}
                     total={total}
                     onPageChange={setPage}
+                    mobileCard={(e) => {
+                        const config = STATUS_CONFIG[e.status] ?? STATUS_CONFIG.DRAFT;
+                        return (
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3 min-w-0">
+                                    <div className="w-11 h-11 rounded-xl bg-neutral-50 border border-neutral-200 flex flex-col items-center justify-center shrink-0">
+                                        <span className="text-[8px] font-black text-neutral-400 uppercase leading-none">
+                                            {format(new Date(e.startAt), "MMM", { locale: pt })}
+                                        </span>
+                                        <span className="text-sm font-black text-neutral-900">
+                                            {format(new Date(e.startAt), "dd")}
+                                        </span>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="font-bold text-neutral-900 tracking-tight leading-snug break-words">
+                                            {e.title}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-[12px] text-neutral-400 mt-1">
+                                            <MapPin className="w-3 h-3 shrink-0" />
+                                            <span className="truncate">{e.venue ? `${e.venue}, ` : ""}{e.city}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${config.className}`}>
+                                        {config.label}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-50 border border-neutral-200 text-neutral-600">
+                                        <Ticket className="w-3 h-3" />
+                                        {e._count.tickets}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-50 border border-neutral-200 text-neutral-600">
+                                        <ShoppingCart className="w-3 h-3" />
+                                        {e._count.orders}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 pt-1 border-t border-neutral-100">
+                                    <Link
+                                        href={`/promotor/events/${e.id}`}
+                                        className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 text-white text-[12px] font-bold hover:bg-violet-700 transition-all"
+                                    >
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                        Editar
+                                    </Link>
+                                    <a
+                                        href={`/events/${e.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all"
+                                        title="Ver página pública"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                    </a>
+                                </div>
+                            </div>
+                        );
+                    }}
                     columns={[
                         {
                             key: "title",
@@ -215,10 +272,10 @@ export default function PromoterEventsPage() {
                         },
                     ]}
                     rowActions={(e) => (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                             <Link
                                 href={`/promotor/events/${e.id}`}
-                                className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
+                                className="p-2.5 sm:p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
                                 title="Editar Evento"
                             >
                                 <Edit3 className="w-4 h-4" />
@@ -227,7 +284,7 @@ export default function PromoterEventsPage() {
                                 href={`/events/${e.slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
+                                className="p-2.5 sm:p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
                                 title="Ver Página Pública"
                             >
                                 <ExternalLink className="w-4 h-4" />
