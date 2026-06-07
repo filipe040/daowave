@@ -51,7 +51,7 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
                         <Layers className="w-5 h-5 text-white" strokeWidth={2.5} />
                     </div>
                     <div>
-                        <span className="text-[13px] font-black text-neutral-900 uppercase tracking-[0.15em] leading-none block">GoPass</span>
+                        <span className="text-[13px] font-black text-neutral-900 uppercase tracking-[0.15em] leading-none block">LivePass</span>
                         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1 block">Promotor</span>
                     </div>
                 </Link>

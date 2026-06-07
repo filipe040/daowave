@@ -3,12 +3,12 @@ export default function TermsPage() {
         <>
             <h1>Termos e Condições de Uso e Venda</h1>
 
-            <p><strong>Bem-vindo ao GoPass!</strong></p>
+            <p><strong>Bem-vindo ao LivePass!</strong></p>
             <p>Estes Termos e Condições regulam a utilização do nosso website e o processo de compra de bilhetes digitais aplicável a todos os utilizadores.</p>
 
             <h3>1. Informações da Empresa</h3>
             <ul>
-                <li><strong>Nome:</strong> GoPass</li>
+                <li><strong>Nome:</strong> LivePass</li>
                 {/* <li><strong>NIF:</strong> [NIF]</li> */}
                 {/* <li><strong>Sede:</strong> [MORADA]</li> */}
                 {/* <li><strong>Email de Contacto:</strong> [EMAIL]</li> */}

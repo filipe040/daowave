@@ -32,13 +32,13 @@ export async function GET(req: Request) {
         results.cleanedApiKey = apiKey?.substring(0, 8);
 
         const client = new Resend(apiKey);
-        const fromEmail = process.env.EMAIL_FROM?.trim().replace(/^[\"']|[\"']$/g, '') || "no-reply@gopass.pt";
+        const fromEmail = process.env.EMAIL_FROM?.trim().replace(/^[\"']|[\"']$/g, '') || "no-reply@livepass.pt";
         results.cleanedFrom = fromEmail;
 
         const result = await client.emails.send({
             from: fromEmail,
             to,
-            subject: "Teste de Email - GoPass Debug",
+            subject: "Teste de Email - LivePass Debug",
             html: "<h1>Teste de Email</h1><p>Se recebeste este email, o Resend está a funcionar corretamente!</p>",
         });
 
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
         const { EmailService } = await import("@/lib/email-service");
         const serviceResult = await EmailService.sendHtml({
             to,
-            subject: "Teste via EmailService - GoPass",
+            subject: "Teste via EmailService - LivePass",
             html: "<h1>Teste via EmailService</h1><p>Este email foi enviado pelo EmailService.</p>",
         });
         results.emailServiceResult = serviceResult;

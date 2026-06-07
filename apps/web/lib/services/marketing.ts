@@ -30,7 +30,7 @@ export class MarketingService {
       }
 
       // Send emails directly (avoiding queue connection errors in dev)
-      const orgName = event.organization?.name || "GoPass";
+      const orgName = event.organization?.name || "LivePass";
       const promises = users.map(u => {
         return EmailService.sendTemplate({
           to: u.email,
@@ -38,8 +38,8 @@ export class MarketingService {
           variables: {
             subject: `Novidade: ${event.title} já está disponível!`,
             title: "Novo Evento Disponível",
-            content: `<p>Olá ${u.name || 'GoPasser'},</p>
-                      <p>Temos o prazer de anunciar um novo evento na GoPass: <strong>${event.title}</strong>.</p>
+            content: `<p>Olá ${u.name || 'LivePasser'},</p>
+                      <p>Temos o prazer de anunciar um novo evento na LivePass: <strong>${event.title}</strong>.</p>
                       <p>A ${orgName} acabou de lançar este evento. Garanta já o seu lugar antes que esgote!</p>
                       <br/>
                       <div style="text-align: center;">

@@ -26,10 +26,10 @@ export default function ContactPage() {
                 Email de suporte
               </div>
               <a
-                href="mailto:support@gopass.pt"
+                href="mailto:support@livepass.pt"
                 className="mt-2 inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-bold text-violet-700 hover:text-violet-800 transition"
               >
-                support@gopass.pt
+                support@livepass.pt
                 <span className="text-neutral-400">→</span>
               </a>
               <p className="mt-2 text-[12px] text-neutral-600">

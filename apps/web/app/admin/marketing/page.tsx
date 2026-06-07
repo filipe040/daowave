@@ -134,7 +134,7 @@ export default function AdminMarketingPage() {
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     className="public-input rounded-xl py-3"
-                                    placeholder="Ex: Agenda de Verão Gopass"
+                                    placeholder="Ex: Agenda de Verão LivePass"
                                 />
                             </div>
 

@@ -1,6 +1,6 @@
 /**
  * Transactional Email Templates
- * Light & Vibrant — GoPass Brand (matches public website)
+ * Light & Vibrant — LivePass Brand (matches public website)
  */
 
 import { getEmailConfig } from "./config/email";
@@ -14,7 +14,7 @@ function getConfig() {
 }
 
 const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://tickets.daowave.pt";
-const BRAND = "GoPass";
+const BRAND = "LivePass";
 
 /** Design tokens — high contrast on light background */
 export const EMAIL = {
@@ -122,7 +122,7 @@ function base(preheader: string, content: string, betaBanner = false): string {
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} ${BRAND} — Todos os direitos reservados.</p>
       <p>Este é um email automático. Por favor não responda.</p>
-      <p><a href="${APP_URL}">tickets.daowave.pt</a> · <a href="mailto:suporte@gopass.pt">suporte@gopass.pt</a></p>
+      <p><a href="${APP_URL}">tickets.daowave.pt</a> · <a href="mailto:suporte@livepass.pt">suporte@livepass.pt</a></p>
     </div>
   </div>
 </div>
@@ -342,8 +342,8 @@ export function getLoginNotificationTemplate(v: {
 
   return {
     subject: `🔐 Novo acesso à sua conta — ${BRAND}`,
-    html: base("Novo acesso detetado na sua conta GoPass.", content, false),
-    text: `Olá ${v.name},\n\nNovo acesso à sua conta GoPass.\nData: ${v.timestamp}\nIP: ${v.ip}\n\nNão foi você? ${v.resetUrl}`,
+    html: base("Novo acesso detetado na sua conta LivePass.", content, false),
+    text: `Olá ${v.name},\n\nNovo acesso à sua conta LivePass.\nData: ${v.timestamp}\nIP: ${v.ip}\n\nNão foi você? ${v.resetUrl}`,
   };
 }
 

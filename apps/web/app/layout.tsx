@@ -8,10 +8,10 @@ import { CookieBanner } from "./components/cookie-banner";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "GoPass - Marketplace de Bilhética",
+  title: "LivePass - Marketplace de Bilhética",
   description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
   metadataBase: new URL("https://tickets.daowave.pt"),
-  applicationName: "GoPass",
+  applicationName: "LivePass",
 };
 
 export function generateViewport() {

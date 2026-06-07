@@ -247,7 +247,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
 
             <div className="min-w-0">
               <div className="text-[13px] font-semibold text-foreground tracking-wide uppercase">
-                GOPASS
+                LIVEPASS
               </div>
               <div className="text-[11px] text-muted-foreground truncate">{section}</div>
             </div>

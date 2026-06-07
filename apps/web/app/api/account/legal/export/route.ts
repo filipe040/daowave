@@ -64,7 +64,7 @@ export async function POST() {
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="gopass-dados-${user.email.replace(/[^a-z0-9]/gi, "-")}-${Date.now()}.json"`,
+        "Content-Disposition": `attachment; filename="livepass-dados-${user.email.replace(/[^a-z0-9]/gi, "-")}-${Date.now()}.json"`,
       },
     });
   } catch (e) {

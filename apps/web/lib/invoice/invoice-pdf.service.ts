@@ -70,7 +70,7 @@ export function generateInvoiceHtml(data: InvoiceData): string {
     : `<div class="brand-text">${escapeHtml(t.brandName)}</div>`;
 
   const platformFooter = t.showPlatformCredit
-    ? `<div class="platform-credit">Emitido via GoPass · tickets.daowave.pt</div>`
+    ? `<div class="platform-credit">Emitido via LivePass · tickets.daowave.pt</div>`
     : "";
 
   const customFooter = t.footerText

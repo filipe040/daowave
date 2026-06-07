@@ -16,7 +16,7 @@ export default function Footer() {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-base md:text-lg font-bold tracking-tight text-neutral-900">
-                    GoPass
+                    LivePass
                   </h3>
                   <p className="text-[11px] md:text-xs uppercase tracking-wider text-neutral-500">
                     Bilhética &amp; acesso
@@ -73,7 +73,7 @@ export default function Footer() {
               <ul className="mt-4 space-y-2 text-sm">
                 <li><Link href="/sobre-nos" className="text-neutral-600 hover:text-violet-600 transition">Sobre Nós</Link></li>
                 <li><Link href="/faq" className="text-neutral-600 hover:text-violet-600 transition">Perguntas Frequentes</Link></li>
-                <li><a href="mailto:suporte@gopass.pt" className="text-neutral-600 hover:text-violet-600 transition">suporte@gopass.pt</a></li>
+                <li><a href="mailto:suporte@livepass.pt" className="text-neutral-600 hover:text-violet-600 transition">suporte@livepass.pt</a></li>
               </ul>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function Footer() {
         <div className="border-t border-neutral-200 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-neutral-500">
-              © {year} GoPass. Todos os direitos reservados.
+              © {year} LivePass. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-2">
               {[

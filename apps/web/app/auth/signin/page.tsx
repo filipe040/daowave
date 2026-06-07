@@ -160,7 +160,7 @@ function SignInContent() {
           <Link href="/" className="inline-flex items-center gap-2 text-neutral-500 hover:text-violet-600 transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
             <ArrowLeft className="h-4 w-4" /> Voltar ao início
           </Link>
-          <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-neutral-900">GoPass</h1>
+          <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-neutral-900">LivePass</h1>
           <p className="mt-2 text-[13px] sm:text-[14px] text-neutral-500">Entre na sua conta para continuar</p>
         </div>
 

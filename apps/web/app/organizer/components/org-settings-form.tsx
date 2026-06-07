@@ -142,7 +142,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
               className={inputClass}
-              placeholder="Ex: GoPass Produções"
+              placeholder="Ex: LivePass Produções"
               required
             />
             {errors.name && <p className="text-red-600 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{errors.name}</p>}
@@ -154,7 +154,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               value={form.legalName}
               onChange={(e) => set("legalName", e.target.value)}
               className={inputClass}
-              placeholder="Ex: GoPass Produções, Lda."
+              placeholder="Ex: LivePass Produções, Lda."
             />
             {errors.legalName && <p className="text-red-600 text-xs mt-1">{errors.legalName}</p>}
           </Field>

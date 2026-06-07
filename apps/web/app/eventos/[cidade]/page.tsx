@@ -39,10 +39,10 @@ export async function generateMetadata({ params }: { params: Promise<{ cidade: s
     const cityName = decodeURIComponent(cidade);
     const capitalized = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
     return {
-        title: `Eventos em ${capitalized} — Bilhetes Online | GoPass`,
+        title: `Eventos em ${capitalized} — Bilhetes Online | LivePass`,
         description: `Compra bilhetes para os melhores eventos em ${capitalized}. Eventos de música, cultura e entretenimento com compra segura e QR code.`,
         openGraph: {
-            title: `Eventos em ${capitalized} | GoPass`,
+            title: `Eventos em ${capitalized} | LivePass`,
             description: `Descobre e compra bilhetes para eventos em ${capitalized}.`,
         },
     };

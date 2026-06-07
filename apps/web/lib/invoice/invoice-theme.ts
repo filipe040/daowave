@@ -35,7 +35,7 @@ export type ResolvedInvoiceTheme = {
 };
 
 export const DEFAULT_INVOICE_THEME: ResolvedInvoiceTheme = {
-  brandName: "GoPass",
+  brandName: "LivePass",
   tagline: "Bilhética Digital",
   logoUrl: null,
   primaryColor: "#6C2BD9",

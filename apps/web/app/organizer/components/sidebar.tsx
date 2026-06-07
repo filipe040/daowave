@@ -72,7 +72,7 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           </div>
           <div className="shrink-0 p-4 sm:p-6 border-b border-neutral-200">
             <Link href="/organizer" onClick={onClose} className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
-              GoPass
+              LivePass
             </Link>
             <p className="text-xs text-neutral-500 mt-1">Área do Promotor</p>
           </div>

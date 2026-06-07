@@ -89,7 +89,7 @@ export default function PromoterDashboardPage() {
             {!loading && !error && !stats && (
                 <EmptyState
                     icon={Calendar}
-                    title="Bem-vindo ao GoPass"
+                    title="Bem-vindo ao LivePass"
                     description="Parece que ainda não tem uma organização ou eventos. Comece por criar o seu primeiro evento."
                     action={
                         <Link

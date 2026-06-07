@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Music, MapPin, Shield } from "lucide-react";
 
 export const metadata = {
-    title: "Sobre Nós — GoPass Bilhetes",
+    title: "Sobre Nós — LivePass Bilhetes",
     description:
         "Somos uma plataforma portuguesa de bilhética digital, criada para ligar promotores de eventos ao seu público de forma simples e segura.",
 };
@@ -25,7 +25,7 @@ export default function SobreNosPage() {
 
                 <div className="space-y-8 text-[15px] text-neutral-700 leading-relaxed">
                     <p>
-                        A <span className="text-neutral-900 font-bold">GoPass</span> é uma plataforma de bilhética
+                        A <span className="text-neutral-900 font-bold">LivePass</span> é uma plataforma de bilhética
                         digital 100% portuguesa, criada para simplificar a venda de bilhetes para eventos ao vivo.
                         Acreditamos que comprar um bilhete deve ser tão fácil como enviar uma mensagem.
                     </p>
@@ -58,7 +58,7 @@ export default function SobreNosPage() {
                             Contacto
                         </div>
                         <div className="space-y-2 text-[14px] text-neutral-700">
-                            <div>📧 <a href="mailto:suporte@gopass.pt" className="text-violet-700 font-semibold hover:underline">suporte@gopass.pt</a></div>
+                            <div>📧 <a href="mailto:suporte@livepass.pt" className="text-violet-700 font-semibold hover:underline">suporte@livepass.pt</a></div>
                             <div>📍 Viseu, Portugal</div>
                         </div>
                     </div>

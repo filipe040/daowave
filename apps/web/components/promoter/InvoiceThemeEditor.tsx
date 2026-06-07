@@ -306,7 +306,7 @@ export function InvoiceThemeEditor({
               className="rounded border-neutral-300"
             />
             <span className="text-sm text-neutral-600">
-              Mostrar crédito GoPass no rodapé
+              Mostrar crédito LivePass no rodapé
             </span>
           </label>
         </div>

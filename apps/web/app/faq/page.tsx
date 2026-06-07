@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Perguntas Frequentes — GoPass Bilhetes",
-    description: "Respostas às perguntas mais comuns sobre compra de bilhetes, reembolsos, check-in e gestão de eventos na GoPass.",
+    title: "Perguntas Frequentes — LivePass Bilhetes",
+    description: "Respostas às perguntas mais comuns sobre compra de bilhetes, reembolsos, check-in e gestão de eventos na LivePass.",
 };
 
 const FAQS = [
@@ -82,7 +82,7 @@ export default function FAQPage() {
                 </h1>
                 <p className="text-[15px] text-neutral-600 mb-12">
                     Não encontras o que procuras?{" "}
-                    <a href="mailto:suporte@gopass.pt" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">
+                    <a href="mailto:suporte@livepass.pt" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">
                         Contacta-nos
                     </a>
                     .

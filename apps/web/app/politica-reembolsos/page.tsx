@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Política de Reembolsos — GoPass Bilhetes",
+    title: "Política de Reembolsos — LivePass Bilhetes",
     description:
-        "Consulta a nossa política de reembolsos e cancelamentos para compras de bilhetes na plataforma GoPass.",
+        "Consulta a nossa política de reembolsos e cancelamentos para compras de bilhetes na plataforma LivePass.",
 };
 
 export default function PoliticaReembolsosPage() {
@@ -28,7 +28,7 @@ export default function PoliticaReembolsosPage() {
                     <section>
                         <h2 className="text-[16px] font-bold text-neutral-900 mb-3">1. Condições Gerais</h2>
                         <p>
-                            A GoPass atua como plataforma intermediária entre promotores de eventos e compradores
+                            A LivePass atua como plataforma intermediária entre promotores de eventos e compradores
                             de bilhetes. A política de reembolsos aplica-se a todas as compras efetuadas na
                             plataforma.
                         </p>
@@ -55,7 +55,7 @@ export default function PoliticaReembolsosPage() {
                     <section>
                         <h2 className="text-[16px] font-bold text-neutral-900 mb-3">4. Processo de Reembolso</h2>
                         <ol className="list-decimal list-inside space-y-2">
-                            <li>Envia um email para <a href="mailto:suporte@gopass.pt" className="text-violet-600 font-semibold hover:underline">suporte@gopass.pt</a> com o número de ordem e motivo.</li>
+                            <li>Envia um email para <a href="mailto:suporte@livepass.pt" className="text-violet-600 font-semibold hover:underline">suporte@livepass.pt</a> com o número de ordem e motivo.</li>
                             <li>A equipa analisa o pedido dentro de 24–48h.</li>
                             <li>O reembolso é processado para o método de pagamento original.</li>
                         </ol>
@@ -82,8 +82,8 @@ export default function PoliticaReembolsosPage() {
                         <h2 className="text-[16px] font-bold text-neutral-900 mb-3">7. Contacto</h2>
                         <p>
                             Para questões relacionadas com reembolsos:{" "}
-                            <a href="mailto:suporte@gopass.pt" className="text-violet-600 font-semibold hover:underline">
-                                suporte@gopass.pt
+                            <a href="mailto:suporte@livepass.pt" className="text-violet-600 font-semibold hover:underline">
+                                suporte@livepass.pt
                             </a>
                         </p>
                     </section>

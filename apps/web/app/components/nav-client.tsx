@@ -123,7 +123,7 @@ export default function NavClient() {
               <Ticket className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-neutral-900 font-black text-lg md:text-xl tracking-tight">
-              GoPass
+              LivePass
             </span>
           </Link>
 

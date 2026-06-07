@@ -38,7 +38,7 @@ export function AdminSidebar() {
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-md">
                         A
                     </div>
-                    <span className="text-[14px] font-bold text-neutral-900 tracking-tight">Admin GoPass</span>
+                    <span className="text-[14px] font-bold text-neutral-900 tracking-tight">Admin LivePass</span>
                 </Link>
             </div>
 

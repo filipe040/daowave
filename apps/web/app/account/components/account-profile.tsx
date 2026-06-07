@@ -258,7 +258,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition");
       const match = disposition?.match(/filename="?([^";]+)"?/);
-      const filename = match?.[1] ?? `gopass-dados-${Date.now()}.json`;
+      const filename = match?.[1] ?? `livepass-dados-${Date.now()}.json`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

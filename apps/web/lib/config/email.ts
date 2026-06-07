@@ -71,7 +71,7 @@ export function getEmailConfig(): EmailConfig {
 
     return emailConfigSchema.parse({
       resendApiKey: cleanApiKey,
-      from: env.EMAIL_FROM || "GoPass <no-reply@gopass.pt>",
+      from: env.EMAIL_FROM || "LivePass <no-reply@livepass.pt>",
       replyTo: env.EMAIL_REPLY_TO,
       appUrl,
       enabled: env.EMAILS_ENABLED,

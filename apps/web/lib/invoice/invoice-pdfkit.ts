@@ -168,7 +168,7 @@ export async function generateInvoicePdfKit(data: InvoiceData): Promise<Buffer> 
     }
     if (t.showPlatformCredit) {
       doc.font("Helvetica").fontSize(7).fillColor(t.mutedColor).text(
-        "Emitido via GoPass - tickets.daowave.pt",
+        "Emitido via LivePass - tickets.daowave.pt",
         margin,
         y
       );

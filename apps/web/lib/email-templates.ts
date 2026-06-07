@@ -1,5 +1,5 @@
 /**
- * Marketing & legacy email wrappers — Light GoPass theme
+ * Marketing & legacy email wrappers — Light LivePass theme
  */
 
 import { config } from "./config";
@@ -19,7 +19,7 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
     title,
     content,
     showBetaBanner = config.env.isStaging,
-    supportEmail = config.app.supportEmail || "suporte@gopass.pt",
+    supportEmail = config.app.supportEmail || "suporte@livepass.pt",
     downloadLink,
     downloadLinkExpiresAt,
   } = options;
@@ -36,7 +36,7 @@ export function getBetaEmailTemplate(options: EmailTemplateOptions): string {
       ${downloadLinkExpiresAt
         ? `<p style="font-size:12px;color:${EMAIL.textMuted};margin-top:16px">Expira a ${downloadLinkExpiresAt.toLocaleString("pt-PT")}</p>`
         : ""}
-      <p style="font-size:12px;color:${EMAIL.textMuted};margin-top:12px">Se expirar, solicite um novo em <strong>Meus bilhetes</strong> na GoPass.</p>
+      <p style="font-size:12px;color:${EMAIL.textMuted};margin-top:12px">Se expirar, solicite um novo em <strong>Meus bilhetes</strong> na LivePass.</p>
     </div>`
     : "";
 
@@ -65,7 +65,7 @@ a{color:${EMAIL.link};font-weight:600}
       ${downloadSection}
     </div>
     <div style="background:${EMAIL.surfaceMuted};padding:28px 32px;text-align:center;color:${EMAIL.textMuted};font-size:13px;border-top:1px solid ${EMAIL.border}">
-      <p style="margin:0 0 8px">&copy; ${new Date().getFullYear()} GoPass. Bilhética &amp; acesso.</p>
+      <p style="margin:0 0 8px">&copy; ${new Date().getFullYear()} LivePass. Bilhética &amp; acesso.</p>
       <p style="margin:0 0 8px">Precisa de ajuda? <a href="mailto:${supportEmail}" style="color:${EMAIL.link}">${supportEmail}</a></p>
       ${showBetaBanner ? `<p style="margin-top:16px;font-size:11px;color:${EMAIL.textMuted}">[Ambiente beta] Bilhetes de teste da plataforma.</p>` : ""}
     </div>

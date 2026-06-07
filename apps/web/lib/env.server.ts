@@ -43,7 +43,7 @@ const envSchema = z.object({
 
   // Email Provider (Resend)
   RESEND_API_KEY: z.string().optional(), // Resend API key (re_...)
-  EMAIL_FROM: z.string().default("GoPass <no-reply@gopass.pt>"), // From address with display name
+  EMAIL_FROM: z.string().default("LivePass <no-reply@livepass.pt>"), // From address with display name
   EMAIL_REPLY_TO: z.string().email().optional(), // Reply-to address (defaults to EMAIL_FROM if not set)
 
   // Application URL
@@ -99,7 +99,7 @@ const envSchema = z.object({
   ),
 
   // Application
-  APP_NAME: z.string().default("GoPass"),
+  APP_NAME: z.string().default("LivePass"),
   SUPPORT_EMAIL: z.string().email().optional(),
 });
 
