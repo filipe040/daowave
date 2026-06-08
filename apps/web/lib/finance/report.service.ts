@@ -241,4 +241,68 @@ export class BalanceReleaseJob {
 
     return { released, scanned: pendingPayments.length };
   }
+
+  /** Liberta saldos pendentes elegíveis de uma organização específica */
+  static async releaseForOrganization(organizationId: string) {
+    const settings = await FinancialSettingsService.get();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - settings.pendingReleaseDays);
+
+    const pendingPayments = await prisma.ledgerTransaction.findMany({
+      where: {
+        type: "ORDER_PAYMENT",
+        status: "COMPLETED",
+        organizationId,
+        balanceReleasedAt: null,
+        completedAt: { lte: cutoff },
+        deletedAt: null,
+      },
+      include: { entries: true },
+    });
+
+    let released = 0;
+    for (const payment of pendingPayments) {
+      await prisma.$transaction(async (tx) => {
+        const entries = payment.entries.filter(
+          (e) => e.balanceBucket === "PENDING" && e.direction === "CREDIT"
+        );
+        if (entries.length === 0) return;
+
+        await LedgerService.createTransaction(
+          {
+            type: "BALANCE_RELEASE",
+            idempotencyKey: `balance-release:${payment.id}`,
+            description: `Libertação de saldo pendente — ${payment.id}`,
+            amountCents: payment.amountCents,
+            organizationId,
+            referenceType: "LEDGER_TRANSACTION",
+            referenceId: payment.id,
+            entries: entries.flatMap((e) => [
+              {
+                walletId: e.walletId,
+                direction: "DEBIT" as const,
+                balanceBucket: "PENDING" as const,
+                amountCents: e.amountCents,
+              },
+              {
+                walletId: e.walletId,
+                direction: "CREDIT" as const,
+                balanceBucket: "AVAILABLE" as const,
+                amountCents: e.amountCents,
+              },
+            ]),
+          },
+          tx
+        );
+
+        await tx.ledgerTransaction.update({
+          where: { id: payment.id },
+          data: { balanceReleasedAt: new Date() },
+        });
+      }, { isolationLevel: "Serializable" });
+      released++;
+    }
+
+    return { released, scanned: pendingPayments.length };
+  }
 }

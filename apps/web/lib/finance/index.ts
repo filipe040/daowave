@@ -8,4 +8,5 @@ export * from "./order-finance.service";
 export * from "./refund.service";
 export * from "./withdrawal.service";
 export * from "./report.service";
+export * from "./backfill.service";
 export * from "./audit.service";

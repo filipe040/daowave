@@ -39,13 +39,19 @@ export async function GET(req: Request) {
     }
 
     if (view === "dashboard") {
-      const [dashboard, withdrawals, settings] = await Promise.all([
-        FinanceReportService.getPromoterDashboard(orgId),
-        WithdrawalService.list({ organizationId: orgId, limit: 10 }),
-        FinancialSettingsService.get(),
-      ]);
+      await WithdrawalService.syncOrganizationFinance(orgId);
+      const [dashboard, withdrawals, settings, withdrawableCents, reservedWithdrawalCents] =
+        await Promise.all([
+          FinanceReportService.getPromoterDashboard(orgId),
+          WithdrawalService.list({ organizationId: orgId, limit: 10 }),
+          FinancialSettingsService.get(),
+          WithdrawalService.getWithdrawableCents(orgId),
+          WithdrawalService.getReservedCents(orgId),
+        ]);
       return NextResponse.json({
         ...dashboard,
+        withdrawableCents,
+        reservedWithdrawalCents,
         settings,
         withdrawals: withdrawals.items,
       });
@@ -71,6 +77,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "view inválida" }, { status: 400 });
   } catch (error) {
     safeLog.error("Promoter finance error", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
+    if (message.includes("does not exist") || message.includes("FinancialSettings")) {
+      return NextResponse.json(
+        { error: "Sistema financeiro não configurado. Contacta o suporte ou executa a migration na VPS." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -101,12 +114,11 @@ export async function POST(req: Request) {
     return NextResponse.json(withdrawal, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
     }
+    const message = error instanceof Error ? error.message : "Internal server error";
     safeLog.error("Promoter withdrawal error", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    );
+    const status = message.includes("Saldo") || message.includes("Montante") ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

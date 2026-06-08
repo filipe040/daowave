@@ -70,6 +70,8 @@ export interface PromoterFinanceDashboard {
   withdrawnCents: number;
   currency: string;
   salesCount: number;
+  withdrawableCents?: number;
+  reservedWithdrawalCents?: number;
 }
 
 export type ReportPeriod = "daily" | "weekly" | "monthly";

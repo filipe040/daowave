@@ -15,7 +15,7 @@ const fmt = (cents: number, currency = "EUR") =>
   new Intl.NumberFormat("pt-PT", { style: "currency", currency }).format(cents / 100);
 
 interface PromoterFinanceResponse extends PromoterFinanceDashboard {
-  settings?: { minWithdrawalCents: number };
+  settings?: { minWithdrawalCents: number; pendingReleaseDays?: number };
   withdrawals: Array<{ id: string; amountCents: number; status: string; createdAt: string }>;
 }
 
@@ -54,18 +54,26 @@ export default function PromoterFinancePage() {
       return;
     }
     const amountCents = Math.round(euros * 100);
+    const min = data?.settings?.minWithdrawalCents ?? 5000;
+    if (amountCents < min) {
+      toast.error(`O montante mínimo é ${fmt(min, currency)}`);
+      return;
+    }
     setWithdrawing(true);
-    const res = await api.post("/api/promotor/finance", { amountCents });
+    const res = await api.post<{ id: string }>("/api/promotor/finance", { amountCents });
     setWithdrawing(false);
     if (res.error) toast.error(res.error);
     else {
-      toast.success("Pedido de levantamento criado");
+      toast.success("Pedido de levantamento criado com sucesso");
       setWithdrawAmount("");
       load();
     }
   };
 
   const currency = data?.currency ?? "EUR";
+  const withdrawableCents = data?.withdrawableCents ?? data?.availableCents ?? 0;
+  const minWithdrawal = data?.settings?.minWithdrawalCents ?? 5000;
+  const canWithdraw = withdrawableCents >= minWithdrawal;
 
   return (
     <PageShell title="Finanças" subtitle="Vendas, comissões, saldos e levantamentos">
@@ -77,15 +85,32 @@ export default function PromoterFinancePage() {
             <KpiCard label="Vendas (GMV)" value={fmt(data.grossCents, currency)} icon={Euro} iconColor="text-emerald-600" subtitle={`${data.salesCount} encomendas`} />
             <KpiCard label="Comissões" value={fmt(data.platformFeesCents, currency)} icon={TrendingDown} iconColor="text-red-500" />
             <KpiCard label="Receita líquida" value={fmt(data.netCents, currency)} icon={Banknote} iconColor="text-blue-600" />
-            <KpiCard label="Saldo pendente" value={fmt(data.pendingCents, currency)} icon={Clock} iconColor="text-amber-500" />
+            <KpiCard label="Saldo pendente" value={fmt(data.pendingCents, currency)} icon={Clock} iconColor="text-amber-500" subtitle={data.settings?.pendingReleaseDays ? `Libertação após ${data.settings.pendingReleaseDays} dias` : undefined} />
             <KpiCard label="Saldo disponível" value={fmt(data.availableCents, currency)} icon={Wallet} iconColor="text-violet-600" />
-            <KpiCard label="Levantado" value={fmt(data.withdrawnCents, currency)} icon={Wallet} iconColor="text-neutral-600" />
+            <KpiCard label="Levantável agora" value={fmt(withdrawableCents, currency)} icon={Wallet} iconColor="text-emerald-600" subtitle={data.reservedWithdrawalCents ? `${fmt(data.reservedWithdrawalCents, currency)} em pedidos activos` : undefined} />
           </div>
 
           <div className="dash-card p-5 sm:p-6 space-y-4">
             <h2 className="text-sm font-bold text-neutral-900">Pedir levantamento</h2>
-            <p className="text-xs text-neutral-500">
-              Mínimo: {fmt(data.settings?.minWithdrawalCents ?? 5000, currency)} · Saldo disponível: {fmt(data.availableCents, currency)}
+            <p className="text-xs text-neutral-500 leading-relaxed">
+              Mínimo: <strong>{fmt(minWithdrawal, currency)}</strong>
+              {" · "}
+              Podes pedir até <strong>{fmt(withdrawableCents, currency)}</strong>
+              {(data.pendingCents > 0 && data.availableCents === 0) && (
+                <span className="block mt-1 text-amber-700">
+                  O teu saldo inclui vendas recentes (pendentes). Podes pedir levantamento — a aprovação é feita pela equipa LivePass.
+                </span>
+              )}
+              {!canWithdraw && data.netCents > 0 && withdrawableCents < minWithdrawal && (
+                <span className="block mt-1 text-amber-700">
+                  Saldo abaixo do mínimo de levantamento ou já reservado noutros pedidos.
+                </span>
+              )}
+              {!canWithdraw && data.netCents === 0 && (
+                <span className="block mt-1 text-neutral-600">
+                  Ainda não há vendas registadas no sistema financeiro.
+                </span>
+              )}
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
@@ -99,9 +124,9 @@ export default function PromoterFinancePage() {
               />
               <button
                 type="button"
-                disabled={withdrawing || data.availableCents <= 0}
+                disabled={withdrawing || !canWithdraw}
                 onClick={handleWithdraw}
-                className="dash-btn-primary sm:shrink-0 disabled:opacity-50"
+                className="dash-btn-primary sm:shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {withdrawing ? "A processar…" : "Pedir levantamento"}
               </button>

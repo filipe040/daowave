@@ -1,28 +1,76 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma, WithdrawalStatus } from "@prisma/client";
+import type { BalanceBucket } from "@prisma/client";
 import { FinancialSettingsService } from "./settings.service";
 import { WalletService } from "./wallet.service";
 import { LedgerService } from "./ledger.service";
 import { FinancialAuditService } from "./audit.service";
+import { FinanceBackfillService } from "./backfill.service";
+import { BalanceReleaseJob } from "./report.service";
+
+const ACTIVE_WITHDRAWAL_STATUSES: WithdrawalStatus[] = ["PENDING", "APPROVED", "PROCESSING"];
 
 export class WithdrawalService {
+  /** Montante já reservado em pedidos de levantamento activos */
+  static async getReservedCents(organizationId: string) {
+    const agg = await prisma.withdrawalRequest.aggregate({
+      where: {
+        organizationId,
+        status: { in: ACTIVE_WITHDRAWAL_STATUSES },
+        deletedAt: null,
+      },
+      _sum: { amountCents: true },
+    });
+    return agg._sum.amountCents ?? 0;
+  }
+
+  /** Saldo que o promotor pode pedir para levantar (pendente + disponível − reservas) */
+  static async getWithdrawableCents(organizationId: string) {
+    await WalletService.ensureOrganizationWallet(organizationId);
+    const wallet = await WalletService.getByCode(WalletService.orgCode(organizationId));
+    const balances = await WalletService.getBalances(wallet.id);
+    const reserved = await WithdrawalService.getReservedCents(organizationId);
+    return Math.max(0, balances.pendingCents + balances.availableCents - reserved);
+  }
+
+  /** Sincroniza ledger (backfill + libertação de saldos elegíveis) */
+  static async syncOrganizationFinance(organizationId: string) {
+    await WalletService.ensureSystemWallets();
+    await WalletService.ensureOrganizationWallet(organizationId);
+    const backfill = await FinanceBackfillService.backfillOrganization(organizationId);
+    const release = await BalanceReleaseJob.releaseForOrganization(organizationId);
+    return { backfill, release };
+  }
+
   static async requestWithdrawal(params: {
     organizationId: string;
     amountCents: number;
     bankDetails?: Record<string, unknown>;
     requestedByUserId?: string;
   }) {
+    await WithdrawalService.syncOrganizationFinance(params.organizationId);
+
     const settings = await FinancialSettingsService.get();
 
     if (params.amountCents < settings.minWithdrawalCents) {
-      throw new Error(`Montante mínimo de levantamento: ${settings.minWithdrawalCents / 100}€`);
+      throw new Error(
+        `Montante mínimo de levantamento: ${(settings.minWithdrawalCents / 100).toFixed(2)}€`
+      );
     }
 
     const wallet = await WalletService.ensureOrganizationWallet(params.organizationId);
-    const balances = await WalletService.getBalances(wallet.id);
+    const withdrawable = await WithdrawalService.getWithdrawableCents(params.organizationId);
 
-    if (balances.availableCents < params.amountCents) {
-      throw new Error("Saldo disponível insuficiente");
+    if (withdrawable < params.amountCents) {
+      const balances = await WalletService.getBalances(wallet.id);
+      if (balances.pendingCents + balances.availableCents === 0) {
+        throw new Error(
+          "Ainda não tens saldo para levantar. O saldo é creditado após vendas confirmadas."
+        );
+      }
+      throw new Error(
+        `Saldo levantável insuficiente. Disponível para pedido: ${(withdrawable / 100).toFixed(2)}€`
+      );
     }
 
     const autoApproved = settings.autoApproveWithdrawals;
@@ -104,10 +152,6 @@ export class WithdrawalService {
   }
 
   private static async markProcessing(withdrawalId: string, actorUserId?: string) {
-    const withdrawal = await prisma.withdrawalRequest.findUniqueOrThrow({
-      where: { id: withdrawalId },
-    });
-
     await prisma.withdrawalRequest.update({
       where: { id: withdrawalId },
       data: { status: "PROCESSING" },
@@ -131,6 +175,41 @@ export class WithdrawalService {
         return withdrawal;
       }
 
+      await WalletService.lockWallets([withdrawal.walletId], tx);
+      const balances = await WalletService.getBalances(withdrawal.walletId, tx);
+
+      let remaining = withdrawal.amountCents;
+      const debitEntries: Array<{
+        walletId: string;
+        direction: "DEBIT";
+        balanceBucket: BalanceBucket;
+        amountCents: number;
+      }> = [];
+
+      const fromAvailable = Math.min(balances.availableCents, remaining);
+      if (fromAvailable > 0) {
+        debitEntries.push({
+          walletId: withdrawal.walletId,
+          direction: "DEBIT",
+          balanceBucket: "AVAILABLE",
+          amountCents: fromAvailable,
+        });
+        remaining -= fromAvailable;
+      }
+
+      if (remaining > 0) {
+        if (balances.pendingCents < remaining) {
+          throw new Error("Saldo insuficiente na wallet para concluir o levantamento");
+        }
+        debitEntries.push({
+          walletId: withdrawal.walletId,
+          direction: "DEBIT",
+          balanceBucket: "PENDING",
+          amountCents: remaining,
+        });
+        remaining = 0;
+      }
+
       const transaction = await LedgerService.createTransaction(
         {
           type: "WITHDRAWAL",
@@ -142,12 +221,7 @@ export class WithdrawalService {
           referenceType: "WITHDRAWAL",
           referenceId: withdrawalId,
           entries: [
-            {
-              walletId: withdrawal.walletId,
-              direction: "DEBIT",
-              balanceBucket: "AVAILABLE",
-              amountCents: withdrawal.amountCents,
-            },
+            ...debitEntries,
             {
               walletId: withdrawal.walletId,
               direction: "CREDIT",
