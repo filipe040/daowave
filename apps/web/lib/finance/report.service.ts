@@ -16,6 +16,11 @@ function periodBounds(period: ReportPeriod, ref = new Date()) {
     start.setDate(start.getDate() - diff);
   } else if (period === "monthly") {
     start.setDate(1);
+  } else if (period === "quarterly") {
+    const q = Math.floor(start.getMonth() / 3);
+    start.setMonth(q * 3, 1);
+  } else if (period === "yearly") {
+    start.setMonth(0, 1);
   }
 
   return { start, end };
@@ -32,7 +37,6 @@ export class FinanceReportService {
       chargebacksAgg,
       withdrawalsPaid,
       withdrawalsPending,
-      platformBalances,
       reserveBalances,
     ] = await Promise.all([
       prisma.order.aggregate({
@@ -41,7 +45,14 @@ export class FinanceReportService {
         _count: true,
       }),
       prisma.orderFinancialBreakdown.aggregate({
-        _sum: { platformFeeCents: true, buyerFeeCents: true },
+        _sum: {
+          platformFeeCents: true,
+          buyerFeeCents: true,
+          serviceFeeCents: true,
+          gatewayFeeCents: true,
+          netPlatformProfitCents: true,
+        },
+        _avg: { marginPercent: true },
       }),
       prisma.refund.aggregate({
         where: { status: "COMPLETED", deletedAt: null },
@@ -59,23 +70,33 @@ export class FinanceReportService {
         where: { status: { in: ["PENDING", "APPROVED", "PROCESSING"] }, deletedAt: null },
         _sum: { amountCents: true },
       }),
-      WalletService.getBalancesByType("PLATFORM"),
       WalletService.getBalancesByType("RESERVE"),
     ]);
 
-    const platformRevenue =
+    const grossRevenue =
+      (breakdownAgg._sum.serviceFeeCents ?? 0) ||
       (breakdownAgg._sum.platformFeeCents ?? 0) + (breakdownAgg._sum.buyerFeeCents ?? 0);
+    const netProfit = breakdownAgg._sum.netPlatformProfitCents ?? grossRevenue;
+    const gatewayFees = breakdownAgg._sum.gatewayFeeCents ?? 0;
+    const avgMargin = breakdownAgg._avg.marginPercent
+      ? Number(breakdownAgg._avg.marginPercent)
+      : grossRevenue > 0
+        ? Math.round((netProfit / grossRevenue) * 10000) / 100
+        : 0;
 
     return {
       gmvCents: ordersAgg._sum.totalCents ?? 0,
-      platformRevenueCents: platformRevenue,
-      reserveBalanceCents:
-        reserveBalances.pendingCents + reserveBalances.availableCents,
+      grossRevenueCents: grossRevenue,
+      netProfitCents: netProfit,
+      platformRevenueCents: grossRevenue,
+      gatewayFeesCents: gatewayFees,
+      reserveBalanceCents: reserveBalances.pendingCents + reserveBalances.availableCents,
       refundsCents: refundsAgg._sum.amountCents ?? 0,
       chargebacksCents: chargebacksAgg._sum.amountCents ?? 0,
       withdrawalsPaidCents: withdrawalsPaid._sum.amountCents ?? 0,
       withdrawalsPendingCents: withdrawalsPending._sum.amountCents ?? 0,
       ordersPaid: ordersAgg._count,
+      averageMarginPercent: avgMargin,
       currency: settings.currency,
     };
   }
@@ -90,7 +111,7 @@ export class FinanceReportService {
       ? await WalletService.getBalances(wallet.id)
       : { pendingCents: 0, availableCents: 0, withdrawnCents: 0, currency: settings.currency };
 
-    const [breakdownAgg, salesCount] = await Promise.all([
+    const [breakdownAgg, salesCount, ticketsSold] = await Promise.all([
       prisma.orderFinancialBreakdown.aggregate({
         where: { order: { event: { organizationId }, status: "PAID" } },
         _sum: {
@@ -101,6 +122,9 @@ export class FinanceReportService {
       }),
       prisma.order.count({
         where: { status: "PAID", event: { organizationId } },
+      }),
+      prisma.ticket.count({
+        where: { order: { status: "PAID", event: { organizationId } } },
       }),
     ]);
 
@@ -117,6 +141,8 @@ export class FinanceReportService {
       withdrawnCents: balances.withdrawnCents,
       currency: settings.currency,
       salesCount,
+      ticketsSold,
+      nextPayoutEstimateCents: balances.pendingCents,
     };
   }
 
@@ -133,6 +159,9 @@ export class FinanceReportService {
           totalCents: true,
           platformFeeCents: true,
           buyerFeeCents: true,
+          serviceFeeCents: true,
+          gatewayFeeCents: true,
+          netPlatformProfitCents: true,
         },
       }),
       prisma.refund.aggregate({
@@ -155,7 +184,12 @@ export class FinanceReportService {
 
     const gmvCents = orders.reduce((s, o) => s + o.totalCents, 0);
     const platformRevenueCents = orders.reduce(
-      (s, o) => s + o.platformFeeCents + o.buyerFeeCents,
+      (s, o) => s + (o.serviceFeeCents || o.platformFeeCents + o.buyerFeeCents),
+      0
+    );
+    const gatewayFeesCents = orders.reduce((s, o) => s + o.gatewayFeeCents, 0);
+    const netProfitCents = orders.reduce(
+      (s, o) => s + (o.netPlatformProfitCents || o.platformFeeCents),
       0
     );
 
@@ -164,6 +198,8 @@ export class FinanceReportService {
       periodEnd: end.toISOString(),
       gmvCents,
       platformRevenueCents,
+      gatewayFeesCents,
+      netProfitCents,
       refundsCents: refunds._sum.amountCents ?? 0,
       withdrawalsCents: withdrawals._sum.amountCents ?? 0,
       ordersCount: orders.length,
@@ -171,10 +207,11 @@ export class FinanceReportService {
   }
 
   static reportToCsv(rows: FinanceReportRow[]): string {
-    const header = "periodStart,periodEnd,gmvCents,platformRevenueCents,refundsCents,withdrawalsCents,ordersCount";
+    const header =
+      "periodStart,periodEnd,gmvCents,platformRevenueCents,gatewayFeesCents,netProfitCents,refundsCents,withdrawalsCents,ordersCount";
     const lines = rows.map(
       (r) =>
-        `${r.periodStart},${r.periodEnd},${r.gmvCents},${r.platformRevenueCents},${r.refundsCents},${r.withdrawalsCents},${r.ordersCount}`
+        `${r.periodStart},${r.periodEnd},${r.gmvCents},${r.platformRevenueCents},${r.gatewayFeesCents},${r.netProfitCents},${r.refundsCents},${r.withdrawalsCents},${r.ordersCount}`
     );
     return [header, ...lines].join("\n");
   }
@@ -242,7 +279,6 @@ export class BalanceReleaseJob {
     return { released, scanned: pendingPayments.length };
   }
 
-  /** Liberta saldos pendentes elegíveis de uma organização específica */
   static async releaseForOrganization(organizationId: string) {
     const settings = await FinancialSettingsService.get();
     const cutoff = new Date();

@@ -39,6 +39,13 @@ const ROLE_PERMISSIONS: Record<SystemRole | OrganizationRole, Permission[]> = {
         Permission.VIEW_FINANCIALS,
         // Admins implicitly have access to everything, handled in logic
     ],
+    FINANCE_MANAGER: [
+        Permission.VIEW_ADMIN_DASHBOARD,
+        Permission.VIEW_FINANCIALS,
+    ],
+    SUPPORT_AGENT: [
+        Permission.VIEW_ADMIN_DASHBOARD,
+    ],
     USER: [], // Basic users have no special permissions
     PROMOTER: [], // System-level promoter role
     VALIDATOR: [], // System-level validator role

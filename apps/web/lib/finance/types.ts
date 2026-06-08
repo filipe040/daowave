@@ -27,6 +27,16 @@ export interface FinancialSettingsInput {
   currency: string;
 }
 
+export interface EnterpriseFinancialSettings extends FinancialSettingsInput {
+  serviceFeeType: "PERCENTAGE" | "FIXED";
+  serviceFeeValue: number;
+  dynamicServiceFee: boolean;
+  minimumProfitPerOrderCents: number;
+  chargebackProtectionEnabled: boolean;
+  automaticPayoutsEnabled: boolean;
+  defaultVatPercent: number;
+}
+
 export interface LedgerEntryInput {
   walletId: string;
   direction: LedgerEntryDirection;
@@ -51,13 +61,17 @@ export interface CreateLedgerTransactionInput {
 
 export interface AdminFinanceDashboard {
   gmvCents: number;
+  grossRevenueCents: number;
+  netProfitCents: number;
   platformRevenueCents: number;
+  gatewayFeesCents: number;
   reserveBalanceCents: number;
   refundsCents: number;
   chargebacksCents: number;
   withdrawalsPaidCents: number;
   withdrawalsPendingCents: number;
   ordersPaid: number;
+  averageMarginPercent: number;
   currency: string;
 }
 
@@ -72,16 +86,24 @@ export interface PromoterFinanceDashboard {
   salesCount: number;
   withdrawableCents?: number;
   reservedWithdrawalCents?: number;
+  ticketsSold?: number;
+  nextPayoutEstimateCents?: number;
 }
 
-export type ReportPeriod = "daily" | "weekly" | "monthly";
+export type ReportPeriod = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
 
 export interface FinanceReportRow {
   periodStart: string;
   periodEnd: string;
   gmvCents: number;
   platformRevenueCents: number;
+  gatewayFeesCents: number;
+  netProfitCents: number;
   refundsCents: number;
   withdrawalsCents: number;
   ordersCount: number;
 }
+
+export type { EnterpriseSplitResult, EnterpriseSettings } from "./enterprise-calculator";
+export { ProfitBelowMinimumError, calculateEnterpriseSplit, simulateFinancialScenario } from "./enterprise-calculator";
+export type { PaymentMethodFees } from "./payment-method.service";

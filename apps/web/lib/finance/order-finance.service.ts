@@ -1,16 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import type { PaymentProviderKind, Prisma } from "@prisma/client";
-import { calculatePaymentSplit } from "./fee-calculator";
+import { calculateEnterpriseSplit } from "./enterprise-calculator";
 import { FinancialSettingsService } from "./settings.service";
+import { PaymentMethodService } from "./payment-method.service";
 import { WalletService } from "./wallet.service";
 import { LedgerService } from "./ledger.service";
 import { FinancialAuditService } from "./audit.service";
+import { WalletTransactionService } from "./wallet-transaction.service";
+import type { WalletTransactionType } from "@prisma/client";
 
 export class OrderFinanceService {
   static async processOrderPayment(
     orderId: string,
     options?: {
       paymentProvider?: PaymentProviderKind;
+      paymentMethodCode?: string;
       actorUserId?: string;
       idempotencyKey?: string;
     }
@@ -41,8 +45,30 @@ export class OrderFinanceService {
         0
       );
 
-      const settings = await FinancialSettingsService.get(tx);
-      const split = calculatePaymentSplit(subtotalCents, settings);
+      const settings = await FinancialSettingsService.getForOrganization(order.event.organizationId);
+      const methodCode = options?.paymentMethodCode ?? "MBWAY";
+
+      let paymentMethod;
+      try {
+        paymentMethod = await PaymentMethodService.getByCode(methodCode, tx);
+      } catch {
+        paymentMethod = await PaymentMethodService.getByCode("MBWAY", tx);
+      }
+
+      const split = calculateEnterpriseSplit({
+        ticketPriceCents: subtotalCents,
+        paymentMethod,
+        settings: {
+          serviceFeeType: settings.serviceFeeType,
+          serviceFeeValue: settings.serviceFeeValue,
+          reservePercentage: settings.reserveFundPercent,
+          dynamicServiceFee: settings.dynamicServiceFee,
+          minimumProfitPerOrderCents: settings.minimumProfitPerOrderCents,
+          defaultVatPercent: settings.defaultVatPercent,
+        },
+        autoAdjustServiceFee: true,
+        enforceMinimumProfit: true,
+      });
 
       await WalletService.ensureSystemWallets(tx);
       const [platformWallet, reserveWallet, promoterWallet] = await Promise.all([
@@ -51,15 +77,38 @@ export class OrderFinanceService {
         WalletService.ensureOrganizationWallet(order.event.organizationId, tx),
       ]);
 
-      const platformCredit = split.platformFeeCents + split.buyerFeeCents;
       const idempotencyKey = options?.idempotencyKey ?? `order-payment:${orderId}`;
+
+      const ledgerEntries = [
+        {
+          walletId: platformWallet.id,
+          direction: "CREDIT" as const,
+          balanceBucket: "PENDING" as const,
+          amountCents: split.netPlatformProfitCents,
+          snapshotType: "SERVICE_FEE" as WalletTransactionType,
+        },
+        {
+          walletId: reserveWallet.id,
+          direction: "CREDIT" as const,
+          balanceBucket: "PENDING" as const,
+          amountCents: split.reserveCents,
+          snapshotType: "RESERVE_HOLD" as WalletTransactionType,
+        },
+        {
+          walletId: promoterWallet.id,
+          direction: "CREDIT" as const,
+          balanceBucket: "PENDING" as const,
+          amountCents: split.promoterNetCents,
+          snapshotType: "TICKET_SALE" as WalletTransactionType,
+        },
+      ].filter((e) => e.amountCents > 0);
 
       const transaction = await LedgerService.createTransaction(
         {
           type: "ORDER_PAYMENT",
           idempotencyKey,
           description: `Pagamento encomenda ${orderId}`,
-          amountCents: split.totalCents,
+          amountCents: split.totalCustomerCents,
           currency: order.currency,
           orderId: order.id,
           organizationId: order.event.organizationId,
@@ -67,59 +116,49 @@ export class OrderFinanceService {
           referenceType: "ORDER",
           referenceId: orderId,
           metadata: {
-            subtotalCents: split.subtotalCents,
-            buyerFeeCents: split.buyerFeeCents,
-            platformFeeCents: split.platformFeeCents,
-            reserveCents: split.reserveCents,
-            promoterNetCents: split.promoterNetCents,
+            ...split,
+            gatewayFeeCents: split.gatewayFeeCents,
             eventTitle: order.event.title,
           },
-          entries: [
-            ...(platformCredit > 0
-              ? [
-                  {
-                    walletId: platformWallet.id,
-                    direction: "CREDIT" as const,
-                    balanceBucket: "PENDING" as const,
-                    amountCents: platformCredit,
-                  },
-                ]
-              : []),
-            ...(split.reserveCents > 0
-              ? [
-                  {
-                    walletId: reserveWallet.id,
-                    direction: "CREDIT" as const,
-                    balanceBucket: "PENDING" as const,
-                    amountCents: split.reserveCents,
-                  },
-                ]
-              : []),
-            ...(split.promoterNetCents > 0
-              ? [
-                  {
-                    walletId: promoterWallet.id,
-                    direction: "CREDIT" as const,
-                    balanceBucket: "PENDING" as const,
-                    amountCents: split.promoterNetCents,
-                  },
-                ]
-              : []),
-          ],
+          entries: ledgerEntries.map(({ snapshotType: _, ...e }) => e),
         },
         tx
       );
+
+      for (const entry of ledgerEntries) {
+        await WalletTransactionService.recordSnapshots(
+          {
+            walletId: entry.walletId,
+            ledgerTransactionId: transaction!.id,
+            type: entry.snapshotType,
+            amountCents: entry.amountCents,
+            balanceBucket: entry.balanceBucket,
+            direction: entry.direction,
+            referenceType: "ORDER",
+            referenceId: orderId,
+            description: `Pagamento ${orderId}`,
+            metadata: { gatewayFeeCents: split.gatewayFeeCents },
+          },
+          tx
+        );
+      }
 
       await tx.orderFinancialBreakdown.create({
         data: {
           orderId: order.id,
           ledgerTransactionId: transaction!.id,
-          subtotalCents: split.subtotalCents,
-          buyerFeeCents: split.buyerFeeCents,
-          platformFeeCents: split.platformFeeCents,
+          subtotalCents,
+          buyerFeeCents: split.serviceFeeCents,
+          serviceFeeCents: split.serviceFeeCents,
+          platformFeeCents: split.netPlatformProfitCents,
+          gatewayFeeCents: split.gatewayFeeCents,
+          netPlatformProfitCents: split.netPlatformProfitCents,
+          vatCents: split.vatCents,
           reserveCents: split.reserveCents,
           promoterNetCents: split.promoterNetCents,
-          totalCents: split.totalCents,
+          totalCents: split.totalCustomerCents,
+          paymentMethodCode: split.paymentMethodCode,
+          marginPercent: split.marginPercent,
           currency: order.currency,
         },
       });

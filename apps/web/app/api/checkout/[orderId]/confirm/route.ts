@@ -192,8 +192,23 @@ export async function POST(
         manual: "MANUAL",
         MOCK: "MANUAL",
       };
+      const methodCodeMap: Record<string, string> = {
+        mock: "MBWAY",
+        mbway: "MBWAY",
+        MBWAY: "MBWAY",
+        multibanco: "MULTIBANCO",
+        MULTIBANCO: "MULTIBANCO",
+        stripe: "VISA",
+        eupago: "MBWAY",
+        EUPAGO: "MBWAY",
+        paypal: "VISA",
+        PAYPAL: "VISA",
+      };
+      const bodyMethod =
+        typeof b.paymentMethodCode === "string" ? b.paymentMethodCode.toUpperCase() : undefined;
       await OrderFinanceService.processOrderPayment(order.id, {
         paymentProvider: providerMap[paymentProviderName] ?? "MANUAL",
+        paymentMethodCode: bodyMethod ?? methodCodeMap[paymentProviderName] ?? "MBWAY",
         idempotencyKey: `order-payment:${order.id}`,
       });
     } catch (financeErr) {

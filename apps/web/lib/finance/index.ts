@@ -10,3 +10,6 @@ export * from "./withdrawal.service";
 export * from "./report.service";
 export * from "./backfill.service";
 export * from "./audit.service";
+export * from "./payment-method.service";
+export * from "./enterprise-calculator";
+export * from "./wallet-transaction.service";

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { canAccessFinanceAdmin } from "@/lib/finance/auth-guard";
 import { safeLog } from "@/lib/security";
 import { RefundService } from "@/lib/finance";
 import { z } from "zod";
@@ -15,7 +16,7 @@ const createRefundSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+    if (!session?.user || !canAccessFinanceAdmin((session.user as { role?: string }).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+    if (!session?.user || !canAccessFinanceAdmin((session.user as { role?: string }).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
