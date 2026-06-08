@@ -128,6 +128,9 @@ model Organization {
   payouts      Payout[]
   auditLogs    AuditLog[]
   invites      Invite[]
+  wallet       Wallet?
+  withdrawalRequests WithdrawalRequest[]
+  ledgerTransactions LedgerTransaction[]
 
   ticketTemplates      OrganizationTicketTemplate[]
   ticketTemplateAssets TicketTemplateAsset[]
@@ -525,6 +528,10 @@ model Order {
   payments        Payment[]
   manualPayment   ManualPayment?
   couponCommission CouponCommission?
+  financialBreakdown OrderFinancialBreakdown?
+  ledgerTransactions LedgerTransaction[]
+  refunds         Refund[]
+  chargebacks     Chargeback[]
 
   @@index([userId])
   @@index([eventId])
@@ -547,6 +554,7 @@ model Payment {
 
   // Relations
   order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  chargebacks       Chargeback[]
 
   @@index([orderId])
   @@index([provider, providerReference])
@@ -981,5 +989,290 @@ model Payout {
   @@index([organizationId])
   @@index([promoterId])
   @@index([status])
+}
+
+// --- FINANCIAL SYSTEM (Ledger-based) ---
+
+enum WalletType {
+  PLATFORM
+  PROMOTER
+  RESERVE
+}
+
+enum BalanceBucket {
+  PENDING
+  AVAILABLE
+  WITHDRAWN
+}
+
+enum LedgerTransactionType {
+  ORDER_PAYMENT
+  REFUND
+  WITHDRAWAL
+  RESERVE_ALLOCATION
+  RESERVE_RELEASE
+  BALANCE_RELEASE
+  CHARGEBACK
+  ADJUSTMENT
+  FEE
+}
+
+enum LedgerTransactionStatus {
+  PENDING
+  COMPLETED
+  REVERSED
+  FAILED
+}
+
+enum LedgerEntryDirection {
+  CREDIT
+  DEBIT
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  PAID
+  REJECTED
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ChargebackStatus {
+  OPEN
+  WON
+  LOST
+  CLOSED
+}
+
+enum PaymentProviderKind {
+  STRIPE
+  EUPAGO
+  MBWAY
+  MULTIBANCO
+  PAYPAL
+  MANUAL
+}
+
+model FinancialSettings {
+  id                      String   @id @default("default")
+  buyerFeePercent         Decimal  @default(0) @db.Decimal(5, 2)
+  buyerFeeFixedCents      Int      @default(0)
+  platformCommissionPercent Decimal @default(5) @db.Decimal(5, 2)
+  reserveFundPercent      Decimal  @default(2) @db.Decimal(5, 2)
+  minWithdrawalCents      Int      @default(5000)
+  pendingReleaseDays      Int      @default(7)
+  autoApproveWithdrawals  Boolean  @default(false)
+  currency                String   @default("EUR")
+  updatedAt               DateTime @updatedAt
+  updatedByUserId         String?
+}
+
+model Wallet {
+  id             String     @id @default(uuid())
+  code           String     @unique
+  type           WalletType
+  organizationId String?    @unique
+  currency       String     @default("EUR")
+  isActive       Boolean    @default(true)
+  deletedAt      DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ledgerEntries  LedgerEntry[]
+  withdrawalRequests WithdrawalRequest[]
+
+  @@index([type])
+  @@index([deletedAt])
+}
+
+model LedgerTransaction {
+  id              String                  @id @default(uuid())
+  type            LedgerTransactionType
+  status          LedgerTransactionStatus @default(PENDING)
+  idempotencyKey  String?                 @unique
+  description     String?                 @db.VarChar(512)
+  amountCents     Int
+  currency        String                  @default("EUR")
+  referenceType   String?                 @db.VarChar(64)
+  referenceId     String?                 @db.VarChar(64)
+  orderId         String?
+  organizationId  String?
+  paymentProvider PaymentProviderKind?
+  metadata        Json?
+  reversedById    String?                 @unique
+  completedAt     DateTime?
+  reversedAt      DateTime?
+  balanceReleasedAt DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  order           Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  entries         LedgerEntry[]
+  reversalOf      LedgerTransaction?  @relation("TransactionReversal", fields: [reversedById], references: [id], onDelete: SetNull)
+  reversedTransaction LedgerTransaction? @relation("TransactionReversal")
+  orderBreakdown  OrderFinancialBreakdown?
+  withdrawal      WithdrawalRequest?
+  refund          Refund?
+  chargeback      Chargeback?
+  auditLogs       FinancialAuditLog[]
+
+  @@index([type, status])
+  @@index([orderId])
+  @@index([organizationId])
+  @@index([referenceType, referenceId])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model LedgerEntry {
+  id            String               @id @default(uuid())
+  transactionId String
+  walletId      String
+  direction     LedgerEntryDirection
+  balanceBucket BalanceBucket
+  amountCents   Int
+  createdAt     DateTime             @default(now())
+
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  wallet        Wallet            @relation(fields: [walletId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([walletId, balanceBucket])
+  @@index([walletId, createdAt])
+}
+
+model OrderFinancialBreakdown {
+  id                 String   @id @default(uuid())
+  orderId            String   @unique
+  ledgerTransactionId String  @unique
+  subtotalCents      Int
+  buyerFeeCents      Int
+  platformFeeCents   Int
+  reserveCents       Int
+  promoterNetCents   Int
+  totalCents         Int
+  currency           String   @default("EUR")
+  createdAt          DateTime @default(now())
+
+  order              Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ledgerTransaction  LedgerTransaction @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+
+  @@index([createdAt])
+}
+
+model WithdrawalRequest {
+  id                  String           @id @default(uuid())
+  walletId            String
+  organizationId      String
+  amountCents         Int
+  currency            String           @default("EUR")
+  status              WithdrawalStatus @default(PENDING)
+  bankDetails         Json?
+  ledgerTransactionId String?          @unique
+  approvedByUserId    String?
+  rejectedReason      String?          @db.VarChar(512)
+  autoApproved        Boolean          @default(false)
+  paidAt              DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  wallet              Wallet            @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model Refund {
+  id                  String       @id @default(uuid())
+  orderId             String
+  amountCents         Int
+  currency            String       @default("EUR")
+  reason              String?      @db.VarChar(512)
+  status              RefundStatus @default(PENDING)
+  ledgerTransactionId String?      @unique
+  initiatedByUserId   String?
+  processedAt         DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  order               Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Chargeback {
+  id                  String           @id @default(uuid())
+  orderId             String
+  paymentId           String?
+  amountCents         Int
+  currency            String           @default("EUR")
+  provider            PaymentProviderKind
+  providerReference   String?          @db.VarChar(128)
+  status              ChargebackStatus @default(OPEN)
+  ledgerTransactionId String?          @unique
+  reason              String?          @db.VarChar(512)
+  resolvedAt          DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  order               Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment             Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([provider, providerReference])
+}
+
+model FinancialAuditLog {
+  id            String   @id @default(uuid())
+  actorUserId   String?
+  action        String   @db.VarChar(128)
+  entityType    String   @db.VarChar(64)
+  entityId      String?  @db.VarChar(64)
+  transactionId String?
+  beforeJson    Json?
+  afterJson     Json?
+  ip            String?  @db.VarChar(45)
+  userAgent     String?  @db.VarChar(512)
+  createdAt     DateTime @default(now())
+
+  transaction   LedgerTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@index([transactionId])
+  @@index([createdAt])
+}
+
+model PaymentProviderConfig {
+  id            String              @id @default(uuid())
+  provider      PaymentProviderKind @unique
+  isEnabled     Boolean             @default(false)
+  displayName   String              @db.VarChar(64)
+  configJson    Json?
+  webhookSecret String?             @db.VarChar(256)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 }
 

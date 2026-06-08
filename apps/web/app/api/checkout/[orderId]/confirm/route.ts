@@ -15,6 +15,8 @@ import { checkoutConfirmSchema } from "@/lib/security/validation";
 import { sendTicketsEmail } from "@/lib/email-service";
 import { recordCouponCommission } from "@/lib/coupons/coupon-commission";
 import { validateCouponForCheckout } from "@/lib/coupons/validate-coupon";
+import { OrderFinanceService } from "@/lib/finance";
+import type { PaymentProviderKind } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -174,6 +176,29 @@ export async function POST(
         }
       }
     });
+
+    try {
+      const providerMap: Record<string, PaymentProviderKind> = {
+        stripe: "STRIPE",
+        STRIPE: "STRIPE",
+        eupago: "EUPAGO",
+        EUPAGO: "EUPAGO",
+        mbway: "MBWAY",
+        MBWAY: "MBWAY",
+        multibanco: "MULTIBANCO",
+        MULTIBANCO: "MULTIBANCO",
+        paypal: "PAYPAL",
+        PAYPAL: "PAYPAL",
+        manual: "MANUAL",
+        MOCK: "MANUAL",
+      };
+      await OrderFinanceService.processOrderPayment(order.id, {
+        paymentProvider: providerMap[paymentProviderName] ?? "MANUAL",
+        idempotencyKey: `order-payment:${order.id}`,
+      });
+    } catch (financeErr) {
+      console.error("[checkout/confirm] Finance ledger error:", financeErr);
+    }
 
     try {
       await sendTicketsEmail(order.id);

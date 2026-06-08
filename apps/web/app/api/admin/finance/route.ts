@@ -1,59 +1,87 @@
-/**
- * GET /api/admin/finance — receita plataforma, payouts, resumo financeiro
- */
-
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { safeLog } from "@/lib/security";
+import {
+  FinanceReportService,
+  FinancialSettingsService,
+  LedgerService,
+  RefundService,
+  WithdrawalService,
+} from "@/lib/finance";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [ordersAgg, payoutsAgg, payoutsByStatus] = await Promise.all([
-      prisma.order.aggregate({
-        where: { status: "PAID" },
-        _sum: { totalCents: true },
-        _count: true,
-      }),
-      prisma.payout.aggregate({
-        _sum: { amountCents: true },
-        _count: true,
-      }),
-      prisma.payout.groupBy({
-        by: ["status"],
-        _sum: { amountCents: true },
-        _count: true,
-      }),
-    ]);
+    const { searchParams } = new URL(req.url);
+    const view = searchParams.get("view") ?? "dashboard";
 
-    const gmvCents = ordersAgg._sum.totalCents ?? 0;
-    const payoutsTotalCents = payoutsAgg._sum.amountCents ?? 0;
-    const paidCents =
-      payoutsByStatus.find((p) => p.status === "PAID")?._sum.amountCents ?? 0;
-    const pendingCents =
-      payoutsByStatus.find((p) => p.status === "PENDING")?._sum.amountCents ?? 0;
+    if (view === "dashboard") {
+      const dashboard = await FinanceReportService.getAdminDashboard();
+      return NextResponse.json(dashboard);
+    }
 
-    return NextResponse.json({
-      gmvCents,
-      ordersPaid: ordersAgg._count,
-      payoutsTotalCents,
-      payoutsPaidCents: paidCents,
-      payoutsPendingCents: pendingCents,
-      payoutsCount: payoutsAgg._count,
-    });
+    if (view === "transactions") {
+      const page = Number(searchParams.get("page") ?? 1);
+      const limit = Number(searchParams.get("limit") ?? 20);
+      const organizationId = searchParams.get("organizationId") ?? undefined;
+      const result = await LedgerService.listTransactions({ page, limit, organizationId });
+      return NextResponse.json(result);
+    }
+
+    if (view === "withdrawals") {
+      const page = Number(searchParams.get("page") ?? 1);
+      const limit = Number(searchParams.get("limit") ?? 20);
+      const status = searchParams.get("status") as import("@prisma/client").WithdrawalStatus | null;
+      const result = await WithdrawalService.list({
+        page,
+        limit,
+        ...(status && { status }),
+      });
+      return NextResponse.json(result);
+    }
+
+    if (view === "refunds") {
+      const page = Number(searchParams.get("page") ?? 1);
+      const limit = Number(searchParams.get("limit") ?? 20);
+      const result = await RefundService.list({ page, limit });
+      return NextResponse.json(result);
+    }
+
+    if (view === "settings") {
+      const settings = await FinancialSettingsService.get();
+      return NextResponse.json(settings);
+    }
+
+    return NextResponse.json({ error: "view inválida" }, { status: 400 });
   } catch (error) {
     safeLog.error("Admin finance error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const updated = await FinancialSettingsService.update({
+      ...body,
+      updatedByUserId: session.user.id,
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    safeLog.error("Admin finance settings error", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
