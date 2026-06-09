@@ -21,6 +21,8 @@ const isBuildPhase = (): boolean => {
 };
 
 // Create Prisma Client - will not connect until first query
+// Produção: use DATABASE_URL com pool, ex.:
+// mysql://user:pass@host:3306/db?connection_limit=20&pool_timeout=20
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({

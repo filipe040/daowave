@@ -493,6 +493,7 @@ model InventoryHold {
   @@index([eventId])
   @@index([ticketLotId])
   @@index([expiresAt])
+  @@index([ticketLotId, status, expiresAt])
 }
 
 model SeatMap {

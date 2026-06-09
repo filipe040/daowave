@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     // Rate limiting
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "unknown";
-    const rateLimitResult = checkRateLimit(`reset-password:${clientIP}`, {
+    const rateLimitResult = await checkRateLimit(`reset-password:${clientIP}`, {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 5, // 5 requests per 15 minutes
     });

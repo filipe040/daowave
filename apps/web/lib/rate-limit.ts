@@ -1,7 +1,8 @@
 /**
- * Simple in-memory rate limiter
- * For production, consider using Redis or a dedicated service
+ * Rate limiting — Redis (multi-instância) com fallback in-memory.
  */
+
+import { getRedisClient } from "./redis-client";
 
 interface RateLimitStore {
   [key: string]: {
@@ -12,102 +13,109 @@ interface RateLimitStore {
 
 const store: RateLimitStore = {};
 
-/**
- * Rate limit configuration
- */
 export interface RateLimitConfig {
-  windowMs: number; // Time window in milliseconds
-  maxRequests: number; // Maximum requests per window
+  windowMs: number;
+  maxRequests: number;
 }
 
 const defaultConfig: RateLimitConfig = {
-  windowMs: 60 * 1000, // 1 minute
-  maxRequests: 60, // 60 requests per minute
+  windowMs: 60 * 1000,
+  maxRequests: 60,
 };
 
-/**
- * Check if request should be rate limited
- * @param identifier - Unique identifier (IP, user ID, etc.)
- * @param config - Rate limit configuration
- * @returns true if request should be allowed, false if rate limited
- */
-export function checkRateLimit(
+function memoryCheck(
   identifier: string,
-  config: RateLimitConfig = defaultConfig
+  config: RateLimitConfig
 ): { allowed: boolean; remaining: number; resetAt: number } {
   const now = Date.now();
-  const key = identifier;
+  let entry = store[identifier];
 
-  // Get or create entry
-  let entry = store[key];
-
-  // If entry doesn't exist or window has expired, reset
   if (!entry || now > entry.resetAt) {
-    entry = {
-      count: 0,
-      resetAt: now + config.windowMs,
-    };
-    store[key] = entry;
+    entry = { count: 0, resetAt: now + config.windowMs };
+    store[identifier] = entry;
   }
 
-  // Increment count
   entry.count++;
-
-  // Check if limit exceeded
   const allowed = entry.count <= config.maxRequests;
   const remaining = Math.max(0, config.maxRequests - entry.count);
 
-  // Cleanup old entries (simple cleanup, in production use TTL)
   if (Object.keys(store).length > 10000) {
     Object.keys(store).forEach((k) => {
-      if (store[k].resetAt < now) {
-        delete store[k];
-      }
+      if (store[k].resetAt < now) delete store[k];
     });
   }
 
-  return {
-    allowed,
-    remaining,
-    resetAt: entry.resetAt,
-  };
+  return { allowed, remaining, resetAt: entry.resetAt };
 }
 
-/**
- * Get client identifier from request
- */
+async function redisCheck(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; remaining: number; resetAt: number } | null> {
+  const redis = await getRedisClient();
+  if (!redis) return null;
+
+  const windowKey = Math.floor(Date.now() / config.windowMs);
+  const key = `rl:${identifier}:${windowKey}`;
+
+  try {
+    const count = await redis.incr(key);
+    if (count === 1) {
+      await redis.pexpire(key, config.windowMs);
+    }
+    const allowed = count <= config.maxRequests;
+    const remaining = Math.max(0, config.maxRequests - count);
+    const resetAt = (windowKey + 1) * config.windowMs;
+    return { allowed, remaining, resetAt };
+  } catch {
+    return null;
+  }
+}
+
+export async function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig = defaultConfig
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const fromRedis = await redisCheck(identifier, config);
+  if (fromRedis) return fromRedis;
+  return memoryCheck(identifier, config);
+}
+
+/** @deprecated Use async checkRateLimit */
+export function checkRateLimitSync(
+  identifier: string,
+  config: RateLimitConfig = defaultConfig
+): { allowed: boolean; remaining: number; resetAt: number } {
+  return memoryCheck(identifier, config);
+}
+
 export function getClientIdentifier(req: Request): string {
-  // Try to get IP from various headers
   const forwarded = req.headers.get("x-forwarded-for");
   const realIp = req.headers.get("x-real-ip");
-  const ip = forwarded?.split(",")[0] || realIp || "unknown";
-
-  return ip;
+  return forwarded?.split(",")[0]?.trim() || realIp || "unknown";
 }
 
-/**
- * Rate limit middleware helper
- */
 export function rateLimit(config?: RateLimitConfig) {
   return async (req: Request): Promise<Response | null> => {
     const identifier = getClientIdentifier(req);
-    const result = checkRateLimit(identifier, config);
+    const result = await checkRateLimit(identifier, config);
 
     if (!result.allowed) {
+      const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
       return new Response(
         JSON.stringify({
           error: "Too many requests",
           message: "Rate limit exceeded. Please try again later.",
-          retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000),
+          retryAfter,
         }),
         {
           status: 429,
           headers: {
             "Content-Type": "application/json",
-            "Retry-After": Math.ceil((result.resetAt - Date.now()) / 1000).toString(),
-            "X-RateLimit-Limit": (config?.maxRequests || defaultConfig.maxRequests).toString(),
-            "X-RateLimit-Remaining": result.remaining.toString(),
-            "X-RateLimit-Reset": result.resetAt.toString(),
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(config?.maxRequests ?? defaultConfig.maxRequests),
+            "X-RateLimit-Remaining": String(result.remaining),
+            "X-RateLimit-Reset": String(result.resetAt),
           },
         }
       );
@@ -116,4 +124,3 @@ export function rateLimit(config?: RateLimitConfig) {
     return null;
   };
 }
-

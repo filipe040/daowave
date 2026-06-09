@@ -22,16 +22,31 @@ export async function GET() {
     },
   };
 
-  try {
-    const start = Date.now();
-    await prisma.$queryRaw`SELECT 1`;
-    checks.services.database = { status: "ok", latency: Date.now() - start };
-  } catch (e) {
-    console.error("[health] DB error:", e);
-    checks.services.database = { status: "error", latency: 0 };
-    checks.status = "degraded";
-  }
+    try {
+      const start = Date.now();
+      await prisma.$queryRaw`SELECT 1`;
+      checks.services.database = { status: "ok", latency: Date.now() - start };
+    } catch (e) {
+      console.error("[health] DB error:", e);
+      checks.services.database = { status: "error", latency: 0 };
+      checks.status = "degraded";
+    }
 
-  const statusCode = checks.status === "ok" ? 200 : 503;
+    if (process.env.REDIS_URL) {
+      try {
+        const { checkRedisConnection } = await import("@/lib/redis-client");
+        const ok = await checkRedisConnection();
+        checks.services.redis = {
+          status: ok ? "ok" : "error",
+          enabled: true,
+        };
+        if (!ok) checks.status = "degraded";
+      } catch {
+        checks.services.redis = { status: "error", enabled: true };
+        checks.status = "degraded";
+      }
+    }
+
+    const statusCode = checks.status === "ok" ? 200 : 503;
   return NextResponse.json(checks, { status: statusCode });
 }

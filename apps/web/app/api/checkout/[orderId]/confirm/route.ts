@@ -16,6 +16,7 @@ import { sendTicketsEmail } from "@/lib/email-service";
 import { recordCouponCommission } from "@/lib/coupons/coupon-commission";
 import { validateCouponForCheckout } from "@/lib/coupons/validate-coupon";
 import { OrderFinanceService } from "@/lib/finance";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
 import type { PaymentProviderKind } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,9 @@ export async function POST(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
+    const rateLimitRes = await applyRateLimit(request, RATE_LIMITS.checkout);
+    if (rateLimitRes) return rateLimitRes;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
