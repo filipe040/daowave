@@ -3,6 +3,7 @@ import { TicketLotService } from "@/lib/services/ticket-lot.service";
 import { requirePromoter } from "@/lib/auth/guards";
 import { assertPromoterEventAccess, canEditTicketInventory, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 import { safeLog } from "@/lib/security";
+import { TicketAlertService } from "@/lib/services/ticket-alert.service";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,8 @@ export async function POST(
     });
 
     safeLog.info("ticket_lot.created", { eventId, lotId: newLot.id, capacity: newLot.capacity });
+
+    TicketAlertService.notifyIfTicketsAvailable(eventId).catch((e) => console.error(e));
 
     return NextResponse.json({ ok: true, ticketLot: newLot, success: true }, { status: 201 });
   } catch (error: any) {

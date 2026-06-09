@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { enqueueTemplate } from "../../../../lib/email-service";
+import { TicketAlertService } from "../../../../lib/services/ticket-alert.service";
 import { safeLog } from "../../../../lib/security";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
             reminders: 0,
             thankYous: 0,
             reports: 0,
+            ticketAlerts: 0,
         };
 
         const now = new Date();
@@ -189,6 +191,10 @@ export async function GET(request: Request) {
                 }
             }
         }
+
+        // 4. PRÉ-REGISTO — avisar quando bilhetes ficam disponíveis (venda agendada)
+        const alertResult = await TicketAlertService.processScheduledAlerts();
+        results.ticketAlerts = alertResult.emails;
 
         safeLog.info("Email schedulers cron completed", results as any);
         return NextResponse.json({ success: true, results });

@@ -5,6 +5,7 @@ import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2, Ticket } from 'lucide-react';
+import { TicketPresave } from './ticket-presave';
 
 interface TicketType {
   id: string;
@@ -36,9 +37,19 @@ interface TicketSelectorProps {
   ticketLots: any[]; // Legacy fallback
   filterTypeId?: string;
   variant?: 'dark' | 'light';
+  presaveEnabled?: boolean;
+  userEmail?: string | null;
+  userName?: string | null;
 }
 
-export function TicketSelector({ event, filterTypeId, variant = 'light' }: TicketSelectorProps) {
+export function TicketSelector({
+  event,
+  filterTypeId,
+  variant = 'light',
+  presaveEnabled = true,
+  userEmail,
+  userName,
+}: TicketSelectorProps) {
   const router = useRouter();
   const [types, setTypes] = useState<TicketType[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -170,6 +181,16 @@ export function TicketSelector({ event, filterTypeId, variant = 'light' }: Ticke
   }
 
   if (types.length === 0) {
+    if (presaveEnabled) {
+      return (
+        <TicketPresave
+          eventSlug={event.slug}
+          variant={variant}
+          userEmail={userEmail}
+          userName={userName}
+        />
+      );
+    }
     return (
       <div className={`${shellCls} text-center py-8`}>
         <p className={`text-sm ${isLight ? 'text-neutral-400' : 'text-white/40'}`}>Nenhum lote disponível no momento.</p>

@@ -11,6 +11,7 @@ import {
   Ticket,
   FileText,
   Home,
+  Heart,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/account/profile", label: "Dados pessoais", icon: User },
   { href: "/account/security", label: "Segurança", icon: Shield },
   { href: "/account/notifications", label: "Notificações", icon: Bell },
+  { href: "/account/favorites", label: "Favoritos", icon: Heart },
   { href: "/account/orders", label: "Compras", icon: ShoppingBag },
   { href: "/account/tickets", label: "Bilhetes", icon: Ticket },
   { href: "/account/legal", label: "Termos e privacidade", icon: FileText },

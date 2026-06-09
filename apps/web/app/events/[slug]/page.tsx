@@ -3,11 +3,14 @@
  */
 
 import { notFound, redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { formatDate } from '@/lib/utils';
 import Image from 'next/image';
 import { MapPin, Calendar } from 'lucide-react';
 import { TicketSelector } from './ticket-selector';
+import { EventDetailFavorite } from './event-detail-favorite';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +30,7 @@ async function getEvent(slug: string) {
       status: true,
       archivedAt: true,
       layoutMode: true,
+      presaveEnabled: true,
       // Branding
       primaryColor: true,
       secondaryColor: true,
@@ -77,7 +81,10 @@ export default async function EventPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = await getEvent(slug);
+  const [event, session] = await Promise.all([
+    getEvent(slug),
+    getServerSession(authOptions),
+  ]);
 
   if (!event || event.status !== 'PUBLISHED' || event.archivedAt !== null) {
     notFound();
@@ -206,9 +213,12 @@ export default async function EventPage({
                   Evento de {event.organization?.name || event.promoter?.brandName || 'Organização'}
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8 text-neutral-900 tracking-tight leading-[1.1]">
-                  {event.title}
-                </h1>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1]">
+                    {event.title}
+                  </h1>
+                  <EventDetailFavorite eventId={event.id} />
+                </div>
 
                 <div className="space-y-10 mb-12">
                   <section>
@@ -257,7 +267,14 @@ export default async function EventPage({
 
               <aside className="relative">
                 <div className="sticky top-24">
-                  <TicketSelector event={event} ticketLots={event.ticketLots} variant="light" />
+                  <TicketSelector
+                    event={event}
+                    ticketLots={event.ticketLots}
+                    variant="light"
+                    presaveEnabled={event.presaveEnabled}
+                    userEmail={session?.user?.email}
+                    userName={session?.user?.name}
+                  />
 
                   <div className="mt-6 text-center">
                     <p className="text-[11px] text-neutral-400 flex items-center justify-center gap-2">

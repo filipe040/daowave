@@ -448,6 +448,35 @@ ${v.feedbackUrl ? `
   };
 }
 
+export function getTicketsAvailableTemplate(v: {
+  name: string;
+  eventTitle: string;
+  eventDate: string;
+  venueName: string;
+  address: string;
+  eventUrl: string;
+  unsubscribeUrl: string;
+}): { subject: string; html: string; text: string } {
+  const content = `
+<h2>Os bilhetes estão à venda! 🎟️</h2>
+<p class="lead">Olá <strong style="color:${EMAIL.text}">${v.name}</strong>,</p>
+<p>Como pediu, avisamos que os bilhetes para <strong style="color:${EMAIL.text}">${v.eventTitle}</strong> já estão disponíveis para compra.</p>
+<div class="card">
+  <div class="card-row"><span class="card-label">Evento</span><span class="card-value">${v.eventTitle}</span></div>
+  <div class="card-row"><span class="card-label">Data</span><span class="card-value">${v.eventDate}</span></div>
+  <div class="card-row"><span class="card-label">Local</span><span class="card-value">${v.venueName}</span></div>
+  <div class="card-row"><span class="card-label">Cidade</span><span class="card-value">${v.address}</span></div>
+</div>
+<div class="btn-wrap"><a href="${v.eventUrl}" class="btn">Comprar bilhetes agora</a></div>
+<p style="font-size:12px;color:${EMAIL.textMuted}">Não quer receber mais avisos? <a href="${v.unsubscribeUrl}" style="color:${EMAIL.textMuted}">Cancelar subscrição</a></p>`;
+
+  return {
+    subject: `🎟️ Bilhetes disponíveis: ${v.eventTitle}`,
+    html: base(`Bilhetes disponíveis para ${v.eventTitle}`, content, getConfig().mode === "public_beta"),
+    text: `Olá ${v.name},\n\nOs bilhetes para ${v.eventTitle} já estão à venda!\nComprar: ${v.eventUrl}\n\nCancelar subscrição: ${v.unsubscribeUrl}`,
+  };
+}
+
 export function getPromoterDailyReportTemplate(v: {
   promoterName: string;
   date: string;

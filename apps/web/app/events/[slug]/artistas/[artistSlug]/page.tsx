@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EventArtistService } from "@/lib/services/event-artist.service";
 import { resolveEventLocation } from "@/lib/maps";
@@ -17,18 +19,22 @@ export default async function ArtistDetailPage({
 }) {
     const { slug, artistSlug } = await params;
 
-    const event = await prisma.event.findUnique({
-        where: { slug, status: "PUBLISHED" },
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            venue: true,
-            city: true,
-            archivedAt: true,
-            locationUrl: true,
-        },
-    });
+    const [event, session] = await Promise.all([
+        prisma.event.findUnique({
+            where: { slug, status: "PUBLISHED" },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                venue: true,
+                city: true,
+                archivedAt: true,
+                locationUrl: true,
+                presaveEnabled: true,
+            },
+        }),
+        getServerSession(authOptions),
+    ]);
 
     if (!event || event.archivedAt) notFound();
 
@@ -115,6 +121,9 @@ export default async function ArtistDetailPage({
                         <ArtistTicketSelector
                             event={{ id: event.id, title: event.title, slug: event.slug }}
                             filterTypeId={artist.ticketTypeId}
+                            presaveEnabled={event.presaveEnabled}
+                            userEmail={session?.user?.email}
+                            userName={session?.user?.name}
                         />
 
                         <section>

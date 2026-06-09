@@ -4,6 +4,7 @@ import { safeLog } from "@/lib/security";
 import { EventService } from "@/lib/services/event.service";
 import { requirePromoter } from "@/lib/auth/guards";
 import { MarketingService } from "@/lib/services/marketing";
+import { TicketAlertService } from "@/lib/services/ticket-alert.service";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +76,9 @@ export async function POST(
 
     // Fire & forget automated marketing email
     MarketingService.dispatchNewEventCampaign(id).catch(e => console.error(e));
+
+    // Notificar pré-registos se bilhetes já estão à venda
+    TicketAlertService.notifyIfTicketsAvailable(id).catch((e) => console.error(e));
 
     safeLog.info(`Event published: ${id}`, { eventId: id, publishedBy: session.user.id });
 

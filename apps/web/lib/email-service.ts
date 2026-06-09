@@ -17,7 +17,8 @@ import {
   getOrganizationInviteTemplate,
   getEventReminderTemplate,
   getPostEventThankYouTemplate,
-  getPromoterDailyReportTemplate
+  getPromoterDailyReportTemplate,
+  getTicketsAvailableTemplate,
 } from "./email-templates-transactional";
 import { getMarketingCampaignTemplate } from "./email-templates";
 import { getEmailQueue } from "./queue/email.queue";
@@ -34,6 +35,7 @@ export type EmailTemplate =
   | "event-reminder-24h"
   | "post-event-thankyou"
   | "promoter-daily-report"
+  | "tickets-available"
   | "marketing-campaign";
 
 export interface SendTemplateOptions {
@@ -247,6 +249,7 @@ export async function enqueueTemplate(options: SendTemplateOptions): Promise<{ s
       "event-reminder-24h": "EVENT_REMINDER_24H",
       "post-event-thankyou": "POST_EVENT_THANKYOU",
       "promoter-daily-report": "PROMOTER_DAILY_REPORT",
+      "tickets-available": "TICKETS_AVAILABLE",
     };
 
     const jobType = typeMapping[options.templateId] || "PURCHASE_CONFIRMATION";
@@ -445,6 +448,17 @@ export async function processTemplateSend(
         totalSales: string;
         ticketsSold: number;
         upcomingEvents: Array<{ title: string; date: string; sold: number }>;
+      }));
+      break;
+    case "tickets-available":
+      ({ subject, html, text } = getTicketsAvailableTemplate(variables as {
+        name: string;
+        eventTitle: string;
+        eventDate: string;
+        venueName: string;
+        address: string;
+        eventUrl: string;
+        unsubscribeUrl: string;
       }));
       break;
     case "marketing-campaign":

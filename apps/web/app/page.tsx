@@ -10,6 +10,7 @@ import {
   getCitiesWithPublishedEvents,
 } from "@/lib/events/public-event-filters";
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Ticket, Users, Zap } from "lucide-react";
+import { EventFavoriteSlot } from "@/components/favorites/event-favorite-slot";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -228,16 +229,17 @@ export default async function Home({
                   ? Math.min(...event.ticketLots.map((l) => l.priceCents))
                   : null;
                 return (
-                  <Link
+                  <div
                     key={event.id}
-                    href={`/events/${event.slug}`}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl",
                       "border border-neutral-200 bg-white",
                       "shadow-md hover:shadow-xl",
-                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1 active:scale-[0.99]"
+                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1"
                     )}
                   >
+                    <EventFavoriteSlot eventId={event.id} />
+                    <Link href={`/events/${event.slug}`} className="block active:scale-[0.99]">
                     <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                       {event.bannerUrl || event.coverImage ? (
                         <Image
@@ -285,7 +287,8 @@ export default async function Home({
                         </span>
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </div>
                 );
               })}
             </div>
@@ -379,16 +382,17 @@ export default async function Home({
                   ? Math.min(...event.ticketLots.map((l) => l.priceCents))
                   : null;
                 return (
-                  <Link
+                  <div
                     key={event.id}
-                    href={`/events/${event.slug}`}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl",
                       "border border-neutral-200 bg-white",
                       "shadow-md hover:shadow-xl",
-                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1 active:scale-[0.99]"
+                      "transition-all duration-200 hover:border-violet-200 hover:-translate-y-1"
                     )}
                   >
+                    <EventFavoriteSlot eventId={event.id} />
+                    <Link href={`/events/${event.slug}`} className="block active:scale-[0.99]">
                     {event.bannerUrl || event.coverImage ? (
                       <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                         <Image
@@ -434,7 +438,8 @@ export default async function Home({
                         </span>
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </div>
                 );
               })}
             </div>

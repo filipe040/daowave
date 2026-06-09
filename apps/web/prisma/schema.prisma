@@ -44,6 +44,8 @@ model User {
   userSessions        UserSession[]
   fraudSignals        FraudSignal[]
   manualPaymentsReceived ManualPayment[]
+  ticketAlerts        EventTicketAlert[]
+  eventFavorites      EventFavorite[]
 
   accounts            Account[]
 
@@ -325,7 +327,8 @@ model Event {
   checkinEndAt          DateTime? // Fim da janela de check-in
 
   layoutMode            EventLayoutMode @default(STANDARD)
-  
+  presaveEnabled        Boolean         @default(true)
+
   organization  Organization? @relation(fields: [organizationId], references: [id])
   promoter      PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
   
@@ -343,12 +346,55 @@ model Event {
   assets        EventAsset[]
   trackingLinks TrackingLink[]
   artists       EventArtist[]
-  
+  ticketAlerts  EventTicketAlert[]
+  favorites     EventFavorite[]
+
   @@index([slug])
   @@index([status])
   @@index([category])
   @@index([promoterId])
   @@index([organizationId])
+}
+
+model EventFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@map("event_favorites")
+}
+
+enum TicketAlertStatus {
+  PENDING
+  NOTIFIED
+  UNSUBSCRIBED
+}
+
+model EventTicketAlert {
+  id               String            @id @default(uuid())
+  eventId          String
+  email            String            @db.VarChar(320)
+  name             String?           @db.VarChar(128)
+  userId           String?
+  status           TicketAlertStatus @default(PENDING)
+  notifiedAt       DateTime?
+  unsubscribeToken String            @unique @default(uuid())
+  createdAt        DateTime          @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, email])
+  @@index([eventId, status])
+  @@index([status])
+  @@map("event_ticket_alerts")
 }
 
 model TicketLot {
@@ -624,6 +670,7 @@ enum EmailJobType {
   EVENT_REMINDER_24H
   POST_EVENT_THANKYOU
   PROMOTER_DAILY_REPORT
+  TICKETS_AVAILABLE
 }
 
 model EmailJobLog {

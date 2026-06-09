@@ -9,6 +9,7 @@ import {
 import { TicketLotService } from "@/lib/services/ticket-lot.service";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
+import { TicketAlertService } from "@/lib/services/ticket-alert.service";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +99,8 @@ export async function PATCH(
       });
       safeLog.info("ticket_lot.price_changed", { lotId, eventId });
     }
+
+    TicketAlertService.notifyIfTicketsAvailable(eventId).catch((e) => console.error(e));
 
     return NextResponse.json({ success: true, ticketLot: updated });
   } catch (error) {

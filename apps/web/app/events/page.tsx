@@ -6,6 +6,7 @@ import { pt } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import EventsSearch from "../components/events-search";
+import { EventFavoriteSlot } from "@/components/favorites/event-favorite-slot";
 import {
   buildPublicEventsWhere,
   getCategoriesWithPublishedEvents,
@@ -110,11 +111,15 @@ export default async function EventsPage({
                   ? Math.min(...event.ticketLots.map((l) => l.priceCents))
                   : null;
                 return (
-                  <Link
+                  <div
                     key={event.id}
-                    href={`/events/${event.slug}`}
-                    className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-md hover:shadow-xl hover:border-violet-200 hover:-translate-y-1 transition-all duration-200 active:scale-[0.99]"
+                    className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-md hover:shadow-xl hover:border-violet-200 hover:-translate-y-1 transition-all duration-200"
                   >
+                    <EventFavoriteSlot eventId={event.id} />
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="block active:scale-[0.99]"
+                    >
                     {(event.bannerUrl || event.coverImage) && (
                       <div className="relative aspect-[16/9] overflow-hidden bg-neutral-100">
                         <Image
@@ -173,7 +178,8 @@ export default async function EventsPage({
                         </span>
                       </div>
                     </div>
-                  </Link>
+                    </Link>
+                  </div>
                 );
               })}
             </div>

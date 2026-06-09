@@ -43,9 +43,11 @@ export async function GET(
                 let available = capacity - lot.soldCount - activeHoldsCount;
                 if (available < 0) available = 0;
 
-                const isAvailable = available > 0 &&
-                    (!lot.startsAt || new Date() >= lot.startsAt) &&
-                    (!lot.endsAt || new Date() <= lot.endsAt);
+                const saleStart = lot.startsAt ?? lot.saleStartAt;
+                const saleEnd = lot.endsAt ?? lot.saleEndAt;
+                const now = new Date();
+                const isAvailable =
+                    available > 0 && now >= saleStart && now <= saleEnd;
 
                 return {
                     id: lot.id,
