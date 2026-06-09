@@ -20,36 +20,64 @@ interface FavoritesContextValue {
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
+const EMPTY_IDS: string[] = [];
+
+function setsEqual(a: Set<string>, b: Set<string>) {
+  if (a.size !== b.size) return false;
+  for (const id of a) {
+    if (!b.has(id)) return false;
+  }
+  return true;
+}
+
 export function FavoritesProvider({
   children,
-  initialIds = [],
+  initialIds = EMPTY_IDS,
 }: {
   children: ReactNode;
   initialIds?: string[];
 }) {
   const { status } = useSession();
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set(initialIds));
+  const initialIdsKey = initialIds.join("\0");
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set(initialIds));
   const [loading, setLoading] = useState(status === "authenticated" && initialIds.length === 0);
 
   useEffect(() => {
     if (status !== "authenticated") {
-      setFavoriteIds(new Set());
-      setLoading(false);
+      setFavoriteIds((prev) => (prev.size === 0 ? prev : new Set()));
+      setLoading((prev) => (prev ? false : prev));
       return;
     }
 
     if (initialIds.length > 0) {
-      setFavoriteIds(new Set(initialIds));
-      setLoading(false);
+      const next = new Set(initialIds);
+      setFavoriteIds((prev) => (setsEqual(prev, next) ? prev : next));
+      setLoading((prev) => (prev ? false : prev));
       return;
     }
 
+    let cancelled = false;
+    setLoading(true);
+
     fetch("/api/account/favorites?ids=1")
       .then((r) => (r.ok ? r.json() : { ids: [] }))
-      .then((data) => setFavoriteIds(new Set(data.ids ?? [])))
-      .catch(() => setFavoriteIds(new Set()))
-      .finally(() => setLoading(false));
-  }, [status, initialIds]);
+      .then((data) => {
+        if (cancelled) return;
+        const next = new Set<string>(data.ids ?? []);
+        setFavoriteIds((prev) => (setsEqual(prev, next) ? prev : next));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setFavoriteIds((prev) => (prev.size === 0 ? prev : new Set()));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, initialIdsKey]);
 
   const toggleFavorite = useCallback(async (eventId: string) => {
     const res = await fetch("/api/account/favorites", {
