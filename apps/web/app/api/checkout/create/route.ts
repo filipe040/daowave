@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { checkoutCreateSchema } from "@/lib/security/validation";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
 import { InventoryService } from "@/lib/services/inventory.service";
+import { FinancialEngine } from "@/lib/finance/financial-engine";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,10 @@ export async function POST(request: Request) {
 
     const event = await prisma.event.findUnique({
       where: { id: validated.eventId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        organizationId: true,
         ticketLots: {
           where: { id: { in: validated.items.map((i) => i.ticketLotId) } },
         },
@@ -97,18 +101,35 @@ export async function POST(request: Request) {
       totalCents += lot.priceCents * item.quantity;
     }
 
+    const feeResult = await FinancialEngine.calculateServiceFee({
+      ticketPriceCents: totalCents,
+      organizationId: event.organizationId ?? undefined,
+    });
+    const config = await FinancialEngine.resolveEffectiveConfig(event.organizationId ?? undefined);
+    const feePaidBy = config.feePaidBy;
+    const orderTotalCents =
+      feePaidBy === "BUYER" ? totalCents + feeResult.serviceFeeCents : totalCents;
+
     const order = await prisma.order.create({
       data: {
         userId: session.user.id,
         eventId: event.id,
-        totalCents,
+        totalCents: orderTotalCents,
+        serviceFeeCents: feeResult.serviceFeeCents,
+        feePaidBy,
         currency: "EUR",
         status: "PENDING",
         items: { create: orderItems },
       },
     });
 
-    return NextResponse.json({ orderId: order.id });
+    return NextResponse.json({
+      orderId: order.id,
+      subtotalCents: totalCents,
+      serviceFeeCents: feeResult.serviceFeeCents,
+      totalCents: orderTotalCents,
+      feePaidBy,
+    });
   } catch (error: unknown) {
     const err = error as { name?: string; errors?: unknown };
     if (err.name === "ZodError") {

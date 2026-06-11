@@ -174,7 +174,8 @@ Pontos-chave:
 |----------|------------|--------|
 | `/api/cron/release-holds` | 1–5 min | Libertar reservas expiradas |
 | `/api/cron/email-schedulers` | 15 min | Lembretes, alertas bilhetes |
-| `/api/cron/finance/release-balances` | Diário | Finanças promotor |
+| `/api/cron/finance/release-balances` | Diário | Libertar saldos PENDING→AVAILABLE após fim do evento + prazo |
+| `/api/cron/finance/auto-settlements` | Diário | Liquidações automáticas por organizador |
 | `/api/cron/ticket-alerts` | 5 min | Pré-registo → email |
 
 Todos requerem header: `Authorization: Bearer $CRON_SECRET`

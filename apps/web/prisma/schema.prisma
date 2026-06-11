@@ -135,6 +135,7 @@ model Organization {
   ledgerTransactions LedgerTransaction[]
   promoterFinancialSettings PromoterFinancialSettings?
   financeCostEntries FinanceCostEntry[]
+  feeCampaigns         FeeCampaign[]
 
   ticketTemplates      OrganizationTicketTemplate[]
   ticketTemplateAssets TicketTemplateAsset[]
@@ -557,6 +558,8 @@ model Order {
   userId          String
   eventId         String
   totalCents      Int
+  serviceFeeCents Int         @default(0)
+  feePaidBy       FeePaidBy?
   currency        String      @default("EUR")
   status          OrderStatus @default(PENDING)
   paymentProvider String?
@@ -1129,6 +1132,42 @@ enum ServiceFeeType {
   FIXED
 }
 
+enum GlobalPricingMode {
+  FORMULA
+  TIERED
+}
+
+enum FeeRounding {
+  NONE
+  END_49
+  END_99
+  END_49_99
+}
+
+enum FeePaidBy {
+  BUYER
+  ORGANIZER
+}
+
+enum OrgPricingMode {
+  GLOBAL
+  CUSTOM
+}
+
+enum SettlementFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  MANUAL
+}
+
+enum FeeCampaignDiscountType {
+  PERCENT_OFF_FEE
+  FIXED_FEE_OVERRIDE
+  ZERO_FEE
+}
+
 enum WalletTransactionType {
   TICKET_SALE
   SERVICE_FEE
@@ -1181,6 +1220,15 @@ model FinancialSettings {
   chargebackProtectionEnabled Boolean @default(true)
   automaticPayoutsEnabled Boolean @default(false)
   defaultVatPercent       Decimal  @default(23) @db.Decimal(5, 2)
+  // Financial Engine
+  pricingMode             GlobalPricingMode @default(FORMULA)
+  serviceFeeFixedCents    Int      @default(50)
+  minimumServiceFeeCents  Int      @default(149)
+  maximumServiceFeeCents  Int?
+  operationalReserveCents Int      @default(20)
+  roundingMode            FeeRounding @default(END_49_99)
+  absorbPaymentFees       Boolean  @default(true)
+  defaultFeePaidBy        FeePaidBy @default(BUYER)
   updatedAt               DateTime @updatedAt
   updatedByUserId         String?
 }
@@ -1193,10 +1241,56 @@ model PromoterFinancialSettings {
   reservePercentage          Decimal? @db.Decimal(5, 2)
   minimumProfitPerOrderCents Int?
   payoutDelayDays            Int?
+  // Organizer financial profile
+  pricingMode                OrgPricingMode @default(GLOBAL)
+  customFixedFeeCents        Int?
+  customPercentageFee        Decimal? @db.Decimal(5, 2)
+  customMinimumFeeCents      Int?
+  customMaximumFeeCents      Int?
+  customOperationalReserveCents Int?
+  feePaidBy                  FeePaidBy?
+  settlementFrequency        SettlementFrequency @default(MANUAL)
+  lastSettlementAt           DateTime?
+  active                     Boolean  @default(true)
   createdAt                  DateTime @default(now())
   updatedAt                  DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model CommissionTier {
+  id             String   @id @default(uuid())
+  minPriceCents  Int
+  maxPriceCents  Int?
+  fixedFeeCents  Int      @default(0)
+  percentageFee  Decimal  @default(0) @db.Decimal(5, 2)
+  active         Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@map("commission_tiers")
+}
+
+model FeeCampaign {
+  id              String                  @id @default(uuid())
+  name            String                  @db.VarChar(128)
+  startDate       DateTime
+  endDate         DateTime
+  discountType    FeeCampaignDiscountType
+  discountValue   Decimal                 @default(0) @db.Decimal(10, 4)
+  organizationId  String?
+  firstEventOnly  Boolean                 @default(false)
+  active          Boolean                 @default(true)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([active, startDate, endDate])
+  @@index([organizationId])
+  @@map("fee_campaigns")
 }
 
 model WalletTransaction {
@@ -1362,6 +1456,11 @@ model OrderFinancialBreakdown {
   totalCents         Int
   paymentMethodCode  String?  @db.VarChar(32)
   marginPercent      Decimal? @db.Decimal(5, 2)
+  feePaidBy          FeePaidBy?
+  operationalReserveCents Int @default(0)
+  appliedCampaignId  String?  @db.VarChar(64)
+  appliedTierId      String?  @db.VarChar(64)
+  pricingModeUsed    String?  @db.VarChar(32)
   currency           String   @default("EUR")
   createdAt          DateTime @default(now())
 

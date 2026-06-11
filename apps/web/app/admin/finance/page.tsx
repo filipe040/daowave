@@ -19,12 +19,17 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import type { AdminFinanceDashboard, EnterpriseFinancialSettings } from "@/lib/finance/types";
+import type {
+  AdminFinanceDashboard,
+  EnterpriseFinancialSettings,
+  FinanceChartPoint,
+} from "@/lib/finance/types";
+import { FinanceChart } from "@/components/admin/FinanceChart";
 
 const fmt = (cents: number, currency = "EUR") =>
   new Intl.NumberFormat("pt-PT", { style: "currency", currency }).format(cents / 100);
 
-type Tab = "dashboard" | "simulator" | "payment-methods";
+type Tab = "dashboard" | "settings" | "tiers" | "campaigns" | "simulator" | "payment-methods";
 
 interface WithdrawalRow {
   id: string;
@@ -114,21 +119,30 @@ export default function AdminFinancePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [simTicket, setSimTicket] = useState(20);
   const [simMethod, setSimMethod] = useState("MBWAY");
+  const [simOrgId, setSimOrgId] = useState("");
   const [simResult, setSimResult] = useState<SimulatorResult | null>(null);
   const [simLoading, setSimLoading] = useState(false);
   const [savingMethodId, setSavingMethodId] = useState<string | null>(null);
+  const [chartDays, setChartDays] = useState(30);
+  const [chartData, setChartData] = useState<FinanceChartPoint[]>([]);
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const [dashRes, wRes, sRes, pmRes] = await Promise.all([
+    const [dashRes, wRes, sRes, pmRes, chartRes, tiersRes, campaignsRes, orgsRes] = await Promise.all([
       api.get<AdminFinanceDashboard>("/api/admin/finance?view=dashboard"),
       api.get<{ items: WithdrawalRow[] }>("/api/admin/finance?view=withdrawals&limit=20"),
       api.get<EnterpriseFinancialSettings>("/api/admin/finance?view=settings"),
       api.get<{ items: PaymentMethodRow[] }>("/api/admin/finance/payment-methods"),
+      api.get<{ points: FinanceChartPoint[] }>(`/api/admin/finance?view=chart&days=${chartDays}`),
+      api.get<{ items: any[] }>("/api/admin/finance/tiers"),
+      api.get<{ items: any[] }>("/api/admin/finance/campaigns"),
+      api.get<{ organizations: { id: string; name: string }[] }>("/api/admin/organizations?limit=100"),
     ]);
     if (dashRes.error) setError(dashRes.error);
     else {
@@ -136,9 +150,13 @@ export default function AdminFinancePage() {
       setWithdrawals(wRes.data?.items ?? []);
       setSettings(sRes.data);
       setPaymentMethods(pmRes.data?.items ?? []);
+      setChartData(chartRes.data?.points ?? []);
+      setTiers(tiersRes.data?.items ?? []);
+      setCampaigns(campaignsRes.data?.items ?? []);
+      setOrganizations(orgsRes.data?.organizations ?? []);
     }
     setLoading(false);
-  }, []);
+  }, [chartDays]);
 
   useEffect(() => {
     load();
@@ -161,6 +179,7 @@ export default function AdminFinancePage() {
     const res = await api.post<SimulatorResult>("/api/admin/finance/simulator", {
       ticketPriceEuros: simTicket,
       paymentMethodCode: simMethod,
+      organizationId: simOrgId || undefined,
     });
     setSimResult(res.data ?? null);
     setSimLoading(false);
@@ -185,6 +204,9 @@ export default function AdminFinancePage() {
 
   const tabs: { id: Tab; label: string; icon: typeof TrendingUp }[] = [
     { id: "dashboard", label: "Dashboard", icon: TrendingUp },
+    { id: "settings", label: "Configurações", icon: Percent },
+    { id: "tiers", label: "Escalões", icon: Banknote },
+    { id: "campaigns", label: "Campanhas", icon: Shield },
     { id: "simulator", label: "Simulador", icon: Calculator },
     { id: "payment-methods", label: "Métodos", icon: CreditCard },
   ];
@@ -261,6 +283,19 @@ export default function AdminFinancePage() {
               >
                 {PAYMENT_METHODS.map((m) => (
                   <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Organizador (opcional)</span>
+              <select
+                className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+                value={simOrgId}
+                onChange={(e) => setSimOrgId(e.target.value)}
+              >
+                <option value="">Global (padrão)</option>
+                {organizations.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
                 ))}
               </select>
             </label>
@@ -389,15 +424,40 @@ export default function AdminFinancePage() {
             </div>
           </div>
 
-          <div className="hidden md:grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-            <KpiCard label="GMV" value={fmt(dashboard.gmvCents, currency)} icon={TrendingUp} iconColor="text-emerald-600" subtitle={`${dashboard.ordersPaid} encomendas`} />
-            <KpiCard label="Receita bruta" value={fmt(dashboard.grossRevenueCents, currency)} icon={Banknote} iconColor="text-violet-600" />
-            <KpiCard label="Lucro líquido" value={fmt(dashboard.netProfitCents, currency)} icon={TrendingUp} iconColor="text-emerald-700" />
-            <KpiCard label="Taxas gateway" value={fmt(dashboard.gatewayFeesCents, currency)} icon={CreditCard} iconColor="text-neutral-600" />
-            <KpiCard label="Margem média" value={`${dashboard.averageMarginPercent.toFixed(1)}%`} icon={Percent} iconColor="text-blue-600" />
-            <KpiCard label="Fundo reserva" value={fmt(dashboard.reserveBalanceCents, currency)} icon={Shield} iconColor="text-blue-600" />
+          <div className="hidden md:grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+            <KpiCard label="Receita Total (GMV)" value={fmt(dashboard.gmvCents, currency)} icon={TrendingUp} iconColor="text-emerald-600" subtitle={`${dashboard.ordersPaid} encomendas`} />
+            <KpiCard label="Receita LivePass" value={fmt(dashboard.grossRevenueCents, currency)} icon={Banknote} iconColor="text-violet-600" />
+            <KpiCard label="Lucro Operacional" value={fmt(dashboard.operationalProfitCents ?? dashboard.netProfitCents, currency)} icon={TrendingUp} iconColor="text-emerald-700" />
+            <KpiCard label="Taxas Gateway" value={fmt(dashboard.gatewayFeesCents, currency)} icon={CreditCard} iconColor="text-neutral-600" />
+            <KpiCard label="Bilhetes Vendidos" value={String(dashboard.ticketsSold ?? 0)} icon={Percent} iconColor="text-blue-600" />
+            <KpiCard label="Eventos Activos" value={String(dashboard.activeEvents ?? 0)} icon={Shield} iconColor="text-blue-600" />
+            <KpiCard label="Organizadores" value={String(dashboard.activeOrganizers ?? 0)} icon={Wallet} iconColor="text-neutral-700" />
+            <KpiCard label="Em Carteiras" value={fmt(dashboard.walletBalanceCents ?? 0, currency)} icon={Wallet} iconColor="text-amber-600" />
+            <KpiCard label="Pendente Liquidação" value={fmt(dashboard.pendingSettlementCents ?? 0, currency)} icon={TrendingDown} iconColor="text-amber-700" />
+            <KpiCard label="Fundo Reserva" value={fmt(dashboard.reserveBalanceCents, currency)} icon={Shield} iconColor="text-blue-600" />
             <KpiCard label="Reembolsos" value={fmt(dashboard.refundsCents, currency)} icon={TrendingDown} iconColor="text-red-500" />
             <KpiCard label="Levantamentos" value={fmt(dashboard.withdrawalsPaidCents, currency)} icon={Wallet} iconColor="text-neutral-700" subtitle={`${fmt(dashboard.withdrawalsPendingCents, currency)} pendentes`} />
+          </div>
+
+          <div className="dash-card p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-neutral-900">Evolução financeira</h2>
+              <div className="flex gap-1">
+                {[7, 30, 90, 365].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setChartDays(d)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                      chartDays === d ? "bg-violet-600 text-white" : "bg-neutral-100 text-neutral-600"
+                    }`}
+                  >
+                    {d === 365 ? "12M" : `${d}D`}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {chartData.length > 0 ? <FinanceChart data={chartData} /> : <p className="text-sm text-neutral-500">Sem dados para o período.</p>}
           </div>
 
           <div>
@@ -449,56 +509,148 @@ export default function AdminFinancePage() {
             />
           </div>
 
-          {settings && (
-            <div className="dash-card overflow-hidden">
-              <button type="button" onClick={() => setSettingsOpen((v) => !v)}
-                className="w-full flex items-center justify-between gap-3 p-4 sm:p-6 text-left hover:bg-neutral-50/80 transition-colors">
-                <h2 className="text-sm sm:text-lg font-bold text-neutral-900">Configurações financeiras</h2>
-                <span className="text-xs font-bold text-violet-600 shrink-0">{settingsOpen ? "Ocultar" : "Editar"}</span>
-              </button>
-              {settingsOpen && (
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 space-y-4 border-t border-neutral-100">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                    {(
-                      [
-                        ["serviceFeeValue", "Taxa serviço (%)", 0.01],
-                        ["reserveFundPercent", "Fundo reserva (%)", 0.01],
-                        ["minimumProfitPerOrderCents", "Lucro mínimo (cêntimos)", 1],
-                        ["minWithdrawalCents", "Mínimo levantamento (cêntimos)", 1],
-                        ["pendingReleaseDays", "Dias até saldo disponível", 1],
-                        ["defaultVatPercent", "IVA default (%)", 0.01],
-                      ] as const
-                    ).map(([key, label, step]) => (
-                      <label key={key} className="block min-w-0">
-                        <span className="text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wide">{label}</span>
-                        <input type="number" step={step} className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
-                          value={settings[key]} onChange={(e) => setSettings({ ...settings, [key]: Number(e.target.value) })} />
-                      </label>
-                    ))}
+        </div>
+      )}
+
+      {!loading && !error && tab === "settings" && settings && (
+        <div className="dash-card p-4 sm:p-6 space-y-4 max-w-4xl">
+          <h2 className="text-lg font-bold">Configurações Financeiras Globais</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Modo de cálculo</span>
+              <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.pricingMode ?? "FORMULA"}
+                onChange={(e) => setSettings({ ...settings, pricingMode: e.target.value as "FORMULA" | "TIERED" })}>
+                <option value="FORMULA">Fórmula (base + %)</option>
+                <option value="TIERED">Escalões</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Taxa base (cêntimos)</span>
+              <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.serviceFeeFixedCents ?? 50}
+                onChange={(e) => setSettings({ ...settings, serviceFeeFixedCents: Number(e.target.value) })} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Percentagem (%)</span>
+              <input type="number" step="0.01" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.serviceFeeValue}
+                onChange={(e) => setSettings({ ...settings, serviceFeeValue: Number(e.target.value) })} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Margem mínima (cêntimos)</span>
+              <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.minimumServiceFeeCents ?? 149}
+                onChange={(e) => setSettings({ ...settings, minimumServiceFeeCents: Number(e.target.value) })} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Taxa máxima (cêntimos)</span>
+              <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.maximumServiceFeeCents ?? ""}
+                onChange={(e) => setSettings({ ...settings, maximumServiceFeeCents: e.target.value ? Number(e.target.value) : null })} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Reserva operacional (cêntimos)</span>
+              <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.operationalReserveCents ?? 20}
+                onChange={(e) => setSettings({ ...settings, operationalReserveCents: Number(e.target.value) })} />
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Arredondamento</span>
+              <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.roundingMode ?? "END_49_99"}
+                onChange={(e) => setSettings({ ...settings, roundingMode: e.target.value as EnterpriseFinancialSettings["roundingMode"] })}>
+                <option value="NONE">Nenhum</option>
+                <option value="END_49">.49</option>
+                <option value="END_99">.99</option>
+                <option value="END_49_99">.49 / .99</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Quem paga taxas</span>
+              <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.defaultFeePaidBy ?? "BUYER"}
+                onChange={(e) => setSettings({ ...settings, defaultFeePaidBy: e.target.value as "BUYER" | "ORGANIZER" })}>
+                <option value="BUYER">Comprador</option>
+                <option value="ORGANIZER">Organizador</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-neutral-500 uppercase">Dias libertação saldo</span>
+              <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
+                value={settings.pendingReleaseDays}
+                onChange={(e) => setSettings({ ...settings, pendingReleaseDays: Number(e.target.value) })} />
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={settings.absorbPaymentFees ?? true}
+                onChange={(e) => setSettings({ ...settings, absorbPaymentFees: e.target.checked })} />
+              Absorver taxas de pagamento
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={settings.dynamicServiceFee}
+                onChange={(e) => setSettings({ ...settings, dynamicServiceFee: e.target.checked })} />
+              Taxa dinâmica (anti-prejuízo)
+            </label>
+          </div>
+          <button type="button" disabled={savingSettings} onClick={saveSettings} className="dash-btn-primary">
+            {savingSettings ? "A guardar…" : "Guardar configurações"}
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && tab === "tiers" && (
+        <div className="dash-card p-4 sm:p-6 space-y-4">
+          <h2 className="text-lg font-bold">Escalões de Comissão</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-xs uppercase text-neutral-500">
+                  <th className="p-2">Mín (€)</th>
+                  <th className="p-2">Máx (€)</th>
+                  <th className="p-2">Taxa fixa (€)</th>
+                  <th className="p-2">%</th>
+                  <th className="p-2">Activo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tiers.map((t) => (
+                  <tr key={t.id} className="border-b border-neutral-50">
+                    <td className="p-2">{(t.minPriceCents / 100).toFixed(2)}</td>
+                    <td className="p-2">{t.maxPriceCents ? (t.maxPriceCents / 100).toFixed(2) : "∞"}</td>
+                    <td className="p-2">{(t.fixedFeeCents / 100).toFixed(2)}</td>
+                    <td className="p-2">{Number(t.percentageFee)}%</td>
+                    <td className="p-2">{t.active ? "Sim" : "Não"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && tab === "campaigns" && (
+        <div className="dash-card p-4 sm:p-6 space-y-4">
+          <h2 className="text-lg font-bold">Campanhas Promocionais</h2>
+          {campaigns.length === 0 ? (
+            <p className="text-sm text-neutral-500">Nenhuma campanha configurada.</p>
+          ) : (
+            <div className="space-y-3">
+              {campaigns.map((c) => (
+                <div key={c.id} className="flex justify-between items-center p-3 rounded-xl border border-neutral-100">
+                  <div>
+                    <p className="font-bold">{c.name}</p>
+                    <p className="text-xs text-neutral-500">
+                      {new Date(c.startDate).toLocaleDateString("pt-PT")} — {new Date(c.endDate).toLocaleDateString("pt-PT")}
+                      {" · "}{c.discountType}
+                    </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <label className="flex items-center gap-3 text-sm">
-                      <input type="checkbox" checked={settings.dynamicServiceFee}
-                        onChange={(e) => setSettings({ ...settings, dynamicServiceFee: e.target.checked })} />
-                      <span>Taxa de serviço dinâmica (anti-prejuízo)</span>
-                    </label>
-                    <label className="flex items-center gap-3 text-sm">
-                      <input type="checkbox" checked={settings.automaticPayoutsEnabled}
-                        onChange={(e) => setSettings({ ...settings, automaticPayoutsEnabled: e.target.checked, autoApproveWithdrawals: e.target.checked })} />
-                      <span>Pagamentos automáticos</span>
-                    </label>
-                    <label className="flex items-center gap-3 text-sm">
-                      <input type="checkbox" checked={settings.chargebackProtectionEnabled}
-                        onChange={(e) => setSettings({ ...settings, chargebackProtectionEnabled: e.target.checked })} />
-                      <span>Protecção chargeback</span>
-                    </label>
-                  </div>
-                  <button type="button" disabled={savingSettings} onClick={saveSettings}
-                    className="w-full sm:w-auto dash-btn-primary py-3 sm:py-2.5">
-                    {savingSettings ? "A guardar…" : "Guardar configurações"}
-                  </button>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${c.active ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>
+                    {c.active ? "Activa" : "Inactiva"}
+                  </span>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>

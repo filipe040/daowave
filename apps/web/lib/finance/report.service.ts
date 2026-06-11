@@ -2,7 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { WalletService } from "./wallet.service";
 import { LedgerService } from "./ledger.service";
 import { FinancialSettingsService } from "./settings.service";
-import type { AdminFinanceDashboard, FinanceReportRow, PromoterFinanceDashboard, ReportPeriod } from "./types";
+import type {
+  AdminFinanceDashboard,
+  FinanceChartPoint,
+  FinanceReportRow,
+  PromoterFinanceDashboard,
+  ReportPeriod,
+} from "./types";
 
 function periodBounds(period: ReportPeriod, ref = new Date()) {
   const end = new Date(ref);
@@ -38,6 +44,10 @@ export class FinanceReportService {
       withdrawalsPaid,
       withdrawalsPending,
       reserveBalances,
+      promoterWallets,
+      activeEvents,
+      ticketsSold,
+      activeOrganizers,
     ] = await Promise.all([
       prisma.order.aggregate({
         where: { status: "PAID" },
@@ -71,6 +81,10 @@ export class FinanceReportService {
         _sum: { amountCents: true },
       }),
       WalletService.getBalancesByType("RESERVE"),
+      WalletService.getBalancesByType("PROMOTER"),
+      prisma.event.count({ where: { status: "PUBLISHED" } }),
+      prisma.ticket.count({ where: { order: { status: "PAID" } } }),
+      prisma.organization.count({ where: { status: "ACTIVE" } }),
     ]);
 
     const grossRevenue =
@@ -98,7 +112,54 @@ export class FinanceReportService {
       ordersPaid: ordersAgg._count,
       averageMarginPercent: avgMargin,
       currency: settings.currency,
+      activeEvents,
+      ticketsSold,
+      activeOrganizers,
+      walletBalanceCents: promoterWallets.pendingCents + promoterWallets.availableCents,
+      pendingSettlementCents: promoterWallets.pendingCents,
+      operationalProfitCents: netProfit - gatewayFees,
     };
+  }
+
+  static async getChartData(days: number): Promise<FinanceChartPoint[]> {
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    const start = new Date(end);
+    start.setDate(start.getDate() - days + 1);
+    start.setHours(0, 0, 0, 0);
+
+    const breakdowns = await prisma.orderFinancialBreakdown.findMany({
+      where: {
+        createdAt: { gte: start, lte: end },
+        order: { status: "PAID" },
+      },
+      select: {
+        createdAt: true,
+        totalCents: true,
+        serviceFeeCents: true,
+        netPlatformProfitCents: true,
+        platformFeeCents: true,
+        buyerFeeCents: true,
+      },
+    });
+
+    const buckets = new Map<string, FinanceChartPoint>();
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = d.toISOString().slice(0, 10);
+      buckets.set(key, { date: key, gmvCents: 0, revenueCents: 0, profitCents: 0, ordersCount: 0 });
+    }
+
+    for (const row of breakdowns) {
+      const key = row.createdAt.toISOString().slice(0, 10);
+      const bucket = buckets.get(key);
+      if (!bucket) continue;
+      bucket.gmvCents += row.totalCents;
+      bucket.revenueCents += row.serviceFeeCents || row.platformFeeCents + row.buyerFeeCents;
+      bucket.profitCents += row.netPlatformProfitCents || row.platformFeeCents;
+      bucket.ordersCount += 1;
+    }
+
+    return Array.from(buckets.values()).sort((a, b) => a.date.localeCompare(b.date));
   }
 
   static async getPromoterDashboard(organizationId: string): Promise<PromoterFinanceDashboard> {
@@ -218,17 +279,32 @@ export class FinanceReportService {
 }
 
 export class BalanceReleaseJob {
+  private static async isEligibleForRelease(
+    payment: { orderId: string | null; completedAt: Date | null },
+    pendingReleaseDays: number
+  ): Promise<boolean> {
+    if (!payment.orderId || !payment.completedAt) return false;
+
+    const order = await prisma.order.findUnique({
+      where: { id: payment.orderId },
+      include: { event: { select: { endAt: true } } },
+    });
+    if (!order?.event) return false;
+
+    const releaseAfter = new Date(order.event.endAt);
+    releaseAfter.setDate(releaseAfter.getDate() + pendingReleaseDays);
+
+    return new Date() >= releaseAfter;
+  }
+
   static async run() {
     const settings = await FinancialSettingsService.get();
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - settings.pendingReleaseDays);
 
     const pendingPayments = await prisma.ledgerTransaction.findMany({
       where: {
         type: "ORDER_PAYMENT",
         status: "COMPLETED",
         balanceReleasedAt: null,
-        completedAt: { lte: cutoff },
         deletedAt: null,
       },
       include: { entries: true },
@@ -237,6 +313,12 @@ export class BalanceReleaseJob {
     let released = 0;
 
     for (const payment of pendingPayments) {
+      const eligible = await BalanceReleaseJob.isEligibleForRelease(
+        payment,
+        settings.pendingReleaseDays
+      );
+      if (!eligible) continue;
+
       await prisma.$transaction(async (tx) => {
         const entries = payment.entries.filter((e) => e.balanceBucket === "PENDING" && e.direction === "CREDIT");
         if (entries.length === 0) return;
@@ -280,9 +362,7 @@ export class BalanceReleaseJob {
   }
 
   static async releaseForOrganization(organizationId: string) {
-    const settings = await FinancialSettingsService.get();
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - settings.pendingReleaseDays);
+    const settings = await FinancialSettingsService.getForOrganization(organizationId);
 
     const pendingPayments = await prisma.ledgerTransaction.findMany({
       where: {
@@ -290,7 +370,6 @@ export class BalanceReleaseJob {
         status: "COMPLETED",
         organizationId,
         balanceReleasedAt: null,
-        completedAt: { lte: cutoff },
         deletedAt: null,
       },
       include: { entries: true },
@@ -298,6 +377,12 @@ export class BalanceReleaseJob {
 
     let released = 0;
     for (const payment of pendingPayments) {
+      const eligible = await BalanceReleaseJob.isEligibleForRelease(
+        payment,
+        settings.pendingReleaseDays
+      );
+      if (!eligible) continue;
+
       await prisma.$transaction(async (tx) => {
         const entries = payment.entries.filter(
           (e) => e.balanceBucket === "PENDING" && e.direction === "CREDIT"

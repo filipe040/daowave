@@ -26,14 +26,16 @@ import { useParams, useRouter } from "next/navigation";
 import { TeamTab } from "./components/TeamTab";
 import { InvitesTab } from "./components/InvitesTab";
 import { AuditTab } from "./components/AuditTab";
+import { FinancialTab } from "./components/FinancialTab";
 import { InviteModal } from "./components/InviteModal";
 import { OrgEditModal } from "./components/OrgEditModal";
 import { DeleteOrgModal } from "./components/DeleteOrgModal";
 
-type TabType = "overview" | "team" | "invites" | "audit";
+type TabType = "overview" | "team" | "invites" | "audit" | "financial";
 
 const TABS: { id: TabType; label: string; icon: any }[] = [
     { id: "overview", label: "Visão Geral", icon: Building2 },
+    { id: "financial", label: "Config. Financeira", icon: Settings },
     { id: "team", label: "Equipa", icon: Users },
     { id: "invites", label: "Convites", icon: Mail },
     { id: "audit", label: "Auditoria", icon: ShieldCheck },
@@ -221,6 +223,8 @@ export default function OrganizationDetailPage() {
                         </div>
                     </div>
                 )}
+
+                {activeTab === "financial" && <FinancialTab organizationId={id} />}
 
                 {activeTab === "team" && <TeamTab organizationId={id} />}
 

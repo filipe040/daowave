@@ -12,4 +12,8 @@ export * from "./backfill.service";
 export * from "./audit.service";
 export * from "./payment-method.service";
 export * from "./enterprise-calculator";
+export * from "./financial-engine";
 export * from "./wallet-transaction.service";
+export * from "./tier.service";
+export * from "./campaign.service";
+export * from "./auto-settlement.service";

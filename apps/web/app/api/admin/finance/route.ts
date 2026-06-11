@@ -60,6 +60,12 @@ export async function GET(req: Request) {
       return NextResponse.json(settings);
     }
 
+    if (view === "chart") {
+      const days = Number(searchParams.get("days") ?? 30);
+      const chart = await FinanceReportService.getChartData(days);
+      return NextResponse.json({ points: chart });
+    }
+
     return NextResponse.json({ error: "view inválida" }, { status: 400 });
   } catch (error) {
     safeLog.error("Admin finance error", error);

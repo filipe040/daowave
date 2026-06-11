@@ -89,10 +89,13 @@ export default async function CheckoutPage({
     );
   }
 
-  const totalCents = order.items.reduce(
+  const subtotalCents = order.items.reduce(
     (sum, item) => sum + item.quantity * item.unitPriceCents,
     0
   );
+  const serviceFeeCents = order.serviceFeeCents ?? 0;
+  const feePaidBy = order.feePaidBy ?? "BUYER";
+  const displayTotalCents = order.totalCents;
 
   const ticketCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -173,11 +176,27 @@ export default async function CheckoutPage({
                   ))}
                 </div>
 
-                <div className="border-t border-neutral-200 pt-5 flex justify-between items-end">
-                  <span className="text-sm font-semibold text-neutral-500">Total</span>
-                  <span className="text-3xl font-black text-violet-700 tabular-nums">
-                    {formatCurrency(totalCents)}
-                  </span>
+                <div className="border-t border-neutral-200 pt-5 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Bilhete(s)</span>
+                    <span className="font-semibold text-neutral-900 tabular-nums">
+                      {formatCurrency(subtotalCents)}
+                    </span>
+                  </div>
+                  {feePaidBy === "BUYER" && serviceFeeCents > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-neutral-600">Taxa de Serviço LivePass</span>
+                      <span className="font-semibold text-neutral-900 tabular-nums">
+                        {formatCurrency(serviceFeeCents)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-end pt-2 border-t border-neutral-100">
+                    <span className="text-sm font-semibold text-neutral-500">Total</span>
+                    <span className="text-3xl font-black text-violet-700 tabular-nums">
+                      {formatCurrency(displayTotalCents)}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
@@ -192,7 +211,14 @@ export default async function CheckoutPage({
 
           <div className="lg:col-span-3">
             <div className="rounded-[28px] border border-neutral-200 bg-white p-6 sm:p-9 shadow-lg">
-              <CheckoutForm orderId={orderId} totalCents={totalCents} eventId={order.event.id} />
+              <CheckoutForm
+                orderId={orderId}
+                subtotalCents={subtotalCents}
+                serviceFeeCents={serviceFeeCents}
+                totalCents={displayTotalCents}
+                feePaidBy={feePaidBy}
+                eventId={order.event.id}
+              />
             </div>
           </div>
         </div>

@@ -35,6 +35,55 @@ export interface EnterpriseFinancialSettings extends FinancialSettingsInput {
   chargebackProtectionEnabled: boolean;
   automaticPayoutsEnabled: boolean;
   defaultVatPercent: number;
+  pricingMode: "FORMULA" | "TIERED";
+  serviceFeeFixedCents: number;
+  minimumServiceFeeCents: number;
+  maximumServiceFeeCents: number | null;
+  operationalReserveCents: number;
+  roundingMode: "NONE" | "END_49" | "END_99" | "END_49_99";
+  absorbPaymentFees: boolean;
+  defaultFeePaidBy: "BUYER" | "ORGANIZER";
+}
+
+export interface PromoterFinancialProfile {
+  organizationId: string;
+  pricingMode: "GLOBAL" | "CUSTOM";
+  customFixedFeeCents: number | null;
+  customPercentageFee: number | null;
+  customMinimumFeeCents: number | null;
+  customMaximumFeeCents: number | null;
+  customOperationalReserveCents: number | null;
+  feePaidBy: "BUYER" | "ORGANIZER" | null;
+  settlementFrequency: "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "MANUAL";
+  lastSettlementAt: string | null;
+  active: boolean;
+  serviceFeeMode: "PERCENTAGE" | "FIXED" | null;
+  serviceFeeValue: number | null;
+  reservePercentage: number | null;
+  minimumProfitPerOrderCents: number | null;
+  payoutDelayDays: number | null;
+}
+
+export interface CommissionTierInput {
+  id?: string;
+  minPriceCents: number;
+  maxPriceCents: number | null;
+  fixedFeeCents: number;
+  percentageFee: number;
+  active: boolean;
+  sortOrder: number;
+}
+
+export interface FeeCampaignInput {
+  id?: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  discountType: "PERCENT_OFF_FEE" | "FIXED_FEE_OVERRIDE" | "ZERO_FEE";
+  discountValue: number;
+  organizationId: string | null;
+  firstEventOnly: boolean;
+  active: boolean;
 }
 
 export interface LedgerEntryInput {
@@ -73,6 +122,29 @@ export interface AdminFinanceDashboard {
   ordersPaid: number;
   averageMarginPercent: number;
   currency: string;
+  activeEvents: number;
+  ticketsSold: number;
+  activeOrganizers: number;
+  walletBalanceCents: number;
+  pendingSettlementCents: number;
+  operationalProfitCents: number;
+}
+
+export interface FinanceChartPoint {
+  date: string;
+  gmvCents: number;
+  revenueCents: number;
+  profitCents: number;
+  ordersCount: number;
+}
+
+export interface FeePreviewResult {
+  ticketPriceCents: number;
+  serviceFeeCents: number;
+  totalCustomerCents: number;
+  promoterReceivesCents: number;
+  feePaidBy: "BUYER" | "ORGANIZER";
+  breakdown: Record<string, string>;
 }
 
 export interface PromoterFinanceDashboard {

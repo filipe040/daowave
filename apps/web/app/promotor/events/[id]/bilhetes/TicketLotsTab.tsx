@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { Plus, Check, Loader2, Pencil, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { FeePreview } from "@/components/promotor/FeePreview";
 
 const EMPTY_FORM = {
     name: "", ticketTypeId: "", priceCents: "", capacity: "", startsAt: "", endsAt: "", status: "ACTIVE" as "ACTIVE" | "PAUSED",
@@ -30,21 +31,25 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deletingLotId, setDeletingLotId] = useState<string | null>(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
+    const [organizationId, setOrganizationId] = useState<string | undefined>();
 
     const loadData = useCallback(async () => {
         setLoading(true); setError(null);
         try {
-            const [lotsRes, typesRes] = await Promise.all([
+            const [lotsRes, typesRes, eventRes] = await Promise.all([
                 fetchWithTimeout(`/api/promotor/events/${eventId}/ticket-lots`, undefined, 8000),
-                fetchWithTimeout(`/api/promotor/events/${eventId}/ticket-types`, undefined, 8000)
+                fetchWithTimeout(`/api/promotor/events/${eventId}/ticket-types`, undefined, 8000),
+                fetchWithTimeout(`/api/promotor/events/${eventId}`, undefined, 8000),
             ]);
             if (!lotsRes.ok || !typesRes.ok) throw new Error("Erro ao carregar dados de lotes/tipos");
 
             const lotsData = await lotsRes.json();
             const typesData = await typesRes.json();
+            const eventData = eventRes.ok ? await eventRes.json() : null;
             setLots(lotsData.ticketLots);
             setTypes(typesData.ticketTypes);
             setCanEdit(!!lotsData.meta?.canEdit);
+            if (eventData?.organizationId) setOrganizationId(eventData.organizationId);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro");
         } finally {
@@ -201,6 +206,7 @@ export default function TicketLotsTab({ eventId }: { eventId: string }) {
                             <div>
                                 <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Preço (€) *</label>
                                 <input required type="number" step="0.01" min="0" value={formData.priceCents} onChange={e => setFormData({ ...formData, priceCents: e.target.value })} disabled={!!editingLotId && !canEdit} placeholder="Ex: 15.00" className="w-full h-12 rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 px-5 focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner text-[14px] disabled:opacity-50" />
+                                <FeePreview priceEuros={formData.priceCents} organizationId={organizationId} />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2 ml-1">Capacidade (Stock) *</label>

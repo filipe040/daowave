@@ -21,7 +21,10 @@ import { PaymentProcessingOverlay } from '@/components/checkout/PaymentProcessin
 
 interface CheckoutFormProps {
   orderId: string;
+  subtotalCents: number;
+  serviceFeeCents: number;
   totalCents: number;
+  feePaidBy: "BUYER" | "ORGANIZER";
   eventId: string;
 }
 
@@ -49,7 +52,14 @@ function generateMultibancoRef() {
   return { entity, reference };
 }
 
-export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps) {
+export function CheckoutForm({
+  orderId,
+  subtotalCents,
+  serviceFeeCents,
+  totalCents,
+  feePaidBy,
+  eventId,
+}: CheckoutFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -71,7 +81,8 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
   const [couponError, setCouponError] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
-  const effectiveTotal = appliedCoupon ? appliedCoupon.finalCents : totalCents;
+  const couponDiscount = appliedCoupon?.discountCents ?? 0;
+  const effectiveTotal = totalCents - couponDiscount;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -86,7 +97,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
         body: JSON.stringify({
           code: couponCode.trim().toUpperCase(),
           eventId,
-          totalCents,
+          totalCents: subtotalCents,
         }),
       });
       const data = await res.json();
@@ -415,9 +426,15 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
         {/* Total + Termos */}
         <section className="rounded-2xl border bg-white border-neutral-200 bg-neutral-50 p-5 space-y-4">
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-600">Subtotal</span>
-            <span className="text-neutral-900">{formatEuro(totalCents)}</span>
+            <span className="text-neutral-600">Bilhete(s)</span>
+            <span className="text-neutral-900">{formatEuro(subtotalCents)}</span>
           </div>
+          {feePaidBy === "BUYER" && serviceFeeCents > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-600">Taxa de Serviço LivePass</span>
+              <span className="text-neutral-900">{formatEuro(serviceFeeCents)}</span>
+            </div>
+          )}
           {appliedCoupon && (
             <div className="flex justify-between text-sm">
               <span className="text-emerald-600">Desconto</span>
@@ -428,7 +445,7 @@ export function CheckoutForm({ orderId, totalCents, eventId }: CheckoutFormProps
             <span className="text-neutral-900 font-semibold">Total</span>
             <div className="text-right">
               <span className="text-3xl font-black text-neutral-900 tracking-tight">{formatEuro(effectiveTotal)}</span>
-              <p className="text-[11px] text-neutral-500 mt-0.5">IVA incluído</p>
+              <p className="text-[11px] text-neutral-500 mt-0.5">IVA incluído onde aplicável</p>
             </div>
           </div>
         </section>

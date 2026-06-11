@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import type { PaymentProviderKind, Prisma } from "@prisma/client";
-import { calculateEnterpriseSplit } from "./enterprise-calculator";
-import { FinancialSettingsService } from "./settings.service";
+import type { FeePaidBy, PaymentProviderKind, Prisma } from "@prisma/client";
+import { FinancialEngine } from "./financial-engine";
 import { PaymentMethodService } from "./payment-method.service";
 import { WalletService } from "./wallet.service";
 import { LedgerService } from "./ledger.service";
@@ -45,9 +44,7 @@ export class OrderFinanceService {
         0
       );
 
-      const settings = await FinancialSettingsService.getForOrganization(order.event.organizationId);
       const methodCode = options?.paymentMethodCode ?? "MBWAY";
-
       let paymentMethod;
       try {
         paymentMethod = await PaymentMethodService.getByCode(methodCode, tx);
@@ -55,19 +52,18 @@ export class OrderFinanceService {
         paymentMethod = await PaymentMethodService.getByCode("MBWAY", tx);
       }
 
-      const split = calculateEnterpriseSplit({
+      const feePaidBy: FeePaidBy = order.feePaidBy ?? "BUYER";
+      const serviceFeeCents = order.serviceFeeCents;
+
+      const split = await FinancialEngine.calculateOrderSplit({
         ticketPriceCents: subtotalCents,
+        organizationId: order.event.organizationId,
         paymentMethod,
-        settings: {
-          serviceFeeType: settings.serviceFeeType,
-          serviceFeeValue: settings.serviceFeeValue,
-          reservePercentage: settings.reserveFundPercent,
-          dynamicServiceFee: settings.dynamicServiceFee,
-          minimumProfitPerOrderCents: settings.minimumProfitPerOrderCents,
-          defaultVatPercent: settings.defaultVatPercent,
+        paymentMethodCode: methodCode,
+        snapshot: {
+          serviceFeeCents,
+          feePaidBy,
         },
-        autoAdjustServiceFee: true,
-        enforceMinimumProfit: true,
       });
 
       await WalletService.ensureSystemWallets(tx);
@@ -159,6 +155,11 @@ export class OrderFinanceService {
           totalCents: split.totalCustomerCents,
           paymentMethodCode: split.paymentMethodCode,
           marginPercent: split.marginPercent,
+          feePaidBy: split.feePaidBy,
+          operationalReserveCents: split.operationalReserveCents,
+          appliedCampaignId: split.appliedCampaignId,
+          appliedTierId: split.appliedTierId,
+          pricingModeUsed: split.pricingModeUsed,
           currency: order.currency,
         },
       });
