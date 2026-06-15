@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { MetadataRoute } from "next";
 import { getAppBaseUrl } from "@/lib/company";
+import { listPublicOrganizationSlugs } from "@/lib/organizations/public-profile";
 
 const BASE = getAppBaseUrl();
 
@@ -41,5 +42,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...eventPages, ...cityPages];
+  const orgProfiles = await listPublicOrganizationSlugs();
+  const orgPages: MetadataRoute.Sitemap = orgProfiles.map((o) => ({
+    url: `${BASE}/org/${o.slug}`,
+    lastModified: o.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...eventPages, ...cityPages, ...orgPages];
 }

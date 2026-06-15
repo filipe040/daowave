@@ -73,6 +73,12 @@ export interface Organization {
     vatNumber?: string;
     status: string;
     website?: string;
+    logoUrl?: string | null;
+    bannerUrl?: string | null;
+    publicBio?: string | null;
+    publicProfileEnabled?: boolean;
+    publicProfileEnabledAt?: string | null;
+    publicProfileNote?: string | null;
     createdAt: string;
     _count?: {
         members: number;

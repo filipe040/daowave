@@ -118,6 +118,11 @@ model Organization {
   country      String?
   website      String?
   logoUrl      String?
+  bannerUrl    String?            @db.VarChar(2048)
+  publicBio    String?            @db.Text
+  publicProfileEnabled    Boolean @default(false)
+  publicProfileEnabledAt  DateTime?
+  publicProfileNote       String?  @db.Text
   invoiceThemeJson Json?
   status       OrganizationStatus @default(PENDING)
   createdAt    DateTime           @default(now())
@@ -142,6 +147,7 @@ model Organization {
 
   @@index([slug])
   @@index([status])
+  @@index([publicProfileEnabled])
 }
 
 // --- TICKET DESIGN SYSTEM ---

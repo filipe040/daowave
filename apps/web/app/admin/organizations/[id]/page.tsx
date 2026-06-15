@@ -15,7 +15,8 @@ import {
     Activity,
     ArrowLeft,
     Plus,
-    Trash2
+    Trash2,
+    Sparkles
 } from "lucide-react";
 import { api, Organization } from "@/lib/api-client";
 import { toast } from "sonner";
@@ -27,15 +28,17 @@ import { TeamTab } from "./components/TeamTab";
 import { InvitesTab } from "./components/InvitesTab";
 import { AuditTab } from "./components/AuditTab";
 import { FinancialTab } from "./components/FinancialTab";
+import { PublicProfileTab } from "./components/PublicProfileTab";
 import { InviteModal } from "./components/InviteModal";
 import { OrgEditModal } from "./components/OrgEditModal";
 import { DeleteOrgModal } from "./components/DeleteOrgModal";
 
-type TabType = "overview" | "team" | "invites" | "audit" | "financial";
+type TabType = "overview" | "team" | "invites" | "audit" | "financial" | "publicProfile";
 
 const TABS: { id: TabType; label: string; icon: any }[] = [
     { id: "overview", label: "Visão Geral", icon: Building2 },
     { id: "financial", label: "Config. Financeira", icon: Settings },
+    { id: "publicProfile", label: "Perfil Público", icon: Sparkles },
     { id: "team", label: "Equipa", icon: Users },
     { id: "invites", label: "Convites", icon: Mail },
     { id: "audit", label: "Auditoria", icon: ShieldCheck },
@@ -218,6 +221,17 @@ export default function OrganizationDetailPage() {
                                     <p className="text-[13px] text-zinc-500 leading-relaxed">
                                         Esta organização está ativa e tem permissões completas para criar eventos e gerir vendas na plataforma.
                                     </p>
+                                    {org.publicProfileEnabled && (
+                                        <a
+                                            href={`/org/${org.slug}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-[13px] font-bold text-[#00a0e3] hover:text-[#5ec8f8] transition-colors"
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                            Ver perfil público
+                                        </a>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -225,6 +239,8 @@ export default function OrganizationDetailPage() {
                 )}
 
                 {activeTab === "financial" && <FinancialTab organizationId={id} />}
+
+                {activeTab === "publicProfile" && <PublicProfileTab organizationId={id} />}
 
                 {activeTab === "team" && <TeamTab organizationId={id} />}
 
