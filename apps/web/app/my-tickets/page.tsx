@@ -10,6 +10,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Ticket, ArrowRight, MapPin, Calendar } from "lucide-react";
 import { PublicPage, PublicEmptyState, PublicButton } from "@/components/public/public-page";
+import { redirect } from "next/navigation";
+import { staffDashboardRedirectPath } from "@/lib/auth/public-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,8 @@ async function getTickets(userId: string) {
 
 export default async function MyTicketsPage() {
   const session = await getServerSession(authOptions);
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
 
   if (!session?.user) {
     return (

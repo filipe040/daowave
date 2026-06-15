@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ShoppingBag, Ticket, ArrowRight } from "lucide-react";
+import { getStaffDashboardPath } from "@/lib/auth/public-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,11 @@ async function getCounts(userId: string) {
 export default async function AccountDashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return null;
+
+  const role = (session.user as { role?: string }).role;
+  const hasOrgAccess = (session.user as { hasOrgAccess?: boolean }).hasOrgAccess === true;
+  const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+  if (staffPath) redirect(staffPath);
 
   const { ordersCount, ticketsCount } = await getCounts(session.user.id);
 

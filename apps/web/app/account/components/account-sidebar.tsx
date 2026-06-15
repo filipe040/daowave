@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   User,
@@ -14,8 +15,13 @@ import {
   Heart,
   type LucideIcon,
 } from "lucide-react";
+import {
+  getStaffDashboardPath,
+  isStaffAccount,
+  staffDashboardLabel,
+} from "@/lib/auth/public-nav";
 
-const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
+const buyerMenuItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/account", label: "Resumo", icon: LayoutDashboard },
   { href: "/account/profile", label: "Dados pessoais", icon: User },
   { href: "/account/security", label: "Segurança", icon: Shield },
@@ -26,6 +32,11 @@ const menuItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/account/legal", label: "Termos e privacidade", icon: FileText },
 ];
 
+const staffMenuItems: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/account/security", label: "Segurança", icon: Shield },
+  { href: "/account/legal", label: "Termos e privacidade", icon: FileText },
+];
+
 interface AccountSidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
@@ -33,6 +44,12 @@ interface AccountSidebarProps {
 
 export default function AccountSidebar({ mobileOpen = false, onClose }: AccountSidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string })?.role;
+  const hasOrgAccess = (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  const isStaff = isStaffAccount(role, hasOrgAccess);
+  const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+  const menuItems = isStaff ? staffMenuItems : buyerMenuItems;
 
   return (
     <>
@@ -67,6 +84,16 @@ export default function AccountSidebar({ mobileOpen = false, onClose }: AccountS
         </div>
         <nav className="flex flex-col h-full p-4">
           <div className="space-y-1 flex-1">
+          {isStaff && staffPath && (
+            <Link
+              href={staffPath}
+              onClick={onClose}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 mb-2 text-sm font-bold bg-[#00a0e3]/15 text-[#5ec8f8] hover:bg-[#00a0e3]/20 transition-colors"
+            >
+              <LayoutDashboard className="h-5 w-5 shrink-0" />
+              {staffDashboardLabel(role, hasOrgAccess)}
+            </Link>
+          )}
           {menuItems.map((item) => {
             const isActive =
               item.href === "/account"

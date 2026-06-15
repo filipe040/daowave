@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { Ticket, Search, Menu, X } from "lucide-react";
-
-const ROLE_LABELS: Record<string, string> = {
-  USER: "Utilizador",
-  ADMIN: "Admin",
-  FINANCE_MANAGER: "Gestor financeiro",
-  SUPPORT_AGENT: "Suporte",
-};
+import { Ticket, Search, Menu, X, LayoutDashboard } from "lucide-react";
+import {
+  getStaffDashboardPath,
+  isStaffAccount,
+  staffDashboardLabel,
+} from "@/lib/auth/public-nav";
 
 function getInitials(name: string | null | undefined, email: string | undefined): string {
   if (name?.trim()) {
@@ -41,7 +39,16 @@ export default function NavClient() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const role = (session?.user as { role?: string })?.role ?? "USER";
+  const hasOrgAccess = (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  const isPlatformAdmin =
+    role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT";
+  const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+  const isStaff = isStaffAccount(role, hasOrgAccess);
+  const initials = getInitials(localName ?? session?.user?.name ?? null, session?.user?.email ?? undefined);
+
   useEffect(() => {
+    if (!session || isStaff) return;
     let mounted = true;
     async function loadProfile() {
       try {
@@ -55,15 +62,10 @@ export default function NavClient() {
     }
     loadProfile();
     return () => { mounted = false; };
-  }, []);
+  }, [session, isStaff]);
 
   const displayName = localName ?? session?.user?.name ?? session?.user?.email ?? "";
   const avatarUrl = localAvatar ?? (session?.user as { avatarUrl?: string })?.avatarUrl ?? (session?.user as { image?: string })?.image;
-  const role = (session?.user as { role?: string })?.role ?? "USER";
-  const hasOrgAccess = (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
-  const isPlatformAdmin =
-    role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT";
-  const initials = getInitials(localName ?? session?.user?.name ?? null, session?.user?.email ?? undefined);
 
   const navLink = "text-sm font-semibold text-zinc-300 hover:text-white transition-colors";
 
@@ -86,7 +88,9 @@ export default function NavClient() {
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <Link href="/events" className={navLink}>Eventos</Link>
-            {session && <Link href="/my-tickets" className={navLink}>Meus bilhetes</Link>}
+            {session && !isStaff && (
+              <Link href="/my-tickets" className={navLink}>Meus bilhetes</Link>
+            )}
             <Link href="/help" className={navLink}>Ajuda</Link>
           </nav>
 
@@ -107,24 +111,38 @@ export default function NavClient() {
                       Admin
                     </Link>
                   )}
-                  {(hasOrgAccess || role === "ADMIN") && (
+                  {hasOrgAccess && (
                     <Link href="/promotor" className={navLink}>
                       Promotor
                     </Link>
                   )}
-                  <Link href="/account" className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-1 pr-3 py-1 hover:bg-white/10 transition-all">
-                    <div className="h-8 w-8 rounded-full overflow-hidden bg-[#00a0e3]/20 flex items-center justify-center">
-                      {avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="text-xs font-bold text-[#5ec8f8]">{initials}</span>
-                      )}
-                    </div>
-                    <span className="text-sm font-semibold text-white max-w-[100px] truncate hidden xl:block">
-                      {displayName.split(" ")[0]}
-                    </span>
-                  </Link>
+                  {isStaff && staffPath ? (
+                    <Link
+                      href={staffPath}
+                      className="flex items-center gap-2 rounded-full border border-[#00a0e3]/30 bg-[#00a0e3]/10 pl-1 pr-3 py-1 hover:bg-[#00a0e3]/20 transition-all"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-[#00a0e3]/25 flex items-center justify-center">
+                        <LayoutDashboard className="h-4 w-4 text-[#5ec8f8]" />
+                      </div>
+                      <span className="text-sm font-semibold text-white max-w-[120px] truncate hidden xl:block">
+                        {staffDashboardLabel(role, hasOrgAccess)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <Link href="/account" className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-1 pr-3 py-1 hover:bg-white/10 transition-all">
+                      <div className="h-8 w-8 rounded-full overflow-hidden bg-[#00a0e3]/20 flex items-center justify-center">
+                        {avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={avatarDisplayUrl(avatarUrl) ?? ""} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-xs font-bold text-[#5ec8f8]">{initials}</span>
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold text-white max-w-[100px] truncate hidden xl:block">
+                        {displayName.split(" ")[0]}
+                      </span>
+                    </Link>
+                  )}
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="text-sm font-semibold text-zinc-500 hover:text-white transition-colors"
@@ -165,13 +183,31 @@ export default function NavClient() {
         {mobileMenuOpen && (
           <nav className="lg:hidden pb-6 pt-2 border-t border-white/10 space-y-1">
             <Link href="/events" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>Eventos</Link>
-            {session && (
+            {session && !isStaff && (
               <Link href="/my-tickets" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>Meus bilhetes</Link>
             )}
             <Link href="/help" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>Ajuda</Link>
             {session ? (
               <>
-                <Link href="/account" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>Conta</Link>
+                {isStaff && staffPath && (
+                  <Link
+                    href={staffPath}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block py-3 ${navLink}`}
+                  >
+                    {staffDashboardLabel(role, hasOrgAccess)}
+                  </Link>
+                )}
+                {!isStaff && (
+                  <Link href="/account" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>
+                    Conta
+                  </Link>
+                )}
+                {isStaff && (
+                  <Link href="/account/security" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>
+                    Segurança da conta
+                  </Link>
+                )}
                 <button
                   onClick={() => { signOut({ callbackUrl: "/" }); setMobileMenuOpen(false); }}
                   className="w-full mt-4 rounded-xl bg-white/10 py-3 text-sm font-bold text-white"

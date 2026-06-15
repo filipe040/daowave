@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import TicketDetail from "../../components/ticket-detail";
+import { staffDashboardRedirectPath } from "@/lib/auth/public-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,8 @@ async function getTicket(id: string, userId: string) {
 export default async function AccountTicketDetailPage(props: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return null;
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
   const { id } = await props.params;
   const ticket = await getTicket(id, session.user.id);
   if (!ticket) notFound();

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AccountProfile from "../components/account-profile";
+import { getStaffDashboardPath } from "@/lib/auth/public-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,12 @@ async function getCurrentUser(userId: string) {
 export default async function AccountProfilePage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/auth/signin?callbackUrl=/account/profile");
+
+  const role = (session.user as { role?: string }).role;
+  const hasOrgAccess = (session.user as { hasOrgAccess?: boolean }).hasOrgAccess === true;
+  const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+  if (staffPath) redirect(staffPath);
+
   const user = await getCurrentUser(session.user.id);
   if (!user) redirect("/account");
   return <AccountProfile user={user} />;

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +9,7 @@ import Image from "next/image";
 import { CheckCircle } from "lucide-react";
 import { generateQrCodeDataUrl, generateQrToken } from "@/lib/qr";
 import { TicketTransferButton } from "./ticket-transfer-button";
+import { staffDashboardRedirectPath } from "@/lib/auth/public-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,8 @@ async function getTicket(ticketId: string, userId: string) {
 
 export default async function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
   if (!session?.user) {
     return notFound();
   }
