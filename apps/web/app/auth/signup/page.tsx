@@ -56,7 +56,7 @@ function SignUpContent() {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-[400px] text-center">
-          <div className="rounded-[24px] sm:rounded-[32px] border border-neutral-200 bg-white p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-[#14141f] p-6 sm:p-8 shadow-xl space-y-6">
             <div className="mx-auto flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
               <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
             </div>
@@ -105,7 +105,7 @@ function SignUpContent() {
           </div>
         )}
 
-        <div className="rounded-[24px] sm:rounded-[32px] border border-neutral-200 bg-white p-6 sm:p-8 shadow-xl">
+        <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-[#14141f] p-6 sm:p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name" className="auth-label">
@@ -199,9 +199,9 @@ function SignUpContent() {
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen mesh-gradient text-neutral-900 selection:bg-white selection:text-black overflow-x-hidden">
+    <div className="public-shell min-h-screen overflow-x-hidden">
       <Suspense fallback={
-        <div className="min-h-screen mesh-gradient flex items-center justify-center">
+        <div className="public-shell min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
         </div>
       }>

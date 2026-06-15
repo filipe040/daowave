@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRight, Users } from "lucide-react";
 import PromoterLink from "@/app/components/PromoterLink";
 
@@ -23,12 +22,6 @@ export function PromoterCta() {
               <PromoterLink className="inline-flex items-center justify-center gap-2 rounded-full bg-[#00a0e3] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#0090cc] transition-colors shadow-lg shadow-[#00a0e3]/25">
                 Começar a vender <ArrowRight className="h-4 w-4" />
               </PromoterLink>
-              <Link
-                href="/sobre-nos"
-                className="inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-colors"
-              >
-                Saber mais
-              </Link>
             </div>
           </div>
         </div>

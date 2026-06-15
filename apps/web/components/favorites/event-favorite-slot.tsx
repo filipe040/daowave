@@ -7,7 +7,7 @@ export function EventFavoriteSlot({ eventId }: { eventId: string }) {
     <FavoriteButton
       eventId={eventId}
       size="sm"
-      className="absolute top-3 right-3 z-10 shadow-sm"
+      className="absolute top-3 left-3 z-10 shadow-sm"
     />
   );
 }

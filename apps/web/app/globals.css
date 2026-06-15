@@ -160,23 +160,23 @@
     @apply ui-btn border-neutral-200 bg-neutral-50 text-neutral-800 hover:bg-neutral-100;
   }
   .public-card {
-    @apply rounded-3xl border border-neutral-200 bg-white shadow-md;
+    @apply rounded-2xl border border-white/10 bg-[#14141f];
   }
 
   .public-input {
-    @apply w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-violet-400 focus:ring-2 focus:ring-violet-100;
+    @apply h-11 sm:h-12 w-full rounded-xl border border-white/10 bg-[#0c0c12] px-4 text-sm text-white placeholder:text-zinc-600 outline-none transition-all focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20;
   }
 
   .public-label {
-    @apply block text-[11px] uppercase tracking-wider text-neutral-500 font-semibold mb-2;
+    @apply block text-xs font-semibold text-zinc-400 mb-1.5;
   }
 
   .auth-input {
-    @apply h-11 sm:h-12 rounded-xl sm:rounded-2xl border border-neutral-200 bg-white text-[13px] sm:text-[14px] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-violet-100 focus-visible:border-violet-400 px-4;
+    @apply public-input;
   }
 
   .auth-label {
-    @apply block text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-500 font-semibold ml-1;
+    @apply block text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-500 font-semibold ml-1;
   }
 
   /* Dashboard (promotor / admin) — light cards & surfaces */
@@ -252,6 +252,10 @@
 
   .public-search-label {
     @apply text-[10px] uppercase tracking-wider text-zinc-500 font-bold pointer-events-none;
+  }
+
+  .public-section-title {
+    @apply text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4;
   }
 
   .animate-fade-in {

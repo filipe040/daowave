@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { PublicPage } from "@/components/public/public-page";
 
 export const metadata = {
     title: "Perguntas Frequentes — LivePass Bilhetes",
@@ -67,55 +66,38 @@ const FAQS = [
 
 export default function FAQPage() {
     return (
-        <div className="min-h-screen mesh-gradient text-neutral-900">
-            <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-[13px] text-neutral-500 hover:text-violet-600 font-semibold transition mb-10"
-                >
-                    <ArrowLeft className="h-4 w-4" /> Início
-                </Link>
-
-                <div className="text-[11px] uppercase tracking-wider text-violet-600 font-bold mb-2">Apoio</div>
-                <h1 className="text-[32px] sm:text-[40px] font-black text-neutral-900 leading-tight mb-4">
-                    Perguntas Frequentes
-                </h1>
-                <p className="text-[15px] text-neutral-600 mb-12">
-                    Não encontras o que procuras?{" "}
-                    <a href="mailto:suporte@livepass.pt" className="text-violet-600 hover:text-violet-700 font-semibold underline underline-offset-2">
-                        Contacta-nos
-                    </a>
-                    .
-                </p>
-
-                <div className="space-y-10">
-                    {FAQS.map((section) => (
-                        <div key={section.category}>
-                            <h2 className="text-[12px] uppercase tracking-wider text-neutral-500 font-bold mb-4">
-                                {section.category}
-                            </h2>
-                            <div className="space-y-3">
-                                {section.items.map((item) => (
-                                    <details
-                                        key={item.q}
-                                        className="group rounded-2xl border border-neutral-200 bg-white open:border-violet-200 open:shadow-md transition-all"
-                                    >
-                                        <summary className="cursor-pointer px-5 py-4 text-[14px] font-semibold text-neutral-800 group-open:text-violet-800 flex items-start justify-between gap-4 select-none">
-                                            {item.q}
-                                            <span className="shrink-0 text-neutral-400 group-open:text-violet-500 group-open:rotate-180 transition-transform duration-200 mt-0.5">
-                                                ↓
-                                            </span>
-                                        </summary>
-                                        <p className="px-5 pb-5 text-[13px] text-neutral-600 leading-relaxed border-t border-neutral-100 pt-3">
-                                            {item.a}
-                                        </p>
-                                    </details>
-                                ))}
-                            </div>
+        <PublicPage
+            title="Perguntas frequentes"
+            subtitle="Não encontras o que procuras? Contacta support@livepass.pt"
+            backHref="/"
+        >
+            <div className="space-y-8 max-w-3xl">
+                {FAQS.map((section) => (
+                    <div key={section.category}>
+                        <h2 className="text-[11px] uppercase tracking-wider text-zinc-500 font-bold mb-3">
+                            {section.category}
+                        </h2>
+                        <div className="space-y-2">
+                            {section.items.map((item) => (
+                                <details
+                                    key={item.q}
+                                    className="group rounded-2xl border border-white/10 bg-[#14141f] open:border-[#00a0e3]/30 transition-all"
+                                >
+                                    <summary className="cursor-pointer px-4 sm:px-5 py-4 text-sm font-semibold text-white flex items-start justify-between gap-4 select-none list-none [&::-webkit-details-marker]:hidden">
+                                        {item.q}
+                                        <span className="shrink-0 text-zinc-500 group-open:text-[#5ec8f8] group-open:rotate-180 transition-transform duration-200">
+                                            ↓
+                                        </span>
+                                    </summary>
+                                    <p className="px-4 sm:px-5 pb-4 text-sm text-zinc-400 leading-relaxed border-t border-white/5 pt-3">
+                                        {item.a}
+                                    </p>
+                                </details>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
-        </div>
+        </PublicPage>
     );
 }

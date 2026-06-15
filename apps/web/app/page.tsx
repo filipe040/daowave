@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
-  buildPublicEventsWhere,
   getCategoriesWithPublishedEvents,
   getCitiesWithPublishedEvents,
 } from "@/lib/events/public-event-filters";
@@ -11,9 +12,7 @@ import { EventCarousel } from "@/components/public/event-carousel";
 import { EventCard } from "@/components/public/event-card";
 import { toEventCardData } from "@/components/public/event-mappers";
 import { SectionHeader } from "@/components/public/section-header";
-import { NewsletterSection } from "@/components/public/newsletter-section";
 import { PromoterCta } from "@/components/public/promoter-cta";
-import EventsSearch from "./components/events-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -46,58 +45,30 @@ async function getThisWeekEvents() {
       },
       include: eventInclude,
       orderBy: { startAt: "asc" },
-      take: 12,
+      take: 8,
     })
     .catch(() => []);
-}
-
-async function getAllEvents(limit = 9) {
-  return prisma.event
-    .findMany({
-      where: buildPublicEventsWhere({}),
-      include: eventInclude,
-      orderBy: { startAt: "asc" },
-      take: limit,
-    })
-    .catch(() => []);
-}
-
-async function getStats() {
-  try {
-    const [totalTickets, totalEvents, totalPromoters] = await Promise.all([
-      prisma.ticket.count({ where: { status: { in: ["VALID", "USED"] } } }),
-      prisma.event.count({ where: { status: "PUBLISHED", archivedAt: null } }),
-      prisma.promoterProfile.count({ where: { status: "APPROVED" } }),
-    ]);
-    return {
-      tickets: Math.max(totalTickets, 1250),
-      events: Math.max(totalEvents, 18),
-      promoters: Math.max(totalPromoters, 6),
-    };
-  } catch {
-    return { tickets: 1250, events: 18, promoters: 6 };
-  }
 }
 
 export default async function Home() {
-  const [featured, thisWeek, allEvents, cities, categories, stats] = await Promise.all([
+  const [featured, thisWeek, cities, categories] = await Promise.all([
     getFeaturedEvents(),
     getThisWeekEvents(),
-    getAllEvents(9),
     getCitiesWithPublishedEvents(),
     getCategoriesWithPublishedEvents(),
-    getStats(),
   ]);
 
   const featuredCards = featured.map(toEventCardData);
   const weekCards = thisWeek.map(toEventCardData);
-  const gridCards = allEvents.map(toEventCardData);
+  const showWeekCarousel = weekCards.length > 0 && weekCards.some((e) => !featuredCards.find((f) => f.id === e.id));
 
   return (
     <div className="public-shell min-h-screen">
-      <HomeHero cities={cities} categories={categories} />
+      <Suspense fallback={null}>
+        <HomeHero cities={cities} categories={categories} />
+      </Suspense>
 
-      <TrustStrip stats={stats} />
+      <TrustStrip />
 
       {featuredCards.length > 0 && (
         <EventCarousel
@@ -108,48 +79,34 @@ export default async function Home() {
         />
       )}
 
-      {weekCards.length > 0 && (
-        <EventCarousel
-          title="Esta semana"
-          subtitle="Próximos dias"
-          events={weekCards}
-          href="/events"
-        />
+      {showWeekCarousel && (
+        <section className="py-8 sm:py-12 border-t border-white/[0.06]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeader title="Esta semana" subtitle="Próximos 7 dias" href="/events" />
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+              {weekCards.slice(0, 8).map((event) => (
+                <EventCard key={event.id} event={event} variant="compact" />
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       <section className="py-10 sm:py-14 border-t border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Todos os eventos"
-            subtitle="Explorar"
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-xl sm:text-2xl font-black text-white">Explora todos os eventos</h2>
+          <p className="mt-2 text-sm text-zinc-400 max-w-lg mx-auto">
+            Filtra por cidade, género ou pesquisa pelo nome do evento.
+          </p>
+          <Link
             href="/events"
-          />
-          <div className="mt-8 mb-8">
-            <Suspense fallback={<div className="h-14 rounded-xl bg-white/5 animate-pulse" />}>
-              <EventsSearch
-                cities={cities}
-                categories={categories}
-                variant="inline"
-                basePath="/events"
-              />
-            </Suspense>
-          </div>
-
-          {gridCards.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-[#14141f] py-16 text-center">
-              <p className="text-zinc-400">Sem eventos disponíveis de momento.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {gridCards.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          )}
+            className="inline-flex items-center gap-2 mt-6 rounded-full bg-[#00a0e3] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#0090cc] transition-colors shadow-lg shadow-[#00a0e3]/20"
+          >
+            Ver todos os eventos <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      <NewsletterSection />
       <PromoterCta />
     </div>
   );

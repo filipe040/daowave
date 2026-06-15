@@ -95,7 +95,7 @@ function VerifyEmailContent() {
       </div>
 
       <div className="w-full max-w-[400px] text-center">
-        <div className="rounded-[24px] sm:rounded-[32px] border border-neutral-200 bg-white p-6 sm:p-10 shadow-xl space-y-8">
+        <div className="rounded-[24px] sm:rounded-[32px] border border-white/10 bg-[#14141f] p-6 sm:p-10 shadow-xl space-y-8">
 
           {status === "loading" && (
             <div className="space-y-6">
@@ -166,9 +166,9 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <div className="min-h-screen mesh-gradient text-neutral-900 selection:bg-white selection:text-black overflow-x-hidden">
+    <div className="public-shell min-h-screen overflow-x-hidden">
       <Suspense fallback={
-        <div className="min-h-screen mesh-gradient flex items-center justify-center">
+        <div className="public-shell min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
         </div>
       }>

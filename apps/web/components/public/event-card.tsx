@@ -47,7 +47,7 @@ export function EventCard({
   return (
     <article
       className={`group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14141f] transition-all duration-300 hover:border-[#00a0e3]/40 hover:shadow-[0_8px_40px_rgba(0,160,227,0.12)] ${
-        isFeatured ? "min-w-[280px] sm:min-w-[320px] max-w-[360px] snap-start" : ""
+        isFeatured ? "min-w-[72vw] sm:min-w-[300px] md:min-w-[320px] max-w-[360px] snap-start shrink-0" : ""
       }`}
     >
       <EventFavoriteSlot eventId={event.id} />
@@ -77,7 +77,7 @@ export function EventCard({
               Desde {formatPrice(event.minPriceCents)}
             </div>
           )}
-          <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10">
+          <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10">
             <ArrowUpRight className="h-4 w-4 text-white" />
           </div>
         </div>

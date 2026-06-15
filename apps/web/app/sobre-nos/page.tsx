@@ -1,69 +1,55 @@
-import Link from "next/link";
-import { ArrowLeft, Music, MapPin, Shield } from "lucide-react";
+import { Music, MapPin, Shield } from "lucide-react";
+import { PublicPage, PublicCard } from "@/components/public/public-page";
+import PromoterLink from "@/app/components/PromoterLink";
 
 export const metadata = {
-    title: "Sobre Nós — LivePass Bilhetes",
-    description:
-        "Somos uma plataforma portuguesa de bilhética digital, criada para ligar promotores de eventos ao seu público de forma simples e segura.",
+  title: "Sobre Nós — LivePass Bilhetes",
+  description:
+    "Plataforma portuguesa de bilhética digital para ligar promotores ao público de forma simples e segura.",
 };
 
+const PILLARS = [
+  { icon: Music, title: "Para o público", desc: "Compra em segundos, entra com QR." },
+  { icon: MapPin, title: "Para promotores", desc: "Cria eventos, vende e analisa." },
+  { icon: Shield, title: "Para todos", desc: "Bilhetes protegidos contra fraude." },
+];
+
 export default function SobreNosPage() {
-    return (
-        <div className="min-h-screen mesh-gradient text-neutral-900">
-            <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-[13px] text-neutral-500 hover:text-violet-600 font-semibold transition mb-10"
-                >
-                    <ArrowLeft className="h-4 w-4" /> Início
-                </Link>
+  return (
+    <PublicPage
+      title="Sobre nós"
+      subtitle="Bilhética digital feita em Portugal."
+      backHref="/"
+    >
+      <div className="max-w-3xl space-y-6">
+        <PublicCard>
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+            A <span className="text-white font-semibold">LivePass</span> simplifica a venda de bilhetes para eventos ao
+            vivo. Compra segura, bilhetes digitais e ferramentas profissionais para promotores.
+          </p>
+        </PublicCard>
 
-                <div className="text-[11px] uppercase tracking-wider text-violet-600 font-bold mb-2">A empresa</div>
-                <h1 className="text-[32px] sm:text-[40px] font-black text-neutral-900 leading-tight mb-6">
-                    Sobre Nós
-                </h1>
-
-                <div className="space-y-8 text-[15px] text-neutral-700 leading-relaxed">
-                    <p>
-                        A <span className="text-neutral-900 font-bold">LivePass</span> é uma plataforma de bilhética
-                        digital 100% portuguesa, criada para simplificar a venda de bilhetes para eventos ao vivo.
-                        Acreditamos que comprar um bilhete deve ser tão fácil como enviar uma mensagem.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {[
-                            { icon: Music, title: "Para o público", desc: "Compra em segundos, entra com QR.", color: "violet" },
-                            { icon: MapPin, title: "Para promotores", desc: "Cria eventos, vende e analisa.", color: "fuchsia" },
-                            { icon: Shield, title: "Para todos", desc: "Bilhetes protegidos contra fraude.", color: "emerald" },
-                        ].map((item) => (
-                            <div
-                                key={item.title}
-                                className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
-                            >
-                                <item.icon className={`h-5 w-5 mb-3 ${item.color === "violet" ? "text-violet-600" : item.color === "fuchsia" ? "text-fuchsia-600" : "text-emerald-600"}`} strokeWidth={1.75} />
-                                <div className="text-[14px] font-bold text-neutral-900 mb-1">{item.title}</div>
-                                <div className="text-[13px] text-neutral-600">{item.desc}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <p>
-                        Trabalhamos com promotores independentes e organizações de todo o país, oferecendo
-                        ferramentas profissionais de gestão de eventos, check-in com QR code, relatórios de
-                        vendas em tempo real e suporte dedicado.
-                    </p>
-
-                    <div className="rounded-2xl border border-violet-200 bg-violet-50 p-6">
-                        <div className="text-[13px] font-bold text-violet-800 mb-3 uppercase tracking-wider">
-                            Contacto
-                        </div>
-                        <div className="space-y-2 text-[14px] text-neutral-700">
-                            <div>📧 <a href="mailto:suporte@livepass.pt" className="text-violet-700 font-semibold hover:underline">suporte@livepass.pt</a></div>
-                            <div>📍 Viseu, Portugal</div>
-                        </div>
-                    </div>
-                </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {PILLARS.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-white/10 bg-[#14141f] p-5 text-center"
+            >
+              <item.icon className="h-8 w-8 text-[#00a0e3] mx-auto mb-3" />
+              <h3 className="font-bold text-white text-sm">{item.title}</h3>
+              <p className="mt-1 text-xs text-zinc-500">{item.desc}</p>
             </div>
+          ))}
         </div>
-    );
+
+        <div className="rounded-2xl border border-[#00a0e3]/30 bg-gradient-to-br from-[#0066aa]/20 to-[#14141f] p-6 sm:p-8 text-center">
+          <h2 className="text-lg font-bold text-white">És promotor?</h2>
+          <p className="mt-2 text-sm text-zinc-400">Começa a vender bilhetes na plataforma.</p>
+          <PromoterLink className="inline-flex mt-5 rounded-full bg-[#00a0e3] px-6 py-3 text-sm font-bold text-white hover:bg-[#0090cc] transition-colors">
+            Área de promotor
+          </PromoterLink>
+        </div>
+      </div>
+    </PublicPage>
+  );
 }
