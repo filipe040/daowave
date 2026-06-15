@@ -19,6 +19,7 @@ import {
 import { PaymentMethodSelector, type PaymentMethod } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentProcessingOverlay } from '@/components/checkout/PaymentProcessingOverlay';
 import { OrderStripeCheckout } from '@/components/checkout/OrderStripeCheckout';
+import { BuyerFeeBreakdownLine } from '@/components/checkout/BuyerFeeBreakdownLine';
 
 interface CheckoutFormProps {
   orderId: string;
@@ -26,6 +27,7 @@ interface CheckoutFormProps {
   serviceFeeCents: number;
   totalCents: number;
   feePaidBy: "BUYER" | "ORGANIZER";
+  ticketCount: number;
   eventId: string;
   stripePaymentsEnabled?: boolean;
   mockPaymentsEnabled?: boolean;
@@ -61,6 +63,7 @@ export function CheckoutForm({
   serviceFeeCents,
   totalCents,
   feePaidBy,
+  ticketCount,
   eventId,
   stripePaymentsEnabled = false,
   mockPaymentsEnabled = true,
@@ -453,16 +456,6 @@ export function CheckoutForm({
 
         {/* Total + Termos */}
         <section className="rounded-2xl border border-white/10 bg-[#0c0c12] p-5 space-y-4 lg:hidden">
-          <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Bilhete(s)</span>
-            <span className="text-white">{formatEuro(subtotalCents)}</span>
-          </div>
-          {feePaidBy === "BUYER" && serviceFeeCents > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-zinc-400">Taxa de Serviço LivePass</span>
-              <span className="text-white">{formatEuro(serviceFeeCents)}</span>
-            </div>
-          )}
           {appliedCoupon && (
             <div className="flex justify-between text-sm">
               <span className="text-emerald-600">Desconto</span>
@@ -470,7 +463,15 @@ export function CheckoutForm({
             </div>
           )}
           <div className="flex justify-between items-end border-t border-white/10 pt-4">
-            <span className="text-white font-semibold">Total</span>
+            <div>
+              <span className="text-white font-semibold">Total</span>
+              <BuyerFeeBreakdownLine
+                ticketCount={ticketCount}
+                serviceFeeCents={serviceFeeCents}
+                feePaidBy={feePaidBy}
+                className="mt-1"
+              />
+            </div>
             <div className="text-right">
               <span className="text-3xl font-black text-[#5ec8f8] tracking-tight">{formatEuro(effectiveTotal)}</span>
               <p className="text-[11px] text-zinc-500 mt-0.5">IVA incluído onde aplicável</p>

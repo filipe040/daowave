@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Ticket } from 'lucide-react';
 import { TicketPresave } from './ticket-presave';
 import { isLotAlmostSoldOut } from '@/lib/events/lot-availability';
+import { BuyerFeeBreakdownLine } from '@/components/checkout/BuyerFeeBreakdownLine';
 
 interface TicketType {
   id: string;
@@ -60,6 +61,12 @@ export function TicketSelector({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [feePreview, setFeePreview] = useState<{
+    serviceFeeCents: number;
+    feePaidBy: "BUYER" | "ORGANIZER";
+    totalCents: number;
+  } | null>(null);
+  const [loadingFeePreview, setLoadingFeePreview] = useState(false);
 
   useEffect(() => {
     fetch(`/api/events/${event.slug}/tickets`)
@@ -95,6 +102,28 @@ export function TicketSelector({
     });
     return sum + typeSum;
   }, 0);
+
+  const displayTotalCents = feePreview?.totalCents ?? totalCents;
+  const serviceFeeCents = feePreview?.serviceFeeCents ?? 0;
+  const feePaidBy = feePreview?.feePaidBy ?? "BUYER";
+
+  useEffect(() => {
+    if (totalCents <= 0) {
+      setFeePreview(null);
+      return;
+    }
+
+    setLoadingFeePreview(true);
+    const timer = setTimeout(() => {
+      fetch(`/api/events/${event.slug}/checkout-preview?subtotalCents=${totalCents}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => setFeePreview(data))
+        .catch(() => setFeePreview(null))
+        .finally(() => setLoadingFeePreview(false));
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [totalCents, event.slug]);
 
   const handleCheckout = async (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -258,13 +287,22 @@ export function TicketSelector({
 
       {totalItems > 0 && (
         <div className={`border-t pt-6 mb-6 ${isLight ? 'border-neutral-200' : 'border-white/10 mb-8'}`}>
-          <div className="flex justify-between items-end mb-2">
-            <div>
+          <div className="flex justify-between items-end gap-4">
+            <div className="min-w-0">
               <p className={`text-[12px] font-bold uppercase tracking-[0.2em] ${isLight ? 'text-neutral-400' : 'text-white/50'}`}>Total</p>
-              <p className={`text-[15px] font-medium ${isLight ? 'text-neutral-600' : 'text-white/80'}`}>{totalItems} bilhetes selecionados</p>
+              <BuyerFeeBreakdownLine
+                ticketCount={totalItems}
+                serviceFeeCents={serviceFeeCents}
+                feePaidBy={feePaidBy}
+                feeClassName={isLight ? 'text-neutral-500' : 'text-zinc-400'}
+                className="mt-1"
+              />
+              {loadingFeePreview && (
+                <p className={`text-[11px] mt-1 ${isLight ? 'text-neutral-400' : 'text-zinc-500'}`}>A calcular taxas…</p>
+              )}
             </div>
-            <span className={`text-3xl font-bold tracking-tight ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-              {formatCurrency(totalCents)}
+            <span className={`text-3xl font-bold tracking-tight shrink-0 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+              {formatCurrency(displayTotalCents)}
             </span>
           </div>
         </div>

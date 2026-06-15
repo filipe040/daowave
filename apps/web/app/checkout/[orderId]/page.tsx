@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { formatCurrency } from '@/lib/utils';
 import { CheckoutForm } from './checkout-form';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
+import { BuyerFeeBreakdownLine } from '@/components/checkout/BuyerFeeBreakdownLine';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
@@ -94,11 +95,10 @@ export default async function CheckoutPage({
     (sum, item) => sum + item.quantity * item.unitPriceCents,
     0
   );
+  const ticketCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const serviceFeeCents = order.serviceFeeCents ?? 0;
   const feePaidBy = order.feePaidBy ?? "BUYER";
   const displayTotalCents = order.totalCents;
-
-  const ticketCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div data-testid="page-checkout" className="public-shell min-h-screen pt-24 pb-16 relative overflow-hidden">
@@ -177,23 +177,17 @@ export default async function CheckoutPage({
                   ))}
                 </div>
 
-                <div className="border-t border-white/10 pt-5 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Bilhete(s)</span>
-                    <span className="font-semibold text-white tabular-nums">
-                      {formatCurrency(subtotalCents)}
-                    </span>
-                  </div>
-                  {feePaidBy === "BUYER" && serviceFeeCents > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400">Taxa de Serviço LivePass</span>
-                      <span className="font-semibold text-white tabular-nums">
-                        {formatCurrency(serviceFeeCents)}
-                      </span>
+                <div className="border-t border-white/10 pt-5">
+                  <div className="flex justify-between items-end gap-4">
+                    <div>
+                      <span className="text-sm font-semibold text-zinc-500">Total</span>
+                      <BuyerFeeBreakdownLine
+                        ticketCount={ticketCount}
+                        serviceFeeCents={serviceFeeCents}
+                        feePaidBy={feePaidBy}
+                        className="mt-1"
+                      />
                     </div>
-                  )}
-                  <div className="flex justify-between items-end pt-2 border-t border-white/10">
-                    <span className="text-sm font-semibold text-zinc-500">Total</span>
                     <span className="text-3xl font-black text-[#5ec8f8] tabular-nums">
                       {formatCurrency(displayTotalCents)}
                     </span>
@@ -218,6 +212,7 @@ export default async function CheckoutPage({
                 serviceFeeCents={serviceFeeCents}
                 totalCents={displayTotalCents}
                 feePaidBy={feePaidBy}
+                ticketCount={ticketCount}
                 eventId={order.event.id}
                 stripePaymentsEnabled={isStripePaymentsEnabled()}
                 mockPaymentsEnabled={isMockPaymentsEnabled()}
