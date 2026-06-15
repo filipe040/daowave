@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth/guards";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import { OrganizationStatus } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit";
+import { canManageAdminOrganizations } from "@/lib/auth/admin-access";
 
 const createOrgSchema = z.object({
     name: z.string().min(2, "Nome é obrigatório"),
@@ -14,12 +16,22 @@ const createOrgSchema = z.object({
     status: z.nativeEnum(OrganizationStatus).default(OrganizationStatus.PENDING),
 });
 
+async function requireOrgAdmin() {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+        return { error: NextResponse.json({ error: "Não autenticado" }, { status: 401 }) };
+    }
+    const role = (session.user as { role?: string }).role;
+    if (!canManageAdminOrganizations(role)) {
+        return { error: NextResponse.json({ error: "Sem permissão para gerir organizações" }, { status: 403 }) };
+    }
+    return { session, userId: (session.user as { id?: string }).id };
+}
+
 export async function GET(req: NextRequest) {
     try {
-        const session = await requireAuth();
-        if ((session.user as any).role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const auth = await requireOrgAdmin();
+        if ("error" in auth) return auth.error;
 
         const { searchParams } = new URL(req.url);
         const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
@@ -74,12 +86,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const session = await requireAuth();
-        const userId = (session.user as any).id;
-
-        if ((session.user as any).role !== "ADMIN") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const auth = await requireOrgAdmin();
+        if ("error" in auth) return auth.error;
+        const { userId } = auth;
 
         const json = await req.json();
         const body = createOrgSchema.parse(json);
@@ -120,6 +129,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
         }
         console.error("[Admin Organizations POST]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        const message =
+            error instanceof Error && /Unknown column|column.*does not exist/i.test(error.message)
+                ? "Base de dados desatualizada. Execute: npx prisma migrate deploy"
+                : "Erro ao criar organização";
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
