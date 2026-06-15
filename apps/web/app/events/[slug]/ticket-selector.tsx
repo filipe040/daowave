@@ -107,23 +107,50 @@ export function TicketSelector({
   const serviceFeeCents = feePreview?.serviceFeeCents ?? 0;
   const feePaidBy = feePreview?.feePaidBy ?? "BUYER";
 
+  const cartItems = types.flatMap((type) =>
+    type.lots
+      .map((lot) => ({
+        unitPriceCents: lot.priceCents,
+        quantity: quantities[lot.id] || 0,
+      }))
+      .filter((item) => item.quantity > 0)
+  );
+
+  const cartItemsKey = JSON.stringify(cartItems);
+
   useEffect(() => {
-    if (totalCents <= 0) {
+    if (cartItems.length === 0) {
       setFeePreview(null);
       return;
     }
 
+    const controller = new AbortController();
     setLoadingFeePreview(true);
+
     const timer = setTimeout(() => {
-      fetch(`/api/events/${event.slug}/checkout-preview?subtotalCents=${totalCents}`)
+      fetch(`/api/events/${event.slug}/checkout-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cartItems }),
+        signal: controller.signal,
+      })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => setFeePreview(data))
-        .catch(() => setFeePreview(null))
-        .finally(() => setLoadingFeePreview(false));
+        .then((data) => {
+          if (!controller.signal.aborted) setFeePreview(data);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setFeePreview(null);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoadingFeePreview(false);
+        });
     }, 200);
 
-    return () => clearTimeout(timer);
-  }, [totalCents, event.slug]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [cartItemsKey, event.slug]);
 
   const handleCheckout = async (e?: React.MouseEvent) => {
     e?.preventDefault();

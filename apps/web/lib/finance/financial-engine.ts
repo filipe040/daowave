@@ -36,6 +36,8 @@ export interface ServiceFeeResult {
   serviceFeeAdjusted: boolean;
 }
 
+export type CartFeeItem = { unitPriceCents: number; quantity: number };
+
 export interface OrderSplitResult {
   ticketPriceCents: number;
   serviceFeeCents: number;
@@ -290,6 +292,54 @@ export class FinancialEngine {
     return {
       serviceFeeCents,
       operationalReserveCents: config.operationalReserveCents,
+      paymentCostCents,
+      appliedTierId,
+      appliedCampaignId,
+      pricingModeUsed,
+      serviceFeeAdjusted,
+    };
+  }
+
+  /**
+   * Taxa por unidade de bilhete — cada bilhete paga a sua taxa (fixo + % do preço unitário).
+   * Evita que lotes grandes partilhem uma única taxa máxima da encomenda.
+   */
+  static async calculateCartServiceFee(params: {
+    items: CartFeeItem[];
+    organizationId?: string;
+    at?: Date;
+  }): Promise<ServiceFeeResult> {
+    const { items, organizationId, at } = params;
+
+    let serviceFeeCents = 0;
+    let operationalReserveCents = 0;
+    let paymentCostCents = 0;
+    let appliedTierId: string | null = null;
+    let appliedCampaignId: string | null = null;
+    let pricingModeUsed: GlobalPricingMode = "FORMULA";
+    let serviceFeeAdjusted = false;
+
+    for (const item of items) {
+      if (item.quantity <= 0 || item.unitPriceCents <= 0) continue;
+
+      const unitFee = await this.calculateServiceFee({
+        ticketPriceCents: item.unitPriceCents,
+        organizationId,
+        at,
+      });
+
+      serviceFeeCents += unitFee.serviceFeeCents * item.quantity;
+      operationalReserveCents += unitFee.operationalReserveCents * item.quantity;
+      paymentCostCents += unitFee.paymentCostCents * item.quantity;
+      appliedTierId = unitFee.appliedTierId;
+      appliedCampaignId = unitFee.appliedCampaignId;
+      pricingModeUsed = unitFee.pricingModeUsed;
+      serviceFeeAdjusted = serviceFeeAdjusted || unitFee.serviceFeeAdjusted;
+    }
+
+    return {
+      serviceFeeCents,
+      operationalReserveCents,
       paymentCostCents,
       appliedTierId,
       appliedCampaignId,

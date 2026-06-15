@@ -101,8 +101,11 @@ export async function POST(request: Request) {
       totalCents += lot.priceCents * item.quantity;
     }
 
-    const feeResult = await FinancialEngine.calculateServiceFee({
-      ticketPriceCents: totalCents,
+    const feeResult = await FinancialEngine.calculateCartServiceFee({
+      items: orderItems.map((item) => ({
+        unitPriceCents: item.unitPriceCents,
+        quantity: item.quantity,
+      })),
       organizationId: event.organizationId ?? undefined,
     });
     const config = await FinancialEngine.resolveEffectiveConfig(event.organizationId ?? undefined);
