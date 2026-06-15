@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { formatBuyerFeeLine } from "@/lib/checkout/buyer-fee-display";
+import { OperationCostsModal } from "@/components/checkout/OperationCostsModal";
 
 type Props = {
   ticketCount: number;
@@ -17,6 +19,8 @@ export function BuyerFeeBreakdownLine({
   className = "",
   feeClassName = "text-zinc-400",
 }: Props) {
+  const [showCostsModal, setShowCostsModal] = useState(false);
+
   const line = formatBuyerFeeLine(ticketCount, serviceFeeCents, feePaidBy);
   if (!line) return null;
 
@@ -25,14 +29,19 @@ export function BuyerFeeBreakdownLine({
   const feePart = line.slice(plusIndex + 3);
 
   return (
-    <p className={`text-[13px] font-medium ${feeClassName} ${className}`}>
-      {ticketsPart} + {feePart}{" "}
-      <abbr
-        title="Custos de operação"
-        className="underline decoration-dotted underline-offset-2 cursor-help"
-      >
-        C. operação
-      </abbr>
-    </p>
+    <>
+      <p className={`text-[13px] font-medium ${feeClassName} ${className}`}>
+        {ticketsPart} +{" "}
+        <button
+          type="button"
+          onClick={() => setShowCostsModal(true)}
+          className={`inline underline decoration-dotted underline-offset-2 hover:opacity-80 transition-opacity ${feeClassName}`}
+        >
+          {feePart} C. operação
+        </button>
+      </p>
+
+      <OperationCostsModal open={showCostsModal} onClose={() => setShowCostsModal(false)} />
+    </>
   );
 }
