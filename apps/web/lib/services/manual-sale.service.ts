@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import {
-    OrderSource,
-    OrderStatus,
-    ManualPaymentMethod,
-    TicketStatus,
-    MemberRole
+  ManualPaymentMethod,
+  MemberRole,
+  OrderSource,
+  OrderStatus,
+  TicketStatus,
 } from "@prisma/client";
+import { canCreateManualSale } from "@/lib/auth/member-permissions";
 import { signQrPayload, TicketQrPayload } from "@ticketing-platform/shared";
 import crypto from "crypto";
 import { createAuditLog } from "@/lib/audit";
@@ -33,8 +34,8 @@ export const ManualSaleService = {
      */
     async createManualSale(input: CreateManualSaleInput, actorId: string, actorRole: MemberRole) {
         // 1. RBAC Check
-        if (actorRole === MemberRole.PROMOTER_STAFF) {
-            throw new Error("PROMOTER_STAFF cannot create manual sales");
+        if (!canCreateManualSale(actorRole)) {
+            throw new Error("Sem permissão para criar vendas manuais");
         }
 
         // 2. Idempotency Check

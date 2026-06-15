@@ -39,7 +39,7 @@ export async function GET(
         const artists = await EventArtistService.getByEvent(eventId);
         return NextResponse.json({
             artists,
-            meta: { canEdit: canManageTicketContent(globalRole, role) },
+            meta: { canEdit: globalRole === "ADMIN" || canManageTicketContent(role) },
         });
     } catch (error: unknown) {
         if (error instanceof TicketManagementAccessError) {
@@ -58,7 +58,7 @@ export async function POST(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canManageTicketContent(globalRole, role)) {
+        if (globalRole !== "ADMIN" && !canManageTicketContent(role)) {
             return NextResponse.json(
                 { error: "Sem permissão para gerir artistas neste evento." },
                 { status: 403 }

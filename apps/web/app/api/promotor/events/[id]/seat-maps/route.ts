@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SeatMapService } from "@/lib/services/seat-map.service";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canManageTicketContent } from "@/lib/auth/member-permissions";
 import { safeLog } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export async function POST(
 ) {
     try {
         const { session, role } = await requirePromoter();
-        const canManage = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string) || (session.user as any).role === "ADMIN";
+        const canManage = canManageTicketContent(role) || (session.user as any).role === "ADMIN";
 
         if (!canManage) {
             return NextResponse.json({ error: "Permissões insuficientes para importar mapas de lugares." }, { status: 403 });

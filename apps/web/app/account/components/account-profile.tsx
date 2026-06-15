@@ -49,7 +49,9 @@ function formatDT(d?: string | null) {
 
 function roleLabel(role: string) {
   if (role === "ADMIN") return "Admin";
-  if (role === "PROMOTER") return "Promotor";
+  if (role === "ADMIN") return "Administrador";
+  if (role === "FINANCE_MANAGER") return "Gestor financeiro";
+  if (role === "SUPPORT_AGENT") return "Suporte";
   if (role === "USER") return "Cliente";
   return role;
 }

@@ -25,11 +25,11 @@ export async function POST(request: Request) {
     }
 
     const globalRole = (session.user as any).role;
-    let isPromoterOrAdmin = globalRole === "ADMIN" || globalRole === "PROMOTER";
-    
+    let isPromoterOrAdmin = globalRole === "ADMIN";
+
     if (!isPromoterOrAdmin) {
       const membership = await prisma.organizationMember.findFirst({
-        where: { userId: (session.user as any).id }
+        where: { userId: (session.user as any).id, status: "ACTIVE" },
       });
       if (membership) {
         isPromoterOrAdmin = true;

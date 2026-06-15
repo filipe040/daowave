@@ -34,10 +34,13 @@ export async function POST(
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
-    // Check if already organizer
-    if (user.role === "PROMOTER") {
+    const existingMembership = await prisma.organizationMember.findFirst({
+      where: { userId: id, status: "ACTIVE" },
+    });
+
+    if (existingMembership || user.promoterProfile?.status === "APPROVED") {
       return NextResponse.json(
-        { error: "Usuário já é promotor" },
+        { error: "Utilizador já tem acesso de promotor" },
         { status: 400 }
       );
     }
@@ -50,13 +53,7 @@ export async function POST(
       );
     }
 
-    // Update user role to PROMOTER
-    await prisma.user.update({
-      where: { id },
-      data: { role: "PROMOTER" },
-    });
-
-    // Create or update organizer profile
+    // Criar perfil de promotor (acesso via membership ou perfil, não role global)
     if (user.promoterProfile) {
       await prisma.promoterProfile.update({
         where: { id: user.promoterProfile.id },

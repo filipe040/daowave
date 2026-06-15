@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 interface OrgMember {
     id: string;
-    role: "PROMOTER_OWNER" | "PROMOTER_MANAGER" | "PROMOTER_STAFF" | "OWNER" | "MANAGER" | "STAFF" | "READ_ONLY";
+    role: string;
     createdAt: string;
     user: { id: string; name: string | null; email: string; role?: string };
     organization: { id: string; name: string };
@@ -29,24 +29,36 @@ function canRemoveMember(
     return true;
 }
 
+const INVITE_ROLES = [
+    { id: "PROMOTER_MANAGER", label: "Gestor", desc: "Gere eventos, vendas e equipa." },
+    { id: "PROMOTER_FINANCE", label: "Financeiro", desc: "Acesso a finanças e relatórios." },
+    { id: "PROMOTER_CASHIER", label: "Caixa (POS)", desc: "Vendas manuais e check-in." },
+    { id: "PROMOTER_CHECKIN", label: "Porteiro", desc: "Apenas check-in na porta." },
+    { id: "READ_ONLY", label: "Leitor", desc: "Visualização de dashboard e vendas." },
+];
+
 const ROLE_LABELS: Record<string, string> = {
     PROMOTER_OWNER: "Proprietário",
     PROMOTER_MANAGER: "Gestor",
-    PROMOTER_STAFF: "Equipa",
+    PROMOTER_FINANCE: "Financeiro",
+    PROMOTER_CASHIER: "Caixa (POS)",
+    PROMOTER_CHECKIN: "Porteiro",
+    READ_ONLY: "Leitor",
     OWNER: "Proprietário",
     MANAGER: "Gestor",
-    STAFF: "Equipa",
-    READ_ONLY: "Leitor",
+    STAFF: "Porteiro",
 };
 
 const ROLE_COLOR: Record<string, string> = {
     PROMOTER_OWNER: "bg-emerald-500/10 text-emerald-500",
     PROMOTER_MANAGER: "bg-blue-500/10 text-blue-500",
-    PROMOTER_STAFF: "bg-amber-500/10 text-amber-500",
+    PROMOTER_FINANCE: "bg-violet-500/10 text-violet-400",
+    PROMOTER_CASHIER: "bg-amber-500/10 text-amber-500",
+    PROMOTER_CHECKIN: "bg-orange-500/10 text-orange-400",
+    READ_ONLY: "bg-neutral-100 text-zinc-400",
     OWNER: "bg-emerald-500/10 text-emerald-500",
     MANAGER: "bg-blue-500/10 text-blue-500",
-    STAFF: "bg-amber-500/10 text-amber-500",
-    READ_ONLY: "bg-neutral-100 text-zinc-400",
+    STAFF: "bg-orange-500/10 text-orange-400",
 };
 
 export default function PromoterTeamPage() {
@@ -62,7 +74,7 @@ export default function PromoterTeamPage() {
 
     // Invite Form
     const [inviteEmail, setInviteEmail] = useState("");
-    const [inviteRole, setInviteRole] = useState("PROMOTER_STAFF");
+    const [inviteRole, setInviteRole] = useState("PROMOTER_CHECKIN");
     const [inviting, setInviting] = useState(false);
 
     const load = useCallback(async () => {
@@ -305,11 +317,7 @@ export default function PromoterTeamPage() {
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-2.5 ml-1">Função na Equipa</label>
                                 <div className="grid grid-cols-1 gap-3">
-                                    {[
-                                        { id: "PROMOTER_OWNER", label: "Proprietário", desc: "Acesso total a todas as funcionalidades." },
-                                        { id: "PROMOTER_MANAGER", label: "Gestor", desc: "Gere eventos e faturação, sem acesso a definições." },
-                                        { id: "PROMOTER_STAFF", label: "Staff", desc: "Operacional para check-in e visualização de vendas." },
-                                    ].map(role => (
+                                    {INVITE_ROLES.map(role => (
                                         <button
                                             key={role.id}
                                             type="button"

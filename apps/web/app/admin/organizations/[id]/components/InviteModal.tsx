@@ -15,8 +15,11 @@ interface InviteModalProps {
 
 const ROLES = [
     { id: "PROMOTER_OWNER", label: "Proprietário", description: "Acesso total e gestão da organização." },
-    { id: "PROMOTER_MANAGER", label: "Gestor", description: "Pode criar eventos e gerir a equipa." },
-    { id: "PROMOTER_STAFF", label: "Staff", description: "Pode gerir eventos e validar bilhetes." },
+    { id: "PROMOTER_MANAGER", label: "Gestor", description: "Cria eventos e gere a equipa." },
+    { id: "PROMOTER_FINANCE", label: "Financeiro", description: "Finanças, analytics e relatórios." },
+    { id: "PROMOTER_CASHIER", label: "Caixa (POS)", description: "Vendas manuais e check-in." },
+    { id: "PROMOTER_CHECKIN", label: "Porteiro", description: "Apenas validação de bilhetes." },
+    { id: "READ_ONLY", label: "Leitor", description: "Visualização sem edição." },
 ];
 
 export function InviteModal({ isOpen, onClose, organizationId, onSuccess }: InviteModalProps) {

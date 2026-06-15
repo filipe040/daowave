@@ -9,7 +9,7 @@ import { Users, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { toast } from "sonner";
 
-type UserRole = "USER" | "PROMOTER" | "ADMIN" | "VALIDATOR";
+type UserRole = "USER" | "ADMIN" | "FINANCE_MANAGER" | "SUPPORT_AGENT";
 
 interface AdminUser {
     id: string;
@@ -22,16 +22,19 @@ interface AdminUser {
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
-    USER: "Utilizador", PROMOTER: "Promotor", ADMIN: "Admin", VALIDATOR: "Validador",
+    USER: "Utilizador",
+    ADMIN: "Administrador",
+    FINANCE_MANAGER: "Gestor financeiro",
+    SUPPORT_AGENT: "Suporte",
 };
 const ROLE_COLOR: Record<UserRole, string> = {
     ADMIN: "bg-red-50 text-red-600 ring-red-200/60",
-    PROMOTER: "bg-emerald-50 text-emerald-700 ring-emerald-200/60",
-    VALIDATOR: "bg-amber-50 text-amber-700 ring-amber-200/60",
+    FINANCE_MANAGER: "bg-blue-50 text-blue-700 ring-blue-200/60",
+    SUPPORT_AGENT: "bg-amber-50 text-amber-700 ring-amber-200/60",
     USER: "bg-gray-100 text-gray-500 ring-gray-200/60",
 };
 
-const ALL_ROLES: UserRole[] = ["USER", "PROMOTER", "VALIDATOR", "ADMIN"];
+const ALL_ROLES: UserRole[] = ["USER", "FINANCE_MANAGER", "SUPPORT_AGENT", "ADMIN"];
 
 const PAGE_LIMIT = 20;
 
@@ -175,9 +178,9 @@ export default function AdminUsersPage() {
                     >
                         <option value="ALL">Todas as funções</option>
                         <option value="USER">Utilizador</option>
-                        <option value="PROMOTER">Promotor</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="VALIDATOR">Validador</option>
+                        <option value="FINANCE_MANAGER">Gestor financeiro</option>
+                        <option value="SUPPORT_AGENT">Suporte</option>
+                        <option value="ADMIN">Administrador</option>
                     </select>
                 </div>
             }

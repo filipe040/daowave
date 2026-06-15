@@ -45,7 +45,7 @@ export async function GET(req: Request) {
         const memberships = await prisma.organizationMember.findMany({
             where: {
                 userId: session.user.id,
-                role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] },
+                status: "ACTIVE",
             },
             select: {
                 role: true,

@@ -186,18 +186,20 @@ export async function middleware(request: NextRequest) {
     // Determine required role based on path
     const userRole = token.role as string | undefined;
 
-    // OBJETIVO C: Role-based protection
+    // Painel admin — ADMIN, FINANCE_MANAGER ou SUPPORT_AGENT
     if (pathname.startsWith("/admin")) {
-      if (userRole !== "ADMIN") {
+      if (
+        userRole !== "ADMIN" &&
+        userRole !== "FINANCE_MANAGER" &&
+        userRole !== "SUPPORT_AGENT"
+      ) {
         return NextResponse.redirect(redirectUrl(request, "/auth/signin", { error: "AccessDenied" }));
       }
     }
 
-    // Legacy validator route - keep until fully migrated
+    // Rota legada — redirecionar para check-in do promotor
     if (pathname.startsWith("/validator")) {
-      if (userRole !== "VALIDATOR" && userRole !== "ADMIN" && userRole !== "PROMOTER") {
-        return NextResponse.redirect(redirectUrl(request, "/auth/signin", { error: "AccessDenied" }));
-      }
+      return NextResponse.redirect(redirectUrl(request, "/promotor/checkin"));
     }
 
     return response;

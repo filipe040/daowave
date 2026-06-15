@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canManageEvents } from "@/lib/auth/member-permissions";
 
 import { isEventCategory } from "@/lib/events/event-categories";
 
@@ -58,10 +59,9 @@ export async function POST(req: NextRequest) {
         where: {
           organizationId: body.orgId,
           userId: (session.user as any).id,
-          role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] },
         },
       });
-      if (!membership) {
+      if (!membership || !canManageEvents(membership.role)) {
         return NextResponse.json({ error: "Sem permissão para criar eventos nesta organização" }, { status: 403 });
       }
     }

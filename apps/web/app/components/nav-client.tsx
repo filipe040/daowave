@@ -7,8 +7,9 @@ import { Ticket, Search, Menu, X } from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
   USER: "Utilizador",
-  PROMOTER: "Promotor",
   ADMIN: "Admin",
+  FINANCE_MANAGER: "Gestor financeiro",
+  SUPPORT_AGENT: "Suporte",
 };
 
 function getInitials(name: string | null | undefined, email: string | undefined): string {
@@ -59,6 +60,9 @@ export default function NavClient() {
   const displayName = localName ?? session?.user?.name ?? session?.user?.email ?? "";
   const avatarUrl = localAvatar ?? (session?.user as { avatarUrl?: string })?.avatarUrl ?? (session?.user as { image?: string })?.image;
   const role = (session?.user as { role?: string })?.role ?? "USER";
+  const hasOrgAccess = (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  const isPlatformAdmin =
+    role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT";
   const initials = getInitials(localName ?? session?.user?.name ?? null, session?.user?.email ?? undefined);
 
   const navLink = "text-sm font-semibold text-zinc-300 hover:text-white transition-colors";
@@ -98,9 +102,14 @@ export default function NavClient() {
             {session ? (
               <>
                 <div className="hidden lg:flex items-center gap-3">
-                  {(role === "PROMOTER" || role === "ADMIN") && (
-                    <Link href={role === "ADMIN" ? "/admin" : "/promotor"} className={navLink}>
-                      Painel
+                  {isPlatformAdmin && (
+                    <Link href="/admin" className={navLink}>
+                      Admin
+                    </Link>
+                  )}
+                  {(hasOrgAccess || role === "ADMIN") && (
+                    <Link href="/promotor" className={navLink}>
+                      Promotor
                     </Link>
                   )}
                   <Link href="/account" className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-1 pr-3 py-1 hover:bg-white/10 transition-all">

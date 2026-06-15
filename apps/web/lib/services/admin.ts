@@ -1,5 +1,5 @@
 import { prisma } from "../prisma";
-import { OrderStatus, OrganizationStatus } from "@prisma/client";
+import { OrderStatus, OrganizationStatus, MemberRole } from "@prisma/client";
 
 export class AdminService {
     /**
@@ -47,7 +47,7 @@ export class AdminService {
                 take: limit,
                 include: {
                     members: {
-                        where: { role: { in: ['OWNER', 'PROMOTER_OWNER'] } },
+                        where: { role: MemberRole.PROMOTER_OWNER },
                         include: { user: { select: { name: true, email: true } } }
                     },
                     _count: { select: { events: true } }

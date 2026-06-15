@@ -4,7 +4,15 @@ import { useState } from "react";
 import { PromoterSidebar } from "@/components/promoter/PromoterSidebar";
 import { Menu, X } from "lucide-react";
 
-export function PromoterLayoutClient({ children }: { children: React.ReactNode }) {
+import { MemberRole } from "@prisma/client";
+
+export function PromoterLayoutClient({
+    children,
+    memberRole,
+}: {
+    children: React.ReactNode;
+    memberRole: MemberRole | string;
+}) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const closeSidebar = () => setSidebarOpen(false);
@@ -12,7 +20,7 @@ export function PromoterLayoutClient({ children }: { children: React.ReactNode }
     return (
         <div className="h-full flex min-h-screen dash-shell">
             <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-30">
-                <PromoterSidebar />
+                <PromoterSidebar memberRole={memberRole} />
             </div>
 
             {sidebarOpen && (
@@ -26,7 +34,7 @@ export function PromoterLayoutClient({ children }: { children: React.ReactNode }
             <div
                 className={`fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-300 ease-in-out md:hidden shadow-xl ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
-                <PromoterSidebar onNavClick={closeSidebar} />
+                <PromoterSidebar onNavClick={closeSidebar} memberRole={memberRole} />
             </div>
 
             <div className="flex-1 md:pl-64 flex flex-col min-h-screen relative">

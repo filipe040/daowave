@@ -64,15 +64,7 @@ export async function POST(
                 }
             });
 
-            // c. Upgrade global user role if they are just a USER
-            const user = await tx.user.findUnique({ where: { id: userId } });
-            if (user?.role === "USER") {
-                await tx.user.update({
-                    where: { id: userId },
-                    data: { role: "PROMOTER" }
-                });
-            }
-
+            // c. Acesso via membership — sem alterar role global
             return member;
         });
 

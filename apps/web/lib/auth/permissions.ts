@@ -1,10 +1,15 @@
-export type AppRole = "USER" | "PROMOTER" | "ADMIN";
+export type AppRole = "USER" | "ADMIN" | "FINANCE_MANAGER" | "SUPPORT_AGENT";
 
 function normalizeRole(rawRole: unknown): AppRole | null {
   if (!rawRole) return null;
-  const role = String(rawRole).toUpperCase() as AppRole;
-  if (role === "USER" || role === "PROMOTER" || role === "ADMIN") {
-    return role;
+  const role = String(rawRole).toUpperCase();
+  if (
+    role === "USER" ||
+    role === "ADMIN" ||
+    role === "FINANCE_MANAGER" ||
+    role === "SUPPORT_AGENT"
+  ) {
+    return role as AppRole;
   }
   return null;
 }
@@ -13,33 +18,29 @@ export function isAdmin(role: unknown): boolean {
   return normalizeRole(role) === "ADMIN";
 }
 
-export function isPromoter(role: unknown): boolean {
-  return normalizeRole(role) === "PROMOTER";
+/** Utilizador com membership em organização (não depende do role global). */
+export function isPromoter(_role: unknown): boolean {
+  return false;
 }
 
 export function isOrganizerRole(role: unknown): boolean {
   const r = normalizeRole(role);
-  return r === "PROMOTER" || r === "ADMIN";
+  return r === "ADMIN" || r === "FINANCE_MANAGER" || r === "SUPPORT_AGENT";
 }
 
 export function canAccessAdminArea(role: unknown): boolean {
-  return isAdmin(role);
+  const r = normalizeRole(role);
+  return r === "ADMIN" || r === "FINANCE_MANAGER" || r === "SUPPORT_AGENT";
 }
 
 export function canAccessOrganizerArea(role: unknown): boolean {
-  return isOrganizerRole(role);
+  return isAdmin(role);
 }
 
-export function canAccessPromoterArea(role: unknown): boolean {
-  return isOrganizerRole(role);
+export function canAccessPromoterArea(_role: unknown): boolean {
+  return true;
 }
 
-/**
- * Verifica se o utilizador pode gerir um determinado evento.
- * - ADMIN: pode sempre
- * - PROMOTER: apenas se for o promotor associado ao evento
- * - USER: nunca
- */
 export function canManageEvent(params: {
   userRole: unknown;
   eventPromoterId: string;
@@ -47,9 +48,5 @@ export function canManageEvent(params: {
 }): boolean {
   const role = normalizeRole(params.userRole);
   if (role === "ADMIN") return true;
-  if (role === "PROMOTER") {
-    return !!params.userPromoterId && params.userPromoterId === params.eventPromoterId;
-  }
-  return false;
+  return !!params.userPromoterId && params.userPromoterId === params.eventPromoterId;
 }
-

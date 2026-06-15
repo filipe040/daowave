@@ -1,14 +1,14 @@
 /**
  * POST /api/promotor/events/[id]/checkin/scan — validar QR e fazer check-in (idempotente)
- * Body: { qrCode }. eventId vem do path.
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CheckinService } from "@/lib/services/checkin.service";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
+import { getPromoterContext } from "@/lib/auth/guards";
+import { canCheckIn } from "@/lib/auth/member-permissions";
+import { assertPromoterEventAccess, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 
 export const dynamic = "force-dynamic";
 
@@ -20,32 +20,22 @@ export async function POST(
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const ctx = await getPromoterContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = (session.user as { role?: string }).role ?? "";
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!canCheckIn(ctx.role) && ctx.globalRole !== "ADMIN") {
+      return NextResponse.json({ error: "Sem permissão para check-in" }, { status: 403 });
     }
 
     const { id: eventId } = await params;
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      select: { promoterId: true },
-    });
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
-    if (userRole === "PROMOTER") {
-      const promoter = await prisma.promoterProfile.findUnique({
-        where: { userId: session.user.id },
-      });
-      if (!promoter || event.promoterId !== promoter.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-    }
+    await assertPromoterEventAccess(
+      eventId,
+      ctx.orgId,
+      ctx.globalRole ?? "",
+      ctx.userId
+    );
 
     const body = await req.json();
     const qrCode = body?.qrCode;
@@ -58,7 +48,7 @@ export async function POST(
       qrCode,
       eventId,
       deviceId ?? "UNKNOWN",
-      session.user.id
+      ctx.userId
     );
 
     if (result.success) {
@@ -77,13 +67,13 @@ export async function POST(
       });
     }
 
-    const status = result.resultType === 'NOT_FOUND' ? 404 : 400;
+    const status = result.resultType === "NOT_FOUND" ? 404 : 400;
     return NextResponse.json({ error: result.message }, { status });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     safeLog.error("Promoter checkin scan error", error);
-    return NextResponse.json(
-      { error: "Failed to verify ticket" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to verify ticket" }, { status: 500 });
   }
 }

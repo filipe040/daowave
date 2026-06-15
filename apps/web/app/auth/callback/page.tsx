@@ -31,8 +31,8 @@ export default async function AuthCallbackPage({
     }
 
     // Role-based redirect
-    if (role === "ADMIN") redirect("/admin");
-    if (role === "PROMOTER") redirect("/promotor");
+    if (role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT") redirect("/admin");
+    if ((session.user as { hasOrgAccess?: boolean }).hasOrgAccess) redirect("/promotor");
 
     const safeFrom = safeRedirectPath(from, "/");
     if (safeFrom !== "/") {

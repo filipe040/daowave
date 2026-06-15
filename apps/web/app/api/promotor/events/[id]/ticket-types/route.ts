@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { TicketTypeService } from "@/lib/services/ticket-type.service";
 import { requirePromoter } from "@/lib/auth/guards";
 import { assertPromoterEventAccess, canEditTicketInventory, TicketManagementAccessError } from "@/lib/auth/ticket-management";
+import { canManageTicketContent } from "@/lib/auth/member-permissions";
 import { z } from "zod";
 import { safeLog } from "@/lib/security";
 
@@ -44,7 +45,7 @@ export async function POST(
 ) {
     try {
         const { session, role } = await requirePromoter();
-        const canManage = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string) || (session.user as any).role === "ADMIN";
+        const canManage = canManageTicketContent(role) || (session.user as any).role === "ADMIN";
 
         if (!canManage) {
             return NextResponse.json({ error: "Permissões insuficientes para gerir bilhetes." }, { status: 403 });

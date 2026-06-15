@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         name: data.name,
         email: data.email,
         passwordHash: hashedPassword,
-        role: "PROMOTER",
+        role: "USER",
         promoterProfile: {
           create: {
             brandName: data.brandName,

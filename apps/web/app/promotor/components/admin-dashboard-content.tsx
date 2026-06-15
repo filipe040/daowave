@@ -56,7 +56,7 @@ export default async function AdminDashboardContent() {
         prisma.event.count({
           where: {
             status: "DRAFT",
-            promoter: { user: { role: "PROMOTER" } },
+            organizationId: { not: null },
           },
         }),
         recentEventsQuery(),

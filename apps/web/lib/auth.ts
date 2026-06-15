@@ -311,12 +311,23 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: (user?.id ?? token.id) as string },
-            select: { role: true, email: true, name: true },
+            select: {
+              role: true,
+              email: true,
+              name: true,
+              _count: {
+                select: {
+                  organizations: { where: { status: "ACTIVE" } },
+                },
+              },
+            },
           });
           if (dbUser) {
             token.role = dbUser.role as Role;
             token.email = dbUser.email;
             token.name = dbUser.name;
+            token.hasOrgAccess =
+              dbUser.role === "ADMIN" || dbUser._count.organizations > 0;
           }
         } catch (err) {
           console.error("[auth] JWT DB fetch error:", err);
@@ -333,6 +344,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role as Role;
         (session.user as any).provider = token.provider as string;
         (session.user as any).requiresEmailUpdate = token.requiresEmailUpdate as boolean;
+        (session.user as any).hasOrgAccess = token.hasOrgAccess === true;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
       }

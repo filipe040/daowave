@@ -26,7 +26,10 @@ interface TeamMember {
 const ROLE_LABELS: Record<string, string> = {
     PROMOTER_OWNER: "Proprietário",
     PROMOTER_MANAGER: "Gestor",
-    PROMOTER_STAFF: "Staff",
+    PROMOTER_FINANCE: "Financeiro",
+    PROMOTER_CASHIER: "Caixa (POS)",
+    PROMOTER_CHECKIN: "Porteiro",
+    READ_ONLY: "Leitor",
 };
 
 export function TeamTab({ organizationId }: { organizationId: string }) {

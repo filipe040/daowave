@@ -41,7 +41,7 @@ export default function PromoterLoginPage() {
         const sessionData = await sessionRes.json();
         const userRole = sessionData?.user?.role;
 
-        if (userRole === "PROMOTER" || userRole === "ADMIN") {
+        if (userRole === "ADMIN" || sessionData?.user?.hasOrgAccess) {
           router.push("/promotor");
         } else {
           setError("Acesso restrito a promotores");

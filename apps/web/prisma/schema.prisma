@@ -100,11 +100,9 @@ enum OrganizationStatus {
 enum MemberRole {
   PROMOTER_OWNER
   PROMOTER_MANAGER
-  PROMOTER_STAFF
-  // Legacy roles for transition
-  OWNER
-  MANAGER
-  STAFF
+  PROMOTER_FINANCE
+  PROMOTER_CASHIER
+  PROMOTER_CHECKIN
   READ_ONLY
 }
 
@@ -218,7 +216,7 @@ model OrganizationMember {
   id             String       @id @default(uuid())
   organizationId String
   userId         String
-  role           MemberRole   @default(PROMOTER_STAFF)
+  role           MemberRole   @default(PROMOTER_CHECKIN)
   status         String       @default("ACTIVE") // ACTIVE, INACTIVE, INVITED
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -793,11 +791,9 @@ model QrSigningKey {
 
 enum Role {
   USER
-  PROMOTER // Deprecated: usar OrganizationMember.role
-  ADMIN    // Superadmin
+  ADMIN
   FINANCE_MANAGER
   SUPPORT_AGENT
-  VALIDATOR // Deprecated: usar OrganizationMember
 }
 
 enum EventStatus {

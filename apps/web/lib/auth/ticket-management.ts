@@ -1,16 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { EventService } from "@/lib/services/event.service";
+import {
+  canManageOrgSettings,
+  canManageTicketContent,
+} from "@/lib/auth/member-permissions";
 
 export function canEditTicketInventory(globalRole?: string, orgRole?: string | null): boolean {
   if (globalRole === "ADMIN") return true;
-  return orgRole === "PROMOTER_OWNER" || orgRole === "OWNER";
+  return canManageOrgSettings(orgRole);
 }
 
-/** Criar/editar tipos, lotes e artistas (OWNER, MANAGER, etc.) */
-export function canManageTicketContent(globalRole?: string, orgRole?: string | null): boolean {
-  if (globalRole === "ADMIN") return true;
-  return ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(orgRole || "");
-}
+export { canManageTicketContent };
 
 export class TicketManagementAccessError extends Error {
   status: number;

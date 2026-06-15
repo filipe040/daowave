@@ -5,6 +5,11 @@ import { can, type PermissionScope } from "./scopes";
 import { prisma } from "../prisma";
 import { MemberRole } from "@prisma/client";
 import type { Session } from "next-auth";
+import {
+  canManageOrgSettings,
+  canInviteMembers,
+  canRemoveMembers,
+} from "@/lib/auth/member-permissions";
 
 /**
  * requireAuth: Basic guard to ensure user is logged in.
@@ -70,6 +75,53 @@ export async function requirePromoter() {
     };
 }
 
+export type PromoterContext = Awaited<ReturnType<typeof getPromoterContext>>;
+
+/**
+ * Versão para API routes — retorna null em vez de redirect.
+ */
+export async function getPromoterContext() {
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as { id?: string })?.id;
+    if (!session?.user || !userId) return null;
+
+    const globalRole = (session.user as { role?: string }).role;
+    const isGlobalAdmin = globalRole === "ADMIN";
+
+    let membership = await prisma.organizationMember.findFirst({
+        where: { userId, status: "ACTIVE" },
+        include: { organization: true },
+    });
+
+    if (!membership && isGlobalAdmin) {
+        const firstOrg = await prisma.organization.findFirst({
+            where: { status: "ACTIVE" },
+            orderBy: { createdAt: "asc" },
+        });
+        if (firstOrg) {
+            return {
+                session,
+                userId,
+                orgId: firstOrg.id,
+                organization: firstOrg,
+                role: MemberRole.PROMOTER_OWNER,
+                globalRole,
+            };
+        }
+    }
+
+    if (!membership && !isGlobalAdmin) return null;
+
+    return {
+        session,
+        userId,
+        orgId: membership?.organizationId ?? null,
+        organization: membership?.organization,
+        role: membership?.role ?? (isGlobalAdmin ? MemberRole.PROMOTER_OWNER : null),
+        globalRole,
+    };
+}
+
 /**
  * requirePermission: Specific scope check.
  */
@@ -109,5 +161,7 @@ export function canManageOrganizationCoupon(
     const globalRole = (session.user as { role?: string })?.role;
     if (globalRole === "ADMIN") return true;
     if (!memberRole) return false;
-    return memberRole === MemberRole.PROMOTER_OWNER || memberRole === MemberRole.OWNER;
+    return memberRole === MemberRole.PROMOTER_OWNER || canManageOrgSettings(memberRole);
 }
+
+export { canInviteMembers, canRemoveMembers };

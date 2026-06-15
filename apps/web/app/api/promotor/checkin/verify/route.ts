@@ -6,7 +6,8 @@
 import { NextResponse } from 'next/server';
 import { CheckinService } from '@/lib/services/checkin.service';
 import { applyRateLimit, RATE_LIMITS, safeLog } from '@/lib/security';
-import { requirePromoter } from '@/lib/auth/guards';
+import { requirePromoter } from "@/lib/auth/guards";
+import { canCheckIn } from "@/lib/auth/member-permissions";
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -16,8 +17,11 @@ export async function POST(request: Request) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const { session, role: memberRole, orgId } = await requirePromoter();
-    const userRole = (session.user as { role?: string }).role ?? '';
+    const { session, role: memberRole } = await requirePromoter();
+
+    if (!canCheckIn(memberRole) && (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Sem permissão para check-in" }, { status: 403 });
+    }
 
     const body = await request.json();
     const { qrCode, eventId, deviceId } = body;

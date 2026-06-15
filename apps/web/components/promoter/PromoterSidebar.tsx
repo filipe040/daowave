@@ -19,6 +19,8 @@ import {
     Tag,
     Home,
 } from "lucide-react";
+import { MemberRole } from "@prisma/client";
+import { promoterNavAllowed } from "@/lib/auth/member-permissions";
 import { signOut } from "next-auth/react";
 
 const routes = [
@@ -38,10 +40,12 @@ const routes = [
 
 interface PromoterSidebarProps {
     onNavClick?: () => void;
+    memberRole?: MemberRole | string;
 }
 
-export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
+export function PromoterSidebar({ onNavClick, memberRole }: PromoterSidebarProps) {
     const pathname = usePathname();
+    const visibleRoutes = routes.filter((route) => promoterNavAllowed(route.href, memberRole));
 
     return (
         <div className="flex flex-col h-full bg-[#0a0a10] border-r border-white/10">
@@ -58,7 +62,7 @@ export function PromoterSidebar({ onNavClick }: PromoterSidebarProps) {
             </div>
 
             <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-                {routes.map((route) => {
+                {visibleRoutes.map((route) => {
                     const active = route.exact
                         ? pathname === route.href
                         : pathname.startsWith(route.href);

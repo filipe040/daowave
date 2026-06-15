@@ -16,6 +16,7 @@ import {
     Home,
     Banknote,
 } from "lucide-react";
+import { adminNavAllowed } from "@/lib/auth/admin-access";
 import { signOut } from "next-auth/react";
 
 const routes = [
@@ -30,8 +31,9 @@ const routes = [
     { label: "Registos de Auditoria", icon: ScrollText, href: "/admin/audit-logs" },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ adminRole }: { adminRole?: string }) {
     const pathname = usePathname();
+    const visibleRoutes = routes.filter((route) => adminNavAllowed(route.href, adminRole));
 
     return (
         <div className="flex flex-col h-full bg-[#0a0a10] border-r border-white/10">
@@ -45,7 +47,7 @@ export function AdminSidebar() {
             </div>
 
             <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-                {routes.map((route) => {
+                {visibleRoutes.map((route) => {
                     const active = route.exact
                         ? pathname === route.href
                         : pathname.startsWith(route.href);

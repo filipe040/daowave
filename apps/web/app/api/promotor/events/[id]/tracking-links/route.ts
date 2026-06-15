@@ -4,11 +4,12 @@
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { safeLog } from "@/lib/security";
 import { z } from "zod";
+import { getPromoterContext } from "@/lib/auth/guards";
+import { canManageEvents } from "@/lib/auth/member-permissions";
+import { assertPromoterEventAccess, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 
 export const dynamic = "force-dynamic";
 
@@ -17,46 +18,23 @@ const CreateTrackingLinkSchema = z.object({
   label: z.string().max(255).optional().nullable(),
 });
 
-async function ensureEventAccess(
-  eventId: string,
-  session: { user: { id: string; role?: string } },
-  role: string
-) {
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    select: { promoterId: true },
-  });
-  if (!event) return { error: "Event not found" as const, status: 404 };
-  if (role === "PROMOTER") {
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-    if (!promoter || event.promoterId !== promoter.id) {
-      return { error: "Forbidden" as const, status: 403 };
-    }
-  }
-  return { event };
-}
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const ctx = await getPromoterContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const role = (session.user as { role?: string }).role ?? "";
-    if (role !== "PROMOTER" && role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { id: eventId } = await params;
-    const access = await ensureEventAccess(eventId, session, role);
-    if ("error" in access) {
-      return NextResponse.json({ error: access.error }, { status: access.status });
-    }
+    await assertPromoterEventAccess(
+      eventId,
+      ctx.orgId,
+      ctx.globalRole ?? "",
+      ctx.userId
+    );
 
     const links = await prisma.trackingLink.findMany({
       where: { eventId },
@@ -64,6 +42,9 @@ export async function GET(
     });
     return NextResponse.json({ data: links });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     safeLog.error("Promoter tracking-links list error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -74,20 +55,22 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const ctx = await getPromoterContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const role = (session.user as { role?: string }).role ?? "";
-    if (role !== "PROMOTER" && role !== "ADMIN") {
+
+    if (!canManageEvents(ctx.role) && ctx.globalRole !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { id: eventId } = await params;
-    const access = await ensureEventAccess(eventId, session, role);
-    if ("error" in access) {
-      return NextResponse.json({ error: access.error }, { status: access.status });
-    }
+    await assertPromoterEventAccess(
+      eventId,
+      ctx.orgId,
+      ctx.globalRole ?? "",
+      ctx.userId
+    );
 
     const body = await req.json();
     const data = CreateTrackingLinkSchema.parse(body);
@@ -111,6 +94,9 @@ export async function POST(
     });
     return NextResponse.json(link, { status: 201 });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.errors },

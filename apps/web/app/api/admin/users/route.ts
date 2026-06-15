@@ -9,6 +9,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
 import type { Role } from "@prisma/client";
+import { canAccessAdminSupport } from "@/lib/auth/admin-access";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
 
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+        if (!session?.user || !canAccessAdminSupport((session.user as { role?: string }).role)) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -28,7 +29,7 @@ export async function GET(req: Request) {
         const roleParam = searchParams.get("role") as Role | null;
         const q = searchParams.get("q")?.trim() ?? "";
 
-        const validRoles: Role[] = ["USER", "PROMOTER", "ADMIN", "VALIDATOR"];
+        const validRoles: Role[] = ["USER", "ADMIN", "FINANCE_MANAGER", "SUPPORT_AGENT"];
         const roleFilter = roleParam && validRoles.includes(roleParam) ? { role: roleParam } : {};
 
         const searchFilter = q

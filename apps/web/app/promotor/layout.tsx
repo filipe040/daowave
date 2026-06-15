@@ -1,3 +1,4 @@
+import { MemberRole } from "@prisma/client";
 import { PromoterLayoutClient } from "@/components/promoter/PromoterLayoutClient";
 import { requirePromoter } from "@/lib/auth/guards";
 
@@ -6,10 +7,11 @@ export default async function PromoterLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { orgId } = await requirePromoter();
+  const { orgId, role } = await requirePromoter();
 
-  // If we wanted to handle "No Org" at layout level:
-  // if (!orgId) redirect("/promotor/onboarding");
-
-  return <PromoterLayoutClient>{children}</PromoterLayoutClient>;
+  return (
+    <PromoterLayoutClient memberRole={role ?? MemberRole.PROMOTER_CHECKIN}>
+      {children}
+    </PromoterLayoutClient>
+  );
 }

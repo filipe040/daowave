@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { TicketLotService } from "@/lib/services/ticket-lot.service";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canManageTicketContent } from "@/lib/auth/member-permissions";
 import { assertPromoterEventAccess, canEditTicketInventory, TicketManagementAccessError } from "@/lib/auth/ticket-management";
 import { safeLog } from "@/lib/security";
 import { TicketAlertService } from "@/lib/services/ticket-alert.service";
@@ -41,7 +42,7 @@ export async function POST(
     const globalRole = (session.user as any).role;
 
     // RBAC check
-    if (globalRole !== "ADMIN" && !["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(role as string)) {
+    if (globalRole !== "ADMIN" && !canManageTicketContent(role)) {
       return NextResponse.json({ error: "Permissões insuficientes." }, { status: 403 });
     }
 

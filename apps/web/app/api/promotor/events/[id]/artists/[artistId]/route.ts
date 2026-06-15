@@ -34,7 +34,7 @@ export async function PATCH(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canManageTicketContent(globalRole, role)) {
+        if (globalRole !== "ADMIN" && !canManageTicketContent(role)) {
             return NextResponse.json({ error: "Sem permissão para editar artistas." }, { status: 403 });
         }
 
@@ -69,7 +69,7 @@ export async function DELETE(
         const { session, role, orgId, userId } = await requirePromoter();
         const globalRole = (session.user as { role?: string }).role;
 
-        if (!canManageTicketContent(globalRole, role)) {
+        if (globalRole !== "ADMIN" && !canManageTicketContent(role)) {
             return NextResponse.json({ error: "Sem permissão para apagar artistas." }, { status: 403 });
         }
 

@@ -86,7 +86,7 @@ async function main() {
       email: "owner@soundrepublic.pt",
       name: "Ricardo Owner",
       passwordHash: pw,
-      role: Role.PROMOTER,
+      role: Role.USER,
       emailVerified: true,
       onboardingComplete: true
     },
@@ -99,7 +99,7 @@ async function main() {
       email: "manager@soundrepublic.pt",
       name: "Sérgio Manager",
       passwordHash: pw,
-      role: Role.PROMOTER,
+      role: Role.USER,
       emailVerified: true,
       onboardingComplete: true
     },

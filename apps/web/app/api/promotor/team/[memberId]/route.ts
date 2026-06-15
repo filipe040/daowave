@@ -3,16 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog, createAuditLog } from "@/lib/security";
 import { requirePromoter } from "@/lib/auth/guards";
 import { MemberRole } from "@prisma/client";
+import { canRemoveMembers, isOrgOwner } from "@/lib/auth/member-permissions";
 
 export const dynamic = "force-dynamic";
-
-const OWNER_ROLES: MemberRole[] = [MemberRole.PROMOTER_OWNER, MemberRole.OWNER];
-
-function canRemoveMembers(actorRole: MemberRole | null, isGlobalAdmin: boolean): boolean {
-  if (isGlobalAdmin) return true;
-  if (!actorRole) return false;
-  return OWNER_ROLES.includes(actorRole);
-}
 
 export async function DELETE(
   _req: Request,
@@ -29,7 +22,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Contexto de organização não encontrado." }, { status: 400 });
     }
 
-    if (!canRemoveMembers(actorRole as MemberRole | null, isGlobalAdmin)) {
+    if (!canRemoveMembers(actorRole) && !isGlobalAdmin) {
       return NextResponse.json(
         { error: "Apenas proprietários ou administradores podem remover membros." },
         { status: 403 }
@@ -57,7 +50,6 @@ export async function DELETE(
       );
     }
 
-    // Promoter owners cannot remove platform administrators from the team
     if (member.user.role === "ADMIN" && !isGlobalAdmin) {
       return NextResponse.json(
         { error: "Não tem permissão para remover administradores da plataforma." },
@@ -65,11 +57,11 @@ export async function DELETE(
       );
     }
 
-    if (OWNER_ROLES.includes(member.role)) {
+    if (isOrgOwner(member.role)) {
       const ownerCount = await prisma.organizationMember.count({
         where: {
           organizationId: orgId,
-          role: { in: OWNER_ROLES },
+          role: MemberRole.PROMOTER_OWNER,
         },
       });
 

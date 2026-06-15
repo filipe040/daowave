@@ -130,7 +130,7 @@ export async function GET(request: Request) {
         const organizations = await prisma.organization.findMany({
             include: {
                 members: {
-                    where: { role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"] } },
+                    where: { role: { in: ["PROMOTER_OWNER", "PROMOTER_MANAGER", "PROMOTER_FINANCE"] } },
                     include: { user: true }
                 },
                 events: {

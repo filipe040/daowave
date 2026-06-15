@@ -10,13 +10,14 @@ import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog, createAuditLog } from "@/lib/security";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
+import { canAccessAdminSupport, canManageAdminUsers } from "@/lib/auth/admin-access";
 
 export const dynamic = "force-dynamic";
 
-const VALID_ROLES: Role[] = ["USER", "PROMOTER", "ADMIN", "VALIDATOR"];
+const VALID_ROLES: Role[] = ["USER", "ADMIN", "FINANCE_MANAGER", "SUPPORT_AGENT"];
 
 const UpdateUserSchema = z.object({
-  role: z.enum(["USER", "PROMOTER", "ADMIN", "VALIDATOR"] as [Role, ...Role[]]).optional(),
+  role: z.enum(["USER", "ADMIN", "FINANCE_MANAGER", "SUPPORT_AGENT"] as [Role, ...Role[]]).optional(),
   /** Banir = forçar role a USER e invalidar sessões */
   banned: z.boolean().optional(),
 });
@@ -30,7 +31,7 @@ export async function GET(
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+    if (!session?.user || !canAccessAdminSupport((session.user as { role?: string }).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -74,7 +75,7 @@ export async function PATCH(
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+    if (!session?.user || !canManageAdminUsers((session.user as { role?: string }).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canInviteMembers, canRemoveMembers } from "@/lib/auth/member-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,8 @@ export async function GET(req: Request) {
             return NextResponse.json({ data: [], total: 0, meta: { currentUserId: userId, canRemoveMembers: isGlobalAdmin, isGlobalAdmin } });
         }
 
-        const canRemoveMembers =
-            isGlobalAdmin ||
-            actorRole === "PROMOTER_OWNER" ||
-            actorRole === "OWNER";
+        const canRemoveMembersFlag =
+            isGlobalAdmin || canRemoveMembers(actorRole);
 
         // Fetch all members of that organization (org-level, not per-event)
         const members = await prisma.organizationMember.findMany({
@@ -48,7 +47,7 @@ export async function GET(req: Request) {
         return NextResponse.json({
             data: members,
             total: members.length,
-            meta: { currentUserId: userId, canRemoveMembers, isGlobalAdmin },
+            meta: { currentUserId: userId, canRemoveMembers: canRemoveMembersFlag, isGlobalAdmin },
         });
     } catch (error) {
         safeLog.error("Promotor team error", error);
@@ -63,9 +62,7 @@ export async function POST(req: Request) {
         if (!orgId) {
             return NextResponse.json({ error: "Contexto de organização não encontrado." }, { status: 400 });
         }
-        const canInvite = ["PROMOTER_OWNER", "PROMOTER_MANAGER", "OWNER", "MANAGER"].includes(actorRole as string);
-
-        if (!canInvite) {
+        if (!canInviteMembers(actorRole)) {
             return NextResponse.json({ error: "Permissões insuficientes para convidar membros." }, { status: 403 });
         }
 

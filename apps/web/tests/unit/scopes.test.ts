@@ -43,18 +43,22 @@ describe("can() RBAC scopes", () => {
       expect(can("ADMIN", "admin:fraud")).toBe(true);
     });
 
-    it("denies PROMOTER for admin scopes", () => {
-      expect(can("PROMOTER", "admin:overview")).toBe(false);
-      expect(can("PROMOTER", "admin:audit")).toBe(false);
+    it("denies USER for admin scopes", () => {
+      expect(can("USER", "admin:overview")).toBe(false);
+      expect(can("USER", "admin:audit")).toBe(false);
+    });
+
+    it("allows FINANCE_MANAGER for finance scope only", () => {
+      expect(can("FINANCE_MANAGER", "admin:finance")).toBe(true);
+      expect(can("FINANCE_MANAGER", "admin:users")).toBe(false);
     });
   });
 
-  describe("wildcard promoter:*", () => {
-    it("allows PROMOTER for any promoter scope", () => {
-      expect(can("PROMOTER", "promoter:overview")).toBe(true);
-      expect(can("PROMOTER", "promoter:events")).toBe(true);
-      expect(can("PROMOTER", "promoter:checkin")).toBe(true);
-      expect(can("PROMOTER", "promoter:analytics")).toBe(true);
+  describe("platform admin roles", () => {
+    it("allows SUPPORT_AGENT for users and events", () => {
+      expect(can("SUPPORT_AGENT", "admin:users")).toBe(true);
+      expect(can("SUPPORT_AGENT", "admin:events")).toBe(true);
+      expect(can("SUPPORT_AGENT", "admin:finance")).toBe(false);
     });
 
     it("allows ADMIN for promoter scopes (ADMIN has promoter:* and admin:*)", () => {
@@ -68,8 +72,7 @@ describe("can() RBAC scopes", () => {
   });
 
   describe("getScopesForRole", () => {
-    it("returns wildcard scopes for PROMOTER and ADMIN", () => {
-      expect(getScopesForRole("PROMOTER")).toContain("promoter:*");
+    it("returns wildcard scopes for ADMIN", () => {
       expect(getScopesForRole("ADMIN")).toContain("promoter:*");
       expect(getScopesForRole("ADMIN")).toContain("admin:*");
     });

@@ -2,6 +2,7 @@ import { AdminLayoutClient } from "@/components/admin/AdminLayoutClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { canAccessAdminPanel } from "@/lib/auth/admin-access";
 
 export default async function AdminLayout({
     children,
@@ -15,9 +16,9 @@ export default async function AdminLayout({
     }
 
     const role = (session.user as { role?: string }).role;
-    if (role !== "ADMIN") {
+    if (!canAccessAdminPanel(role)) {
         redirect("/");
     }
 
-    return <AdminLayoutClient>{children}</AdminLayoutClient>;
+    return <AdminLayoutClient adminRole={role ?? "USER"}>{children}</AdminLayoutClient>;
 }

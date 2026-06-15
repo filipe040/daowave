@@ -1,7 +1,6 @@
 /**
  * Permission scopes for RBAC.
- * Roles: USER | PROMOTER | ADMIN
- * Scopes define what actions a role can perform (resource:action or area).
+ * Platform roles: USER | ADMIN | FINANCE_MANAGER | SUPPORT_AGENT
  */
 
 import type { AppRole } from "./permissions";
@@ -40,14 +39,15 @@ export type PermissionScope =
 
 const ROLE_SCOPES: Record<AppRole, PermissionScope[]> = {
   USER: ["user:tickets", "user:orders"],
-  PROMOTER: ["promoter:*"],
   ADMIN: ["promoter:*", "admin:*"],
+  FINANCE_MANAGER: ["admin:overview", "admin:finance", "admin:promoters"],
+  SUPPORT_AGENT: ["admin:overview", "admin:users", "admin:events", "admin:promoters"],
 };
 
 function normalizeRole(rawRole: unknown): AppRole | null {
   if (!rawRole) return null;
   const role = String(rawRole).toUpperCase() as AppRole;
-  if (role === "USER" || role === "PROMOTER" || role === "ADMIN") return role;
+  if (role in ROLE_SCOPES) return role;
   return null;
 }
 
