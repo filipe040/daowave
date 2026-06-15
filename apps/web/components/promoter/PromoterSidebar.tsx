@@ -18,6 +18,7 @@ import {
     FileText,
     Tag,
     Home,
+    Shield,
 } from "lucide-react";
 import { MemberRole } from "@prisma/client";
 import { promoterNavAllowed } from "@/lib/auth/member-permissions";
@@ -35,6 +36,7 @@ const routes = [
     { label: "Design Faturas", icon: FileText, href: "/promotor/settings/invoices" },
     { label: "Cupão de desconto", icon: Tag, href: "/promotor/settings/coupon" },
     { label: "Equipa", icon: Users, href: "/promotor/team" },
+    { label: "Segurança", icon: Shield, href: "/account/security" },
     { label: "Definições", icon: Settings, href: "/promotor/settings" },
 ];
 

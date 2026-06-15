@@ -265,7 +265,9 @@ export function TicketSelector({
                 <Ticket className={`h-4 w-4 ${isLight ? 'text-neutral-500' : 'text-white/70'}`} />
                 <h3 className={typeTitleCls}>{type.name}</h3>
                 {type.requiresSeat && (
-                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-600 border border-amber-500/30 rounded-md">Lugares Marcados</span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-zinc-500/15 text-zinc-500 border border-white/10 rounded-md" title="Lugar atribuído na entrada">
+                    Sala marcada
+                  </span>
                 )}
               </div>
             )}

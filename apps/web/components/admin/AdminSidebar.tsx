@@ -16,6 +16,7 @@ import {
     Home,
     Banknote,
     MessageSquare,
+    Shield,
 } from "lucide-react";
 import { adminNavAllowed } from "@/lib/auth/admin-access";
 import { signOut } from "next-auth/react";
@@ -76,6 +77,13 @@ export function AdminSidebar({ adminRole }: { adminRole?: string }) {
             </nav>
 
             <div className="px-3 pb-8 border-t border-white/10 pt-4 space-y-1">
+                <Link
+                    href="/account/security"
+                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-200"
+                >
+                    <Shield className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
+                    <span>Segurança da conta</span>
+                </Link>
                 <Link
                     href="/"
                     className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-200"

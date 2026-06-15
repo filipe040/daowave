@@ -216,6 +216,7 @@ export function promoterNavAllowed(
     if (href.includes("/tickets") || href.includes("/invoices")) return canManageBrandingSettings(r);
     return canManageOrgSettings(r);
   }
+  if (href.startsWith("/account/security")) return true;
 
   return canManageEvents(r);
 }

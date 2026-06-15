@@ -32,6 +32,38 @@ function redirectUrl(request: NextRequest, pathname: string, params?: Record<str
   return url;
 }
 
+/** Edge-safe — espelha lib/auth/public-nav (sem imports locais). */
+function staffDashboardPathEdge(
+  role: string | undefined,
+  hasOrgAccess: boolean
+): string | null {
+  if (role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT") {
+    return "/admin";
+  }
+  if (hasOrgAccess) return "/promotor";
+  return null;
+}
+
+function isStaffBuyerBlockedPath(pathname: string): boolean {
+  if (pathname.startsWith("/my-tickets")) return true;
+  if (pathname.startsWith("/checkout")) return true;
+  if (pathname.startsWith("/ticket/")) return true;
+  if (pathname === "/account") return true;
+  if (pathname.startsWith("/account/profile")) return true;
+  if (pathname.startsWith("/account/favorites")) return true;
+  if (pathname.startsWith("/account/notifications")) return true;
+  if (pathname.startsWith("/account/orders")) return true;
+  if (pathname.startsWith("/account/tickets")) return true;
+  return false;
+}
+
+function isStaffAllowedAccountPath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/account/security") ||
+    pathname.startsWith("/account/legal")
+  );
+}
+
 /**
  * Edge-safe middleware - 100% Edge Runtime Compatible
  *
@@ -129,6 +161,34 @@ export async function middleware(request: NextRequest) {
 
     const isPublicPromoterRoute =
       pathname === "/promotor/login" || pathname.startsWith("/promotor/login/");
+
+    // Staff (promotor/admin) não usa fluxo de comprador
+    const authSecretForStaff = process.env.NEXTAUTH_SECRET;
+    if (
+      authSecretForStaff &&
+      authSecretForStaff.length >= 32 &&
+      isStaffBuyerBlockedPath(pathname) &&
+      !isStaffAllowedAccountPath(pathname)
+    ) {
+      try {
+        const { getToken } = await import("next-auth/jwt");
+        const staffToken = await getToken({
+          req: request as any,
+          secret: authSecretForStaff,
+        });
+        if (staffToken) {
+          const dest = staffDashboardPathEdge(
+            staffToken.role as string | undefined,
+            staffToken.hasOrgAccess === true
+          );
+          if (dest) {
+            return NextResponse.redirect(redirectUrl(request, dest));
+          }
+        }
+      } catch {
+        /* fail open — páginas também validam no servidor */
+      }
+    }
 
     // Check if route needs protection (canonical: /admin, /promotor, /validator)
     const isProtectedRoute =

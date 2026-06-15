@@ -65,6 +65,11 @@ export default function SeatMapsTab({ eventId }: { eventId: string }) {
     const hasMap = stats?.total > 0;
 
     return (
+        <div className="space-y-4">
+            <div className="mx-6 mt-6 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-left text-sm text-amber-200/90">
+                <strong className="font-bold text-amber-100">Nota:</strong> o mapa é para gestão interna e check-in.
+                A compra online com lugar escolhido ainda não está ativa — venda como entrada geral.
+            </div>
         <div className="flex flex-col items-center justify-center p-12 text-center h-[500px] bg-transparent">
 
             {!hasMap ? (
@@ -124,6 +129,7 @@ export default function SeatMapsTab({ eventId }: { eventId: string }) {
                     </div>
                 </div>
             )}
+        </div>
         </div>
     );
 }

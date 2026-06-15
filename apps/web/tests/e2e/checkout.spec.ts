@@ -123,7 +123,7 @@ test.describe("Check-in (promotor scanner) E2E", () => {
     await login(page, email, password);
 
     const { eventId } = getSeedFixture();
-    await page.goto(`/promotor/checkin/${eventId}`);
+    await page.goto(`/promotor/checkin?eventId=${eventId}`);
     await page.waitForLoadState("networkidle").catch(() => {});
     await expect(page.getByTestId("page-promotor-checkin")).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId("input-qr")).toBeVisible({ timeout: 5000 });
@@ -134,7 +134,7 @@ test.describe("Check-in (promotor scanner) E2E", () => {
     await login(page, email, password);
 
     const { eventId, validQr } = getSeedFixture();
-    await page.goto(`/promotor/checkin/${eventId}`);
+    await page.goto(`/promotor/checkin?eventId=${eventId}`);
     await expect(page.getByTestId("page-promotor-checkin")).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId("input-qr")).toBeVisible({ timeout: 5000 });
 

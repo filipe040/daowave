@@ -72,7 +72,7 @@ export default function AccountTickets() {
             return (
               <li key={t.id}>
                 <Link
-                  href={`/account/tickets/${t.id}`}
+                  href={`/ticket/${t.id}`}
                   className="block rounded-3xl border border-white/10 bg-[#14141f] shadow-md p-5 sm:p-6 transition-colors hover:bg-white/5 hover:border-neutral-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#00a0e3]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   data-testid={`ticket-card-${t.id}`}
                 >
