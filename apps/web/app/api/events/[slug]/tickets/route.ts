@@ -53,6 +53,8 @@ export async function GET(
                     id: lot.id,
                     name: lot.name,
                     priceCents: lot.priceCents,
+                    capacity,
+                    soldCount: lot.soldCount,
                     available,
                     isAvailable,
                     perUserLimit: lot.perUserLimit

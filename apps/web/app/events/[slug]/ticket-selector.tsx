@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2, Ticket } from 'lucide-react';
 import { TicketPresave } from './ticket-presave';
+import { isLotAlmostSoldOut } from '@/lib/events/lot-availability';
 
 interface TicketType {
   id: string;
@@ -21,6 +22,8 @@ interface TicketLot {
   id: string;
   name: string;
   priceCents: number;
+  capacity: number;
+  soldCount: number;
   available: number;
   isAvailable: boolean;
   perUserLimit: number | null;
@@ -215,7 +218,7 @@ export function TicketSelector({
                           <p className={priceCls}>
                             {formatCurrency(lot.priceCents, "EUR")}
                           </p>
-                          {available > 0 && available <= 20 && (
+                          {isLotAlmostSoldOut(lot.available, lot.capacity, lot.soldCount) && (
                             <span className="text-[10px] font-bold uppercase text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Quase a esgotar</span>
                           )}
                         </div>
