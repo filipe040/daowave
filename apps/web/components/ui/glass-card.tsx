@@ -10,8 +10,8 @@ const GlassCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl sm:rounded-3xl border border-neutral-200 bg-white shadow-md",
-      "transition-all duration-200 hover:shadow-lg hover:border-violet-200",
+      "rounded-2xl sm:rounded-3xl border border-white/10 bg-[#14141f] shadow-lg shadow-black/20",
+      "transition-all duration-200 hover:shadow-xl hover:border-[#00a0e3]/30",
       "animate-fade-in",
       className
     )}
@@ -27,7 +27,7 @@ const GlassSection = React.forwardRef<
   <section
     ref={ref}
     className={cn(
-      "rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm",
+      "rounded-2xl border border-white/10 bg-[#14141f] p-6 sm:p-8 shadow-lg shadow-black/20",
       "transition-all duration-200",
       className
     )}

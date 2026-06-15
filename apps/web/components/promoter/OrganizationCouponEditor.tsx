@@ -221,13 +221,13 @@ function CouponForm({
   };
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+    <div className="bg-[#0c0c12] border border-white/10 rounded-2xl p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4 mr-1" />
           Voltar
         </Button>
-        <h2 className="text-lg font-bold text-neutral-900">
+        <h2 className="text-lg font-bold text-white">
           {isEdit ? `Editar cupão ${coupon?.code}` : "Novo cupão"}
         </h2>
       </div>
@@ -280,10 +280,10 @@ function CouponForm({
           />
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50/80 p-4 space-y-4">
+        <div className="rounded-xl border border-white/10 bg-white/5/80 p-4 space-y-4">
           <div>
-            <p className="text-sm font-semibold text-neutral-900">Promotor e comissão</p>
-            <p className="text-xs text-neutral-500 mt-0.5">
+            <p className="text-sm font-semibold text-white">Promotor e comissão</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
               Crie um cupão por promotor — cada código gera comissão em € para o membro
               selecionado.
             </p>
@@ -416,7 +416,7 @@ function CouponForm({
         </div>
 
         {isEdit && (
-          <label className="flex items-center gap-2 text-sm text-neutral-700">
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
             <input
               type="checkbox"
               disabled={readOnly}
@@ -506,7 +506,7 @@ export function OrganizationCouponEditor() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-neutral-500 py-12">
+      <div className="flex items-center gap-2 text-zinc-500 py-12">
         <Loader2 className="h-5 w-5 animate-spin" />
         A carregar...
       </div>
@@ -518,8 +518,8 @@ export function OrganizationCouponEditor() {
       <div className="max-w-xl bg-amber-50 border border-amber-200 rounded-2xl p-6 flex gap-4">
         <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
         <div>
-          <h3 className="font-semibold text-neutral-900 mb-1">Sem cupões configurados</h3>
-          <p className="text-sm text-neutral-600 leading-relaxed">
+          <h3 className="font-semibold text-white mb-1">Sem cupões configurados</h3>
+          <p className="text-sm text-zinc-400 leading-relaxed">
             Apenas o proprietário da organização ou um administrador pode criar cupões e
             atribuí-los a promotores da equipa.
           </p>
@@ -569,7 +569,7 @@ export function OrganizationCouponEditor() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-zinc-500">
             {coupons.length} cupão{coupons.length !== 1 ? "ões" : ""}
             {totalCommissions > 0 && (
               <span className="ml-2 text-emerald-700">
@@ -587,9 +587,9 @@ export function OrganizationCouponEditor() {
       </div>
 
       {coupons.length === 0 ? (
-        <div className="bg-white border border-dashed border-neutral-300 rounded-2xl p-10 text-center">
-          <Tag className="h-8 w-8 text-neutral-400 mx-auto mb-3" />
-          <p className="text-neutral-600 mb-4">Ainda não há cupões. Crie um para cada promotor.</p>
+        <div className="bg-[#14141f] border border-dashed border-neutral-300 rounded-2xl p-10 text-center">
+          <Tag className="h-8 w-8 text-zinc-500 mx-auto mb-3" />
+          <p className="text-zinc-400 mb-4">Ainda não há cupões. Crie um para cada promotor.</p>
           {canManage && (
             <Button onClick={() => setView("create")}>
               <Plus className="h-4 w-4 mr-2" />
@@ -608,31 +608,31 @@ export function OrganizationCouponEditor() {
             return (
               <div
                 key={coupon.id}
-                className="bg-white border border-neutral-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm"
+                className="bg-[#0c0c12] border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm"
               >
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-bold text-neutral-900">{coupon.code}</span>
+                    <span className="font-mono font-bold text-white">{coupon.code}</span>
                     <Badge variant={coupon.isActive ? "success" : "muted"}>
                       {coupon.isActive ? "Ativo" : "Inativo"}
                     </Badge>
-                    <span className="text-sm text-violet-700 font-medium">
+                    <span className="text-sm text-[#5ec8f8] font-medium">
                       {formatDiscount(coupon)} desconto
                     </span>
                   </div>
-                  <p className="text-sm text-neutral-600 truncate">
+                  <p className="text-sm text-zinc-400 truncate">
                     {coupon.event?.title ?? "Evento"}
                     {promoterName && (
-                      <span className="text-neutral-500">
+                      <span className="text-zinc-500">
                         {" "}
-                        · Promotor: <strong className="text-neutral-700">{promoterName}</strong>
+                        · Promotor: <strong className="text-zinc-300">{promoterName}</strong>
                         {coupon.commissionCents != null && (
                           <span> ({formatEuro(coupon.commissionCents)}/uso)</span>
                         )}
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-zinc-500">
                     {coupon.usedCount}
                     {coupon.maxUses != null ? ` / ${coupon.maxUses}` : ""} utilizações
                     {(coupon.commissionStats?.totalCommissionCents ?? 0) > 0 && (

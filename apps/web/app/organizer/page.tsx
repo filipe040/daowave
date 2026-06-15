@@ -47,11 +47,11 @@ export default async function OrganizerDashboard() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Dashboard</h1>
-          <p className="text-base md:text-lg text-neutral-500">Bem-vindo, {organizerProfile.brandName}</p>
+          <p className="text-base md:text-lg text-zinc-500">Bem-vindo, {organizerProfile.brandName}</p>
         </div>
         <Link
           href="/organizer/events/new"
-          className="bg-violet-600 hover:bg-violet-700 px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105 whitespace-nowrap"
+          className="bg-[#00a0e3] hover:bg-[#0090cc] px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105 whitespace-nowrap"
         >
           + Criar Evento
         </Link>
@@ -59,43 +59,43 @@ export default async function OrganizerDashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 text-neutral-500">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
             <Ticket className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsTotal}</div>
-          <div className="text-sm md:text-base text-neutral-500">Total de Eventos</div>
+          <div className="text-sm md:text-base text-zinc-500">Total de Eventos</div>
         </div>
 
-        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 text-neutral-500">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
             <CircleCheck className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{overview.eventsActive}</div>
-          <div className="text-sm md:text-base text-neutral-500">Publicados</div>
+          <div className="text-sm md:text-base text-zinc-500">Publicados</div>
         </div>
 
-        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 text-neutral-500">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
             <FileText className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">{draftEvents}</div>
-          <div className="text-sm md:text-base text-neutral-500">Rascunhos</div>
+          <div className="text-sm md:text-base text-zinc-500">Rascunhos</div>
         </div>
 
-        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 text-neutral-500">
+        <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-zinc-500">
             <CircleDollarSign className="h-6 w-6" strokeWidth={1.5} />
           </div>
           <div className="text-4xl md:text-5xl font-bold mb-2">
             {(overview.revenueCents / 100).toFixed(2)}€
           </div>
-          <div className="text-sm md:text-base text-neutral-500">Receita Total</div>
+          <div className="text-sm md:text-base text-zinc-500">Receita Total</div>
         </div>
       </div>
 
       {/* Recent Events */}
-      <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-neutral-200 p-6 md:p-8 shadow-lg">
+      <div className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 shadow-lg">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-bold">Eventos Recentes</h2>
           <Link
@@ -109,13 +109,13 @@ export default async function OrganizerDashboard() {
 
         {recentEvents.length === 0 ? (
           <div className="text-center py-12 md:py-16">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-500">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-zinc-500">
               <Calendar className="h-8 w-8" strokeWidth={1.5} />
             </div>
-            <p className="text-lg md:text-xl text-neutral-500 mb-6">Ainda não criou nenhum evento</p>
+            <p className="text-lg md:text-xl text-zinc-500 mb-6">Ainda não criou nenhum evento</p>
             <Link
               href="/organizer/events/new"
-              className="inline-block bg-violet-600 hover:bg-violet-700 px-8 py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+              className="inline-block bg-[#00a0e3] hover:bg-[#0090cc] px-8 py-4 rounded-xl text-base md:text-lg font-semibold text-white transition-all shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
             >
               Criar Primeiro Evento
             </Link>
@@ -126,7 +126,7 @@ export default async function OrganizerDashboard() {
               <Link
                 key={event.id}
                 href={`/organizer/events/${event.id}/edit`}
-                className="flex items-center justify-between p-5 md:p-6 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 transition-all group"
+                className="flex items-center justify-between p-5 md:p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -142,11 +142,11 @@ export default async function OrganizerDashboard() {
                       {event.status === "PUBLISHED" ? "Publicado" : "Rascunho"}
                     </span>
                   </div>
-                  <p className="text-sm md:text-base text-neutral-500">
+                  <p className="text-sm md:text-base text-zinc-500">
                     {format(new Date(event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-neutral-500 group-hover:text-purple-400 transition-colors ml-4" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-zinc-500 group-hover:text-purple-400 transition-colors ml-4" />
               </Link>
             ))}
           </div>

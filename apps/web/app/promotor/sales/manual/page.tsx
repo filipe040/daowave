@@ -98,7 +98,7 @@ export default function ManualSalesPage() {
             actions={
                 <Link
                     href="/promotor/sales/manual/new"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-[14px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] transition-all active:scale-95 shadow-md"
                 >
                     <Plus className="w-4 h-4" />
                     Nova Venda Manual
@@ -124,7 +124,7 @@ export default function ManualSalesPage() {
                             key: "createdAt",
                             label: "Data",
                             render: (o) => (
-                                <div className="text-[13px] text-neutral-600">
+                                <div className="text-[13px] text-zinc-400">
                                     {format(new Date(o.createdAt), "dd MMM HH:mm", { locale: pt })}
                                 </div>
                             ),
@@ -134,8 +134,8 @@ export default function ManualSalesPage() {
                             label: "Evento / Cliente",
                             render: (o) => (
                                 <div className="max-w-[200px]">
-                                    <div className="font-bold text-neutral-900 uppercase tracking-tight truncate">{o.event.title}</div>
-                                    <div className="text-[11px] text-neutral-400 truncate">{o.buyerName || "Cliente Final"}</div>
+                                    <div className="font-bold text-white uppercase tracking-tight truncate">{o.event.title}</div>
+                                    <div className="text-[11px] text-zinc-500 truncate">{o.buyerName || "Cliente Final"}</div>
                                 </div>
                             ),
                         },
@@ -144,8 +144,8 @@ export default function ManualSalesPage() {
                             label: "Pagamento",
                             render: (o) => (
                                 <div>
-                                    <div className="font-bold text-neutral-900 text-sm">{(o.totalCents / 100).toFixed(2)}€</div>
-                                    <div className="text-[10px] text-neutral-400 font-black uppercase tracking-widest">{o.manualPayment.method}</div>
+                                    <div className="font-bold text-white text-sm">{(o.totalCents / 100).toFixed(2)}€</div>
+                                    <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">{o.manualPayment.method}</div>
                                 </div>
                             ),
                         },
@@ -165,7 +165,7 @@ export default function ManualSalesPage() {
                             key: "tickets",
                             label: "Bilhetes",
                             render: (o) => (
-                                <div className="text-[12px] font-bold text-neutral-500">
+                                <div className="text-[12px] font-bold text-zinc-500">
                                     {o.tickets.length} bilhete{o.tickets.length !== 1 ? 's' : ''}
                                 </div>
                             ),
@@ -185,7 +185,7 @@ export default function ManualSalesPage() {
                             {o.buyerEmail && o.status === 'PAID' && (
                                 <button
                                     onClick={() => handleResend(o.id)}
-                                    className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
+                                    className="p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                                     title="Reenviar Bilhetes"
                                 >
                                     <Mail className="w-4 h-4" />

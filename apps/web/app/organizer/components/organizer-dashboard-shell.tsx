@@ -30,7 +30,7 @@ export default function OrganizerDashboardShell({
   }, [mounted]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex">
+    <div className="min-h-screen dash-shell flex">
       {/* Sidebar: desktop fixed, mobile drawer */}
       <OrganizerSidebar
         mobileOpen={mobileOpen}

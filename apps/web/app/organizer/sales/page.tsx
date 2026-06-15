@@ -89,60 +89,60 @@ export default async function OrganizerSalesPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold mb-2">Vendas</h1>
-        <p className="text-neutral-500">Acompanhe as suas vendas e receitas</p>
+        <p className="text-zinc-500">Acompanhe as suas vendas e receitas</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Receita Total</span>
-            <CircleDollarSign className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Receita Total</span>
+            <CircleDollarSign className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">
+          <p className="text-2xl font-bold text-white">
             {(totalRevenue / 100).toFixed(2)} €
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Bilhetes Vendidos</span>
-            <Ticket className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Bilhetes Vendidos</span>
+            <Ticket className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">{totalTickets}</p>
+          <p className="text-2xl font-bold text-white">{totalTickets}</p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Encomendas</span>
-            <Package className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Encomendas</span>
+            <Package className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">{totalOrders}</p>
+          <p className="text-2xl font-bold text-white">{totalOrders}</p>
         </div>
       </div>
 
       {/* Sales by Event */}
       {Object.keys(salesByEvent).length > 0 && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <h2 className="text-xl font-bold mb-4">Vendas por Evento</h2>
           <div className="space-y-4">
             {Object.values(salesByEvent).map((group: any) => (
               <div
                 key={group.event.id}
-                className="border border-neutral-200 rounded-lg p-4 hover:bg-neutral-50 transition-colors"
+                className="border border-white/10 rounded-lg p-4 hover:bg-white/5 transition-colors"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-semibold text-lg">{group.event.title}</h3>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-zinc-500">
                       {group.orders.length} {group.orders.length === 1 ? "encomenda" : "encomendas"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-neutral-900">
+                    <p className="text-lg font-bold text-white">
                       {(group.revenue / 100).toFixed(2)} €
                     </p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-zinc-500">
                       {group.tickets} {group.tickets === 1 ? "bilhete" : "bilhetes"}
                     </p>
                   </div>
@@ -154,33 +154,33 @@ export default async function OrganizerSalesPage() {
       )}
 
       {/* Recent Orders */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+      <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
         <h2 className="text-xl font-bold mb-4">Encomendas Recentes</h2>
         {orders.length === 0 ? (
           <div className="text-center py-12">
             <div className="mb-4 flex justify-center">
-              <Package className="h-14 w-14 text-neutral-500" strokeWidth={1.5} />
+              <Package className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
             </div>
-            <p className="text-lg text-neutral-500 mb-2">Ainda não há vendas</p>
-            <p className="text-sm text-neutral-500">As encomendas pagas aparecerão aqui</p>
+            <p className="text-lg text-zinc-500 mb-2">Ainda não há vendas</p>
+            <p className="text-sm text-zinc-500">As encomendas pagas aparecerão aqui</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-neutral-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Data</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Evento</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Comprador</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Bilhetes</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-neutral-500">Total</th>
+                <tr className="border-b border-white/10">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Data</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Evento</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Comprador</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Bilhetes</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-zinc-500">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
                   <tr
                     key={order.id}
-                    className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors"
+                    className="border-b border-white/10 hover:bg-white/5 transition-colors"
                   >
                     <td className="py-3 px-4 text-sm">
                       {order.createdAt
@@ -192,7 +192,7 @@ export default async function OrganizerSalesPage() {
                     </td>
                     <td className="py-3 px-4 text-sm">
                       <div>{order.user.name || "N/A"}</div>
-                      <div className="text-neutral-500 text-xs">
+                      <div className="text-zinc-500 text-xs">
                         {order.user.email}
                       </div>
                     </td>

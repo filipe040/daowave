@@ -30,7 +30,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
   APPROVED: "bg-blue-50 text-blue-700 border-blue-200",
-  PROCESSING: "bg-violet-50 text-violet-700 border-violet-200",
+  PROCESSING: "bg-[#00a0e3]/10 text-[#5ec8f8] border-[#00a0e3]/30",
   PAID: "bg-emerald-50 text-emerald-700 border-emerald-200",
   REJECTED: "bg-red-50 text-red-600 border-red-200",
 };
@@ -97,7 +97,7 @@ export default function PromoterFinancePage() {
       {!loading && !error && data && (
         <div className="space-y-5 sm:space-y-8 pb-8">
           {/* Destaque mobile — saldo levantável */}
-          <div className="lg:hidden rounded-2xl sm:rounded-3xl border border-violet-200 bg-gradient-to-br from-violet-600 to-indigo-600 p-5 sm:p-6 text-white shadow-lg">
+          <div className="lg:hidden rounded-2xl sm:rounded-3xl border border-[#00a0e3]/30 bg-gradient-to-br from-[#00a0e3] to-[#0066aa] p-5 sm:p-6 text-white shadow-lg">
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80">Levantável agora</p>
             <p className="mt-2 text-3xl sm:text-4xl font-black tabular-nums tracking-tight">
               {fmt(withdrawableCents, currency)}
@@ -110,10 +110,10 @@ export default function PromoterFinancePage() {
 
           {/* Pedir levantamento — antes dos KPIs no mobile */}
           <div className="dash-card p-4 sm:p-6 space-y-4 order-first lg:order-none">
-            <h2 className="text-sm sm:text-base font-bold text-neutral-900">Pedir levantamento</h2>
-            <div className="rounded-xl bg-neutral-50 border border-neutral-100 p-3 sm:p-4 space-y-2 text-xs sm:text-sm text-neutral-600 leading-relaxed">
+            <h2 className="text-sm sm:text-base font-bold text-white">Pedir levantamento</h2>
+            <div className="rounded-xl bg-white/5 border border-white/10 p-3 sm:p-4 space-y-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
               <p>
-                Podes pedir até <strong className="text-neutral-900">{fmt(withdrawableCents, currency)}</strong>
+                Podes pedir até <strong className="text-white">{fmt(withdrawableCents, currency)}</strong>
                 {" "}(mínimo {fmt(minWithdrawal, currency)}).
               </p>
               {data.pendingCents > 0 && data.availableCents === 0 && (
@@ -130,7 +130,7 @@ export default function PromoterFinancePage() {
             </div>
             <div className="flex flex-col gap-3">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-neutral-400">€</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-500">€</span>
                 <input
                   type="number"
                   min="0"
@@ -139,7 +139,7 @@ export default function PromoterFinancePage() {
                   placeholder="0,00"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 pl-9 pr-4 py-3.5 text-base font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-violet-100 focus:border-violet-400"
+                  className="w-full rounded-xl border border-white/10 pl-9 pr-4 py-3.5 text-base font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#00a0e3]/20 focus:border-[#00a0e3]/50"
                 />
               </div>
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3">
@@ -147,7 +147,7 @@ export default function PromoterFinancePage() {
                   <button
                     type="button"
                     onClick={fillMaxWithdraw}
-                    className="w-full py-3 rounded-xl text-sm font-bold border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    className="w-full py-3 rounded-xl text-sm font-bold border border-white/10 bg-[#14141f] text-zinc-300 hover:bg-white/5 transition-colors"
                   >
                     Valor máximo
                   </button>
@@ -158,8 +158,8 @@ export default function PromoterFinancePage() {
                   onClick={handleWithdraw}
                   className={`w-full py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     canWithdraw
-                      ? "bg-violet-600 text-white hover:bg-violet-700 shadow-md"
-                      : "bg-neutral-100 text-neutral-400"
+                      ? "bg-[#00a0e3] text-white hover:bg-[#0090cc] shadow-md"
+                      : "bg-neutral-100 text-zinc-500"
                   } ${!canWithdraw ? "xs:col-span-2" : ""}`}
                 >
                   {withdrawing ? "A processar…" : "Pedir levantamento"}
@@ -173,7 +173,7 @@ export default function PromoterFinancePage() {
             <KpiCard label="Comissões" value={fmt(data.platformFeesCents, currency)} icon={TrendingDown} iconColor="text-red-500" />
             <KpiCard label="Receita líquida" value={fmt(data.netCents, currency)} icon={Banknote} iconColor="text-blue-600" />
             <KpiCard label="Saldo pendente" value={fmt(data.pendingCents, currency)} icon={Clock} iconColor="text-amber-600" subtitle={data.settings?.pendingReleaseDays ? `Libertação após ${data.settings.pendingReleaseDays} dias` : undefined} />
-            <KpiCard label="Saldo disponível" value={fmt(data.availableCents, currency)} icon={Wallet} iconColor="text-violet-600" />
+            <KpiCard label="Saldo disponível" value={fmt(data.availableCents, currency)} icon={Wallet} iconColor="text-[#00a0e3]" />
             <KpiCard
               className="hidden lg:flex"
               label="Levantável agora"
@@ -186,7 +186,7 @@ export default function PromoterFinancePage() {
           </div>
 
           <div>
-            <h2 className="text-sm sm:text-base font-semibold text-neutral-900 mb-3 sm:mb-4">Histórico de levantamentos</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4">Histórico de levantamentos</h2>
             <DataTable
               keyField="id"
               data={data.withdrawals}
@@ -194,8 +194,8 @@ export default function PromoterFinancePage() {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-lg font-black text-neutral-900 tabular-nums">{fmt(row.amountCents, currency)}</div>
-                      <div className="text-xs text-neutral-400 mt-0.5">
+                      <div className="text-lg font-black text-white tabular-nums">{fmt(row.amountCents, currency)}</div>
+                      <div className="text-xs text-zinc-500 mt-0.5">
                         {new Date(row.createdAt).toLocaleDateString("pt-PT", {
                           day: "2-digit",
                           month: "short",
@@ -205,7 +205,7 @@ export default function PromoterFinancePage() {
                     </div>
                     <span
                       className={`shrink-0 inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${
-                        STATUS_STYLE[row.status] ?? "bg-neutral-50 text-neutral-600 border-neutral-200"
+                        STATUS_STYLE[row.status] ?? "bg-white/5 text-zinc-400 border-white/10"
                       }`}
                     >
                       {STATUS_LABEL[row.status] ?? row.status}

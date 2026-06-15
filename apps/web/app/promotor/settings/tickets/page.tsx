@@ -88,7 +88,7 @@ export default function TicketTemplatesPage() {
                 <button
                     onClick={handleCreate}
                     disabled={creating || loading}
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 transition-all shadow-sm"
+                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] disabled:opacity-50 transition-all shadow-sm"
                 >
                     <Plus className="h-4 w-4" />
                     {creating ? "A criar..." : "Novo template"}
@@ -106,18 +106,18 @@ export default function TicketTemplatesPage() {
             {!loading && error && <ErrorState message={error} onRetry={load} />}
 
             {!loading && !error && templates.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 sm:py-24 px-4 text-center rounded-3xl border border-dashed border-neutral-200 bg-gradient-to-b from-violet-50/50 to-white">
-                    <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center mb-5">
-                        <Ticket className="h-8 w-8 text-violet-600" />
+                <div className="flex flex-col items-center justify-center py-16 sm:py-24 px-4 text-center rounded-3xl border border-dashed border-white/10 bg-gradient-to-b from-[#00a0e3]/5 to-white">
+                    <div className="w-16 h-16 rounded-2xl bg-[#00a0e3]/15 flex items-center justify-center mb-5">
+                        <Ticket className="h-8 w-8 text-[#00a0e3]" />
                     </div>
-                    <h3 className="text-xl font-bold text-neutral-900">Sem templates ainda</h3>
-                    <p className="text-neutral-500 max-w-md mt-2 text-sm sm:text-base leading-relaxed">
+                    <h3 className="text-xl font-bold text-white">Sem templates ainda</h3>
+                    <p className="text-zinc-500 max-w-md mt-2 text-sm sm:text-base leading-relaxed">
                         Crie o primeiro design personalizado para os bilhetes da sua organização — cores, logo, layout e QR.
                     </p>
                     <button
                         onClick={handleCreate}
                         disabled={creating}
-                        className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all shadow-sm"
+                        className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] transition-all shadow-sm"
                     >
                         <Plus className="h-4 w-4" />
                         Criar o primeiro template
@@ -131,7 +131,7 @@ export default function TicketTemplatesPage() {
                         <Link
                             key={template.id}
                             href={`/promotor/settings/tickets/${template.id}`}
-                            className="group flex flex-col bg-white border border-neutral-200/80 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-violet-200 transition-all active:scale-[0.99]"
+                            className="group flex flex-col bg-[#0c0c12] border border-white/10/80 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[#00a0e3]/30 transition-all active:scale-[0.99]"
                         >
                             <div className="flex justify-between items-start gap-3 mb-4">
                                 <span
@@ -139,7 +139,7 @@ export default function TicketTemplatesPage() {
                                         template.status === "ACTIVE"
                                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                                             : template.status === "ARCHIVED"
-                                              ? "bg-neutral-100 text-neutral-500"
+                                              ? "bg-neutral-100 text-zinc-500"
                                               : "bg-amber-50 text-amber-700 border border-amber-200/60"
                                     }`}
                                 >
@@ -156,28 +156,28 @@ export default function TicketTemplatesPage() {
                                           ? "Arquivado"
                                           : "Rascunho"}
                                 </span>
-                                <span className="text-[11px] font-bold text-neutral-400">v{template.version}</span>
+                                <span className="text-[11px] font-bold text-zinc-500">v{template.version}</span>
                             </div>
 
                             <div className="flex items-start gap-3 mb-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 group-hover:bg-violet-100 transition-colors">
-                                    <LayoutTemplate className="h-5 w-5 text-violet-600" />
+                                <div className="w-10 h-10 rounded-xl bg-[#00a0e3]/10 border border-[#00a0e3]/20 flex items-center justify-center shrink-0 group-hover:bg-[#00a0e3]/15 transition-colors">
+                                    <LayoutTemplate className="h-5 w-5 text-[#00a0e3]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="text-base font-bold text-neutral-900 truncate group-hover:text-violet-700 transition-colors">
+                                    <h3 className="text-base font-bold text-white truncate group-hover:text-[#5ec8f8] transition-colors">
                                         {template.name}
                                     </h3>
-                                    <p className="text-xs text-neutral-500 mt-0.5">
+                                    <p className="text-xs text-zinc-500 mt-0.5">
                                         {PRESET_LABELS[template.preset] || template.preset}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="mt-auto flex items-center justify-between pt-4 border-t border-neutral-100">
-                                <span className="text-[11px] text-neutral-400">
+                            <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/10">
+                                <span className="text-[11px] text-zinc-500">
                                     {new Date(template.createdAt).toLocaleDateString("pt-PT")}
                                 </span>
-                                <span className="text-xs font-bold text-violet-600 flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <span className="text-xs font-bold text-[#00a0e3] flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                                     Editar
                                     <ExternalLink className="h-3 w-3" />
                                 </span>
@@ -188,10 +188,10 @@ export default function TicketTemplatesPage() {
             )}
 
             {!loading && !error && templates.length > 0 && (
-                <div className="mt-8 rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-4 sm:p-5 flex gap-3 items-start">
-                    <Layers className="h-5 w-5 text-violet-600 shrink-0 mt-0.5" />
-                    <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                        Apenas um template pode estar <strong className="font-semibold text-neutral-800">Ativo</strong> de
+                <div className="mt-8 rounded-2xl border border-white/10/80 bg-white/5/50 p-4 sm:p-5 flex gap-3 items-start">
+                    <Layers className="h-5 w-5 text-[#00a0e3] shrink-0 mt-0.5" />
+                    <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                        Apenas um template pode estar <strong className="font-semibold text-zinc-200">Ativo</strong> de
                         cada vez. Ao publicar um design, os bilhetes novos passam a usá-lo automaticamente.
                     </p>
                 </div>

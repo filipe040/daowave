@@ -18,7 +18,7 @@ export default function AccountError({
   const linkClass = buttonVariants({ variant: "ghost", size: "sm" });
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-background/50 p-8 text-center">
+    <div className="rounded-2xl border border-white/10 bg-background/50 p-8 text-center">
       <h2 className="text-lg font-semibold text-foreground">Algo correu mal</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Ocorreu um erro ao carregar esta página. Verifica se a base de dados está a correr e se as migrações foram aplicadas.

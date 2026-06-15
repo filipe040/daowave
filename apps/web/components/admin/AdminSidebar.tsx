@@ -34,13 +34,13 @@ export function AdminSidebar() {
     const pathname = usePathname();
 
     return (
-        <div className="flex flex-col h-full bg-white border-r border-neutral-200 shadow-sm">
-            <div className="px-6 pt-8 pb-6 border-b border-neutral-100">
+        <div className="flex flex-col h-full bg-[#0a0a10] border-r border-white/10">
+            <div className="px-6 pt-8 pb-6 border-b border-white/10">
                 <Link href="/admin" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-md">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00a0e3] to-[#0066aa] flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-lg shadow-[#00a0e3]/20">
                         A
                     </div>
-                    <span className="text-[14px] font-bold text-neutral-900 tracking-tight">Admin LivePass</span>
+                    <span className="text-[14px] font-bold text-white tracking-tight">Admin LivePass</span>
                 </Link>
             </div>
 
@@ -57,12 +57,12 @@ export function AdminSidebar() {
                             className={cn(
                                 "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                                 active
-                                    ? "bg-violet-600 text-white shadow-md shadow-violet-200"
-                                    : "text-neutral-600 hover:bg-violet-50 hover:text-violet-700"
+                                    ? "bg-[#00a0e3] text-white shadow-lg shadow-[#00a0e3]/20"
+                                    : "text-zinc-400 hover:bg-white/5 hover:text-white"
                             )}
                         >
                             <route.icon
-                                className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-neutral-400")}
+                                className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-zinc-500")}
                                 strokeWidth={active ? 2 : 1.5}
                             />
                             <span className="tracking-wide">{route.label}</span>
@@ -71,19 +71,19 @@ export function AdminSidebar() {
                 })}
             </nav>
 
-            <div className="px-3 pb-8 border-t border-neutral-100 pt-4 space-y-1">
+            <div className="px-3 pb-8 border-t border-white/10 pt-4 space-y-1">
                 <Link
                     href="/"
-                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-neutral-600 hover:bg-violet-50 hover:text-violet-700 transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-200"
                 >
-                    <Home className="h-4 w-4 shrink-0 text-neutral-400" strokeWidth={1.5} />
+                    <Home className="h-4 w-4 shrink-0 text-zinc-500" strokeWidth={1.5} />
                     <span>Voltar ao início</span>
                 </Link>
                 <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
+                    className="flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sm font-medium text-zinc-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
                 >
-                    <LogOut className="h-4 w-4 group-hover:text-red-600" strokeWidth={1.5} />
+                    <LogOut className="h-4 w-4 group-hover:text-red-400" strokeWidth={1.5} />
                     <span>Sair</span>
                 </button>
             </div>

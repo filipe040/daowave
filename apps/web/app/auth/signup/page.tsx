@@ -61,18 +61,18 @@ function SignUpContent() {
               <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
             </div>
             <div className="space-y-2">
-              <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Conta criada!</h1>
-              <p className="text-[13px] sm:text-[14px] text-neutral-500 leading-relaxed px-2 sm:px-4">
-                Enviamos um email de verificação para <span className="text-neutral-900 font-medium">{formData.email}</span>.
+              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Conta criada!</h1>
+              <p className="text-[13px] sm:text-[14px] text-zinc-500 leading-relaxed px-2 sm:px-4">
+                Enviamos um email de verificação para <span className="text-white font-medium">{formData.email}</span>.
               </p>
             </div>
-            <div className="pt-4 border-t border-neutral-200">
-              <p className="text-[11px] sm:text-[12px] text-neutral-500 mb-6">
+            <div className="pt-4 border-t border-white/10">
+              <p className="text-[11px] sm:text-[12px] text-zinc-500 mb-6">
                 Por favor, siga a ligação no email para ativar a sua conta.
               </p>
               <Link
                 href="/auth/signin"
-                className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-6 py-3 text-[13px] sm:text-[14px] font-bold text-white hover:opacity-95 shadow-md transition-all"
+                className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-[#00a0e3] to-[#0090cc] px-6 py-3 text-[13px] sm:text-[14px] font-bold text-white hover:opacity-95 shadow-md transition-all"
               >
                 Voltar ao Login
               </Link>
@@ -86,16 +86,16 @@ function SignUpContent() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 sm:px-6 overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-violet-400/15 blur-[120px]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-[#00a0e3]/15 blur-[120px]" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl" />
       </div>
 
       <div className="mb-8 text-center w-full max-w-[400px]">
-        <Link href="/auth/signin" className="inline-flex items-center gap-2 text-neutral-500 hover:text-violet-600 transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
+        <Link href="/auth/signin" className="inline-flex items-center gap-2 text-zinc-500 hover:text-[#00a0e3] transition-colors mb-6 text-[11px] sm:text-[13px] uppercase tracking-widest font-bold">
           <ArrowLeft className="h-4 w-4" /> Voltar ao Login
         </Link>
-        <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-neutral-900">Criar Conta</h1>
-        <p className="mt-2 text-[13px] sm:text-[14px] text-neutral-500">Junte-se à maior rede de eventos em Portugal</p>
+        <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-white">Criar Conta</h1>
+        <p className="mt-2 text-[13px] sm:text-[14px] text-zinc-500">Junte-se à maior rede de eventos em Portugal</p>
       </div>
 
       <div className="w-full max-w-[400px]">
@@ -156,7 +156,7 @@ function SignUpContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-zinc-300 transition-colors"
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m13.42 13.42l-3.29-3.29M3 3l18 18" /></svg>
@@ -170,7 +170,7 @@ function SignUpContent() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 sm:h-12 rounded-full mt-4 text-[13px] sm:text-[14px] font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-95 shadow-md transition-all disabled:opacity-50"
+              className="w-full h-11 sm:h-12 rounded-full mt-4 text-[13px] sm:text-[14px] font-bold bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white hover:opacity-95 shadow-md transition-all disabled:opacity-50"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               {loading ? "A processar..." : "Criar Conta"}
@@ -179,17 +179,17 @@ function SignUpContent() {
         </div>
 
         <div className="mt-8 text-center space-y-4">
-          <p className="text-[13px] sm:text-[14px] text-neutral-600">
+          <p className="text-[13px] sm:text-[14px] text-zinc-400">
             Já tem uma conta?{" "}
-            <Link href="/auth/signin" className="text-violet-600 hover:text-violet-700 font-bold transition-all underline underline-offset-4">
+            <Link href="/auth/signin" className="text-[#00a0e3] hover:text-[#5ec8f8] font-bold transition-all underline underline-offset-4">
               Entrar agora
             </Link>
           </p>
           <p className="text-[10px] sm:text-[11px] text-neutral-400 leading-relaxed px-6">
             Ao registar-se, aceita os nossos{" "}
-            <Link href="/terms" className="underline hover:text-neutral-600">Termos</Link>{" "}
+            <Link href="/terms" className="underline hover:text-zinc-400">Termos</Link>{" "}
             e a nossa{" "}
-            <Link href="/privacy" className="underline hover:text-neutral-600">Política de Privacidade</Link>.
+            <Link href="/privacy" className="underline hover:text-zinc-400">Política de Privacidade</Link>.
           </p>
         </div>
       </div>
@@ -202,7 +202,7 @@ export default function SignUpPage() {
     <div className="public-shell min-h-screen overflow-x-hidden">
       <Suspense fallback={
         <div className="public-shell min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#5ec8f8]" />
         </div>
       }>
         <SignUpContent />

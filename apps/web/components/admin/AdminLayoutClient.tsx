@@ -8,7 +8,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-full flex min-h-screen mesh-gradient bg-background">
+        <div className="h-full flex min-h-screen dash-shell">
             <div className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 z-30">
                 <AdminSidebar />
             </div>
@@ -28,15 +28,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex-1 md:pl-60 flex flex-col min-h-screen relative">
-                <div className="md:hidden flex items-center gap-4 px-6 py-4 bg-white/90 backdrop-blur-xl border-b border-neutral-200 sticky top-0 z-20">
+                <div className="md:hidden flex items-center gap-4 px-6 py-4 bg-[#14141f]/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-20">
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="p-2 rounded-xl text-neutral-600 hover:bg-violet-50 hover:text-violet-700 transition-all"
+                        className="p-2 rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white transition-all"
                         aria-label="Menu"
                     >
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
-                    <span className="text-[15px] font-bold text-neutral-900 tracking-tight">Administração</span>
+                    <span className="text-[15px] font-bold text-white tracking-tight">Administração</span>
                 </div>
 
                 <main className="flex-1 relative z-10">{children}</main>

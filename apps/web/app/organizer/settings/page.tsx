@@ -42,13 +42,13 @@ export default async function OrganizerSettingsPage() {
           <div className="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
             <Building2 className="h-4 w-4 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900">Configurações da Organização</h1>
+          <h1 className="text-2xl font-bold text-white">Configurações da Organização</h1>
         </div>
-        <p className="text-sm text-neutral-500 ml-11">Gerir os dados públicos e fiscais da sua organização</p>
+        <p className="text-sm text-zinc-500 ml-11">Gerir os dados públicos e fiscais da sua organização</p>
       </div>
 
       {/* Form Card */}
-      <div className="rounded-2xl border border-neutral-200 bg-white backdrop-blur-sm p-6 sm:p-8">
+      <div className="rounded-2xl border border-white/10 bg-[#14141f] backdrop-blur-sm p-6 sm:p-8">
         <OrgSettingsForm organization={org as any} />
       </div>
     </div>

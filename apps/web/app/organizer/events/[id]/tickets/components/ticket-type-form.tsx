@@ -54,12 +54,12 @@ export default function TicketTypeForm({
 
   return (
     <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-neutral-50 rounded-2xl border border-neutral-200 p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Criar Tipo de Bilhete</h2>
           <button
             onClick={onClose}
-            className="text-neutral-500 hover:text-neutral-900 transition-colors p-1"
+            className="text-zinc-500 hover:text-white transition-colors p-1"
             aria-label="Fechar"
           >
             <X className="h-5 w-5" strokeWidth={1.5} />
@@ -137,14 +137,14 @@ export default function TicketTypeForm({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold transition-all disabled:opacity-50"
+              className="flex-1 px-6 py-3 rounded-lg bg-[#00a0e3] hover:bg-[#0090cc] text-white font-semibold transition-all disabled:opacity-50"
             >
               {loading ? "A criar..." : "Criar Tipo"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-100 transition-colors"
+              className="px-6 py-3 rounded-lg border border-white/10 text-zinc-500 hover:bg-white/10 transition-colors"
             >
               Cancelar
             </button>

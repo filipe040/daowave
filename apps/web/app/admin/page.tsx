@@ -36,17 +36,17 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="min-h-full bg-transparent">
-            <div className="bg-neutral-50 border-b border-neutral-200 px-6 sm:px-10 py-8">
+            <div className="bg-white/5 border-b border-white/10 px-6 sm:px-10 py-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight uppercase">Visão Geral</h1>
-                    <p className="mt-1 text-[14px] text-neutral-500">Estado global da plataforma</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight uppercase">Visão Geral</h1>
+                    <p className="mt-1 text-[14px] text-zinc-500">Estado global da plataforma</p>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-6 sm:px-10 py-10 space-y-10">
                 {loading && (
                     <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-                        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl bg-neutral-50" />)}
+                        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl bg-white/5" />)}
                     </div>
                 )}
                 {!loading && error && <ErrorState message={error} onRetry={load} />}
@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
                             <KpiCard label="Organizações" value={stats.activeOrganizations} icon={Building2} iconColor="text-purple-600" />
                             <KpiCard label="Eventos" value={stats.events} icon={Calendar} iconColor="text-orange-600" />
                             <div className="col-span-2 sm:col-span-1">
-                                <KpiCard label="Encomendas" value={stats.orders} icon={ShoppingCart} iconColor="text-neutral-500" />
+                                <KpiCard label="Encomendas" value={stats.orders} icon={ShoppingCart} iconColor="text-zinc-500" />
                             </div>
                         </div>
 
@@ -73,10 +73,10 @@ export default function AdminDashboardPage() {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className="bg-neutral-50 backdrop-blur-xl rounded-2xl border border-neutral-200 p-6 hover:bg-neutral-100 hover:border-neutral-300 transition-all duration-300 group shadow-xl"
+                                    className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/10 hover:border-neutral-300 transition-all duration-300 group shadow-xl"
                                 >
-                                    <p className="text-sm font-bold text-neutral-900 group-hover:text-neutral-900 tracking-wide uppercase">{item.label}</p>
-                                    <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{item.desc}</p>
+                                    <p className="text-sm font-bold text-white group-hover:text-white tracking-wide uppercase">{item.label}</p>
+                                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{item.desc}</p>
                                 </Link>
                             ))}
                         </div>

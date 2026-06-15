@@ -65,22 +65,22 @@ export function FinancialTab({ organizationId }: Props) {
     else toast.success("Configuração financeira guardada");
   };
 
-  if (loading) return <div className="p-6 text-sm text-neutral-500">A carregar…</div>;
+  if (loading) return <div className="p-6 text-sm text-zinc-500">A carregar…</div>;
 
   return (
     <div className="dash-card p-6 space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-neutral-900">Configuração Financeira</h3>
-        <p className="text-sm text-neutral-500 mt-1">
+        <h3 className="text-lg font-bold text-white">Configuração Financeira</h3>
+        <p className="text-sm text-zinc-500 mt-1">
           Define condições comerciais próprias ou usa a configuração global.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="text-xs font-bold text-neutral-500 uppercase">Modo de preços</span>
+          <span className="text-xs font-bold text-zinc-500 uppercase">Modo de preços</span>
           <select
-            className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+            className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
             value={profile.pricingMode ?? "GLOBAL"}
             onChange={(e) => setProfile({ ...profile, pricingMode: e.target.value as "GLOBAL" | "CUSTOM" })}
           >
@@ -90,9 +90,9 @@ export function FinancialTab({ organizationId }: Props) {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold text-neutral-500 uppercase">Quem paga as taxas</span>
+          <span className="text-xs font-bold text-zinc-500 uppercase">Quem paga as taxas</span>
           <select
-            className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+            className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
             value={profile.feePaidBy ?? globalDefaults?.defaultFeePaidBy ?? "BUYER"}
             onChange={(e) => setProfile({ ...profile, feePaidBy: e.target.value as "BUYER" | "ORGANIZER" })}
           >
@@ -102,9 +102,9 @@ export function FinancialTab({ organizationId }: Props) {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold text-neutral-500 uppercase">Liquidação automática</span>
+          <span className="text-xs font-bold text-zinc-500 uppercase">Liquidação automática</span>
           <select
-            className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+            className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
             value={profile.settlementFrequency ?? "MANUAL"}
             onChange={(e) =>
               setProfile({
@@ -132,13 +132,13 @@ export function FinancialTab({ organizationId }: Props) {
       </div>
 
       {profile.pricingMode === "CUSTOM" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-neutral-100 pt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border-t border-white/10 pt-6">
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Taxa base (€)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Taxa base (€)</span>
             <input
               type="number"
               step="0.01"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={(profile.customFixedFeeCents ?? 0) / 100}
               onChange={(e) =>
                 setProfile({ ...profile, customFixedFeeCents: Math.round(Number(e.target.value) * 100) })
@@ -146,21 +146,21 @@ export function FinancialTab({ organizationId }: Props) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Percentagem (%)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Percentagem (%)</span>
             <input
               type="number"
               step="0.01"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={profile.customPercentageFee ?? ""}
               onChange={(e) => setProfile({ ...profile, customPercentageFee: Number(e.target.value) })}
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Margem mínima (€)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Margem mínima (€)</span>
             <input
               type="number"
               step="0.01"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={(profile.customMinimumFeeCents ?? 0) / 100}
               onChange={(e) =>
                 setProfile({ ...profile, customMinimumFeeCents: Math.round(Number(e.target.value) * 100) })
@@ -168,11 +168,11 @@ export function FinancialTab({ organizationId }: Props) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Taxa máxima (€)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Taxa máxima (€)</span>
             <input
               type="number"
               step="0.01"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={profile.customMaximumFeeCents != null ? profile.customMaximumFeeCents / 100 : ""}
               onChange={(e) =>
                 setProfile({
@@ -183,11 +183,11 @@ export function FinancialTab({ organizationId }: Props) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Reserva operacional (€)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Reserva operacional (€)</span>
             <input
               type="number"
               step="0.01"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={(profile.customOperationalReserveCents ?? 0) / 100}
               onChange={(e) =>
                 setProfile({
@@ -198,10 +198,10 @@ export function FinancialTab({ organizationId }: Props) {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-neutral-500 uppercase">Prazo libertação (dias)</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase">Prazo libertação (dias)</span>
             <input
               type="number"
-              className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
               value={profile.payoutDelayDays ?? globalDefaults?.pendingReleaseDays ?? 3}
               onChange={(e) => setProfile({ ...profile, payoutDelayDays: Number(e.target.value) })}
             />

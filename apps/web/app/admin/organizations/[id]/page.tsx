@@ -90,9 +90,9 @@ export default function OrganizationDetailPage() {
                     </button>
                     <button
                         onClick={() => setShowEditModal(true)}
-                        className="flex items-center gap-2 px-4 h-10 border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 rounded-xl text-[13px] font-bold transition-all border border-neutral-200"
+                        className="flex items-center gap-2 px-4 h-10 border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-xl text-[13px] font-bold transition-all border border-white/10"
                     >
-                        <Settings className="h-4 w-4 text-neutral-500" />
+                        <Settings className="h-4 w-4 text-zinc-500" />
                         Configurações
                     </button>
                     {org.website && (
@@ -100,7 +100,7 @@ export default function OrganizationDetailPage() {
                             href={org.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 h-10 bg-white text-black rounded-xl text-[13px] font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            className="flex items-center gap-2 px-4 h-10 bg-[#14141f] text-black rounded-xl text-[13px] font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
                         >
                             <ExternalLink className="h-4 w-4" />
                             Website
@@ -136,7 +136,7 @@ export default function OrganizationDetailPage() {
             />
 
             {/* Header Tabs */}
-            <div className="flex items-center gap-1 p-1 bg-neutral-50 rounded-2xl border border-neutral-200 mb-8 w-fit">
+            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-2xl border border-white/10 mb-8 w-fit">
                 {TABS.map((tab) => {
                     const active = activeTab === tab.id;
                     return (
@@ -146,11 +146,11 @@ export default function OrganizationDetailPage() {
                             className={cn(
                                 "flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all duration-300",
                                 active
-                                    ? "bg-white text-black shadow-xl"
-                                    : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+                                    ? "bg-[#14141f] text-black shadow-xl"
+                                    : "text-zinc-500 hover:text-white hover:bg-white/5"
                             )}
                         >
-                            <tab.icon className={cn("h-4 w-4", active ? "text-white" : "text-neutral-500")} />
+                            <tab.icon className={cn("h-4 w-4", active ? "text-white" : "text-zinc-500")} />
                             {tab.label}
                         </button>
                     );
@@ -163,59 +163,59 @@ export default function OrganizationDetailPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Summary Card */}
                         <div className="md:col-span-2 space-y-6">
-                            <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] p-8">
-                                <h3 className="text-xl font-bold text-neutral-900 tracking-tight mb-6">Informação Legal</h3>
+                            <div className="bg-[#0c0c12] border border-white/10 shadow-sm rounded-[32px] p-8">
+                                <h3 className="text-xl font-bold text-white tracking-tight mb-6">Informação Legal</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
                                     <div>
-                                        <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-1.5">Nome Legal</div>
-                                        <div className="text-[15px] font-bold text-neutral-900 tracking-tight">{org.legalName || "—"}</div>
+                                        <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.15em] mb-1.5">Nome Legal</div>
+                                        <div className="text-[15px] font-bold text-white tracking-tight">{org.legalName || "—"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-1.5">NIF / VAT</div>
-                                        <div className="text-[15px] font-bold text-neutral-900 tracking-tight">{org.vatNumber || "—"}</div>
+                                        <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.15em] mb-1.5">NIF / VAT</div>
+                                        <div className="text-[15px] font-bold text-white tracking-tight">{org.vatNumber || "—"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-1.5">Slug</div>
+                                        <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.15em] mb-1.5">Slug</div>
                                         <div className="text-[15px] font-medium text-amber-600 tracking-tight">@{org.slug}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-1.5">Membro desde</div>
-                                        <div className="text-[15px] font-bold text-neutral-900 tracking-tight">{new Date(org.createdAt).toLocaleDateString("pt-PT")}</div>
+                                        <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.15em] mb-1.5">Membro desde</div>
+                                        <div className="text-[15px] font-bold text-white tracking-tight">{new Date(org.createdAt).toLocaleDateString("pt-PT")}</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Stats */}
                             <div className="grid grid-cols-3 gap-6">
-                                <div className="bg-neutral-50 rounded-[24px] p-6 border border-neutral-200">
-                                    <div className="text-neutral-400 mb-2"><Activity className="h-5 w-5" /></div>
-                                    <div className="text-2xl font-black text-neutral-900">{org._count?.events || 0}</div>
-                                    <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Eventos</div>
+                                <div className="bg-white/5 rounded-[24px] p-6 border border-white/10">
+                                    <div className="text-zinc-500 mb-2"><Activity className="h-5 w-5" /></div>
+                                    <div className="text-2xl font-black text-white">{org._count?.events || 0}</div>
+                                    <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Eventos</div>
                                 </div>
-                                <div className="bg-neutral-50 rounded-[24px] p-6 border border-neutral-200">
-                                    <div className="text-neutral-400 mb-2"><Users className="h-5 w-5" /></div>
-                                    <div className="text-2xl font-black text-neutral-900">{org._count?.members || 0}</div>
-                                    <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Membros</div>
+                                <div className="bg-white/5 rounded-[24px] p-6 border border-white/10">
+                                    <div className="text-zinc-500 mb-2"><Users className="h-5 w-5" /></div>
+                                    <div className="text-2xl font-black text-white">{org._count?.members || 0}</div>
+                                    <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Membros</div>
                                 </div>
-                                <div className="bg-neutral-50 rounded-[24px] p-6 border border-neutral-200">
-                                    <div className="text-neutral-400 mb-2"><Mail className="h-5 w-5" /></div>
-                                    <div className="text-2xl font-black text-neutral-900">{org._count?.invites || 0}</div>
-                                    <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mt-1">Convites</div>
+                                <div className="bg-white/5 rounded-[24px] p-6 border border-white/10">
+                                    <div className="text-zinc-500 mb-2"><Mail className="h-5 w-5" /></div>
+                                    <div className="text-2xl font-black text-white">{org._count?.invites || 0}</div>
+                                    <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Convites</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Status Card */}
                         <div className="space-y-6">
-                            <div className="border border-neutral-200 bg-neutral-50 rounded-[32px] p-8">
-                                <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-6">Estado da Entidade</h3>
+                            <div className="border border-white/10 bg-white/5 rounded-[32px] p-8">
+                                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-6">Estado da Entidade</h3>
                                 <div className="flex flex-col gap-4">
                                     {/* Simple Status Badge for now */}
                                     <div className="flex items-center gap-3 p-4 bg-emerald-400/10 border border-emerald-400/20 rounded-2xl">
                                         <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                                         <span className="text-emerald-600 font-bold text-[13px] uppercase tracking-widest">{org.status}</span>
                                     </div>
-                                    <p className="text-[13px] text-neutral-500 leading-relaxed">
+                                    <p className="text-[13px] text-zinc-500 leading-relaxed">
                                         Esta organização está ativa e tem permissões completas para criar eventos e gerir vendas na plataforma.
                                     </p>
                                 </div>
@@ -232,12 +232,12 @@ export default function OrganizationDetailPage() {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-xl font-bold text-neutral-900 tracking-tight">Convites Pendentes</h3>
-                                <p className="text-sm text-neutral-500 mt-1">Gira os convites enviados para novos membros.</p>
+                                <h3 className="text-xl font-bold text-white tracking-tight">Convites Pendentes</h3>
+                                <p className="text-sm text-zinc-500 mt-1">Gira os convites enviados para novos membros.</p>
                             </div>
                             <button
                                 onClick={() => setShowInviteModal(true)}
-                                className="flex items-center gap-2 px-5 h-11 bg-white text-black rounded-2xl text-[13px] font-bold hover:scale-[1.02] transition-all shadow-xl shadow-white/5"
+                                className="flex items-center gap-2 px-5 h-11 bg-[#14141f] text-black rounded-2xl text-[13px] font-bold hover:scale-[1.02] transition-all shadow-xl shadow-white/5"
                             >
                                 <Plus className="h-4 w-4" strokeWidth={2.5} />
                                 Convidar Membro

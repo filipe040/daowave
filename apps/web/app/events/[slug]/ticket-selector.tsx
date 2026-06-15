@@ -168,7 +168,7 @@ export function TicketSelector({
     : 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-white/10 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 active:scale-95 transition-all text-base sm:text-lg';
   const qtyNumCls = isLight ? 'w-5 sm:w-6 text-center font-bold text-sm sm:text-base text-neutral-900' : 'w-5 sm:w-6 text-center font-bold text-sm sm:text-base text-white';
   const checkoutBtnCls = isLight
-    ? 'w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold text-[15px] hover:opacity-95 transition-all disabled:opacity-40 shadow-md shadow-violet-500/25'
+    ? 'w-full h-12 rounded-xl bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white font-bold text-[15px] hover:opacity-95 transition-all disabled:opacity-40 shadow-md shadow-[#00a0e3]/25'
     : 'w-full h-14 rounded-2xl bg-white text-black font-bold text-[15px] hover:bg-white/90 shadow-[0_12px_40px_rgba(255,255,255,0.15)] transition-all hover:-translate-y-0.5';
 
   if (loadingData) {
@@ -254,7 +254,7 @@ export function TicketSelector({
                           <button
                             onClick={() => updateQuantity(lot.id, 1, available, type.perUserLimit || lot.perUserLimit)}
                             disabled={quantity >= available || (!!(type.perUserLimit || lot.perUserLimit) && quantity >= (type.perUserLimit || lot.perUserLimit || 0))}
-                            className={`${qtyBtnCls} ${isLight ? 'bg-violet-600 text-white ring-0 hover:bg-violet-700' : 'font-bold'}`}
+                            className={`${qtyBtnCls} ${isLight ? 'bg-[#00a0e3] text-white ring-0 hover:bg-[#0090cc]' : 'font-bold'}`}
                           >
                             +
                           </button>

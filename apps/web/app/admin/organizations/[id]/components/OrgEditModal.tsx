@@ -27,9 +27,9 @@ interface OrgEditModalProps {
 }
 
 const inputClass =
-    "w-full rounded-xl border border-neutral-200 public-input px-4 py-2.5 text-[14px] focus:border-neutral-300 focus:bg-neutral-100 transition-colors";
+    "w-full rounded-xl border border-white/10 public-input px-4 py-2.5 text-[14px] focus:border-neutral-300 focus:bg-neutral-100 transition-colors";
 
-const labelClass = "block text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em] mb-1.5";
+const labelClass = "block text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] mb-1.5";
 
 const COUNTRIES = ["Portugal", "Espanha", "França", "Alemanha", "Itália", "Países Baixos", "Bélgica", "Suíça", "Áustria", "Polónia", "Reino Unido", "Brasil", "Angola", "Moçambique", "Outro"];
 
@@ -89,23 +89,23 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-neutral-200 rounded-3xl shadow-2xl">
+            <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0c0c12] border border-white/10 rounded-3xl shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between px-7 py-5 border-b border-neutral-200">
+                <div className="flex items-center justify-between px-7 py-5 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-neutral-50 flex items-center justify-center">
-                            <Building2 className="h-4 w-4 text-neutral-600" />
+                        <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center">
+                            <Building2 className="h-4 w-4 text-zinc-400" />
                         </div>
                         <div>
-                            <h2 className="text-[15px] font-bold text-neutral-900">Editar Organização</h2>
-                            <p className="text-[12px] text-neutral-500">@{org.slug}</p>
+                            <h2 className="text-[15px] font-bold text-white">Editar Organização</h2>
+                            <p className="text-[12px] text-zinc-500">@{org.slug}</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="h-8 w-8 rounded-xl bg-neutral-50 hover:bg-neutral-100 flex items-center justify-center transition-colors"
+                        className="h-8 w-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
                     >
-                        <X className="h-4 w-4 text-neutral-500" />
+                        <X className="h-4 w-4 text-zinc-500" />
                     </button>
                 </div>
 
@@ -113,7 +113,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
                 <div className="px-7 py-6 space-y-6">
                     {/* Identity */}
                     <div>
-                        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-4">Identidade</p>
+                        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Identidade</p>
                         <div className="grid sm:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>Nome <span className="text-red-600">*</span></label>
@@ -131,7 +131,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
                             <div>
                                 <label className={labelClass}>Slug <span className="text-red-600">*</span></label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-[14px] select-none">@</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-[14px] select-none">@</span>
                                     <input
                                         type="text"
                                         value={form.slug}
@@ -141,7 +141,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
                                         required
                                     />
                                 </div>
-                                <p className="text-[11px] text-neutral-400 mt-1">Apenas letras minúsculas, números e hífens.</p>
+                                <p className="text-[11px] text-zinc-500 mt-1">Apenas letras minúsculas, números e hífens.</p>
                                 {errors.slug && <p className="text-red-600 text-xs mt-1">{errors.slug}</p>}
                             </div>
                         </div>
@@ -149,7 +149,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
 
                     {/* Contacts */}
                     <div>
-                        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-4">Contactos</p>
+                        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Contactos</p>
                         <div className="grid sm:grid-cols-2 gap-4">
                             <div>
                                 <label className={labelClass}>Email</label>
@@ -170,7 +170,7 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
 
                     {/* Location */}
                     <div>
-                        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mb-4">Localização</p>
+                        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Localização</p>
                         <div className="grid sm:grid-cols-2 gap-4">
                             <div className="sm:col-span-2">
                                 <label className={labelClass}>Morada</label>
@@ -191,14 +191,14 @@ export function OrgEditModal({ org, isOpen, onClose, onSuccess }: OrgEditModalPr
                 </div>
 
                 {/* Footer */}
-                <div className="px-7 py-5 border-t border-neutral-200 flex justify-end gap-3">
-                    <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50 transition-colors">
+                <div className="px-7 py-5 border-t border-white/10 flex justify-end gap-3">
+                    <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-zinc-500 hover:text-white hover:bg-white/5 transition-colors">
                         Cancelar
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isPending || !form.name.trim()}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-[13px] font-bold bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-[13px] font-bold bg-[#14141f] text-black hover:bg-[#14141f]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
                     >
                         {isPending ? <><Loader2 className="h-4 w-4 animate-spin" />A guardar…</> : <><Save className="h-4 w-4" />Guardar</>}
                     </button>

@@ -77,11 +77,11 @@ export default async function OrganizerAccountPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold mb-2">Conta</h1>
-        <p className="text-neutral-500">Gerir o seu perfil e configurações</p>
+        <p className="text-zinc-500">Gerir o seu perfil e configurações</p>
       </div>
 
       {/* Profile Info */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+      <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
         <h2 className="text-xl font-bold mb-4">Informações do Perfil</h2>
         <AccountForm
           organizerProfile={organizerProfile}
@@ -91,52 +91,52 @@ export default async function OrganizerAccountPage() {
 
       {/* Statistics */}
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Eventos</span>
-            <Ticket className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Eventos</span>
+            <Ticket className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">{stats.totalEvents}</p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-2xl font-bold text-white">{stats.totalEvents}</p>
+          <p className="text-xs text-zinc-500 mt-1">
             {stats.publishedEvents} publicados
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Bilhetes</span>
-            <Ticket className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Bilhetes</span>
+            <Ticket className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">{stats.totalTickets}</p>
+          <p className="text-2xl font-bold text-white">{stats.totalTickets}</p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Receita</span>
-            <CircleDollarSign className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Receita</span>
+            <CircleDollarSign className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">
+          <p className="text-2xl font-bold text-white">
             {((stats.totalRevenue._sum.totalCents || 0) / 100).toFixed(2)} €
           </p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Membro desde</span>
-            <Calendar className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Membro desde</span>
+            <Calendar className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-sm font-bold text-neutral-900">
+          <p className="text-sm font-bold text-white">
             {format(new Date(organizerProfile.user.createdAt), "MMM yyyy", { locale: pt })}
           </p>
         </div>
       </div>
 
       {/* Status */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+      <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
         <h2 className="text-xl font-bold mb-4">Estado da Conta</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-neutral-500">Status do Perfil</span>
+            <span className="text-sm text-zinc-500">Status do Perfil</span>
             <span
               className={`text-xs px-3 py-1 rounded font-semibold ${
                 organizerProfile.status === "APPROVED"
@@ -154,11 +154,11 @@ export default async function OrganizerAccountPage() {
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-neutral-500">Marca</span>
+            <span className="text-sm text-zinc-500">Marca</span>
             <span className="text-sm font-medium">{organizerProfile.brandName}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-neutral-500">Email</span>
+            <span className="text-sm text-zinc-500">Email</span>
             <span className="text-sm font-medium">{organizerProfile.user.email}</span>
           </div>
         </div>

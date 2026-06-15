@@ -23,7 +23,7 @@ interface EventBranding {
     ticketTemplateId: string | null;
 }
 
-const inputCls = "w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner";
+const inputCls = "w-full rounded-2xl border border-white/10 bg-[#14141f] text-white placeholder:text-zinc-500 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#00a0e3]/30 transition-all shadow-inner";
 const labelCls = "public-label text-[12px] font-bold tracking-[0.2em] mb-3";
 
 export default function PromoterEventBrandingPage() {
@@ -137,8 +137,8 @@ export default function PromoterEventBrandingPage() {
     if (loading) return (
         <PageShell title="Design da Página">
             <div className="max-w-2xl animate-pulse space-y-3">
-                <div className="h-10 bg-neutral-50 rounded-xl border border-neutral-200" />
-                <div className="h-80 bg-neutral-50 rounded-[32px] border border-neutral-200" />
+                <div className="h-10 bg-white/5 rounded-xl border border-white/10" />
+                <div className="h-80 bg-white/5 rounded-[32px] border border-white/10" />
             </div>
         </PageShell>
     );
@@ -157,7 +157,7 @@ export default function PromoterEventBrandingPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center w-full sm:w-auto mt-4 sm:mt-0">
                     <Link
                         href={`/promotor/events/${id}`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Voltar ao Evento
@@ -166,13 +166,13 @@ export default function PromoterEventBrandingPage() {
             }
         >
             <div className="max-w-3xl space-y-4">
-                <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden divide-y divide-neutral-200 relative">
+                <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-md overflow-hidden divide-y divide-neutral-200 relative">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
                     
                     {/* Colors & Typography */}
-                    <div className="p-6 pb-4 flex items-center gap-3 border-b border-neutral-200">
-                        <Palette className="h-5 w-5 text-neutral-500" />
-                        <h2 className="text-sm font-bold text-neutral-900 tracking-widest uppercase">Cores & Tipografia</h2>
+                    <div className="p-6 pb-4 flex items-center gap-3 border-b border-white/10">
+                        <Palette className="h-5 w-5 text-zinc-500" />
+                        <h2 className="text-sm font-bold text-white tracking-widest uppercase">Cores & Tipografia</h2>
                     </div>
 
                     <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -184,7 +184,7 @@ export default function PromoterEventBrandingPage() {
                                     id="primaryColor"
                                     value={primaryColor}
                                     onChange={(e) => setPrimaryColor(e.target.value)}
-                                    className="h-12 w-16 p-1 rounded-xl bg-white border border-neutral-200 cursor-pointer"
+                                    className="h-12 w-16 p-1 rounded-xl bg-[#0c0c12] border border-white/10 cursor-pointer"
                                 />
                                 <input
                                     type="text"
@@ -203,7 +203,7 @@ export default function PromoterEventBrandingPage() {
                                     id="secondaryColor"
                                     value={secondaryColor}
                                     onChange={(e) => setSecondaryColor(e.target.value)}
-                                    className="h-12 w-16 p-1 rounded-xl bg-white border border-neutral-200 cursor-pointer"
+                                    className="h-12 w-16 p-1 rounded-xl bg-[#0c0c12] border border-white/10 cursor-pointer"
                                 />
                                 <input
                                     type="text"
@@ -216,7 +216,7 @@ export default function PromoterEventBrandingPage() {
                         </div>
                     </div>
                     
-                    <div className="px-6 pb-6 border-b border-neutral-200">
+                    <div className="px-6 pb-6 border-b border-white/10">
                         <label className={labelCls}><Type className="inline-block w-3 h-3 mr-1" /> Tipo de Letra (Font Family)</label>
                         <select 
                             value={fontFamily} 
@@ -232,16 +232,16 @@ export default function PromoterEventBrandingPage() {
                     </div>
 
                     {/* Images */}
-                    <div className="p-6 pb-4 flex items-center gap-3 border-b border-neutral-200 bg-neutral-50">
-                        <ImageIcon className="h-5 w-5 text-neutral-500" />
-                        <h2 className="text-sm font-bold text-neutral-900 tracking-widest uppercase">Imagens do Evento</h2>
+                    <div className="p-6 pb-4 flex items-center gap-3 border-b border-white/10 bg-white/5">
+                        <ImageIcon className="h-5 w-5 text-zinc-500" />
+                        <h2 className="text-sm font-bold text-white tracking-widest uppercase">Imagens do Evento</h2>
                     </div>
 
-                    <div className="px-6 py-6 space-y-8 bg-neutral-50">
+                    <div className="px-6 py-6 space-y-8 bg-white/5">
                         <div>
                             <label className={labelCls}>Banner / Capa (Recomendado: 1920x1080)</label>
                             <div className="space-y-4">
-                                <div className="p-4 border border-dashed border-neutral-300 rounded-2xl bg-neutral-50 hover:bg-neutral-50 transition-colors relative overflow-hidden group">
+                                <div className="p-4 border border-dashed border-neutral-300 rounded-2xl bg-white/5 hover:bg-white/5 transition-colors relative overflow-hidden group">
                                     <input 
                                         type="file" 
                                         accept="image/png, image/jpeg, image/jpg, image/webp" 
@@ -250,16 +250,16 @@ export default function PromoterEventBrandingPage() {
                                         title="Clique ou arraste a imagem do seu computador"
                                     />
                                     <div className="flex flex-col items-center justify-center py-4 text-center pointer-events-none">
-                                        <div className="w-12 h-12 rounded-full bg-neutral-50 flex items-center justify-center mb-3">
-                                            <ImageIcon className="w-5 h-5 text-neutral-500" />
+                                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                                            <ImageIcon className="w-5 h-5 text-zinc-500" />
                                         </div>
-                                        <p className="text-sm font-bold text-neutral-900 mb-1">Upload a partir do PC</p>
-                                        <p className="text-xs text-neutral-500">Arraste a sua imagem ou clique para procurar ficheiros</p>
+                                        <p className="text-sm font-bold text-white mb-1">Upload a partir do PC</p>
+                                        <p className="text-xs text-zinc-500">Arraste a sua imagem ou clique para procurar ficheiros</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="flex-1 h-px bg-neutral-100" />
-                                    <span className="text-xs text-neutral-400 font-bold uppercase tracking-widest">ou link externo</span>
+                                    <span className="text-xs text-zinc-500 font-bold uppercase tracking-widest">ou link externo</span>
                                     <div className="flex-1 h-px bg-neutral-100" />
                                 </div>
                                 <input
@@ -270,11 +270,11 @@ export default function PromoterEventBrandingPage() {
                                     className={inputCls}
                                 />
                                 {bannerUrl && (
-                                    <div className="mt-4 relative rounded-xl overflow-hidden border border-neutral-200 h-32 w-full group">
+                                    <div className="mt-4 relative rounded-xl overflow-hidden border border-white/10 h-32 w-full group">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={bannerUrl} alt="Banner Preview" className="h-full w-full object-cover" />
                                         <div className="absolute inset-0 bg-neutral-900/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <p className="text-xs font-bold text-neutral-900">Previsão da Imagem</p>
+                                            <p className="text-xs font-bold text-white">Previsão da Imagem</p>
                                         </div>
                                     </div>
                                 )}
@@ -284,7 +284,7 @@ export default function PromoterEventBrandingPage() {
                         <div>
                             <label className={labelCls}>Logotipo da Organização (Opcional)</label>
                             <div className="space-y-4">
-                                <div className="p-4 border border-dashed border-neutral-300 rounded-2xl bg-neutral-50 hover:bg-neutral-50 transition-colors relative overflow-hidden">
+                                <div className="p-4 border border-dashed border-neutral-300 rounded-2xl bg-white/5 hover:bg-white/5 transition-colors relative overflow-hidden">
                                     <input 
                                         type="file" 
                                         accept="image/png, image/jpeg, image/jpg, image/webp" 
@@ -293,8 +293,8 @@ export default function PromoterEventBrandingPage() {
                                         title="Clique ou arraste a imagem do seu computador"
                                     />
                                     <div className="flex flex-col items-center justify-center py-2 text-center pointer-events-none">
-                                        <p className="text-sm font-bold text-neutral-900 mb-1">Upload do Logotipo</p>
-                                        <p className="text-xs text-neutral-500">Fundo transparente (PNG) recomendado</p>
+                                        <p className="text-sm font-bold text-white mb-1">Upload do Logotipo</p>
+                                        <p className="text-xs text-zinc-500">Fundo transparente (PNG) recomendado</p>
                                     </div>
                                 </div>
                                 <input
@@ -305,7 +305,7 @@ export default function PromoterEventBrandingPage() {
                                     className={inputCls}
                                 />
                                 {logoUrl && (
-                                    <div className="mt-4 bg-white p-4 rounded-xl border border-neutral-200 inline-block">
+                                    <div className="mt-4 bg-[#14141f] p-4 rounded-xl border border-white/10 inline-block">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={logoUrl} alt="Logo Preview" className="h-16 w-auto object-contain" />
                                     </div>
@@ -315,12 +315,12 @@ export default function PromoterEventBrandingPage() {
                     </div>
 
                     {/* Custom HTML Landing Page */}
-                    <div className="p-6 pb-4 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50">
+                    <div className="p-6 pb-4 flex items-center gap-3 border-t border-white/10 bg-white/5">
                         <LayoutTemplate className="h-5 w-5 text-emerald-600" />
                         <h2 className="text-sm font-bold text-emerald-600 tracking-widest uppercase">Layout da Landing Page</h2>
                     </div>
 
-                    <div className="px-6 py-6 space-y-6 bg-neutral-50">
+                    <div className="px-6 py-6 space-y-6 bg-white/5">
                         <label className="flex items-center gap-4 cursor-pointer group">
                             <div className="relative">
                                 <input 
@@ -329,16 +329,16 @@ export default function PromoterEventBrandingPage() {
                                     onChange={e => setUseCustomLandingPage(e.target.checked)} 
                                     className="sr-only peer" 
                                 />
-                                <div className="w-12 h-6 bg-neutral-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 transition-colors shadow-inner" />
+                                <div className="w-12 h-6 bg-neutral-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#14141f] after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 transition-colors shadow-inner" />
                             </div>
                             <div>
-                                <span className="block text-sm font-bold text-neutral-800 group-hover:text-neutral-900 transition-colors">Substituir descrição simples por Layout Profissional (HTML)</span>
-                                <span className="block text-xs text-neutral-500 mt-1">Permite criar tabelas, vídeos, divisões e texto formatado à medida usando código HTML.</span>
+                                <span className="block text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">Substituir descrição simples por Layout Profissional (HTML)</span>
+                                <span className="block text-xs text-zinc-500 mt-1">Permite criar tabelas, vídeos, divisões e texto formatado à medida usando código HTML.</span>
                             </div>
                         </label>
                         
                         {useCustomLandingPage && (
-                            <div className="animate-in fade-in slide-in-from-top-2 pt-4 border-t border-neutral-200">
+                            <div className="animate-in fade-in slide-in-from-top-2 pt-4 border-t border-white/10">
                                 <label className={labelCls}>Código HTML da Landing Page</label>
                                 <textarea
                                     rows={12}
@@ -356,12 +356,12 @@ export default function PromoterEventBrandingPage() {
                     </div>
 
                     {/* Ticket Template */}
-                    <div className="p-6 pb-4 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50">
+                    <div className="p-6 pb-4 flex items-center gap-3 border-t border-white/10 bg-white/5">
                         <Ticket className="h-5 w-5 text-amber-500" />
                         <h2 className="text-sm font-bold text-amber-500 tracking-widest uppercase">Design de Bilhetes</h2>
                     </div>
 
-                    <div className="px-6 py-6 space-y-4 bg-neutral-50 border-b border-neutral-200">
+                    <div className="px-6 py-6 space-y-4 bg-white/5 border-b border-white/10">
                         <label className={labelCls}>Template de Bilhetes PDF</label>
                         <select 
                             value={ticketTemplateId} 
@@ -373,20 +373,20 @@ export default function PromoterEventBrandingPage() {
                                 <option key={t.id} value={t.id}>{t.name}</option>
                             ))}
                         </select>
-                        <p className="mt-2 text-xs text-neutral-500">
+                        <p className="mt-2 text-xs text-zinc-500">
                             Selecione o design específico para os bilhetes descarregados pelos compradores deste evento. Pode gerir designs na aba &quot;Bilhetes&quot; do menu principal.
                         </p>
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="px-6 py-6 bg-neutral-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <p className="text-[12px] text-neutral-500 font-medium">
+                    <div className="px-6 py-6 bg-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <p className="text-[12px] text-zinc-500 font-medium">
                             As alterações refletem-se na página do evento logo após guardar.
                         </p>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
                         >
                             <Save className="h-4 w-4" />
                             {saving ? "A guardar…" : "Guardar Personalização"}

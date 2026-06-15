@@ -50,19 +50,19 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
       />
       <aside
         className={`
-          w-64 flex-shrink-0 fixed left-0 top-0 h-screen border-r border-neutral-200 bg-white/95 backdrop-blur-xl z-50
+          w-64 flex-shrink-0 fixed left-0 top-0 h-screen border-r border-white/10 bg-[#0a0a10] z-50
           transform transition-transform duration-200 ease-out
           md:translate-x-0
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         <div className="flex min-h-0 flex-col h-full">
-          <div className="md:hidden flex shrink-0 items-center justify-between p-4 border-b border-neutral-200">
+          <div className="md:hidden flex shrink-0 items-center justify-between p-4 border-b border-white/10">
             <span className="font-bold text-sm">Menu</span>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+              className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10"
               aria-label="Fechar menu"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,11 +70,11 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
               </svg>
             </button>
           </div>
-          <div className="shrink-0 p-4 sm:p-6 border-b border-neutral-200">
+          <div className="shrink-0 p-4 sm:p-6 border-b border-white/10">
             <Link href="/organizer" onClick={onClose} className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
               LivePass
             </Link>
-            <p className="text-xs text-neutral-500 mt-1">Área do Promotor</p>
+            <p className="text-xs text-zinc-500 mt-1">Área do Promotor</p>
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto p-4 space-y-1">
@@ -87,8 +87,8 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
                   href={item.href}
                   onClick={onClose}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
-                      ? "bg-violet-50 text-violet-700 font-semibold"
-                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+                      ? "bg-[#00a0e3]/10 text-[#5ec8f8] font-semibold"
+                      : "text-zinc-500 hover:bg-white/5 hover:text-white"
                     }`}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
@@ -99,11 +99,11 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           </nav>
 
           {/* Home button */}
-          <div className="shrink-0 px-4 pt-3 border-t border-neutral-200">
+          <div className="shrink-0 px-4 pt-3 border-t border-white/10">
             <Link
               href="/"
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-zinc-500 hover:bg-white/5 hover:text-white"
             >
               <Home className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
               <span className="text-sm font-medium">Voltar ao início</span>
@@ -111,21 +111,21 @@ export default function OrganizerSidebar({ mobileOpen = false, onClose }: Organi
           </div>
 
           {session?.user && (
-            <div className="shrink-0 p-4 border-t border-neutral-200">
+            <div className="shrink-0 p-4 border-t border-white/10">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-2xl border border-neutral-200 bg-neutral-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
                   <User className="h-5 w-5 text-zinc-300" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-neutral-900 truncate">
+                  <div className="text-sm font-semibold text-white truncate">
                     {(session.user as any).role || "PROMOTOR"}
                   </div>
-                  <div className="text-xs text-neutral-500 truncate">{session.user.email}</div>
+                  <div className="text-xs text-zinc-500 truncate">{session.user.email}</div>
                 </div>
               </div>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="w-full rounded-xl border border-neutral-200 border border-neutral-200 bg-neutral-50 text-neutral-700 px-4 py-2.5 flex items-center justify-center gap-2 transition-all hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="w-full rounded-xl border border-white/10 bg-white/5 text-zinc-300 px-4 py-2.5 flex items-center justify-center gap-2 transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a0e3]/30"
                 type="button"
               >
                 <LogOut className="h-4 w-4" />

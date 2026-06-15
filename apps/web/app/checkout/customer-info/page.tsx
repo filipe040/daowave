@@ -110,11 +110,11 @@ function CustomerInfoContent() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in">
       <div className="mb-8 space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900">Informação de Compra</h1>
-        <p className="text-base text-neutral-500">Preencha os seus dados para continuar para o pagamento</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white">Informação de Compra</h1>
+        <p className="text-base text-zinc-500">Preencha os seus dados para continuar para o pagamento</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-md shadow-md space-y-6">
+      <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-[#14141f] p-6 sm:p-8 shadow-md shadow-md space-y-6">
         {errors.submit && (
           <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-600">
             {errors.submit}
@@ -176,16 +176,16 @@ function CustomerInfoContent() {
               <AlertTriangle className="h-4 w-4 shrink-0" /> {errors.buyerPhone}
             </p>
           )}
-          <p className="text-neutral-500 text-[12px] mt-1.5 pl-1.5">
+          <p className="text-zinc-500 text-[12px] mt-1.5 pl-1.5">
             Formato exigido: 9XXXXXXXX ou +351 9XXXXXXXX
           </p>
         </div>
 
-        <div className="pt-4 border-t border-neutral-200">
+        <div className="pt-4 border-t border-white/10">
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-violet-600 px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-neutral-900 shadow-md transition-all hover:bg-violet-700 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
+            className="w-full rounded-full bg-[#00a0e3] px-6 py-4 sm:py-4 mt-2 text-[15px] font-bold text-white shadow-md transition-all hover:bg-[#0090cc] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -206,8 +206,8 @@ export default function CustomerInfoPage() {
   return (
     <Suspense fallback={
       <div className="mx-auto max-w-2xl px-4 sm:px-0 animate-fade-in mt-12 text-center">
-        <h1 className="text-3xl font-bold text-neutral-900">Informação de Compra</h1>
-        <p className="mt-2 text-sm text-neutral-500">A carregar segurança...</p>
+        <h1 className="text-3xl font-bold text-white">Informação de Compra</h1>
+        <p className="mt-2 text-sm text-zinc-500">A carregar segurança...</p>
       </div>
     }>
       <CustomerInfoContent />

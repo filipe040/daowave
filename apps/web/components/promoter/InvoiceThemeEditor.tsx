@@ -158,8 +158,8 @@ export function InvoiceThemeEditor({
   if (loading) {
     return (
       <div className="grid lg:grid-cols-2 gap-8 animate-pulse">
-        <div className="h-96 rounded-3xl bg-neutral-50" />
-        <div className="h-[600px] rounded-3xl bg-neutral-50" />
+        <div className="h-96 rounded-3xl bg-white/5" />
+        <div className="h-[600px] rounded-3xl bg-white/5" />
       </div>
     );
   }
@@ -170,7 +170,7 @@ export function InvoiceThemeEditor({
     <div className="grid lg:grid-cols-2 gap-8">
       <div className="space-y-6">
         {scope === "event" && (
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -179,13 +179,13 @@ export function InvoiceThemeEditor({
                 className="mt-1 rounded border-neutral-300"
               />
               <div>
-                <div className="text-sm font-bold text-neutral-900">
+                <div className="text-sm font-bold text-white">
                   Personalizar faturas deste evento
                 </div>
-                <div className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                <div className="text-xs text-zinc-500 mt-1 leading-relaxed">
                   {eventTitle ? (
                     <>
-                      Por defeito, <strong className="text-neutral-600">{eventTitle}</strong> usa o
+                      Por defeito, <strong className="text-zinc-400">{eventTitle}</strong> usa o
                       design da organização ({orgName || "organização"}). Ative para definir um
                       design específico.
                     </>
@@ -199,11 +199,11 @@ export function InvoiceThemeEditor({
         )}
 
         <div
-          className={`rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5 ${
+          className={`rounded-3xl border border-white/10 bg-[#14141f] p-6 shadow-sm space-y-5 ${
             formDisabled ? "opacity-50 pointer-events-none" : ""
           }`}
         >
-          <div className="flex items-center gap-2 text-violet-600">
+          <div className="flex items-center gap-2 text-[#00a0e3]">
             <Palette className="h-4 w-4" />
             <h3 className="text-sm font-bold uppercase tracking-widest">Identidade</h3>
           </div>
@@ -249,7 +249,7 @@ export function InvoiceThemeEditor({
                   type="color"
                   value={theme.primaryColor || "#6C2BD9"}
                   onChange={(e) => updateField("primaryColor", e.target.value)}
-                  className="h-11 w-14 rounded-xl border border-neutral-200 bg-transparent cursor-pointer"
+                  className="h-11 w-14 rounded-xl border border-white/10 bg-transparent cursor-pointer"
                 />
                 <input
                   className={inputCls}
@@ -266,7 +266,7 @@ export function InvoiceThemeEditor({
                   type="color"
                   value={theme.secondaryColor || "#D946EF"}
                   onChange={(e) => updateField("secondaryColor", e.target.value)}
-                  className="h-11 w-14 rounded-xl border border-neutral-200 bg-transparent cursor-pointer"
+                  className="h-11 w-14 rounded-xl border border-white/10 bg-transparent cursor-pointer"
                 />
                 <input
                   className={inputCls}
@@ -305,7 +305,7 @@ export function InvoiceThemeEditor({
               onChange={(e) => updateField("showPlatformCredit", e.target.checked)}
               className="rounded border-neutral-300"
             />
-            <span className="text-sm text-neutral-600">
+            <span className="text-sm text-zinc-400">
               Mostrar crédito LivePass no rodapé
             </span>
           </label>
@@ -315,7 +315,7 @@ export function InvoiceThemeEditor({
           <button
             onClick={handleSave}
             disabled={saving || formDisabled}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-[#14141f] text-black hover:bg-gray-100 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {saving ? "A guardar..." : "Guardar"}
@@ -323,7 +323,7 @@ export function InvoiceThemeEditor({
           <button
             onClick={handleReset}
             disabled={formDisabled}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold border border-white/10 text-zinc-400 hover:bg-white/5 disabled:opacity-50"
           >
             <RotateCcw className="h-4 w-4" />
             {scope === "event" ? "Usar design da org." : "Limpar"}
@@ -331,17 +331,17 @@ export function InvoiceThemeEditor({
         </div>
       </div>
 
-      <div className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col min-h-[640px]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
-          <div className="flex items-center gap-2 text-neutral-600 text-sm font-bold">
+      <div className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden flex flex-col min-h-[640px]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div className="flex items-center gap-2 text-zinc-400 text-sm font-bold">
             <Eye className="h-4 w-4" />
             Pré-visualização
           </div>
           {previewLoading && (
-            <span className="text-xs text-neutral-500 animate-pulse">A atualizar...</span>
+            <span className="text-xs text-zinc-500 animate-pulse">A atualizar...</span>
           )}
         </div>
-        <div className="flex-1 bg-neutral-50 overflow-auto">
+        <div className="flex-1 bg-white/5 overflow-auto">
           {previewHtml ? (
             <iframe
               srcDoc={previewHtml}
@@ -350,7 +350,7 @@ export function InvoiceThemeEditor({
               sandbox="allow-same-origin"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-neutral-500 text-sm">
+            <div className="flex items-center justify-center h-full text-zinc-500 text-sm">
               A gerar preview...
             </div>
           )}

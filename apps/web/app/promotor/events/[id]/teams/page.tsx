@@ -51,16 +51,16 @@ export default function EventTeamsPage() {
           </button>
         </div>
         {loading ? (
-          <p className="text-sm text-neutral-500">A carregar…</p>
+          <p className="text-sm text-zinc-500">A carregar…</p>
         ) : (
           <ul className="divide-y divide-neutral-100">
             {members.map((m) => (
               <li key={m.id} className="py-3 flex justify-between gap-4">
                 <div>
-                  <p className="font-medium text-neutral-900">{m.user.name || m.user.email}</p>
-                  <p className="text-xs text-neutral-500">{m.user.email}</p>
+                  <p className="font-medium text-white">{m.user.name || m.user.email}</p>
+                  <p className="text-xs text-zinc-500">{m.user.email}</p>
                 </div>
-                <span className="text-xs font-semibold uppercase text-violet-600">{m.role}</span>
+                <span className="text-xs font-semibold uppercase text-[#00a0e3]">{m.role}</span>
               </li>
             ))}
           </ul>

@@ -54,7 +54,7 @@ function RoleSelector({
                 value={user.role}
                 disabled={disabled}
                 onChange={(e) => onRoleChange(user.id, e.target.value as UserRole)}
-                className="text-xs border border-gray-200 bg-white text-gray-700 rounded-lg px-2 py-1 h-7 focus:outline-none focus:ring-2 focus:ring-gray-900/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="text-xs border border-gray-200 bg-[#14141f] text-gray-700 rounded-lg px-2 py-1 h-7 focus:outline-none focus:ring-2 focus:ring-gray-900/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 title="Alterar função"
             >
                 {ALL_ROLES.map((r) => (
@@ -163,13 +163,13 @@ export default function AdminUsersPage() {
             actions={
                 <div className="flex flex-wrap gap-2">
                     <input
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 w-40 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 w-40 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         placeholder="Pesquisar…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         value={role}
                         onChange={(e) => { setRole(e.target.value); setPage(1); }}
                     >
@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
             }
         >
             {loading && (
-                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="px-6 py-4 border-b border-gray-50 last:border-0">
                             <Skeleton className="h-5 w-2/3" />
@@ -198,7 +198,7 @@ export default function AdminUsersPage() {
             {!loading && !error && data.length > 0 && (
                 <div className="space-y-4">
                     {/* Desktop table */}
-                    <div className="hidden lg:block bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <div className="hidden lg:block bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-100">
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
                     {/* Mobile cards */}
                     <div className="lg:hidden space-y-3">
                         {data.map((u) => (
-                            <div key={u.id} className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
+                            <div key={u.id} className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
                                         <div className="font-medium text-gray-900 truncate">{u.name ?? "—"}</div>
@@ -290,11 +290,11 @@ export default function AdminUsersPage() {
                         <p className="text-sm text-gray-400">Página {page} de {totalPages} · {total} total</p>
                         <div className="flex items-center gap-1">
                             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
+                                className="p-2 rounded-lg text-gray-400 hover:bg-[#14141f] hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
                             <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
+                                className="p-2 rounded-lg text-gray-400 hover:bg-[#14141f] hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

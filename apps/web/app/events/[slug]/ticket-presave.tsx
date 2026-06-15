@@ -90,8 +90,8 @@ export function TicketPresave({ eventSlug, variant = "light", userEmail, userNam
   return (
     <div className={shellCls}>
       <div className="flex items-center gap-3 mb-4">
-        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isLight ? "bg-violet-100" : "bg-white/10"}`}>
-          <Bell className={`h-5 w-5 ${isLight ? "text-violet-600" : "text-white"}`} />
+        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isLight ? "bg-[#00a0e3]/15" : "bg-white/10"}`}>
+          <Bell className={`h-5 w-5 ${isLight ? "text-[#00a0e3]" : "text-white"}`} />
         </div>
         <div>
           <h2 className={`text-lg font-bold ${isLight ? "text-neutral-900" : "text-white"}`}>
@@ -151,7 +151,7 @@ export function TicketPresave({ eventSlug, variant = "light", userEmail, userNam
           disabled={submitting || !email.trim()}
           className={`w-full py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 ${
             isLight
-              ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-md shadow-violet-500/25 hover:opacity-95"
+              ? "bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white shadow-md shadow-[#00a0e3]/25 hover:opacity-95"
               : "bg-white text-black hover:bg-white/90"
           }`}
         >

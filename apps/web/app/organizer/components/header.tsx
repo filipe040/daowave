@@ -11,14 +11,14 @@ interface OrganizerHeaderProps {
 
 export default function OrganizerHeader({ organizerName, userEmail, onMenuClick }: OrganizerHeaderProps) {
   return (
-    <header className="border-b border-neutral-200 bg-neutral-1000 backdrop-blur-xl sticky top-0 z-10">
+    <header className="border-b border-white/10 bg-[#14141f]/90 backdrop-blur-xl sticky top-0 z-10">
       <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center gap-3 min-w-0">
           {onMenuClick && (
             <button
               type="button"
               onClick={onMenuClick}
-              className="md:hidden flex-shrink-0 p-2 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+              className="md:hidden flex-shrink-0 p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10"
               aria-label="Abrir menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,8 +27,8 @@ export default function OrganizerHeader({ organizerName, userEmail, onMenuClick 
             </button>
           )}
           <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-bold text-neutral-900 truncate">{organizerName}</h1>
-            <p className="text-xs text-neutral-500 truncate">{userEmail}</p>
+            <h1 className="text-base sm:text-lg font-bold text-white truncate">{organizerName}</h1>
+            <p className="text-xs text-zinc-500 truncate">{userEmail}</p>
           </div>
         </div>
         
@@ -36,7 +36,7 @@ export default function OrganizerHeader({ organizerName, userEmail, onMenuClick 
           <Link
             href="/events"
             target="_blank"
-            className="text-xs sm:text-sm text-neutral-500 hover:text-neutral-900 transition-colors whitespace-nowrap"
+            className="text-xs sm:text-sm text-zinc-500 hover:text-white transition-colors whitespace-nowrap"
           >
             Ver Portal
           </Link>
@@ -55,7 +55,7 @@ export default function OrganizerHeader({ organizerName, userEmail, onMenuClick 
                 window.location.href = "/";
               }
             }}
-            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+            className="text-sm text-zinc-500 hover:text-white transition-colors"
           >
             Sair
           </button>

@@ -39,7 +39,7 @@ export default function AccountTickets() {
 
   const statusConfig = {
     VALID: { label: "Válido", icon: CheckCircle, className: "text-emerald-500 border-emerald-500/30 bg-emerald-500/10" },
-    USED: { label: "Utilizado", icon: XCircle, className: "text-neutral-500 border-zinc-600 bg-neutral-100/50" },
+    USED: { label: "Utilizado", icon: XCircle, className: "text-zinc-500 border-zinc-600 bg-neutral-100/50" },
     EXPIRED: { label: "Expirado", icon: Clock, className: "text-amber-500 border-amber-500/30 bg-amber-500/10" },
     TRANSFERRED: { label: "Transferido", icon: ArrowRightLeft, className: "text-blue-500 border-blue-500/30 bg-blue-500/10" },
   };
@@ -47,22 +47,22 @@ export default function AccountTickets() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
           Bilhetes
         </h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-zinc-500">
           Lista dos teus bilhetes e estado de check-in.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-neutral-500">A carregar…</p>
+        <p className="text-sm text-zinc-500">A carregar…</p>
       ) : error ? (
         <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       ) : tickets.length === 0 ? (
-        <p className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-sm text-neutral-500">Ainda não tens bilhetes.</p>
+        <p className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-500">Ainda não tens bilhetes.</p>
       ) : (
         <ul className="space-y-4" data-testid="account-tickets-list">
           {tickets.map((t) => {
@@ -73,13 +73,13 @@ export default function AccountTickets() {
               <li key={t.id}>
                 <Link
                   href={`/account/tickets/${t.id}`}
-                  className="block rounded-3xl border border-neutral-200 bg-white shadow-md p-5 sm:p-6 transition-colors hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-violet-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                  className="block rounded-3xl border border-white/10 bg-[#14141f] shadow-md p-5 sm:p-6 transition-colors hover:bg-white/5 hover:border-neutral-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#00a0e3]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   data-testid={`ticket-card-${t.id}`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-neutral-900 text-[17px]">{t.event?.title ?? "Evento"}</p>
-                      <p className="mt-0.5 text-sm text-neutral-500">
+                      <p className="font-semibold text-white text-[17px]">{t.event?.title ?? "Evento"}</p>
+                      <p className="mt-0.5 text-sm text-zinc-500">
                         {t.ticketLot?.name ?? "Bilhete"} · {t.code}
                       </p>
                     </div>
@@ -90,7 +90,7 @@ export default function AccountTickets() {
                       {config.label}
                     </span>
                   </div>
-                  <p className="mt-4 pt-4 border-t border-neutral-200 text-xs text-neutral-500">
+                  <p className="mt-4 pt-4 border-t border-white/10 text-xs text-zinc-500">
                     Comprado em {formatDate(t.createdAt)}
                   </p>
                 </Link>

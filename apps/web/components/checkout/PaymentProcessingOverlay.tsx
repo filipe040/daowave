@@ -38,7 +38,7 @@ export function PaymentProcessingOverlay({ active }: { active: boolean }) {
         <div className="relative mx-auto mb-8 flex h-20 w-20 items-center justify-center">
           <div className="absolute inset-0 animate-ping rounded-full bg-emerald-500/20" />
           <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-neutral-50 border border-neutral-200">
-            <Loader2 className="h-9 w-9 animate-spin text-violet-600" />
+            <Loader2 className="h-9 w-9 animate-spin text-[#00a0e3]" />
           </div>
         </div>
 

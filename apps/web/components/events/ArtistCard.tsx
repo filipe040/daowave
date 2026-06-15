@@ -40,7 +40,7 @@ export function ArtistCard({
                             unoptimized={artist.imageUrl.startsWith("http")}
                         />
                     ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-violet-200 via-fuchsia-100 to-orange-100" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#00a0e3]/30 via-[#0090cc]/20 to-orange-100" />
                     )}
 
                     {/* Overlay ondulado estilo referência */}

@@ -138,38 +138,38 @@ export default async function OrganizerTicketsPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold mb-2">Bilhetes</h1>
-        <p className="text-neutral-500">Gerir e acompanhar todos os bilhetes emitidos</p>
+        <p className="text-zinc-500">Gerir e acompanhar todos os bilhetes emitidos</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Total</span>
-            <Ticket className="h-6 w-6 text-neutral-500" strokeWidth={1.5} />
+            <span className="text-sm text-zinc-500">Total</span>
+            <Ticket className="h-6 w-6 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-2xl font-bold text-neutral-900">{totalTickets}</p>
+          <p className="text-2xl font-bold text-white">{totalTickets}</p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Emitidos</span>
+            <span className="text-sm text-zinc-500">Emitidos</span>
             <CheckCircle className="h-6 w-6 text-green-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-green-400">{issuedTickets}</p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Validados</span>
+            <span className="text-sm text-zinc-500">Validados</span>
             <Scan className="h-6 w-6 text-blue-400" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-blue-400">{checkedInTickets}</p>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-500">Cancelados</span>
+            <span className="text-sm text-zinc-500">Cancelados</span>
             <XCircle className="h-6 w-6 text-red-600" strokeWidth={1.5} />
           </div>
           <p className="text-2xl font-bold text-red-600">{cancelledTickets}</p>
@@ -190,18 +190,18 @@ export default async function OrganizerTicketsPage() {
             return (
               <div
                 key={group.event.id}
-                className="rounded-xl border border-neutral-200 bg-white p-6 backdrop-blur-sm"
+                className="rounded-xl border border-white/10 bg-[#14141f] p-6 backdrop-blur-sm"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-xl font-bold mb-1">{group.event.title}</h2>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-zinc-500">
                       {format(new Date(group.event.startAt), "dd MMM yyyy, HH:mm", { locale: pt })}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-neutral-500">Total de bilhetes</p>
-                    <p className="text-2xl font-bold text-neutral-900">{eventTickets.length}</p>
+                    <p className="text-sm text-zinc-500">Total de bilhetes</p>
+                    <p className="text-2xl font-bold text-white">{eventTickets.length}</p>
                     <div className="flex gap-4 mt-2 text-xs">
                       <span className="text-green-400">{eventIssued} emitidos</span>
                       <span className="text-blue-400">{eventCheckedIn} validados</span>
@@ -212,22 +212,22 @@ export default async function OrganizerTicketsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-neutral-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">ID</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Tipo</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Participante</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Status</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Entradas</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-500">Última Validação</th>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">ID</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Tipo</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Participante</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Status</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Entradas</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-500">Última Validação</th>
                       </tr>
                     </thead>
                     <tbody>
                       {eventTickets.slice(0, 10).map((ticket: any) => (
                         <tr
                           key={ticket.id}
-                          className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors"
+                          className="border-b border-white/10 hover:bg-white/5 transition-colors"
                         >
-                          <td className="py-3 px-4 text-sm font-mono text-neutral-500">
+                          <td className="py-3 px-4 text-sm font-mono text-zinc-500">
                             {ticket.id.substring(0, 8)}...
                           </td>
                           <td className="py-3 px-4 text-sm">
@@ -235,7 +235,7 @@ export default async function OrganizerTicketsPage() {
                           </td>
                           <td className="py-3 px-4">
                             <div className="text-sm font-medium">{ticket.attendeeName}</div>
-                            <div className="text-xs text-neutral-500">{ticket.attendeeEmail}</div>
+                            <div className="text-xs text-zinc-500">{ticket.attendeeEmail}</div>
                           </td>
                           <td className="py-3 px-4">
                             <span
@@ -256,7 +256,7 @@ export default async function OrganizerTicketsPage() {
                               return max === Infinity ? "∞" : String(max);
                             })()}
                           </td>
-                          <td className="py-3 px-4 text-sm text-neutral-500">
+                          <td className="py-3 px-4 text-sm text-zinc-500">
                             {(ticket as TicketRow).checkedInAt
                               ? format(new Date((ticket as TicketRow).checkedInAt as Date), "dd MMM, HH:mm", {
                                 locale: pt,
@@ -268,7 +268,7 @@ export default async function OrganizerTicketsPage() {
                     </tbody>
                   </table>
                   {eventTickets.length > 10 && (
-                    <div className="mt-4 text-center text-sm text-neutral-500">
+                    <div className="mt-4 text-center text-sm text-zinc-500">
                       Mostrando 10 de {eventTickets.length} bilhetes
                     </div>
                   )}
@@ -278,12 +278,12 @@ export default async function OrganizerTicketsPage() {
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-neutral-200 bg-white p-12 text-center">
+        <div className="rounded-xl border border-white/10 bg-[#14141f] p-12 text-center">
           <div className="mb-4 flex justify-center">
-            <Ticket className="h-14 w-14 text-neutral-500" strokeWidth={1.5} />
+            <Ticket className="h-14 w-14 text-zinc-500" strokeWidth={1.5} />
           </div>
-          <p className="text-lg text-neutral-500 mb-2">Ainda não há bilhetes emitidos</p>
-          <p className="text-sm text-neutral-500">Os bilhetes aparecerão aqui após serem vendidos</p>
+          <p className="text-lg text-zinc-500 mb-2">Ainda não há bilhetes emitidos</p>
+          <p className="text-sm text-zinc-500">Os bilhetes aparecerão aqui após serem vendidos</p>
         </div>
       )}
     </div>

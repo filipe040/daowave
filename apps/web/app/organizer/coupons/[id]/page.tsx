@@ -93,7 +93,7 @@ export default function EditCouponPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-neutral-500">A carregar...</div>
+        <div className="text-zinc-500">A carregar...</div>
       </div>
     );
   }
@@ -110,10 +110,10 @@ export default function EditCouponPage() {
             Voltar para Cupões
           </Link>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">Editar Cupão</h1>
-          <p className="text-base md:text-lg text-neutral-500">Atualizar cupão de desconto</p>
+          <p className="text-base md:text-lg text-zinc-500">Atualizar cupão de desconto</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-neutral-200 shadow-lg space-y-6 md:space-y-8">
+        <form onSubmit={handleSubmit} className="bg-neutral-100/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10 border border-white/10 shadow-lg space-y-6 md:space-y-8">
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 text-red-600 px-4 py-3 rounded-lg">
             {error}
@@ -132,12 +132,12 @@ export default function EditCouponPage() {
                 code: e.target.value.toUpperCase().replace(/\s/g, ""),
               })
             }
-            className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-neutral-900 font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 md:px-5 py-3 md:py-4 text-base md:text-lg text-white font-mono focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
             placeholder="VERAO2025"
             maxLength={20}
             readOnly
           />
-          <p className="text-sm text-neutral-500 mt-2">O código não pode ser alterado</p>
+          <p className="text-sm text-zinc-500 mt-2">O código não pode ser alterado</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
@@ -222,7 +222,7 @@ export default function EditCouponPage() {
               type="checkbox"
               checked={formData.isActive}
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="w-5 h-5 rounded border-neutral-200 bg-neutral-50 text-purple-500 focus:ring-purple-500 focus:ring-2"
+              className="w-5 h-5 rounded border-white/10 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-2"
             />
             <span className="text-base md:text-lg text-zinc-300">Cupão ativo</span>
           </label>
@@ -232,13 +232,13 @@ export default function EditCouponPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-violet-600 hover:bg-violet-700 px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
+            className="flex-1 bg-[#00a0e3] hover:bg-[#0090cc] px-6 md:px-8 py-4 md:py-5 rounded-xl text-base md:text-lg font-semibold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105"
           >
             {saving ? "A guardar..." : "Guardar Alterações"}
           </button>
           <Link
             href="/organizer/coupons"
-            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-neutral-200 hover:bg-neutral-100 transition-colors text-center text-base md:text-lg font-medium"
+            className="px-6 md:px-8 py-4 md:py-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors text-center text-base md:text-lg font-medium"
           >
             Cancelar
           </Link>

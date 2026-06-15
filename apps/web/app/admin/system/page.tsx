@@ -35,7 +35,7 @@ export default function AdminSystemPage() {
 
     const refreshBtn = (
         <button onClick={load} disabled={loading}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-[#14141f] text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Atualizar</span>
         </button>
@@ -51,7 +51,7 @@ export default function AdminSystemPage() {
             {!loading && error && <ErrorState message={error} onRetry={load} />}
 
             {!loading && !error && errors.length === 0 && (
-                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm">
+                <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm">
                     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
                         <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-5">
                             <CheckCircle2 className="w-6 h-6 text-emerald-500" strokeWidth={1.5} />
@@ -73,7 +73,7 @@ export default function AdminSystemPage() {
                     </div>
 
                     {/* Error list */}
-                    <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden divide-y divide-gray-50">
+                    <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden divide-y divide-gray-50">
                         {errors.map((e) => (
                             <div key={e.id} className="p-5 sm:p-6 space-y-2">
                                 <div className="flex items-start justify-between gap-3">

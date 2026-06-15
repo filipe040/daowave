@@ -442,7 +442,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
   };
 
   return (
-    <div className="min-h-screen mesh-gradient text-neutral-900">
+    <div className="min-h-screen dash-shell text-white">
       {/* background glow */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full bg-indigo-500/10 blur-3xl" />
@@ -466,17 +466,17 @@ export default function AccountProfile({ user }: AccountProfileProps) {
 
         {/* Header */}
         <div className="mb-6">
-          <div className="text-[11px] uppercase tracking-wider text-neutral-500">Conta</div>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-semibold text-neutral-900">Perfil e bilhetes</h1>
-          <p className="mt-2 text-sm text-neutral-600">
+          <div className="text-[11px] uppercase tracking-wider text-zinc-500">Conta</div>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-semibold text-white">Perfil e bilhetes</h1>
+          <p className="mt-2 text-sm text-zinc-400">
             Gere identidade, preferências e transferências numa única área.
           </p>
         </div>
 
         {/* Shell Card */}
-        <div className="rounded-3xl border border-neutral-200 bg-white shadow-lg overflow-hidden">
+        <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-lg overflow-hidden">
           {/* Top bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-200 px-5 sm:px-7 py-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 px-5 sm:px-7 py-5">
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -484,10 +484,10 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 disabled={uploading}
                 className={cn(
                   "relative h-14 w-14 sm:h-16 sm:w-16 rounded-2xl overflow-hidden",
-                  "border border-neutral-200 bg-neutral-50",
+                  "border border-white/10 bg-white/5",
                   "flex items-center justify-center",
-                  "text-sm font-semibold text-neutral-800",
-                  "hover:bg-neutral-100 transition disabled:opacity-60"
+                  "text-sm font-semibold text-zinc-200",
+                  "hover:bg-white/10 transition disabled:opacity-60"
                 )}
               >
                 {pendingAvatarPreview ? (
@@ -501,7 +501,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 )}
 
                 {uploading && (
-                  <div className="absolute inset-0 bg-neutral-900/30 flex items-center justify-center text-[12px] text-neutral-700">
+                  <div className="absolute inset-0 bg-neutral-900/30 flex items-center justify-center text-[12px] text-zinc-300">
                     A guardar…
                   </div>
                 )}
@@ -515,7 +515,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                     disabled={uploading}
                     className={cn(
                       "rounded-full px-4 py-2 text-[12px] font-semibold",
-                      "bg-violet-600 text-white hover:bg-violet-700 transition disabled:opacity-60"
+                      "bg-[#00a0e3] text-white hover:bg-[#0090cc] transition disabled:opacity-60"
                     )}
                   >
                     Guardar foto
@@ -526,7 +526,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                     disabled={uploading}
                     className={cn(
                       "rounded-full px-4 py-2 text-[12px] font-semibold",
-                      "border border-neutral-200 text-neutral-700 hover:bg-neutral-100 transition disabled:opacity-60"
+                      "border border-white/10 text-zinc-300 hover:bg-white/10 transition disabled:opacity-60"
                     )}
                   >
                     Cancelar
@@ -535,14 +535,14 @@ export default function AccountProfile({ user }: AccountProfileProps) {
               )}
 
               <div className="min-w-0">
-                <div className="text-xs text-neutral-500">Perfil</div>
-                <div className="font-semibold text-neutral-900 truncate">{user.name || user.email}</div>
-                <div className="text-xs text-neutral-600 truncate">{user.email}</div>
+                <div className="text-xs text-zinc-500">Perfil</div>
+                <div className="font-semibold text-white truncate">{user.name || user.email}</div>
+                <div className="text-xs text-zinc-400 truncate">{user.email}</div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] uppercase tracking-wider text-neutral-600">
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-zinc-400">
                 {roleLabel(user.role)}
               </span>
             </div>
@@ -552,15 +552,15 @@ export default function AccountProfile({ user }: AccountProfileProps) {
 
           {/* Tabs */}
           <div className="px-5 sm:px-7 pt-5">
-            <div className="inline-flex rounded-full border border-neutral-200 bg-neutral-50 p-1">
+            <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab("profile")}
                 className={cn(
                   "px-4 py-2 rounded-full text-[12px] font-semibold transition",
                   activeTab === "profile"
-                    ? "bg-violet-600 text-white shadow-md"
-                    : "text-neutral-600 hover:text-neutral-900"
+                    ? "bg-[#00a0e3] text-white shadow-md"
+                    : "text-zinc-400 hover:text-white"
                 )}
               >
                 Perfil
@@ -571,8 +571,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 className={cn(
                   "px-4 py-2 rounded-full text-[12px] font-semibold transition",
                   activeTab === "tickets"
-                    ? "bg-violet-600 text-white shadow-md"
-                    : "text-neutral-600 hover:text-neutral-900"
+                    ? "bg-[#00a0e3] text-white shadow-md"
+                    : "text-zinc-400 hover:text-white"
                 )}
               >
                 Meus bilhetes
@@ -586,7 +586,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
               <form onSubmit={handleNameSave} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                       Nome
                     </label>
                     <input
@@ -595,16 +595,16 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       onChange={(e) => setName(e.target.value)}
                       placeholder="O teu nome"
                       className={cn(
-                        "w-full rounded-2xl border border-neutral-200 bg-white",
-                        "px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400",
+                        "w-full rounded-2xl border border-white/10 bg-white",
+                        "px-4 py-3 text-sm text-white placeholder:text-zinc-500",
                         "outline-none transition-all",
-                        "focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                        "focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20"
                       )}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                       Email
                     </label>
                     <input
@@ -612,8 +612,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       value={user.email}
                       disabled
                       className={cn(
-                        "w-full rounded-2xl border border-neutral-200 bg-white",
-                        "px-4 py-3 text-sm text-neutral-600 cursor-not-allowed"
+                        "w-full rounded-2xl border border-white/10 bg-white",
+                        "px-4 py-3 text-sm text-zinc-400 cursor-not-allowed"
                       )}
                     />
                   </div>
@@ -637,14 +637,14 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 </div>
 
                 {/* Segurança - alterar palavra-passe */}
-                <div className="mt-8 pt-6 border-t border-neutral-200">
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-3">Segurança</div>
-                  <p className="text-sm text-neutral-600 mb-4">
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-3">Segurança</div>
+                  <p className="text-sm text-zinc-400 mb-4">
                     Altera a palavra-passe que usas para iniciar sessão. Recomendamos uma palavra-passe forte com pelo menos 8 caracteres.
                   </p>
                   <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                     <div>
-                      <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+                      <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                         Palavra-passe atual
                       </label>
                       <input
@@ -654,15 +654,15 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                         placeholder="••••••••"
                         autoComplete="current-password"
                         className={cn(
-                          "w-full rounded-2xl border border-neutral-200 bg-white",
-                          "px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400",
+                          "w-full rounded-2xl border border-white/10 bg-white",
+                          "px-4 py-3 text-sm text-white placeholder:text-zinc-500",
                           "outline-none transition-all",
-                          "focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                          "focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20"
                         )}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+                      <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                         Nova palavra-passe
                       </label>
                       <input
@@ -673,15 +673,15 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                         autoComplete="new-password"
                         minLength={8}
                         className={cn(
-                          "w-full rounded-2xl border border-neutral-200 bg-white",
-                          "px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400",
+                          "w-full rounded-2xl border border-white/10 bg-white",
+                          "px-4 py-3 text-sm text-white placeholder:text-zinc-500",
                           "outline-none transition-all",
-                          "focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                          "focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20"
                         )}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+                      <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                         Confirmar nova palavra-passe
                       </label>
                       <input
@@ -691,10 +691,10 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                         placeholder="Repete a nova palavra-passe"
                         autoComplete="new-password"
                         className={cn(
-                          "w-full rounded-2xl border border-neutral-200 bg-white",
-                          "px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400",
+                          "w-full rounded-2xl border border-white/10 bg-white",
+                          "px-4 py-3 text-sm text-white placeholder:text-zinc-500",
                           "outline-none transition-all",
-                          "focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                          "focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20"
                         )}
                       />
                     </div>
@@ -703,9 +703,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
+                        "border border-neutral-300 bg-white/5 text-white",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-neutral-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        "hover:bg-white/10 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       )}
                     >
                       {savingPassword ? "A alterar…" : "Alterar palavra-passe"}
@@ -714,9 +714,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 </div>
 
                 {/* Privacidade e dados */}
-                <div className="mt-8 pt-6 border-t border-neutral-200">
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-3">Privacidade e dados</div>
-                  <p className="text-sm text-neutral-600 mb-4">
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-3">Privacidade e dados</div>
+                  <p className="text-sm text-zinc-400 mb-4">
                     Tens direito a aceder aos teus dados e a descarregá-los. Consulta a nossa política de privacidade.
                   </p>
                   <div className="flex flex-wrap gap-3">
@@ -724,9 +724,9 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       href="/privacy"
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
+                        "border border-neutral-300 bg-white/5 text-white",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-neutral-100 transition"
+                        "hover:bg-white/10 transition"
                       )}
                     >
                       Política de privacidade
@@ -737,30 +737,30 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       disabled={exporting}
                       className={cn(
                         "inline-flex items-center justify-center rounded-full",
-                        "border border-neutral-300 bg-neutral-50 text-neutral-900",
+                        "border border-neutral-300 bg-white/5 text-white",
                         "px-5 py-3 text-[13px] font-semibold",
-                        "hover:bg-neutral-100 transition disabled:opacity-50"
+                        "hover:bg-white/10 transition disabled:opacity-50"
                       )}
                     >
                       {exporting ? "A descarregar…" : "Descarregar os meus dados"}
                     </button>
                   </div>
-                  <p className="mt-3 text-xs text-neutral-500">
+                  <p className="mt-3 text-xs text-zinc-500">
                     O ficheiro JSON inclui o teu perfil, encomendas e bilhetes (sem dados sensíveis como a palavra-passe).
                   </p>
                 </div>
 
                 {/* Terminar sessão - definições do perfil */}
-                <div className="mt-8 pt-6 border-t border-neutral-200">
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-3">Sessão</div>
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-3">Sessão</div>
                   <button
                     type="button"
                     onClick={() => signOut({ callbackUrl: "/", redirect: true })}
                     className={cn(
                       "inline-flex items-center justify-center rounded-full",
-                      "border border-neutral-300 bg-neutral-50 text-neutral-900",
+                      "border border-neutral-300 bg-white/5 text-white",
                       "px-5 py-3 text-[13px] font-semibold",
-                      "hover:bg-neutral-100 hover:text-neutral-900 transition"
+                      "hover:bg-white/10 hover:text-white transition"
                     )}
                   >
                     Terminar sessão
@@ -771,11 +771,11 @@ export default function AccountProfile({ user }: AccountProfileProps) {
 
             {activeTab === "tickets" && (
               <div className="space-y-4">
-                {loadingTickets && <div className="text-sm text-neutral-600">A carregar bilhetes…</div>}
+                {loadingTickets && <div className="text-sm text-zinc-400">A carregar bilhetes…</div>}
                 {ticketsError && <div className="text-sm text-red-200">{ticketsError}</div>}
 
                 {!loadingTickets && tickets && tickets.length === 0 && (
-                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-sm text-neutral-600">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-400">
                     Ainda não tens bilhetes.
                   </div>
                 )}
@@ -788,14 +788,14 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                       <div
                         key={t.id}
                         className={cn(
-                          "rounded-2xl border border-neutral-200 bg-white",
+                          "rounded-2xl border border-white/10 bg-white",
                           "p-4 sm:p-5",
                           "flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                         )}
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="font-semibold text-neutral-900 truncate">
+                            <div className="font-semibold text-white truncate">
                               {t.event?.title || "Evento"}
                             </div>
 
@@ -809,14 +809,14 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                             </span>
 
                             {t.ticketLot?.name && (
-                              <span className="hidden sm:inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] text-neutral-600">
+                              <span className="hidden sm:inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400">
                                 {t.ticketLot.name}
                               </span>
                             )}
                           </div>
 
-                          <div className="mt-2 text-xs text-neutral-600 space-y-1">
-                            <div className="truncate">Código: <span className="text-neutral-700 font-mono">{t.code}</span></div>
+                          <div className="mt-2 text-xs text-zinc-400 space-y-1">
+                            <div className="truncate">Código: <span className="text-zinc-300 font-mono">{t.code}</span></div>
                             <div>Compra: {formatDT(t.createdAt)}</div>
                             <div>Último check-in: {formatDT(t.lastCheckinAt || t.checkedInAt)}</div>
                           </div>
@@ -828,8 +828,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                             onClick={() => openTransfer(t)}
                             className={cn(
                               "px-4 py-2.5 rounded-full text-[12px] font-semibold",
-                              "border border-neutral-200 bg-neutral-50 text-neutral-700",
-                              "hover:bg-neutral-100 hover:text-neutral-900 transition"
+                              "border border-white/10 bg-white/5 text-zinc-300",
+                              "hover:bg-white/10 hover:text-white transition"
                             )}
                           >
                             Transferir
@@ -839,8 +839,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                             href={`/events/${t.event?.slug ?? t.event?.id}`}
                             className={cn(
                               "px-4 py-2.5 rounded-full text-[12px] font-semibold",
-                              "bg-violet-600 text-white",
-                              "hover:bg-violet-700 transition"
+                              "bg-[#00a0e3] text-white",
+                              "hover:bg-[#0090cc] transition"
                             )}
                           >
                             Ver evento
@@ -868,26 +868,26 @@ export default function AccountProfile({ user }: AccountProfileProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="leave-confirm-title"
-            className="relative rounded-2xl border border-neutral-200 bg-white backdrop-blur-xl p-6 w-full max-w-md shadow-xl"
+            className="relative rounded-2xl border border-white/10 bg-[#14141f] backdrop-blur-xl p-6 w-full max-w-md shadow-xl"
           >
-            <h2 id="leave-confirm-title" className="text-lg font-semibold text-neutral-900">
+            <h2 id="leave-confirm-title" className="text-lg font-semibold text-white">
               Guardar alterações antes de sair?
             </h2>
-            <p className="mt-2 text-sm text-neutral-600">
+            <p className="mt-2 text-sm text-zinc-400">
               Tens alterações não guardadas. Desejas guardá-las antes de sair da página?
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setLeaveConfirm(null)}
-                className="rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-100 transition"
+                className="rounded-full border border-neutral-300 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleLeaveConfirmDiscard}
-                className="rounded-full border border-neutral-300 bg-neutral-50 px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-100 transition"
+                className="rounded-full border border-neutral-300 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition"
               >
                 Não, sair sem guardar
               </button>
@@ -895,7 +895,7 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 type="button"
                 onClick={handleLeaveConfirmSave}
                 disabled={leaving}
-                className="rounded-full bg-violet-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-violet-700 transition disabled:opacity-60"
+                className="rounded-full bg-[#00a0e3] text-white px-4 py-2.5 text-sm font-semibold hover:bg-[#0090cc] transition disabled:opacity-60"
               >
                 {leaving ? "A guardar…" : "Sim, guardar"}
               </button>
@@ -911,19 +911,19 @@ export default function AccountProfile({ user }: AccountProfileProps) {
           <div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white backdrop-blur-2xl shadow-lg overflow-hidden"
+            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#14141f] backdrop-blur-2xl shadow-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-5 border-b border-neutral-200">
-              <div className="text-[11px] uppercase tracking-wider text-neutral-500">Transferência</div>
-              <h3 className="mt-2 text-lg font-semibold text-neutral-900">Transferir bilhete</h3>
-              <p className="mt-2 text-sm text-neutral-600">
+            <div className="px-6 py-5 border-b border-white/10">
+              <div className="text-[11px] uppercase tracking-wider text-zinc-500">Transferência</div>
+              <h3 className="mt-2 text-lg font-semibold text-white">Transferir bilhete</h3>
+              <p className="mt-2 text-sm text-zinc-400">
                 {transferingTicket.code} — {transferingTicket.event?.title || "Evento"}
               </p>
             </div>
 
             <div className="px-6 py-5">
-              <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-2">
+              <label className="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
                 Email do destinatário
               </label>
               <input
@@ -932,10 +932,10 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                 type="email"
                 placeholder="email@exemplo.com"
                 className={cn(
-                  "w-full rounded-2xl border border-neutral-200 bg-white",
-                  "px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400",
+                  "w-full rounded-2xl border border-white/10 bg-white",
+                  "px-4 py-3 text-sm text-white placeholder:text-zinc-500",
                   "outline-none transition-all",
-                  "focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                  "focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20"
                 )}
               />
 
@@ -945,8 +945,8 @@ export default function AccountProfile({ user }: AccountProfileProps) {
                   onClick={closeTransfer}
                   className={cn(
                     "px-4 py-2.5 rounded-full text-[12px] font-semibold",
-                    "border border-neutral-200 bg-neutral-50 text-neutral-700 hover:text-neutral-900",
-                    "hover:bg-neutral-100 transition"
+                    "border border-white/10 bg-white/5 text-zinc-300 hover:text-white",
+                    "hover:bg-white/10 transition"
                   )}
                 >
                   Cancelar

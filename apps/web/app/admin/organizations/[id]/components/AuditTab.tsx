@@ -41,7 +41,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
     useEffect(() => { load(); }, [load]);
 
     return (
-        <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] overflow-hidden">
+        <div className="bg-[#0c0c12] border border-white/10 shadow-sm rounded-[32px] overflow-hidden">
             <DataTable<AuditLog>
                 data={logs}
                 loading={loading}
@@ -54,7 +54,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "action",
                         label: "Ação",
                         render: (l) => {
-                            const config = ACTION_LABELS[l.action] || { label: l.action, color: "text-neutral-500" };
+                            const config = ACTION_LABELS[l.action] || { label: l.action, color: "text-zinc-500" };
                             return (
                                 <div className="flex items-center gap-3">
                                     <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", config.color.replace("text-", "bg-"))} />
@@ -67,7 +67,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "details",
                         label: "Detalhes",
                         render: (l) => (
-                            <div className="text-[12px] text-neutral-400 font-medium max-w-xs truncate">
+                            <div className="text-[12px] text-zinc-500 font-medium max-w-xs truncate">
                                 {JSON.stringify(l.metaJson)}
                             </div>
                         ),
@@ -76,7 +76,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "context",
                         label: "Origem",
                         render: (l) => (
-                            <div className="flex items-center gap-4 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+                            <div className="flex items-center gap-4 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                                 <span className="flex items-center gap-1">
                                     <Globe className="h-3 w-3" />
                                     {l.ip || "Sistema"}
@@ -88,7 +88,7 @@ export function AuditTab({ organizationId }: { organizationId: string }) {
                         key: "createdAt",
                         label: "Data",
                         render: (l) => (
-                            <span className="text-[13px] font-medium text-neutral-400">
+                            <span className="text-[13px] font-medium text-zinc-500">
                                 {new Date(l.createdAt).toLocaleString("pt-PT", {
                                     day: "2-digit",
                                     month: "2-digit",

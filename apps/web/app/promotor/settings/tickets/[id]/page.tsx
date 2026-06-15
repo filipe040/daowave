@@ -39,13 +39,13 @@ const TABS: { id: EditorTab; label: string; icon: typeof Info }[] = [
 ];
 
 const sectionClass =
-    "bg-white border border-neutral-200/80 rounded-2xl shadow-sm overflow-hidden";
+    "bg-[#0c0c12] border border-white/10/80 rounded-2xl shadow-sm overflow-hidden";
 const sectionHeadClass =
-    "flex items-center gap-2 px-4 sm:px-5 py-3.5 border-b border-neutral-100 bg-neutral-50/80";
+    "flex items-center gap-2 px-4 sm:px-5 py-3.5 border-b border-white/10 bg-white/5/80";
 const sectionBodyClass = "p-4 sm:p-5 space-y-4";
-const labelClass = "text-[11px] font-bold uppercase tracking-wide text-neutral-500 block mb-2";
+const labelClass = "text-[11px] font-bold uppercase tracking-wide text-zinc-500 block mb-2";
 const inputClass =
-    "w-full bg-white border border-neutral-200 rounded-xl px-3 sm:px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all";
+    "w-full bg-[#0c0c12] border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:border-[#00a0e3]/50 focus:ring-2 focus:ring-[#00a0e3]/20 outline-none transition-all";
 const selectClass = inputClass;
 
 function Chip({
@@ -63,8 +63,8 @@ function Chip({
             onClick={onClick}
             className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
                 active
-                    ? "bg-violet-600 text-white border-violet-600 shadow-sm"
-                    : "bg-white text-neutral-600 border-neutral-200 hover:border-violet-200 hover:bg-violet-50/50"
+                    ? "bg-[#00a0e3] text-white border-[#00a0e3] shadow-sm"
+                    : "bg-[#14141f] text-zinc-400 border-white/10 hover:border-[#00a0e3]/30 hover:bg-[#00a0e3]/10/50"
             }`}
         >
             {children}
@@ -91,10 +91,10 @@ function Section({
                 onClick={() => setOpen((v) => !v)}
                 className={`${sectionHeadClass} w-full text-left lg:cursor-default`}
             >
-                <Icon className="h-4 w-4 text-violet-600 shrink-0" />
-                <span className="text-sm font-bold text-neutral-800 flex-1">{title}</span>
+                <Icon className="h-4 w-4 text-[#00a0e3] shrink-0" />
+                <span className="text-sm font-bold text-zinc-200 flex-1">{title}</span>
                 <ChevronDown
-                    className={`h-4 w-4 text-neutral-400 transition-transform lg:hidden ${open ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 text-zinc-500 transition-transform lg:hidden ${open ? "rotate-180" : ""}`}
                 />
             </button>
             <div className={`${sectionBodyClass} ${open ? "block" : "hidden lg:block"}`}>{children}</div>
@@ -306,13 +306,13 @@ export default function TicketTemplateEditorPage() {
     };
 
     const Toggle = ({ id, label }: { id: string; label: string }) => (
-        <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-neutral-50/80 border border-neutral-100 cursor-pointer hover:border-violet-200 hover:bg-violet-50/30 transition-colors">
-            <span className="text-sm font-medium text-neutral-800">{label}</span>
+        <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/5/80 border border-white/10 cursor-pointer hover:border-[#00a0e3]/30 hover:bg-[#00a0e3]/10/30 transition-colors">
+            <span className="text-sm font-medium text-zinc-200">{label}</span>
             <input
                 type="checkbox"
                 checked={Boolean((theme?.blocks as Record<string, unknown>)?.[id])}
                 onChange={(e) => updateTheme(`blocks.${id}`, e.target.checked)}
-                className="w-4 h-4 accent-violet-600 shrink-0"
+                className="w-4 h-4 accent-[#00a0e3] shrink-0"
             />
         </label>
     );
@@ -323,7 +323,7 @@ export default function TicketTemplateEditorPage() {
                 <CheckCircle2 className="h-3 w-3" /> Ativo
             </span>
         ) : template?.status === "ARCHIVED" ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-neutral-100 text-neutral-500">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-neutral-100 text-zinc-500">
                 <Archive className="h-3 w-3" /> Arquivado
             </span>
         ) : (
@@ -350,7 +350,7 @@ export default function TicketTemplateEditorPage() {
                         <option value="HORIZONTAL_QR_RIGHT">Horizontal — QR à direita</option>
                         <option value="MOBILE_PASS">Mobile Pass — estilo wallet</option>
                     </select>
-                    <p className="text-xs text-neutral-400 mt-2">O preview atualiza ao mudar o preset.</p>
+                    <p className="text-xs text-zinc-500 mt-2">O preview atualiza ao mudar o preset.</p>
                 </div>
             </Section>
 
@@ -382,7 +382,7 @@ export default function TicketTemplateEditorPage() {
             <Section title="Logo e identidade" icon={MousePointer2}>
                 <div>
                     <label className={labelClass}>Upload do logo</label>
-                    <div className="relative border-2 border-dashed border-neutral-200 rounded-xl p-4 sm:p-5 bg-neutral-50/50 hover:border-violet-300 hover:bg-violet-50/20 transition-colors cursor-pointer">
+                    <div className="relative border-2 border-dashed border-white/10 rounded-xl p-4 sm:p-5 bg-white/5 hover:border-[#00a0e3]/40 hover:bg-[#00a0e3]/10 transition-colors cursor-pointer">
                         <input
                             type="file"
                             accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
@@ -391,35 +391,35 @@ export default function TicketTemplateEditorPage() {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="flex items-center gap-3 pointer-events-none">
-                            <div className="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-[#0c0c12] border border-white/10 flex items-center justify-center shrink-0">
                                 {uploadingLogo ? (
-                                    <div className="w-4 h-4 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-[#00a0e3]/30 border-t-[#00a0e3] rounded-full animate-spin" />
                                 ) : (
-                                    <Upload className="h-4 w-4 text-violet-600" />
+                                    <Upload className="h-4 w-4 text-[#00a0e3]" />
                                 )}
                             </div>
                             <div className="min-w-0">
-                                <p className="text-sm font-semibold text-neutral-800">
+                                <p className="text-sm font-semibold text-zinc-200">
                                     {uploadingLogo ? "A carregar..." : "Clique para fazer upload"}
                                 </p>
-                                <p className="text-xs text-neutral-500">PNG, JPG, SVG — máx. 5MB</p>
+                                <p className="text-xs text-zinc-500">PNG, JPG, SVG — máx. 5MB</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {theme?.brand.logoUrl && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 bg-neutral-50/50">
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={theme.brand.logoUrl} alt="Logo" className="h-10 w-auto object-contain max-w-[72px] shrink-0" />
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-neutral-700">Logo atual</p>
-                            <p className="text-[11px] text-neutral-400 truncate">{theme.brand.logoUrl}</p>
+                            <p className="text-xs font-bold text-zinc-300">Logo atual</p>
+                            <p className="text-[11px] text-zinc-500 truncate">{theme.brand.logoUrl}</p>
                         </div>
                         <button
                             type="button"
                             onClick={() => updateTheme("brand.logoUrl", "")}
-                            className="p-2 rounded-lg hover:bg-white text-neutral-400 hover:text-neutral-800 transition-colors shrink-0"
+                            className="p-2 rounded-lg hover:bg-[#14141f] text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -530,7 +530,7 @@ export default function TicketTemplateEditorPage() {
                                     type="color"
                                     value={(theme?.colors as Record<string, string>)?.[key] || "#000000"}
                                     onChange={(e) => updateTheme(`colors.${key}`, e.target.value)}
-                                    className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-200 cursor-pointer shrink-0"
+                                    className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 cursor-pointer shrink-0"
                                 />
                                 <input
                                     value={(theme?.colors as Record<string, string>)?.[key] || ""}
@@ -599,13 +599,13 @@ export default function TicketTemplateEditorPage() {
                         ))}
                     </div>
                 </div>
-                <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-neutral-50/80 border border-neutral-100 cursor-pointer">
-                    <span className="text-sm font-medium text-neutral-800">Labels em maiúsculas</span>
+                <label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/5/80 border border-white/10 cursor-pointer">
+                    <span className="text-sm font-medium text-zinc-200">Labels em maiúsculas</span>
                     <input
                         type="checkbox"
                         checked={theme?.typography.uppercaseLabels !== false}
                         onChange={(e) => updateTheme("typography.uppercaseLabels", e.target.checked)}
-                        className="w-4 h-4 accent-violet-600"
+                        className="w-4 h-4 accent-[#00a0e3]"
                     />
                 </label>
             </Section>
@@ -830,11 +830,11 @@ export default function TicketTemplateEditorPage() {
                 </div>
             </Section>
 
-            <div className="rounded-2xl border border-violet-200/60 bg-gradient-to-br from-violet-50 to-white p-4 sm:p-5">
-                <h4 className="text-sm font-bold text-violet-800 mb-2 flex items-center gap-2">
+            <div className="rounded-2xl border border-[#00a0e3]/30 bg-gradient-to-br from-[#00a0e3]/5 to-[#14141f] p-4 sm:p-5">
+                <h4 className="text-sm font-bold text-[#5ec8f8] mb-2 flex items-center gap-2">
                     <Sparkles className="h-4 w-4" /> Dica
                 </h4>
-                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
                     Use contraste elevado entre fundo e texto. QR tamanho L funciona melhor em locais com pouca luz.
                 </p>
             </div>
@@ -858,17 +858,17 @@ export default function TicketTemplateEditorPage() {
         <div className={`${sectionClass} flex flex-col`}>
             <div className={`${sectionHeadClass} justify-between`}>
                 <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4 text-violet-600" />
-                    <span className="text-sm font-bold text-neutral-800">Preview ao vivo</span>
+                    <Eye className="h-4 w-4 text-[#00a0e3]" />
+                    <span className="text-sm font-bold text-zinc-200">Preview ao vivo</span>
                 </div>
                 <div className="flex items-center gap-2">
                     {previewLoading && (
-                        <span className="text-[11px] text-violet-600 font-medium animate-pulse">A atualizar...</span>
+                        <span className="text-[11px] text-[#00a0e3] font-medium animate-pulse">A atualizar...</span>
                     )}
                     <button
                         type="button"
                         onClick={() => setPreviewExpanded((v) => !v)}
-                        className="lg:hidden p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+                        className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 text-zinc-500"
                         aria-label={previewExpanded ? "Recolher preview" : "Expandir preview"}
                     >
                         <ChevronDown className={`h-4 w-4 transition-transform ${previewExpanded ? "rotate-180" : ""}`} />
@@ -876,7 +876,7 @@ export default function TicketTemplateEditorPage() {
                 </div>
             </div>
             <div className={`p-3 sm:p-4 ${previewExpanded ? "block" : "hidden lg:block"}`}>
-                <div className="rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900/5 shadow-inner min-h-[220px] h-[38vh] sm:h-[42vh] lg:h-[min(520px,calc(100vh-12rem))] xl:min-h-[480px]">
+                <div className="rounded-xl overflow-hidden border border-white/10 bg-neutral-900/5 shadow-inner min-h-[220px] h-[38vh] sm:h-[42vh] lg:h-[min(520px,calc(100vh-12rem))] xl:min-h-[480px]">
                     {previewHtml ? (
                         <iframe
                             title="Preview do bilhete"
@@ -885,19 +885,19 @@ export default function TicketTemplateEditorPage() {
                             sandbox="allow-same-origin"
                         />
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center gap-2 text-neutral-400">
-                            <div className="w-8 h-8 border-2 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                        <div className="h-full flex flex-col items-center justify-center gap-2 text-zinc-500">
+                            <div className="w-8 h-8 border-2 border-[#00a0e3]/30 border-t-[#00a0e3] rounded-full animate-spin" />
                             <span className="text-sm">A carregar preview...</span>
                         </div>
                     )}
                 </div>
-                <p className="text-xs text-neutral-500 mt-3 leading-relaxed">
+                <p className="text-xs text-zinc-500 mt-3 leading-relaxed">
                     Alterações refletem-se aqui em tempo real. Guarde e publique para aplicar nos bilhetes.
                 </p>
                 <button
                     type="button"
                     onClick={handlePreview}
-                    className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 text-neutral-800 hover:bg-neutral-50 transition-all"
+                    className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border border-white/10 text-zinc-200 hover:bg-white/5 transition-all"
                 >
                     <Eye className="h-4 w-4" />
                     Abrir em ecrã completo
@@ -931,7 +931,7 @@ export default function TicketTemplateEditorPage() {
             subtitle={
                 <span className="flex flex-wrap items-center gap-2">
                     {statusBadge}
-                    <span className="text-neutral-400">·</span>
+                    <span className="text-zinc-500">·</span>
                     <span>v{template.version}</span>
                 </span>
             }
@@ -953,7 +953,7 @@ export default function TicketTemplateEditorPage() {
                         type="button"
                         onClick={handleSave}
                         disabled={saving}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 disabled:opacity-50 transition-all shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-white/10 bg-[#14141f] text-white hover:bg-white/5 disabled:opacity-50 transition-all shadow-sm"
                     >
                         <Save className="h-4 w-4" />
                         {saving ? "A guardar..." : "Guardar"}
@@ -963,7 +963,7 @@ export default function TicketTemplateEditorPage() {
                             type="button"
                             onClick={handlePublish}
                             disabled={publishing}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 transition-all shadow-sm"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] disabled:opacity-50 transition-all shadow-sm"
                         >
                             <Send className="h-4 w-4" />
                             {publishing ? "A publicar..." : "Publicar"}
@@ -982,7 +982,7 @@ export default function TicketTemplateEditorPage() {
                         {/* Tabs */}
                         <div className="sticky top-0 z-20 -mx-1 px-1 pt-1 pb-2 bg-gradient-to-b from-white via-white to-transparent">
                             <div
-                                className="flex gap-1.5 overflow-x-auto no-scrollbar p-1.5 bg-neutral-100/80 border border-neutral-200/80 rounded-2xl backdrop-blur-sm"
+                                className="flex gap-1.5 overflow-x-auto no-scrollbar p-1.5 bg-neutral-100/80 border border-white/10/80 rounded-2xl backdrop-blur-sm"
                                 role="tablist"
                             >
                                 {TABS.map(({ id, label, icon: Icon }) => (
@@ -994,8 +994,8 @@ export default function TicketTemplateEditorPage() {
                                         onClick={() => setActiveTab(id)}
                                         className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
                                             activeTab === id
-                                                ? "bg-white text-violet-700 shadow-sm border border-violet-100"
-                                                : "text-neutral-600 hover:text-neutral-900 hover:bg-white/60"
+                                                ? "bg-[#14141f] text-[#5ec8f8] shadow-sm border border-[#00a0e3]/20"
+                                                : "text-zinc-400 hover:text-white hover:bg-[#14141f]/60"
                                         }`}
                                     >
                                         <Icon className="h-4 w-4 shrink-0" />
@@ -1011,7 +1011,7 @@ export default function TicketTemplateEditorPage() {
             </div>
 
             {/* Barra fixa mobile / tablet */}
-            <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden border-t border-neutral-200 bg-white/95 backdrop-blur-md px-4 py-3 safe-area-pb shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+            <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden border-t border-white/10 bg-white/95 backdrop-blur-md px-4 py-3 safe-area-pb shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
                 <div className="max-w-7xl mx-auto flex items-center gap-2">
                     {template.status !== "ARCHIVED" && (
                         <button
@@ -1028,7 +1028,7 @@ export default function TicketTemplateEditorPage() {
                         type="button"
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border border-neutral-200 bg-white text-neutral-900 disabled:opacity-50"
+                        className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border border-white/10 bg-[#14141f] text-white disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
                         {saving ? "A guardar..." : "Guardar"}
@@ -1038,7 +1038,7 @@ export default function TicketTemplateEditorPage() {
                             type="button"
                             onClick={handlePublish}
                             disabled={publishing}
-                            className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold bg-violet-600 text-white disabled:opacity-50"
+                            className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold bg-[#00a0e3] text-white disabled:opacity-50"
                         >
                             <Send className="h-4 w-4" />
                             {publishing ? "..." : "Publicar"}

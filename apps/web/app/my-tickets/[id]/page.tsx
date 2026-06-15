@@ -148,7 +148,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             <a
               href={`/api/tickets/${ticket.id}/pdf`}
               target="_blank"
-              className="w-full rounded-xl bg-violet-600 hover:bg-violet-700 px-6 py-3 text-center text-sm font-bold text-neutral-900 shadow-lg shadow-blue-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 active:scale-95"
+              className="w-full rounded-xl bg-[#00a0e3] hover:bg-[#0090cc] px-6 py-3 text-center text-sm font-bold text-neutral-900 shadow-lg shadow-blue-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 active:scale-95"
             >
               📥 Descarregar PDF
             </a>

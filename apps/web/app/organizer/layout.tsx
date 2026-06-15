@@ -49,12 +49,12 @@ export default async function OrganizerLayout({
   // If organizer but no profile or not approved
   if (isPromoter(role) && (!organizerProfile || organizerProfile.status !== "APPROVED")) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen dash-shell text-white">
         <div className="flex min-h-screen items-center justify-center px-4">
-          <div className="w-full max-w-md text-center">
+          <div className="w-full max-w-md text-center dash-card p-8">
             <div className="mb-6 flex justify-center opacity-70">
               {!organizerProfile ? (
-                <FileText className="h-16 w-16 text-neutral-500" strokeWidth={1.5} />
+                <FileText className="h-16 w-16 text-zinc-500" strokeWidth={1.5} />
               ) : organizerProfile.status === "PENDING" ? (
                 <Loader2 className="h-16 w-16 animate-spin text-amber-600" strokeWidth={1.5} />
               ) : (
@@ -68,7 +68,7 @@ export default async function OrganizerLayout({
                 ? "Aguardando Aprovação"
                 : "Acesso Negado"}
             </h2>
-            <p className="mb-6 text-neutral-500">
+            <p className="mb-6 text-zinc-500">
               {!organizerProfile
                 ? "O seu perfil de promotor ainda não foi criado. Contacte o administrador."
                 : organizerProfile.status === "PENDING"
@@ -77,7 +77,7 @@ export default async function OrganizerLayout({
             </p>
             <Link
               href="/"
-              className="inline-block rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-700 transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
+              className="inline-block rounded-xl bg-[#00a0e3] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0090cc] transition-all hover:scale-105 hover:shadow-lg hover:shadow-white/20"
             >
               Voltar ao Início
             </Link>

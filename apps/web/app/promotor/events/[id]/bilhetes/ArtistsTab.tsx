@@ -226,9 +226,9 @@ export default function ArtistsTab({
     return (
         <div className="p-6 sm:p-8">
             {layoutMode !== "ARTISTS" && (
-                <div className="mb-6 rounded-2xl border border-violet-500/30 bg-violet-500/10 p-4 sm:p-5">
-                    <p className="text-[14px] font-bold text-violet-700">Modo bilhetes por artista</p>
-                    <p className="text-[13px] text-violet-700/70 mt-1 leading-relaxed">
+                <div className="mb-6 rounded-2xl border border-[#00a0e3]/30 bg-[#00a0e3]/10 p-4 sm:p-5">
+                    <p className="text-[14px] font-bold text-[#5ec8f8]">Modo bilhetes por artista</p>
+                    <p className="text-[13px] text-[#5ec8f8]/70 mt-1 leading-relaxed">
                         Adicione artistas abaixo — ao criar o primeiro, a página pública passa automaticamente para o layout em grelha (estilo festival).
                     </p>
                 </div>
@@ -236,11 +236,11 @@ export default function ArtistsTab({
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                        <Mic2 className="h-5 w-5 text-neutral-500" />
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Mic2 className="h-5 w-5 text-zinc-500" />
                         Artistas
                     </h3>
-                    <p className="text-sm text-neutral-500 mt-1">
+                    <p className="text-sm text-zinc-500 mt-1">
                         Cada artista tem a sua página pública com poster e bilhetes.
                     </p>
                     {eventSlug && (
@@ -258,7 +258,7 @@ export default function ArtistsTab({
                     <button
                         type="button"
                         onClick={() => { resetForm(); setIsFormOpen(true); }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all shrink-0"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] transition-all shrink-0"
                     >
                         <Plus className="h-4 w-4" />
                         Adicionar Artista
@@ -272,38 +272,38 @@ export default function ArtistsTab({
             </div>
 
             {isFormOpen && canEdit && (
-                <form onSubmit={handleSubmit} className="mb-8 p-6 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-4">
+                <form onSubmit={handleSubmit} className="mb-8 p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
                     <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-neutral-900">{editingId ? "Editar Artista" : "Novo Artista"}</h4>
-                        <button type="button" onClick={resetForm} className="text-neutral-500 hover:text-neutral-900">
+                        <h4 className="font-bold text-white">{editingId ? "Editar Artista" : "Novo Artista"}</h4>
+                        <button type="button" onClick={resetForm} className="text-zinc-500 hover:text-white">
                             <X className="h-4 w-4" />
                         </button>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Nome *</label>
-                            <input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" placeholder="Fernando Daniel" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Nome *</label>
+                            <input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" placeholder="Fernando Daniel" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Slug *</label>
-                            <input required pattern="[a-z0-9-]+" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value, slugManual: true })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm font-mono" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Slug *</label>
+                            <input required pattern="[a-z0-9-]+" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value, slugManual: true })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm font-mono" />
                         </div>
                         <div className="sm:col-span-2">
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">URL da imagem (poster)</label>
-                            <input type="url" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" placeholder="https://..." />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">URL da imagem (poster)</label>
+                            <input type="url" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" placeholder="https://..." />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Data do concerto *</label>
-                            <input required type="datetime-local" value={formData.performanceAt} onChange={(e) => setFormData({ ...formData, performanceAt: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Data do concerto *</label>
+                            <input required type="datetime-local" value={formData.performanceAt} onChange={(e) => setFormData({ ...formData, performanceAt: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Nome do local (opcional)</label>
-                            <input value={formData.venue} onChange={(e) => setFormData({ ...formData, venue: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" placeholder="Usa o do evento se vazio" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Nome do local (opcional)</label>
+                            <input value={formData.venue} onChange={(e) => setFormData({ ...formData, venue: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" placeholder="Usa o do evento se vazio" />
                         </div>
                         <div className="sm:col-span-2">
                             <div className="flex items-center justify-between mb-1.5">
-                                <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest">Link do mapa (Google Maps)</label>
+                                <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Link do mapa (Google Maps)</label>
                                 <a
                                     href="https://www.google.com/maps"
                                     target="_blank"
@@ -319,31 +319,31 @@ export default function ArtistsTab({
                                 type="url"
                                 value={formData.locationUrl}
                                 onChange={(e) => setFormData({ ...formData, locationUrl: e.target.value })}
-                                className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm"
+                                className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm"
                                 placeholder="https://maps.google.com/... — substitui o mapa do evento para este artista"
                             />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Preço (€) *</label>
-                            <input required value={formData.priceCents} onChange={(e) => setFormData({ ...formData, priceCents: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" placeholder="10.00" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Preço (€) *</label>
+                            <input required value={formData.priceCents} onChange={(e) => setFormData({ ...formData, priceCents: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" placeholder="10.00" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Capacidade *</label>
-                            <input required type="number" min={1} value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Capacidade *</label>
+                            <input required type="number" min={1} value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Etiqueta (ex: 1º Lote)</label>
-                            <input value={formData.badgeLabel} onChange={(e) => setFormData({ ...formData, badgeLabel: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Etiqueta (ex: 1º Lote)</label>
+                            <input value={formData.badgeLabel} onChange={(e) => setFormData({ ...formData, badgeLabel: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" />
                         </div>
                         <div>
-                            <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5 block">Nome do bilhete</label>
-                            <input value={formData.lotName} onChange={(e) => setFormData({ ...formData, lotName: e.target.value })} className="w-full rounded-xl border border-neutral-200 bg-white text-neutral-900 px-4 py-2.5 text-sm" />
+                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Nome do bilhete</label>
+                            <input value={formData.lotName} onChange={(e) => setFormData({ ...formData, lotName: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#14141f] text-white px-4 py-2.5 text-sm" />
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={resetForm} className="px-4 py-2 rounded-xl text-[13px] font-bold text-neutral-500 hover:text-neutral-900">Cancelar</button>
-                        <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-white text-black disabled:opacity-40">
+                        <button type="button" onClick={resetForm} className="px-4 py-2 rounded-xl text-[13px] font-bold text-zinc-500 hover:text-white">Cancelar</button>
+                        <button type="submit" disabled={isSubmitting} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold bg-[#14141f] text-black disabled:opacity-40">
                             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                             {editingId ? "Guardar" : "Criar Artista"}
                         </button>
@@ -352,7 +352,7 @@ export default function ArtistsTab({
             )}
 
             {artists.length === 0 ? (
-                <div className="text-center py-16 text-neutral-400">
+                <div className="text-center py-16 text-zinc-500">
                     <Mic2 className="h-10 w-10 mx-auto mb-3 opacity-30" />
                     <p className="font-medium">Ainda não há artistas configurados.</p>
                     {canEdit && <p className="text-sm mt-1">Adicione o primeiro artista para ativar a página pública.</p>}
@@ -363,18 +363,18 @@ export default function ArtistsTab({
                         const lot = artist.ticketType.ticketLots[0];
                         const isEditing = editingId === artist.id;
                         return (
-                            <div key={artist.id} className={`rounded-2xl border p-4 ${isEditing ? "border-amber-400/40 bg-amber-400/5" : "border-neutral-200 bg-neutral-50"}`}>
+                            <div key={artist.id} className={`rounded-2xl border p-4 ${isEditing ? "border-amber-400/40 bg-amber-400/5" : "border-white/10 bg-white/5"}`}>
                                 <div className="flex gap-4">
                                     {artist.imageUrl ? (
-                                        <img src={artist.imageUrl} alt="" className="w-16 h-20 rounded-lg object-cover shrink-0 bg-neutral-50" />
+                                        <img src={artist.imageUrl} alt="" className="w-16 h-20 rounded-lg object-cover shrink-0 bg-white/5" />
                                     ) : (
-                                        <div className="w-16 h-20 rounded-lg bg-gradient-to-br from-violet-500/30 to-orange-500/30 shrink-0" />
+                                        <div className="w-16 h-20 rounded-lg bg-gradient-to-br from-[#00a0e3]/30 to-orange-500/30 shrink-0" />
                                     )}
                                     <div className="min-w-0 flex-1">
-                                        <h4 className="font-bold text-neutral-900 truncate">{artist.name}</h4>
-                                        <p className="text-[12px] text-neutral-500 font-mono">/{artist.slug}</p>
+                                        <h4 className="font-bold text-white truncate">{artist.name}</h4>
+                                        <p className="text-[12px] text-zinc-500 font-mono">/{artist.slug}</p>
                                         {lot && (
-                                            <p className="text-[13px] text-neutral-600 mt-1">
+                                            <p className="text-[13px] text-zinc-400 mt-1">
                                                 {formatCurrency(lot.priceCents)} · {lot.soldCount}/{lot.capacity} vendidos
                                             </p>
                                         )}
@@ -385,7 +385,7 @@ export default function ArtistsTab({
                                 </div>
                                 {canEdit && (
                                     <div className="flex gap-2 mt-4 justify-end">
-                                        <button type="button" onClick={() => isEditing ? resetForm() : startEdit(artist)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+                                        <button type="button" onClick={() => isEditing ? resetForm() : startEdit(artist)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold border border-white/10 text-zinc-400 hover:bg-white/5">
                                             {isEditing ? <X className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
                                             {isEditing ? "Fechar" : "Editar"}
                                         </button>

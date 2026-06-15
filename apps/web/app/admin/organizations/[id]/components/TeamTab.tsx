@@ -44,7 +44,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
     useEffect(() => { load(); }, [load]);
 
     return (
-        <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] overflow-hidden">
+        <div className="bg-[#0c0c12] border border-white/10 shadow-sm rounded-[32px] overflow-hidden">
             <DataTable<TeamMember>
                 data={members}
                 loading={loading}
@@ -58,16 +58,16 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         label: "Membro",
                         render: (m) => (
                             <div className="flex items-center gap-3">
-                                <div className="relative w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center border border-neutral-200 overflow-hidden">
+                                <div className="relative w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden">
                                     {m.user.avatarUrl ? (
                                         <Image src={m.user.avatarUrl} alt={m.user.name || ""} fill className="object-cover" unoptimized />
                                     ) : (
-                                        <Users className="h-4 w-4 text-neutral-400" />
+                                        <Users className="h-4 w-4 text-zinc-500" />
                                     )}
                                 </div>
                                 <div>
-                                    <div className="font-bold text-neutral-900 tracking-tight">{m.user.name || "Sem nome"}</div>
-                                    <div className="text-[11px] font-medium text-neutral-400 uppercase tracking-widest">{m.user.email}</div>
+                                    <div className="font-bold text-white tracking-tight">{m.user.name || "Sem nome"}</div>
+                                    <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest">{m.user.email}</div>
                                 </div>
                             </div>
                         ),
@@ -76,8 +76,8 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         key: "role",
                         label: "Cargo",
                         render: (m) => (
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-50 border border-neutral-200 text-[11px] font-bold text-neutral-600">
-                                <Shield className="h-3 w-3 text-neutral-400" />
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-zinc-400">
+                                <Shield className="h-3 w-3 text-zinc-500" />
                                 {ROLE_LABELS[m.role] || m.role}
                             </div>
                         ),
@@ -99,7 +99,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                         key: "joined",
                         label: "Desde",
                         render: (m) => (
-                            <span className="text-[13px] font-medium text-neutral-400">
+                            <span className="text-[13px] font-medium text-zinc-500">
                                 {new Date(m.createdAt).toLocaleDateString("pt-PT")}
                             </span>
                         ),
@@ -108,7 +108,7 @@ export function TeamTab({ organizationId }: { organizationId: string }) {
                 rowActions={(m) => (
                     <button
                         onClick={() => toast.info("Remoção de membros em desenvolvimento")}
-                        className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-rose-500/10 text-neutral-400 hover:text-rose-500 transition-all"
+                        className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-rose-500/10 text-zinc-500 hover:text-rose-500 transition-all"
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>

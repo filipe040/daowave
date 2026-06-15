@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> =
     PAID: { label: "Pago", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
     PENDING: { label: "Pendente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
     CANCELED: { label: "Cancelado", className: "bg-red-500/10 text-red-400 border-red-500/20" },
-    REFUNDED: { label: "Refunded", className: "bg-neutral-100 text-neutral-500 border-neutral-200" },
+    REFUNDED: { label: "Refunded", className: "bg-neutral-100 text-zinc-500 border-white/10" },
 };
 
 const fmt = (cents: number, currency = "EUR") =>
@@ -82,7 +82,7 @@ export default function PromoterSalesPage() {
             actions={
                 <button
                     onClick={handleExport}
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-3 rounded-2xl text-[13px] sm:text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all active:scale-95 shadow-md"
+                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-3 rounded-2xl text-[13px] sm:text-[14px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] transition-all active:scale-95 shadow-md"
                 >
                     <Download className="w-4 h-4 shrink-0" />
                     Exportar CSV
@@ -93,11 +93,11 @@ export default function PromoterSalesPage() {
                 {/* Search & Filters */}
                 <div className="flex flex-col gap-4">
                     <div className="relative w-full sm:max-w-md group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-focus-within:text-violet-600 transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-[#00a0e3] transition-colors" />
                         <input
                             type="search"
                             placeholder="Pesquisar por comprador, email ou evento..."
-                            className="w-full bg-white border border-neutral-200 rounded-2xl py-3.5 pl-11 pr-4 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-violet-100 focus:border-violet-400 transition-all text-sm"
+                            className="w-full bg-[#0c0c12] border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#00a0e3]/20 focus:border-[#00a0e3]/50 transition-all text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -111,8 +111,8 @@ export default function PromoterSalesPage() {
                                 onClick={() => { setStatusFilter(s); setPage(1); }}
                                 className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all whitespace-nowrap ${
                                     statusFilter === s
-                                        ? "bg-violet-600 text-white border-violet-600 shadow-sm"
-                                        : "bg-white text-neutral-600 border-neutral-200 hover:border-violet-200"
+                                        ? "bg-[#00a0e3] text-white border-[#00a0e3] shadow-sm"
+                                        : "bg-[#14141f] text-zinc-400 border-white/10 hover:border-[#00a0e3]/30"
                                 }`}
                             >
                                 {s === "ALL" ? "Todos" : s === "PAID" ? "Pagos" : s === "PENDING" ? "Pendentes" : "Cancelados"}
@@ -144,32 +144,32 @@ export default function PromoterSalesPage() {
                             <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-3 min-w-0">
                                     <div className="min-w-0 flex-1">
-                                        <div className="font-bold text-neutral-900 tracking-tight break-words">
+                                        <div className="font-bold text-white tracking-tight break-words">
                                             {o.buyerName || "Cliente"}
                                         </div>
                                         {o.buyerEmail && (
-                                            <div className="text-[12px] text-neutral-400 truncate mt-0.5">{o.buyerEmail}</div>
+                                            <div className="text-[12px] text-zinc-500 truncate mt-0.5">{o.buyerEmail}</div>
                                         )}
                                     </div>
-                                    <span className="font-black text-neutral-900 shrink-0 tabular-nums">
+                                    <span className="font-black text-white shrink-0 tabular-nums">
                                         {fmt(o.totalCents, o.currency)}
                                     </span>
                                 </div>
-                                <div className="text-[13px] font-medium text-neutral-600 break-words">{o.event.title}</div>
+                                <div className="text-[13px] font-medium text-zinc-400 break-words">{o.event.title}</div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${config.className}`}>
                                         {config.label}
                                     </span>
-                                    <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+                                    <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                                         {o._count.tickets} bilhete{o._count.tickets !== 1 ? "s" : ""}
                                     </span>
-                                    <span className="text-[11px] text-neutral-400 tabular-nums">
+                                    <span className="text-[11px] text-zinc-500 tabular-nums">
                                         {format(new Date(o.createdAt), "dd/MM/yyyy HH:mm", { locale: pt })}
                                     </span>
                                 </div>
                                 <Link
                                     href={`/promotor/sales/${o.id}`}
-                                    className="flex w-full items-center justify-center gap-2 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 text-[12px] font-bold hover:bg-neutral-100 transition-all"
+                                    className="flex w-full items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-[12px] font-bold hover:bg-white/10 transition-all"
                                 >
                                     <Eye className="w-3.5 h-3.5" />
                                     Ver detalhes
@@ -183,8 +183,8 @@ export default function PromoterSalesPage() {
                             label: "Comprador",
                             render: (o) => (
                                 <div className="min-w-0 py-1">
-                                    <div className="font-bold text-neutral-900 uppercase tracking-tight truncate">{o.buyerName || "Cliente"}</div>
-                                    <div className="text-[12px] text-neutral-400 truncate">{o.buyerEmail || ""}</div>
+                                    <div className="font-bold text-white uppercase tracking-tight truncate">{o.buyerName || "Cliente"}</div>
+                                    <div className="text-[12px] text-zinc-500 truncate">{o.buyerEmail || ""}</div>
                                 </div>
                             ),
                         },
@@ -193,8 +193,8 @@ export default function PromoterSalesPage() {
                             label: "Evento / Bilhetes",
                             render: (o) => (
                                 <div className="min-w-0">
-                                    <div className="text-[13px] font-medium text-neutral-600 truncate">{o.event.title}</div>
-                                    <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mt-0.5">
+                                    <div className="text-[13px] font-medium text-zinc-400 truncate">{o.event.title}</div>
+                                    <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
                                         {o._count.tickets} BILHETE{o._count.tickets !== 1 ? "S" : ""}
                                     </div>
                                 </div>
@@ -204,7 +204,7 @@ export default function PromoterSalesPage() {
                             key: "totalCents",
                             label: "Total",
                             render: (o) => (
-                                <span className="font-black text-neutral-900">{fmt(o.totalCents, o.currency)}</span>
+                                <span className="font-black text-white">{fmt(o.totalCents, o.currency)}</span>
                             ),
                         },
                         {
@@ -223,7 +223,7 @@ export default function PromoterSalesPage() {
                             key: "createdAt",
                             label: "Data",
                             render: (o) => (
-                                <div className="text-[12px] font-medium text-neutral-500 tabular-nums">
+                                <div className="text-[12px] font-medium text-zinc-500 tabular-nums">
                                     {format(new Date(o.createdAt), "dd/MM/yyyy HH:mm", { locale: pt })}
                                 </div>
                             ),
@@ -232,7 +232,7 @@ export default function PromoterSalesPage() {
                     rowActions={(o) => (
                         <Link
                             href={`/promotor/sales/${o.id}`}
-                            className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-all active:scale-90"
+                            className="p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                             title="Ver Detalhes"
                         >
                             <Eye className="w-4 h-4" />

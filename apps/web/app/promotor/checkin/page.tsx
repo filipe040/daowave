@@ -162,7 +162,7 @@ export default function PromoterCheckinPage() {
             <PageShell title="Check-in" subtitle="Validação de bilhetes">
                 <div className="max-w-xl space-y-4">
                     {/* Context selectors */}
-                    <div className="rounded-3xl border border-neutral-200 bg-white shadow-md divide-y divide-neutral-200">
+                    <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-md divide-y divide-neutral-200">
                         {orgs.length > 1 && (
                             <div className="px-6 py-5">
                                 <label className={labelCls}>Organização</label>
@@ -175,7 +175,7 @@ export default function PromoterCheckinPage() {
                         <div className="px-6 py-5">
                             <label className={labelCls}>Evento</label>
                             {loadingEvents
-                                ? <div className="h-[50px] bg-neutral-50 rounded-2xl border border-neutral-200 animate-pulse" />
+                                ? <div className="h-[50px] bg-white/5 rounded-2xl border border-white/10 animate-pulse" />
                                 : (
                                     <select className={inputCls}  value={eventId} onChange={(e) => { setEventId(e.target.value); setResult(null); }} disabled={!orgId}>
                                         <option value="">{orgId ? "Selecionar evento…" : "Selecionar organização primeiro"}</option>
@@ -186,13 +186,13 @@ export default function PromoterCheckinPage() {
                     </div>
 
                     {/* Scan form */}
-                    <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden mt-6">
-                        <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5">
+                    <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-md overflow-hidden mt-6">
+                        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center">
-                                    <QrCode className="h-5 w-5 text-neutral-600" strokeWidth={2} />
+                                <div className="w-10 h-10 rounded-xl bg-neutral-100 border border-white/10 flex items-center justify-center">
+                                    <QrCode className="h-5 w-5 text-zinc-400" strokeWidth={2} />
                                 </div>
-                                <h2 className="text-[15px] font-bold text-neutral-900 tracking-wide">Código do bilhete</h2>
+                                <h2 className="text-[15px] font-bold text-white tracking-wide">Código do bilhete</h2>
                             </div>
                             <button
                                 type="button"
@@ -219,7 +219,7 @@ export default function PromoterCheckinPage() {
                             <button
                                 type="submit"
                                 disabled={checking || !eventId || !qrCode.trim()}
-                                className="w-full inline-flex items-center justify-center gap-2 h-[50px] rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95"
+                                className="w-full inline-flex items-center justify-center gap-2 h-[50px] rounded-2xl text-[14px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95"
                             >
                                 {checking ? "A validar…" : "Validar bilhete"}
                             </button>
@@ -240,11 +240,11 @@ export default function PromoterCheckinPage() {
                                     <p className={`text-[16px] font-bold uppercase tracking-wide ${result.kind === "success" ? "text-emerald-600" : result.kind === "duplicate" ? "text-amber-600" : "text-red-400"}`}>
                                         {result.kind === "success" ? "Bilhete válido" : result.kind === "duplicate" ? "Bilhete já utilizado" : "Bilhete inválido"}
                                     </p>
-                                    <p className="text-[14px] font-medium text-neutral-800">{result.message}</p>
+                                    <p className="text-[14px] font-medium text-zinc-200">{result.message}</p>
                                     {result.kind === "success" && result.ticket && (
-                                        <div className="text-[13px] text-neutral-600 space-y-1 pt-3 border-t border-neutral-200 mt-3">
-                                            {result.ticket.holder && <p><span className="font-bold text-neutral-500 uppercase tracking-widest text-[10px] mr-2">Titular</span> <span className="text-neutral-900">{result.ticket.holder}</span></p>}
-                                            {result.ticket.type && <p><span className="font-bold text-neutral-500 uppercase tracking-widest text-[10px] mr-2">Tipo</span> {result.ticket.type}</p>}
+                                        <div className="text-[13px] text-zinc-400 space-y-1 pt-3 border-t border-white/10 mt-3">
+                                            {result.ticket.holder && <p><span className="font-bold text-zinc-500 uppercase tracking-widest text-[10px] mr-2">Titular</span> <span className="text-white">{result.ticket.holder}</span></p>}
+                                            {result.ticket.type && <p><span className="font-bold text-zinc-500 uppercase tracking-widest text-[10px] mr-2">Tipo</span> {result.ticket.type}</p>}
                                         </div>
                                     )}
                                     {result.kind === "duplicate" && (
@@ -263,24 +263,24 @@ export default function PromoterCheckinPage() {
                         <div className="fixed inset-0 z-[100] bg-neutral-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
                             <button
                                 onClick={() => setScanning(false)}
-                                className="absolute top-6 right-6 p-3 bg-neutral-100 hover:bg-neutral-200 rounded-full text-neutral-900 transition-all z-10"
+                                className="absolute top-6 right-6 p-3 bg-neutral-100 hover:bg-neutral-200 rounded-full text-white transition-all z-10"
                             >
                                 <X className="w-6 h-6" />
                             </button>
 
                             <div className="w-full max-w-sm flex flex-col items-center">
                                 <div className="mb-6 text-center">
-                                    <h3 className="text-xl font-bold text-neutral-900 mb-2">Aponte a câmara</h3>
-                                    <p className="text-sm text-neutral-500">Centre o QR code dentro do quadrado</p>
+                                    <h3 className="text-xl font-bold text-white mb-2">Aponte a câmara</h3>
+                                    <p className="text-sm text-zinc-500">Centre o QR code dentro do quadrado</p>
                                 </div>
 
-                                <div className="w-full bg-black rounded-[32px] overflow-hidden border border-neutral-200 relative aspect-[4/5] flex items-center justify-center dashboard-scanner-container shadow-2xl">
+                                <div className="w-full bg-black rounded-[32px] overflow-hidden border border-white/10 relative aspect-[4/5] flex items-center justify-center dashboard-scanner-container shadow-2xl">
                                     <div id="dashboard-reader" className="w-full h-full relative" />
                                 </div>
 
-                                <div className="mt-8 flex items-center justify-center gap-2 px-4 py-2 bg-neutral-50 rounded-full border border-neutral-200">
+                                <div className="mt-8 flex items-center justify-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
                                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-[12px] font-bold text-neutral-600 tracking-widest uppercase">Câmara Ativa</span>
+                                    <span className="text-[12px] font-bold text-zinc-400 tracking-widest uppercase">Câmara Ativa</span>
                                 </div>
                             </div>
                         </div>

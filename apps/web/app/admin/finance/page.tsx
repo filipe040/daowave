@@ -102,7 +102,7 @@ function WithdrawalActions({
   }
   if (status === "PROCESSING" || status === "APPROVED") {
     return (
-      <button type="button" className={`${btnBase} bg-violet-600 text-white hover:bg-violet-700`} onClick={onPaid}>
+      <button type="button" className={`${btnBase} bg-[#00a0e3] text-white hover:bg-[#0090cc]`} onClick={onPaid}>
         Marcar pago
       </button>
     );
@@ -219,7 +219,7 @@ export default function AdminFinancePage() {
         <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
           <a
             href="/api/admin/finance/reports?period=monthly&format=csv"
-            className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-semibold border border-neutral-200 bg-white hover:bg-neutral-50"
+            className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-semibold border border-white/10 bg-[#14141f] hover:bg-white/5"
           >
             <Download className="h-4 w-4 shrink-0" />
             Exportar CSV
@@ -227,7 +227,7 @@ export default function AdminFinancePage() {
           <button
             type="button"
             onClick={load}
-            className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700"
+            className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-sm font-semibold bg-[#00a0e3] text-white hover:bg-[#0090cc]"
           >
             <RefreshCw className="h-4 w-4 shrink-0" />
             Atualizar
@@ -243,8 +243,8 @@ export default function AdminFinancePage() {
             onClick={() => setTab(id)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
               tab === id
-                ? "bg-violet-600 text-white"
-                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                ? "bg-[#00a0e3] text-white"
+                : "bg-neutral-100 text-zinc-400 hover:bg-neutral-200"
             }`}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -258,26 +258,26 @@ export default function AdminFinancePage() {
 
       {!loading && !error && tab === "simulator" && (
         <div className="dash-card p-4 sm:p-6 space-y-5 max-w-2xl">
-          <h2 className="text-lg font-bold text-neutral-900">Simulador financeiro</h2>
-          <p className="text-sm text-neutral-500">
+          <h2 className="text-lg font-bold text-white">Simulador financeiro</h2>
+          <p className="text-sm text-zinc-500">
             Calcula taxa gateway, lucro líquido e margem. Com taxa dinâmica activa, garante lucro mínimo.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Preço bilhete (€)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Preço bilhete (€)</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
-                className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+                className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
                 value={simTicket}
                 onChange={(e) => setSimTicket(Number(e.target.value))}
               />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Método pagamento</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Método pagamento</span>
               <select
-                className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+                className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
                 value={simMethod}
                 onChange={(e) => setSimMethod(e.target.value)}
               >
@@ -287,9 +287,9 @@ export default function AdminFinancePage() {
               </select>
             </label>
             <label className="block sm:col-span-2">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Organizador (opcional)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Organizador (opcional)</span>
               <select
-                className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm"
+                className="mt-1.5 w-full rounded-xl border border-white/10 px-3 py-2.5 text-sm"
                 value={simOrgId}
                 onChange={(e) => setSimOrgId(e.target.value)}
               >
@@ -309,10 +309,10 @@ export default function AdminFinancePage() {
             {simLoading ? "A calcular…" : "Simular"}
           </button>
           {simResult && (
-            <div className="rounded-2xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden">
+            <div className="rounded-2xl border border-white/10 divide-y divide-neutral-100 overflow-hidden">
               {Object.entries(simResult.breakdown).map(([key, val]) => (
                 <div key={key} className="flex justify-between px-4 py-3 text-sm">
-                  <span className="text-neutral-500 capitalize">{key.replace(/([A-Z])/g, " $1")}</span>
+                  <span className="text-zinc-500 capitalize">{key.replace(/([A-Z])/g, " $1")}</span>
                   <span className="font-bold tabular-nums">{val}</span>
                 </div>
               ))}
@@ -328,7 +328,7 @@ export default function AdminFinancePage() {
 
       {!loading && !error && tab === "payment-methods" && (
         <div className="space-y-4">
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-zinc-500">
             Taxas gateway editáveis — usadas no cálculo anti-prejuízo e no simulador.
           </p>
           <div className="space-y-3 md:hidden">
@@ -336,7 +336,7 @@ export default function AdminFinancePage() {
               <div key={m.id} className="dash-card p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold">{m.name}</span>
-                  <span className="text-xs font-mono text-neutral-400">{m.code}</span>
+                  <span className="text-xs font-mono text-zinc-500">{m.code}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block text-xs">
@@ -355,7 +355,7 @@ export default function AdminFinancePage() {
                   Activo
                 </label>
                 <button type="button" disabled={savingMethodId === m.id} onClick={() => savePaymentMethod(m)}
-                  className="w-full py-2 rounded-xl bg-violet-600 text-white text-xs font-bold">
+                  className="w-full py-2 rounded-xl bg-[#00a0e3] text-white text-xs font-bold">
                   {savingMethodId === m.id ? "A guardar…" : "Guardar"}
                 </button>
               </div>
@@ -364,7 +364,7 @@ export default function AdminFinancePage() {
           <div className="hidden md:block dash-card overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-100 text-left text-xs uppercase text-neutral-500">
+                <tr className="border-b border-white/10 text-left text-xs uppercase text-zinc-500">
                   <th className="p-3">Método</th>
                   <th className="p-3">Fixa (€)</th>
                   <th className="p-3">%</th>
@@ -376,7 +376,7 @@ export default function AdminFinancePage() {
               <tbody>
                 {paymentMethods.map((m) => (
                   <tr key={m.id} className="border-b border-neutral-50">
-                    <td className="p-3 font-semibold">{m.name} <span className="text-neutral-400 font-mono text-xs ml-1">{m.code}</span></td>
+                    <td className="p-3 font-semibold">{m.name} <span className="text-zinc-500 font-mono text-xs ml-1">{m.code}</span></td>
                     <td className="p-3">
                       <input type="number" step="0.01" className="w-20 rounded-lg border px-2 py-1"
                         value={Number(m.fixedFee)} onChange={(e) => setPaymentMethods((prev) => prev.map((x) => x.id === m.id ? { ...x, fixedFee: e.target.value } : x))} />
@@ -394,7 +394,7 @@ export default function AdminFinancePage() {
                     </td>
                     <td className="p-3">
                       <button type="button" disabled={savingMethodId === m.id} onClick={() => savePaymentMethod(m)}
-                        className="text-xs font-bold text-violet-600 hover:text-violet-800">
+                        className="text-xs font-bold text-[#00a0e3] hover:text-[#5ec8f8]">
                         {savingMethodId === m.id ? "…" : "Guardar"}
                       </button>
                     </td>
@@ -414,9 +414,9 @@ export default function AdminFinancePage() {
               <p className="mt-1 text-2xl font-black text-emerald-900 tabular-nums">{fmt(dashboard.gmvCents, currency)}</p>
               <p className="text-xs text-emerald-700/70 mt-1">{dashboard.ordersPaid} encomendas</p>
             </div>
-            <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-violet-700/80">Lucro líquido</p>
-              <p className="mt-1 text-lg font-black text-violet-900 tabular-nums">{fmt(dashboard.netProfitCents, currency)}</p>
+            <div className="rounded-2xl border border-[#00a0e3]/30 bg-[#00a0e3]/10 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#5ec8f8]/80">Lucro líquido</p>
+              <p className="mt-1 text-lg font-black text-white tabular-nums">{fmt(dashboard.netProfitCents, currency)}</p>
             </div>
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-800/80">Pendentes</p>
@@ -426,22 +426,22 @@ export default function AdminFinancePage() {
 
           <div className="hidden md:grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
             <KpiCard label="Receita Total (GMV)" value={fmt(dashboard.gmvCents, currency)} icon={TrendingUp} iconColor="text-emerald-600" subtitle={`${dashboard.ordersPaid} encomendas`} />
-            <KpiCard label="Receita LivePass" value={fmt(dashboard.grossRevenueCents, currency)} icon={Banknote} iconColor="text-violet-600" />
+            <KpiCard label="Receita LivePass" value={fmt(dashboard.grossRevenueCents, currency)} icon={Banknote} iconColor="text-[#00a0e3]" />
             <KpiCard label="Lucro Operacional" value={fmt(dashboard.operationalProfitCents ?? dashboard.netProfitCents, currency)} icon={TrendingUp} iconColor="text-emerald-700" />
-            <KpiCard label="Taxas Gateway" value={fmt(dashboard.gatewayFeesCents, currency)} icon={CreditCard} iconColor="text-neutral-600" />
+            <KpiCard label="Taxas Gateway" value={fmt(dashboard.gatewayFeesCents, currency)} icon={CreditCard} iconColor="text-zinc-400" />
             <KpiCard label="Bilhetes Vendidos" value={String(dashboard.ticketsSold ?? 0)} icon={Percent} iconColor="text-blue-600" />
             <KpiCard label="Eventos Activos" value={String(dashboard.activeEvents ?? 0)} icon={Shield} iconColor="text-blue-600" />
-            <KpiCard label="Organizadores" value={String(dashboard.activeOrganizers ?? 0)} icon={Wallet} iconColor="text-neutral-700" />
+            <KpiCard label="Organizadores" value={String(dashboard.activeOrganizers ?? 0)} icon={Wallet} iconColor="text-zinc-300" />
             <KpiCard label="Em Carteiras" value={fmt(dashboard.walletBalanceCents ?? 0, currency)} icon={Wallet} iconColor="text-amber-600" />
             <KpiCard label="Pendente Liquidação" value={fmt(dashboard.pendingSettlementCents ?? 0, currency)} icon={TrendingDown} iconColor="text-amber-700" />
             <KpiCard label="Fundo Reserva" value={fmt(dashboard.reserveBalanceCents, currency)} icon={Shield} iconColor="text-blue-600" />
             <KpiCard label="Reembolsos" value={fmt(dashboard.refundsCents, currency)} icon={TrendingDown} iconColor="text-red-500" />
-            <KpiCard label="Levantamentos" value={fmt(dashboard.withdrawalsPaidCents, currency)} icon={Wallet} iconColor="text-neutral-700" subtitle={`${fmt(dashboard.withdrawalsPendingCents, currency)} pendentes`} />
+            <KpiCard label="Levantamentos" value={fmt(dashboard.withdrawalsPaidCents, currency)} icon={Wallet} iconColor="text-zinc-300" subtitle={`${fmt(dashboard.withdrawalsPendingCents, currency)} pendentes`} />
           </div>
 
           <div className="dash-card p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">Evolução financeira</h2>
+              <h2 className="text-sm font-bold text-white">Evolução financeira</h2>
               <div className="flex gap-1">
                 {[7, 30, 90, 365].map((d) => (
                   <button
@@ -449,7 +449,7 @@ export default function AdminFinancePage() {
                     type="button"
                     onClick={() => setChartDays(d)}
                     className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                      chartDays === d ? "bg-violet-600 text-white" : "bg-neutral-100 text-neutral-600"
+                      chartDays === d ? "bg-[#00a0e3] text-white" : "bg-neutral-100 text-zinc-400"
                     }`}
                   >
                     {d === 365 ? "12M" : `${d}D`}
@@ -457,12 +457,12 @@ export default function AdminFinancePage() {
                 ))}
               </div>
             </div>
-            {chartData.length > 0 ? <FinanceChart data={chartData} /> : <p className="text-sm text-neutral-500">Sem dados para o período.</p>}
+            {chartData.length > 0 ? <FinanceChart data={chartData} /> : <p className="text-sm text-zinc-500">Sem dados para o período.</p>}
           </div>
 
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 sm:mb-4">
-              <h2 className="text-sm sm:text-base font-semibold text-neutral-900">
+              <h2 className="text-sm sm:text-base font-semibold text-white">
                 Pedidos de levantamento
                 {pendingCount > 0 && (
                   <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
@@ -479,10 +479,10 @@ export default function AdminFinancePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-lg font-black tabular-nums">{fmt(row.amountCents, currency)}</div>
-                      <div className="text-[11px] text-neutral-400 mt-0.5 font-mono truncate">{row.id.slice(0, 8)}…</div>
-                      <div className="text-xs text-neutral-500 mt-1">{new Date(row.createdAt).toLocaleDateString("pt-PT")}</div>
+                      <div className="text-[11px] text-zinc-500 mt-0.5 font-mono truncate">{row.id.slice(0, 8)}…</div>
+                      <div className="text-xs text-zinc-500 mt-1">{new Date(row.createdAt).toLocaleDateString("pt-PT")}</div>
                     </div>
-                    <span className="shrink-0 text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-neutral-100 text-neutral-600">
+                    <span className="shrink-0 text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-neutral-100 text-zinc-400">
                       {WITHDRAWAL_STATUS_LABEL[row.status] ?? row.status}
                     </span>
                   </div>
@@ -517,7 +517,7 @@ export default function AdminFinancePage() {
           <h2 className="text-lg font-bold">Configurações Financeiras Globais</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Modo de cálculo</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Modo de cálculo</span>
               <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.pricingMode ?? "FORMULA"}
                 onChange={(e) => setSettings({ ...settings, pricingMode: e.target.value as "FORMULA" | "TIERED" })}>
@@ -526,37 +526,37 @@ export default function AdminFinancePage() {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Taxa base (cêntimos)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Taxa base (cêntimos)</span>
               <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.serviceFeeFixedCents ?? 50}
                 onChange={(e) => setSettings({ ...settings, serviceFeeFixedCents: Number(e.target.value) })} />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Percentagem (%)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Percentagem (%)</span>
               <input type="number" step="0.01" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.serviceFeeValue}
                 onChange={(e) => setSettings({ ...settings, serviceFeeValue: Number(e.target.value) })} />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Margem mínima (cêntimos)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Margem mínima (cêntimos)</span>
               <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.minimumServiceFeeCents ?? 149}
                 onChange={(e) => setSettings({ ...settings, minimumServiceFeeCents: Number(e.target.value) })} />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Taxa máxima (cêntimos)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Taxa máxima (cêntimos)</span>
               <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.maximumServiceFeeCents ?? ""}
                 onChange={(e) => setSettings({ ...settings, maximumServiceFeeCents: e.target.value ? Number(e.target.value) : null })} />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Reserva operacional (cêntimos)</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Reserva operacional (cêntimos)</span>
               <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.operationalReserveCents ?? 20}
                 onChange={(e) => setSettings({ ...settings, operationalReserveCents: Number(e.target.value) })} />
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Arredondamento</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Arredondamento</span>
               <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.roundingMode ?? "END_49_99"}
                 onChange={(e) => setSettings({ ...settings, roundingMode: e.target.value as EnterpriseFinancialSettings["roundingMode"] })}>
@@ -567,7 +567,7 @@ export default function AdminFinancePage() {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Quem paga taxas</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Quem paga taxas</span>
               <select className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.defaultFeePaidBy ?? "BUYER"}
                 onChange={(e) => setSettings({ ...settings, defaultFeePaidBy: e.target.value as "BUYER" | "ORGANIZER" })}>
@@ -576,7 +576,7 @@ export default function AdminFinancePage() {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs font-bold text-neutral-500 uppercase">Dias libertação saldo</span>
+              <span className="text-xs font-bold text-zinc-500 uppercase">Dias libertação saldo</span>
               <input type="number" className="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm"
                 value={settings.pendingReleaseDays}
                 onChange={(e) => setSettings({ ...settings, pendingReleaseDays: Number(e.target.value) })} />
@@ -606,7 +606,7 @@ export default function AdminFinancePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs uppercase text-neutral-500">
+                <tr className="border-b text-left text-xs uppercase text-zinc-500">
                   <th className="p-2">Mín (€)</th>
                   <th className="p-2">Máx (€)</th>
                   <th className="p-2">Taxa fixa (€)</th>
@@ -634,19 +634,19 @@ export default function AdminFinancePage() {
         <div className="dash-card p-4 sm:p-6 space-y-4">
           <h2 className="text-lg font-bold">Campanhas Promocionais</h2>
           {campaigns.length === 0 ? (
-            <p className="text-sm text-neutral-500">Nenhuma campanha configurada.</p>
+            <p className="text-sm text-zinc-500">Nenhuma campanha configurada.</p>
           ) : (
             <div className="space-y-3">
               {campaigns.map((c) => (
-                <div key={c.id} className="flex justify-between items-center p-3 rounded-xl border border-neutral-100">
+                <div key={c.id} className="flex justify-between items-center p-3 rounded-xl border border-white/10">
                   <div>
                     <p className="font-bold">{c.name}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-zinc-500">
                       {new Date(c.startDate).toLocaleDateString("pt-PT")} — {new Date(c.endDate).toLocaleDateString("pt-PT")}
                       {" · "}{c.discountType}
                     </p>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${c.active ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${c.active ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-zinc-500"}`}>
                     {c.active ? "Activa" : "Inactiva"}
                   </span>
                 </div>

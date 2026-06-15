@@ -31,12 +31,12 @@ function ResetPasswordContent() {
               <XCircle className="h-8 w-8" strokeWidth={1.5} />
             </div>
             <div className="space-y-2">
-              <h1 className="text-xl font-bold text-neutral-900">Token inválido</h1>
-              <p className="text-[14px] text-neutral-500 leading-relaxed px-4">
+              <h1 className="text-xl font-bold text-white">Token inválido</h1>
+              <p className="text-[14px] text-zinc-500 leading-relaxed px-4">
                 O link de recuperação é inválido ou expirou.
               </p>
             </div>
-            <Button asChild className="w-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-95 shadow-md">
+            <Button asChild className="w-full rounded-full bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white hover:opacity-95 shadow-md">
               <Link href="/auth/forgot-password">Solicitar novo link</Link>
             </Button>
           </div>
@@ -88,9 +88,9 @@ function ResetPasswordContent() {
             <div className="mx-auto flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
               <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Sucesso!</h1>
-            <p className="text-[13px] sm:text-[14px] text-neutral-500">Palavra-passe redefinida. A redirecionar...</p>
-            <Loader2 className="mx-auto h-5 w-5 sm:h-6 sm:w-6 animate-spin text-violet-300" />
+            <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Sucesso!</h1>
+            <p className="text-[13px] sm:text-[14px] text-zinc-500">Palavra-passe redefinida. A redirecionar...</p>
+            <Loader2 className="mx-auto h-5 w-5 sm:h-6 sm:w-6 animate-spin text-[#5ec8f8]" />
           </div>
         </div>
       </div>
@@ -100,13 +100,13 @@ function ResetPasswordContent() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 sm:px-6 overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-violet-400/15 blur-[120px]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-[#00a0e3]/15 blur-[120px]" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl" />
       </div>
 
       <div className="mb-8 text-center w-full max-w-[400px]">
-        <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-neutral-900">Nova Palavra-passe</h1>
-        <p className="mt-2 text-[13px] sm:text-[14px] text-neutral-500">Escolha uma nova senha para a sua conta</p>
+        <h1 className="text-[24px] sm:text-[28px] font-black tracking-tight text-white">Nova Palavra-passe</h1>
+        <p className="mt-2 text-[13px] sm:text-[14px] text-zinc-500">Escolha uma nova senha para a sua conta</p>
       </div>
 
       <div className="w-full max-w-[400px]">
@@ -153,7 +153,7 @@ function ResetPasswordContent() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 sm:h-12 rounded-full mt-4 text-[13px] sm:text-[14px] font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-95 shadow-md transition-all disabled:opacity-50"
+              className="w-full h-11 sm:h-12 rounded-full mt-4 text-[13px] sm:text-[14px] font-bold bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white hover:opacity-95 shadow-md transition-all disabled:opacity-50"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               {loading ? "A processar..." : "Redefinir Palavra-passe"}
@@ -170,7 +170,7 @@ export default function ResetPasswordPage() {
     <div className="public-shell min-h-screen overflow-x-hidden">
       <Suspense fallback={
         <div className="public-shell min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#5ec8f8]" />
         </div>
       }>
         <ResetPasswordContent />

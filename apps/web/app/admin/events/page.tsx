@@ -87,13 +87,13 @@ export default function AdminEventsPage() {
             actions={
                 <div className="flex flex-wrap gap-2">
                     <input
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 w-40 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 w-40 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         placeholder="Pesquisar…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                        className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                         value={status}
                         onChange={(e) => { setStatus(e.target.value); setPage(1); }}
                     >
@@ -107,7 +107,7 @@ export default function AdminEventsPage() {
             }
         >
             {loading && (
-                <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="px-6 py-4 border-b border-gray-50 last:border-0">
                             <Skeleton className="h-5 w-3/4" />
@@ -122,7 +122,7 @@ export default function AdminEventsPage() {
             {!loading && !error && filtered.length > 0 && (
                 <div className="space-y-4">
                     {/* Desktop */}
-                    <div className="hidden md:block bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <div className="hidden md:block bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-gray-100">
@@ -159,7 +159,7 @@ export default function AdminEventsPage() {
                                                     <button
                                                         disabled={actioning === ev.id}
                                                         onClick={() => handleApprove(ev.id)}
-                                                        className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                                                        className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-[#14141f] text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
                                                     >
                                                         {actioning === ev.id ? "…" : "Publicar"}
                                                     </button>
@@ -183,7 +183,7 @@ export default function AdminEventsPage() {
                     {/* Mobile cards */}
                     <div className="md:hidden space-y-3">
                         {filtered.map((ev) => (
-                            <div key={ev.id} className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
+                            <div key={ev.id} className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm p-5 space-y-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
                                         <div className="font-medium text-gray-900 truncate">{ev.title}</div>
@@ -201,7 +201,7 @@ export default function AdminEventsPage() {
                                     <div className="flex gap-2">
                                         {ev.status === "DRAFT" && (
                                             <button disabled={actioning === ev.id} onClick={() => handleApprove(ev.id)}
-                                                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                                                className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-[#14141f] text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
                                                 Publicar
                                             </button>
                                         )}
@@ -223,11 +223,11 @@ export default function AdminEventsPage() {
                         <p className="text-sm text-gray-400">Página {page} de {totalPages} · {total} total</p>
                         <div className="flex items-center gap-1">
                             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
+                                className="p-2 rounded-lg text-gray-400 hover:bg-[#14141f] hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
                             <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}
-                                className="p-2 rounded-lg text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
+                                className="p-2 rounded-lg text-gray-400 hover:bg-[#14141f] hover:text-gray-700 disabled:opacity-30 border border-gray-200/80 transition-colors">
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

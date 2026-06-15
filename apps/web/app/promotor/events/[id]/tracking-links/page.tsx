@@ -61,19 +61,19 @@ export default function TrackingLinksPage() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-neutral-500">A carregar…</p>
+          <p className="text-sm text-zinc-500">A carregar…</p>
         ) : links.length === 0 ? (
-          <p className="text-sm text-neutral-500">Sem links criados.</p>
+          <p className="text-sm text-zinc-500">Sem links criados.</p>
         ) : (
           <ul className="space-y-3">
             {links.map((l) => {
               const url = `${baseUrl}/events?ref=${l.code}`;
               return (
-                <li key={l.id} className="rounded-xl border border-neutral-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <li key={l.id} className="rounded-xl border border-white/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-neutral-900">{l.label || l.code}</p>
-                    <p className="text-xs text-neutral-500 truncate">{url}</p>
-                    <p className="text-xs text-neutral-400 mt-1">
+                    <p className="font-semibold text-white">{l.label || l.code}</p>
+                    <p className="text-xs text-zinc-500 truncate">{url}</p>
+                    <p className="text-xs text-zinc-500 mt-1">
                       {l.clicks} cliques · {l.conversions} conversões
                     </p>
                   </div>

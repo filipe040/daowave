@@ -14,7 +14,7 @@ const ORG_STATUS_CONFIG: Record<string, { label: string; color: string; dot: str
     ACTIVE: { label: "Ativa", color: "text-emerald-600 bg-emerald-400/10 border-emerald-400/20", dot: "bg-emerald-400" },
     PENDING: { label: "Pendente", color: "text-amber-600 bg-amber-400/10 border-amber-400/20", dot: "bg-amber-400" },
     REJECTED: { label: "Rejeitada", color: "text-rose-400 bg-rose-400/10 border-rose-400/20", dot: "bg-rose-400" },
-    SUSPENDED: { label: "Suspensa", color: "text-neutral-600 bg-neutral-100 border-neutral-200", dot: "bg-neutral-400" },
+    SUSPENDED: { label: "Suspensa", color: "text-zinc-400 bg-neutral-100 border-white/10", dot: "bg-neutral-400" },
 };
 
 // ─── Create Organization Modal ───────────────────────────────────────────────
@@ -109,16 +109,16 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
             <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" />
 
             {/* Panel */}
-            <div className="relative w-full max-w-lg bg-white border border-neutral-200 rounded-3xl shadow-2xl overflow-hidden">
+            <div className="relative w-full max-w-lg bg-[#0c0c12] border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 pt-8 pb-6 border-b border-neutral-200">
+                <div className="flex items-center justify-between px-8 pt-8 pb-6 border-b border-white/10">
                     <div>
-                        <h2 className="text-xl font-black text-neutral-900 tracking-tight">Nova Organização</h2>
-                        <p className="text-sm text-neutral-500 mt-0.5">Criar uma entidade promotora na plataforma</p>
+                        <h2 className="text-xl font-black text-white tracking-tight">Nova Organização</h2>
+                        <p className="text-sm text-zinc-500 mt-0.5">Criar uma entidade promotora na plataforma</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-9 h-9 rounded-xl bg-neutral-50 hover:bg-neutral-100 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-all"
+                        className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-500 hover:text-white transition-all"
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -146,7 +146,7 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
                             Slug <span className="text-rose-400">*</span>
                         </label>
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-sm font-mono select-none">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-mono select-none">
                                 /
                             </span>
                             <input
@@ -154,10 +154,10 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
                                 value={form.slug}
                                 onChange={handleChange}
                                 placeholder="daowave-eventos"
-                                className="w-full h-11 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm pl-7 pr-4 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all font-mono"
+                                className="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-white text-sm pl-7 pr-4 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#00a0e3]/20 transition-all font-mono"
                             />
                         </div>
-                        <p className="text-[11px] text-neutral-400 mt-1.5 ml-1">
+                        <p className="text-[11px] text-zinc-500 mt-1.5 ml-1">
                             Apenas letras minúsculas, números e hífens
                         </p>
                     </div>
@@ -214,7 +214,7 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
                             name="status"
                             value={form.status}
                             onChange={handleChange}
-                            className="w-full h-11 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm px-4 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all appearance-none cursor-pointer"
+                            className="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-white text-sm px-4 focus:outline-none focus:ring-2 focus:ring-[#00a0e3]/20 transition-all appearance-none cursor-pointer"
                         >
                             <option value="PENDING">Pendente</option>
                             <option value="ACTIVE">Ativa</option>
@@ -236,7 +236,7 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
                         type="button"
                         onClick={onClose}
                         disabled={submitting}
-                        className="px-5 h-11 rounded-2xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 text-sm font-bold transition-all"
+                        className="px-5 h-11 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 text-sm font-bold transition-all"
                     >
                         Cancelar
                     </button>
@@ -245,7 +245,7 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
                         form=""
                         disabled={submitting || !form.name.trim() || !form.slug.trim()}
                         onClick={handleSubmit}
-                        className="flex items-center gap-2 px-6 h-11 rounded-2xl bg-white text-black text-sm font-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none shadow-xl shadow-white/5"
+                        className="flex items-center gap-2 px-6 h-11 rounded-2xl bg-[#14141f] text-black text-sm font-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none shadow-xl shadow-white/5"
                     >
                         {submitting ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -318,7 +318,7 @@ export default function AdminOrganizationsPage() {
                     <div className="flex items-center gap-3">
                         <div className="relative group">
                             <select
-                                className="appearance-none text-[13px] font-bold border border-neutral-200 bg-neutral-50 text-neutral-600 rounded-2xl px-4 pr-10 h-11 focus:outline-none focus:ring-2 focus:ring-violet-100 hover:bg-neutral-100 transition-all cursor-pointer shadow-xl"
+                                className="appearance-none text-[13px] font-bold border border-white/10 bg-white/5 text-zinc-400 rounded-2xl px-4 pr-10 h-11 focus:outline-none focus:ring-2 focus:ring-[#00a0e3]/20 hover:bg-white/10 transition-all cursor-pointer shadow-xl"
                                 value={status}
                                 onChange={(e) => { setStatus(e.target.value); setPage(1); }}
                             >
@@ -328,14 +328,14 @@ export default function AdminOrganizationsPage() {
                                 <option value="REJECTED">Rejeitadas</option>
                                 <option value="SUSPENDED">Suspensas</option>
                             </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 group-hover:text-neutral-500 transition-colors">
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 group-hover:text-zinc-500 transition-colors">
                                 <ArrowRight className="h-3 w-3 rotate-90" />
                             </div>
                         </div>
 
                         <button
                             onClick={() => setShowCreate(true)}
-                            className="flex items-center gap-2 px-5 h-11 bg-white text-black rounded-2xl text-[13px] font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/5"
+                            className="flex items-center gap-2 px-5 h-11 bg-[#14141f] text-black rounded-2xl text-[13px] font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/5"
                         >
                             <Plus className="h-4 w-4" strokeWidth={2.5} />
                             Nova Organização
@@ -363,14 +363,14 @@ export default function AdminOrganizationsPage() {
                             render: (org) => (
                                 <Link href={`/admin/organizations/${org.id}`} className="group/item">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-neutral-50 flex items-center justify-center border border-neutral-200 group-hover/item:border-neutral-300 transition-all">
-                                            <Building2 className="h-5 w-5 text-neutral-500 group-hover/item:text-neutral-900 transition-colors" />
+                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover/item:border-neutral-300 transition-all">
+                                            <Building2 className="h-5 w-5 text-zinc-500 group-hover/item:text-white transition-colors" />
                                         </div>
                                         <div>
-                                            <div className="font-bold text-neutral-900 group-hover/item:text-violet-700 transition-colors tracking-tight">
+                                            <div className="font-bold text-white group-hover/item:text-[#5ec8f8] transition-colors tracking-tight">
                                                 {org.name}
                                             </div>
-                                            <div className="text-[11px] font-medium text-neutral-400 uppercase tracking-widest mt-0.5">
+                                            <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest mt-0.5">
                                                 {org.slug}
                                             </div>
                                         </div>
@@ -398,7 +398,7 @@ export default function AdminOrganizationsPage() {
                             key: "members",
                             label: "Equipa",
                             render: (org) => (
-                                <div className="flex items-center gap-2 text-neutral-500">
+                                <div className="flex items-center gap-2 text-zinc-500">
                                     <Users className="h-4 w-4" />
                                     <span className="text-[13px] font-medium">{org._count?.members || 0}</span>
                                 </div>
@@ -408,7 +408,7 @@ export default function AdminOrganizationsPage() {
                             key: "events",
                             label: "Eventos",
                             render: (org) => (
-                                <div className="flex items-center gap-2 text-neutral-500">
+                                <div className="flex items-center gap-2 text-zinc-500">
                                     <Calendar className="h-4 w-4" />
                                     <span className="text-[13px] font-medium">{org._count?.events || 0}</span>
                                 </div>
@@ -418,7 +418,7 @@ export default function AdminOrganizationsPage() {
                             key: "createdAt",
                             label: "Criada",
                             render: (org) => (
-                                <span className="text-[13px] font-medium text-neutral-400">
+                                <span className="text-[13px] font-medium text-zinc-500">
                                     {new Date(org.createdAt).toLocaleDateString("pt-PT")}
                                 </span>
                             ),
@@ -427,7 +427,7 @@ export default function AdminOrganizationsPage() {
                     rowActions={(org) => (
                         <Link
                             href={`/admin/organizations/${org.id}`}
-                            className="flex items-center justify-center w-9 h-9 rounded-xl bg-neutral-50 text-neutral-500 hover:bg-white hover:text-black transition-all group/action"
+                            className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 text-zinc-500 hover:bg-[#14141f] hover:text-black transition-all group/action"
                         >
                             <ArrowRight className="h-4 w-4 transition-transform group-hover/action:translate-x-0.5" strokeWidth={2.5} />
                         </Link>

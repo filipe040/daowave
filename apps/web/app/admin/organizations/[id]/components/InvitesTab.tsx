@@ -46,7 +46,7 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
     };
 
     return (
-        <div className="bg-white border border-neutral-200 shadow-sm rounded-[32px] overflow-hidden">
+        <div className="bg-[#0c0c12] border border-white/10 shadow-sm rounded-[32px] overflow-hidden">
             <DataTable<Invite>
                 data={invites}
                 loading={loading}
@@ -60,8 +60,8 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
                         label: "Destinatário",
                         render: (i) => (
                             <div>
-                                <div className="font-bold text-neutral-900 tracking-tight">{i.email}</div>
-                                <div className="text-[11px] font-medium text-neutral-400 uppercase tracking-widest mt-0.5">
+                                <div className="font-bold text-white tracking-tight">{i.email}</div>
+                                <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest mt-0.5">
                                     Convite Individual
                                 </div>
                             </div>
@@ -71,8 +71,8 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
                         key: "role",
                         label: "Cargo Atribuído",
                         render: (i) => (
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-50 border border-neutral-200 text-[11px] font-bold text-neutral-600">
-                                <Shield className="h-3 w-3 text-neutral-400" />
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-zinc-400">
+                                <Shield className="h-3 w-3 text-zinc-500" />
                                 {ROLE_LABELS[i.role] || i.role}
                             </div>
                         ),
@@ -85,7 +85,7 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
                             return (
                                 <div className={cn(
                                     "inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest",
-                                    i.status === "PENDING" && !isExpired ? "text-amber-600" : "text-neutral-400"
+                                    i.status === "PENDING" && !isExpired ? "text-amber-600" : "text-zinc-500"
                                 )}>
                                     <Clock className="h-3 w-3" />
                                     {isExpired ? "Expirado" : i.status}
@@ -97,7 +97,7 @@ export function InvitesTab({ organizationId }: { organizationId: string }) {
                         key: "expires",
                         label: "Expira em",
                         render: (i) => (
-                            <span className="text-[13px] font-medium text-neutral-400">
+                            <span className="text-[13px] font-medium text-zinc-500">
                                 {new Date(i.expiresAt).toLocaleDateString("pt-PT")}
                             </span>
                         ),

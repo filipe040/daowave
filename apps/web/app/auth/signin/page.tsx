@@ -229,7 +229,7 @@ function SignInContent() {
                 className="relative w-full flex items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 py-3 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold text-white transition-all hover:bg-white/10 active:scale-[0.98] disabled:opacity-50"
               >
                 {oauthLoading === "google" ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-neutral-700" />
+                  <Loader2 className="h-4 w-4 animate-spin text-zinc-300" />
                 ) : (
                   <GoogleIcon className="h-4 w-4" />
                 )}

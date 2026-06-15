@@ -37,7 +37,7 @@ export default function AdminFraudPage() {
 
     const refreshBtn = (
         <button onClick={load} disabled={loading}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-[#14141f] text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors">
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Atualizar</span>
         </button>
@@ -76,7 +76,7 @@ export default function AdminFraudPage() {
                         ].map(({ value, label, sub }) => {
                             const isAlert = value > 0;
                             return (
-                                <div key={label} className={`bg-white rounded-2xl border shadow-sm p-6 ${isAlert ? "border-amber-200" : "border-gray-200/80"}`}>
+                                <div key={label} className={`bg-[#14141f] rounded-2xl border shadow-sm p-6 ${isAlert ? "border-amber-200" : "border-gray-200/80"}`}>
                                     <div className={`flex items-center gap-2 mb-3 ${isAlert ? "text-amber-500" : "text-gray-400"}`}>
                                         <AlertTriangle className="h-4 w-4" strokeWidth={1.75} />
                                         <span className="text-xs font-medium text-gray-500">{label}</span>
@@ -89,7 +89,7 @@ export default function AdminFraudPage() {
                     </div>
 
                     {data.duplicateCheckinsSample.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                        <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                             <div className="px-6 py-4 border-b border-gray-100">
                                 <h2 className="text-sm font-semibold text-gray-900">Check-ins duplicados (amostra)</h2>
                             </div>
@@ -107,7 +107,7 @@ export default function AdminFraudPage() {
                     )}
 
                     {data.anomalousUsers.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                        <div className="bg-[#14141f] rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                             <div className="px-6 py-4 border-b border-gray-100">
                                 <h2 className="text-sm font-semibold text-gray-900">Atividade suspeita</h2>
                             </div>

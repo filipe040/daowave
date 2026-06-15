@@ -52,18 +52,18 @@ function Field({
   return (
     <div>
       <label className="flex items-center gap-1.5 text-sm font-semibold mb-2 text-zinc-200">
-        {Icon && <Icon className="h-4 w-4 text-neutral-500 shrink-0" />}
+        {Icon && <Icon className="h-4 w-4 text-zinc-500 shrink-0" />}
         {label}
         {required && <span className="text-red-600 ml-0.5">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-neutral-500 mt-1.5">{hint}</p>}
+      {hint && <p className="text-xs text-zinc-500 mt-1.5">{hint}</p>}
     </div>
   );
 }
 
 const inputClass =
-  "w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all hover:border-zinc-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-100/50 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all hover:border-zinc-600";
 
 const EU_COUNTRIES = [
   "Portugal", "Espanha", "França", "Alemanha", "Itália", "Países Baixos",
@@ -178,7 +178,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
               className={`${inputClass} opacity-50 cursor-not-allowed`}
               disabled
             />
-            <p className="text-xs text-neutral-500 mt-1.5">Para alterar o slug contacte o suporte.</p>
+            <p className="text-xs text-zinc-500 mt-1.5">Para alterar o slug contacte o suporte.</p>
           </Field>
         </div>
       </section>
@@ -275,7 +275,7 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
 
           {form.logoUrl && (
             <div className="flex items-center justify-center">
-              <div className="rounded-xl border border-neutral-200 bg-neutral-100/50 p-4 w-full flex items-center justify-center">
+              <div className="rounded-xl border border-white/10 bg-neutral-100/50 p-4 w-full flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={form.logoUrl}
@@ -290,11 +290,11 @@ export default function OrgSettingsForm({ organization }: OrgSettingsFormProps) 
       </section>
 
       {/* Status badge */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-200 bg-neutral-50/40">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/5/40">
         <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${organization.status === "ACTIVE" ? "bg-emerald-400" :
             organization.status === "PENDING" ? "bg-amber-400" : "bg-zinc-500"
           }`} />
-        <span className="text-sm text-neutral-500">
+        <span className="text-sm text-zinc-500">
           Estado da organização:&nbsp;
           <span className="font-semibold text-zinc-200">
             {organization.status === "ACTIVE" ? "Ativa" :

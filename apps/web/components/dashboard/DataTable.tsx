@@ -57,27 +57,27 @@ export function DataTable<T>({
                     <div className="md:hidden space-y-3 animate-pulse">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <div key={i} className="dash-card p-4 space-y-3">
-                                <div className="h-4 w-3/4 bg-neutral-200 rounded" />
-                                <div className="h-3 w-1/2 bg-neutral-100 rounded" />
+                                <div className="h-4 w-3/4 bg-white/10 rounded" />
+                                <div className="h-3 w-1/2 bg-white/5 rounded" />
                                 <div className="flex gap-2">
-                                    <div className="h-6 w-16 bg-neutral-100 rounded-full" />
-                                    <div className="h-6 w-16 bg-neutral-100 rounded-full" />
+                                    <div className="h-6 w-16 bg-white/5 rounded-full" />
+                                    <div className="h-6 w-16 bg-white/5 rounded-full" />
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
                 <div className={`dash-card overflow-hidden animate-pulse ${mobileCard ? "hidden md:block" : ""}`}>
-                    <div className={`${cellPad} py-4 border-b border-neutral-100 flex gap-6`}>
+                    <div className={`${cellPad} py-4 border-b border-white/10 flex gap-6`}>
                         {columns.map((col) => (
-                            <div key={String(col.key)} className="h-3 w-20 bg-neutral-200 rounded" />
+                            <div key={String(col.key)} className="h-3 w-20 bg-white/10 rounded" />
                         ))}
                     </div>
                     {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className={`${cellPad} py-5 border-b border-neutral-100 last:border-0 flex gap-6`}>
-                            <div className="h-4 w-32 bg-neutral-200 rounded" />
-                            <div className="h-4 w-24 bg-neutral-100 rounded" />
-                            <div className="h-4 w-16 bg-neutral-100 rounded" />
+                        <div key={i} className={`${cellPad} py-5 border-b border-white/10 last:border-0 flex gap-6`}>
+                            <div className="h-4 w-32 bg-white/10 rounded" />
+                            <div className="h-4 w-24 bg-white/5 rounded" />
+                            <div className="h-4 w-16 bg-white/5 rounded" />
                         </div>
                     ))}
                 </div>
@@ -110,32 +110,32 @@ export function DataTable<T>({
                 <div className="overflow-x-auto -mx-px">
                     <table className="w-full min-w-[640px] text-sm">
                         <thead>
-                            <tr className="border-b border-neutral-100 bg-neutral-50/80">
+                            <tr className="border-b border-white/10 bg-white/5">
                                 {columns.map((col) => (
                                     <th
                                         key={String(col.key)}
-                                        className={`${cellPad} py-4 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em] whitespace-nowrap ${col.className ?? ""}`}
+                                        className={`${cellPad} py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] whitespace-nowrap ${col.className ?? ""}`}
                                     >
                                         {col.label}
                                     </th>
                                 ))}
                                 {rowActions && (
-                                    <th className={`${cellPad} py-4 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-[0.1em]`}>
+                                    <th className={`${cellPad} py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em]`}>
                                         Ações
                                     </th>
                                 )}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-100">
+                        <tbody className="divide-y divide-white/10">
                             {data.map((row) => (
                                 <tr
                                     key={String(row[keyField])}
-                                    className="hover:bg-violet-50/40 transition-all duration-200 group"
+                                    className="hover:bg-[#00a0e3]/10 transition-all duration-200 group"
                                 >
                                     {columns.map((col) => (
                                         <td
                                             key={String(col.key)}
-                                            className={`${cellPad} py-5 text-neutral-800 font-medium ${col.className ?? ""}`}
+                                            className={`${cellPad} py-5 text-zinc-200 font-medium ${col.className ?? ""}`}
                                         >
                                             {col.render
                                                 ? col.render(row)
@@ -158,11 +158,11 @@ export function DataTable<T>({
 
             {onPageChange && (
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
-                    <p className="text-[12px] sm:text-[13px] text-neutral-500 text-center sm:text-left">
-                        Página <span className="text-neutral-900 font-bold">{page}</span> de{" "}
-                        <span className="text-neutral-900 font-bold">{totalPages}</span>
+                    <p className="text-[12px] sm:text-[13px] text-zinc-500 text-center sm:text-left">
+                        Página <span className="text-white font-bold">{page}</span> de{" "}
+                        <span className="text-white font-bold">{totalPages}</span>
                         {total !== undefined && (
-                            <span className="block sm:inline sm:ml-2 font-normal text-neutral-400">
+                            <span className="block sm:inline sm:ml-2 font-normal text-zinc-500">
                                 {total} resultado{total !== 1 ? "s" : ""}
                             </span>
                         )}

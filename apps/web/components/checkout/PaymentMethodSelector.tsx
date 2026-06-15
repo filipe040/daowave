@@ -60,13 +60,13 @@ export function PaymentMethodSelector({ value, onChange }: PaymentMethodSelector
             onClick={() => onChange(method.id)}
             className={`relative flex flex-col items-start gap-2 rounded-2xl border p-4 text-left transition-all ${
               selected
-                ? "border-violet-400 bg-violet-50 ring-2 ring-violet-200 shadow-lg"
+                ? "border-[#00a0e3]/50 bg-[#00a0e3]/10 ring-2 ring-[#00a0e3]/30 shadow-lg"
                 : "border-neutral-200 bg-neutral-50 hover:border-neutral-300 hover:bg-neutral-100"
             }`}
           >
-            <span className={`${selected ? "text-violet-700" : "text-neutral-600"}`}>{method.icon}</span>
+            <span className={`${selected ? "text-[#5ec8f8]" : "text-neutral-600"}`}>{method.icon}</span>
             <div>
-              <p className={`text-[14px] font-bold ${selected ? "text-violet-700" : "text-neutral-700"}`}>
+              <p className={`text-[14px] font-bold ${selected ? "text-[#5ec8f8]" : "text-neutral-700"}`}>
                 {method.label}
               </p>
               <p className="text-[11px] text-neutral-500 mt-0.5">{method.description}</p>

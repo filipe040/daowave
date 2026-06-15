@@ -90,7 +90,7 @@ function VerifyEmailContent() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 sm:px-6 overflow-x-hidden">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-violet-400/15 blur-[120px]" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-[#00a0e3]/15 blur-[120px]" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl" />
       </div>
 
@@ -100,11 +100,11 @@ function VerifyEmailContent() {
           {status === "loading" && (
             <div className="space-y-6">
               <div className="mx-auto flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-neutral-100">
-                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-violet-300" />
+                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-[#5ec8f8]" />
               </div>
               <div className="space-y-2">
-                <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">A verificar email</h1>
-                <p className="text-[13px] sm:text-[14px] text-neutral-500">Por favor, aguarde um momento...</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">A verificar email</h1>
+                <p className="text-[13px] sm:text-[14px] text-zinc-500">Por favor, aguarde um momento...</p>
               </div>
             </div>
           )}
@@ -115,10 +115,10 @@ function VerifyEmailContent() {
                 <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
               </div>
               <div className="space-y-2">
-                <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Verificado!</h1>
-                <p className="text-[13px] sm:text-[14px] text-neutral-500">{message}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Verificado!</h1>
+                <p className="text-[13px] sm:text-[14px] text-zinc-500">{message}</p>
               </div>
-              <Button asChild className="w-full h-11 sm:h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold hover:opacity-95 shadow-md transition-all">
+              <Button asChild className="w-full h-11 sm:h-12 rounded-full bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white font-bold hover:opacity-95 shadow-md transition-all">
                 <Link href="/auth/signin">Entrar agora</Link>
               </Button>
             </div>
@@ -130,10 +130,10 @@ function VerifyEmailContent() {
                 <XCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
               </div>
               <div className="space-y-2">
-                <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Erro no Link</h1>
-                <p className="text-[13px] sm:text-[14px] text-neutral-500 leading-relaxed px-2 sm:px-4">{message}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Erro no Link</h1>
+                <p className="text-[13px] sm:text-[14px] text-zinc-500 leading-relaxed px-2 sm:px-4">{message}</p>
               </div>
-              <Button asChild variant="outline" className="w-full h-11 sm:h-12 rounded-full border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800">
+              <Button asChild variant="outline" className="w-full h-11 sm:h-12 rounded-full border-white/10 bg-white/5 hover:bg-neutral-100 text-zinc-200">
                 <Link href="/auth/signin">Voltar ao Login</Link>
               </Button>
             </div>
@@ -145,14 +145,14 @@ function VerifyEmailContent() {
                 <Clock className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={1.5} />
               </div>
               <div className="space-y-2">
-                <h1 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Link Expirado</h1>
-                <p className="text-[13px] sm:text-[14px] text-neutral-500">{message}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Link Expirado</h1>
+                <p className="text-[13px] sm:text-[14px] text-zinc-500">{message}</p>
               </div>
               <div className="space-y-3 pt-2">
-                <Button onClick={handleResend} className="w-full h-11 sm:h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-bold hover:opacity-95 shadow-md">
+                <Button onClick={handleResend} className="w-full h-11 sm:h-12 rounded-full bg-gradient-to-r from-[#00a0e3] to-[#0090cc] text-white font-bold hover:opacity-95 shadow-md">
                   Reenviar email
                 </Button>
-                <Button asChild variant="ghost" className="w-full h-11 sm:h-12 rounded-full text-violet-600 hover:text-violet-700">
+                <Button asChild variant="ghost" className="w-full h-11 sm:h-12 rounded-full text-[#00a0e3] hover:text-[#5ec8f8]">
                   <Link href="/auth/signin">Voltar ao Login</Link>
                 </Button>
               </div>
@@ -169,7 +169,7 @@ export default function VerifyEmailPage() {
     <div className="public-shell min-h-screen overflow-x-hidden">
       <Suspense fallback={
         <div className="public-shell min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#5ec8f8]" />
         </div>
       }>
         <VerifyEmailContent />

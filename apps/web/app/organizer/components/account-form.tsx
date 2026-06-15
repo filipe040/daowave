@@ -93,7 +93,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
           type="text"
           value={formData.brandName}
           onChange={(e) => handleChange("brandName", e.target.value)}
-          className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+          className="w-full rounded-lg border border-white/10 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
           placeholder="Nome da sua marca/promotora"
           required
         />
@@ -112,7 +112,7 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
           type="text"
           value={formData.userName}
           onChange={(e) => handleChange("userName", e.target.value)}
-          className="w-full rounded-lg border border-neutral-200 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
+          className="w-full rounded-lg border border-white/10 bg-neutral-100/50 px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all hover:border-zinc-600"
           placeholder="Seu nome"
         />
         {errors.userName && (
@@ -122,11 +122,11 @@ export default function AccountForm({ organizerProfile, user }: AccountFormProps
         )}
       </div>
 
-      <div className="pt-4 border-t border-neutral-200">
+      <div className="pt-4 border-t border-white/10">
         <button
           type="submit"
           disabled={loading}
-          className="rounded-xl bg-violet-600 hover:bg-violet-700 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95 flex items-center justify-center gap-2"
+          className="rounded-xl bg-[#00a0e3] hover:bg-[#0090cc] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-95 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

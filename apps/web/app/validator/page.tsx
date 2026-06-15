@@ -176,16 +176,16 @@ export default function ValidatorPage() {
   }, [scanning, handleValidate, stopScanner]);
 
   if (status === "loading") {
-    return <div className="min-h-screen mesh-gradient grid place-items-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-violet-600"></div></div>;
+    return <div className="min-h-screen dash-shell grid place-items-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#00a0e3]"></div></div>;
   }
 
   if (!session || (session.user.role !== "USER" && session.user.role !== "ADMIN")) {
     return (
-      <div className="min-h-screen mesh-gradient grid place-items-center px-4">
+      <div className="min-h-screen dash-shell grid place-items-center px-4">
         <div className="w-full max-w-md public-card p-8 text-center">
           <Lock className="mx-auto h-16 w-16 text-neutral-300" />
-          <h2 className="mt-4 text-2xl font-semibold text-neutral-900">Acesso restrito</h2>
-          <Link href="/auth/signin" className="mt-6 block w-full rounded-full bg-violet-600 px-6 py-4 text-white font-bold hover:bg-violet-700">Iniciar sessão</Link>
+          <h2 className="mt-4 text-2xl font-semibold text-white">Acesso restrito</h2>
+          <Link href="/auth/signin" className="mt-6 block w-full rounded-full bg-[#00a0e3] px-6 py-4 text-white font-bold hover:bg-[#0090cc]">Iniciar sessão</Link>
         </div>
       </div>
     );
@@ -216,13 +216,13 @@ export default function ValidatorPage() {
   }
 
   return (
-    <div className="min-h-screen mesh-gradient text-neutral-900 flex flex-col pt-8 px-4 pb-20">
+    <div className="min-h-screen dash-shell text-white flex flex-col pt-8 px-4 pb-20">
       <div className="flex justify-between items-center mb-6 max-w-lg mx-auto w-full">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Validar Entradas</h1>
-          <p className="text-neutral-500 text-sm">Pronto para ler QR codes</p>
+          <h1 className="text-2xl font-bold text-white">Validar Entradas</h1>
+          <p className="text-zinc-500 text-sm">Pronto para ler QR codes</p>
         </div>
-        <button onClick={syncOfflineQueue} className="text-xs bg-white border border-neutral-200 px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2 text-neutral-600 shadow-sm">
+        <button onClick={syncOfflineQueue} className="text-xs bg-[#0c0c12] border border-white/10 px-4 py-2 rounded-full active:scale-95 transition-transform flex items-center gap-2 text-zinc-400 shadow-sm">
           Sync Offline <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
         </button>
       </div>
@@ -232,7 +232,7 @@ export default function ValidatorPage() {
           {scanning ? (
             <div id="reader" className="w-full h-full object-cover"></div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-neutral-400">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-zinc-500">
               <ScanLine className="w-20 h-20 mb-4 opacity-50 text-white" />
               <p className="text-white/70">Câmara pendente</p>
             </div>
@@ -244,7 +244,7 @@ export default function ValidatorPage() {
 
         <div className="grid grid-cols-2 gap-3 mt-2">
           {!scanning ? (
-            <button onClick={() => setScanning(true)} className="col-span-2 py-4 rounded-full bg-violet-600 text-white font-bold text-lg active:scale-95 hover:bg-violet-700">
+            <button onClick={() => setScanning(true)} className="col-span-2 py-4 rounded-full bg-[#00a0e3] text-white font-bold text-lg active:scale-95 hover:bg-[#0090cc]">
               Ligar Câmara
             </button>
           ) : (
@@ -255,7 +255,7 @@ export default function ValidatorPage() {
         </div>
 
         <div className="mt-4 p-5 rounded-3xl public-card">
-          <h3 className="text-xs font-semibold uppercase text-neutral-500 mb-3">Validação Manual</h3>
+          <h3 className="text-xs font-semibold uppercase text-zinc-500 mb-3">Validação Manual</h3>
           <div className="flex gap-2">
             <input
               value={manualCode}
@@ -263,7 +263,7 @@ export default function ValidatorPage() {
               placeholder="Introduza código (ABC-123)"
               className="flex-1 public-input uppercase font-mono"
             />
-            <button onClick={handleManualValidate} className="px-6 py-3 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors">
+            <button onClick={handleManualValidate} className="px-6 py-3 rounded-xl bg-[#00a0e3] text-white font-bold hover:bg-[#0090cc] transition-colors">
               Validar
             </button>
           </div>

@@ -79,23 +79,23 @@ export default function AdminMarketingPage() {
 
                 {/* STAs */}
                 <div className="lg:col-span-1">
-                    <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-6 shadow-xl sticky top-24">
+                    <div className="border border-white/10 bg-white/5 rounded-2xl p-6 shadow-xl sticky top-24">
                         <div className="flex items-center gap-4 mb-4">
                             <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
                                 <Users className="h-6 w-6 text-purple-400" />
                             </div>
                             <div>
-                                <h3 className="text-neutral-600 text-sm font-medium">Subscritores</h3>
-                                <div className="text-3xl font-bold text-neutral-900 mt-1">
+                                <h3 className="text-zinc-400 text-sm font-medium">Subscritores</h3>
+                                <div className="text-3xl font-bold text-white mt-1">
                                     {loadingStats ? (
-                                        <Loader2 className="h-6 w-6 animate-spin text-neutral-400 mt-2" />
+                                        <Loader2 className="h-6 w-6 animate-spin text-zinc-500 mt-2" />
                                     ) : (
                                         <span>{stats?.totalOptedIn || 0}</span>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <p className="text-xs text-neutral-500 leading-relaxed">
+                        <p className="text-xs text-zinc-500 leading-relaxed">
                             Apenas utilizadores que ativaram a opção <strong>&quot;Novidades e ofertas&quot;</strong> nas configurações da conta irão receber estes emails.
                         </p>
                     </div>
@@ -103,9 +103,9 @@ export default function AdminMarketingPage() {
 
                 {/* Form */}
                 <div className="lg:col-span-2">
-                    <form onSubmit={handleSend} className="border border-neutral-200 bg-neutral-50 rounded-2xl p-6 shadow-xl space-y-6">
-                        <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                            <Mail className="h-5 w-5 text-neutral-500" />
+                    <form onSubmit={handleSend} className="border border-white/10 bg-white/5 rounded-2xl p-6 shadow-xl space-y-6">
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-zinc-500" />
                             Nova Campanha
                         </h2>
 
@@ -150,7 +150,7 @@ export default function AdminMarketingPage() {
                                     className="public-input rounded-xl py-3 font-mono text-sm"
                                     placeholder="<p>Olá,</p><p>Temos dezenas de novos eventos disponíveis! Veja no nosso <a href='https://tickets.daowave.pt'>site</a>.</p>"
                                 />
-                                <p className="text-[11px] text-neutral-400 mt-2">
+                                <p className="text-[11px] text-zinc-500 mt-2">
                                     Pode usar tags HTML simples como &lt;b&gt;, &lt;p&gt;, &lt;a href=&quot;...&quot;&gt;, &lt;br&gt;.
                                 </p>
                             </div>
@@ -170,11 +170,11 @@ export default function AdminMarketingPage() {
                             </div>
                         )}
 
-                        <div className="pt-4 border-t border-neutral-200 flex justify-end">
+                        <div className="pt-4 border-t border-white/10 flex justify-end">
                             <button
                                 type="submit"
                                 disabled={sending || !stats || stats.totalOptedIn === 0}
-                                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 px-6 py-3 rounded-xl text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
+                                className="flex items-center gap-2 bg-[#00a0e3] hover:bg-[#0090cc] px-6 py-3 rounded-xl text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
                             >
                                 {sending ? (
                                     <><Loader2 className="h-4 w-4 animate-spin" /> A enviar...</>

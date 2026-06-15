@@ -77,7 +77,7 @@ export default async function ArtistDetailPage({
                                     unoptimized={artist.imageUrl.startsWith("http")}
                                 />
                             ) : (
-                                <div className="absolute inset-0 bg-gradient-to-br from-violet-300 via-blue-200 to-orange-200" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-[#00a0e3]/40 via-blue-200 to-orange-200" />
                             )}
                             {artist.badgeLabel && (
                                 <span className="absolute top-4 left-4 bg-white/95 text-red-600 text-[11px] font-bold uppercase px-3 py-1 rounded-full shadow">

@@ -21,13 +21,13 @@ export function KpiGridSkeleton({ count = 4 }: { count?: number }) {
 export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: number }) {
     return (
         <div className="dash-card overflow-hidden animate-pulse">
-            <div className="px-8 py-5 border-b border-neutral-100 flex gap-10">
+            <div className="px-8 py-5 border-b border-white/10 flex gap-10">
                 {Array.from({ length: cols }).map((_, i) => (
                     <div key={i} className="h-2.5 w-16 bg-neutral-200 rounded" />
                 ))}
             </div>
             {Array.from({ length: rows }).map((_, i) => (
-                <div key={i} className="px-8 py-6 border-b border-neutral-100 last:border-0 flex gap-10 items-center">
+                <div key={i} className="px-8 py-6 border-b border-white/10 last:border-0 flex gap-10 items-center">
                     <div className="space-y-2 flex-1">
                         <div className="h-4 w-40 bg-neutral-200 rounded" />
                         <div className="h-3 w-28 bg-neutral-100 rounded" />
@@ -72,9 +72,9 @@ export function PageSkeleton() {
 export function StatsSkeleton() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-            <div className="md:col-span-2 h-[300px] bg-neutral-100 rounded-[32px] border border-neutral-200" />
-            <div className="h-[300px] bg-neutral-100 rounded-[32px] border border-neutral-200" />
-            <div className="col-span-full h-24 bg-neutral-100 rounded-[24px] border border-neutral-200" />
+            <div className="md:col-span-2 h-[300px] bg-neutral-100 rounded-[32px] border border-white/10" />
+            <div className="h-[300px] bg-neutral-100 rounded-[32px] border border-white/10" />
+            <div className="col-span-full h-24 bg-neutral-100 rounded-[24px] border border-white/10" />
         </div>
     );
 }

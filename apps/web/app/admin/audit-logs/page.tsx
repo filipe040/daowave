@@ -48,7 +48,7 @@ export default function AdminAuditLogsPage() {
         <button
             onClick={load}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-[#14141f] text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition-colors"
         >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Atualizar</span>
@@ -58,13 +58,13 @@ export default function AdminAuditLogsPage() {
     const filters = (
         <div className="flex flex-wrap gap-2">
             <input
-                className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 w-36 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 w-36 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                 placeholder="Ação…"
                 value={action}
                 onChange={(e) => { setAction(e.target.value.toUpperCase()); setPage(1); }}
             />
             <input
-                className="text-sm border border-gray-200 bg-white text-gray-700 rounded-xl px-3 h-9 w-36 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                className="text-sm border border-gray-200 bg-[#14141f] text-gray-700 rounded-xl px-3 h-9 w-36 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                 placeholder="Entidade…"
                 value={entityType}
                 onChange={(e) => { setEntityType(e.target.value.toUpperCase()); setPage(1); }}

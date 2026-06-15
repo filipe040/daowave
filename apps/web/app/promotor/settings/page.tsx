@@ -12,8 +12,8 @@ export default function PromoterSettingsPage() {
                         <ShieldAlert className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                        <h2 className="text-base font-bold text-neutral-900 mb-1">Acesso restrito</h2>
-                        <p className="text-sm text-neutral-500 leading-relaxed">
+                        <h2 className="text-base font-bold text-white mb-1">Acesso restrito</h2>
+                        <p className="text-sm text-zinc-500 leading-relaxed">
                             As configurações da organização são geridas pelo administrador da plataforma.<br />
                             Para editar os dados da organização, contacte um administrador.
                         </p>

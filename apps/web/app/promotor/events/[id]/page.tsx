@@ -27,13 +27,13 @@ interface EventDetail {
     layoutMode?: string;
 }
 
-const inputCls = "w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-200 transition-all shadow-inner";
+const inputCls = "w-full rounded-2xl border border-white/10 bg-[#14141f] text-white placeholder:text-zinc-500 px-5 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#00a0e3]/30 transition-all shadow-inner";
 const labelCls = "public-label text-[12px] font-bold tracking-[0.2em] mb-3";
 
 const STATUS_COLOR: Record<string, string> = {
     PUBLISHED: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20",
     DRAFT: "bg-amber-500/10 text-amber-600 ring-amber-500/20",
-    ARCHIVED: "bg-neutral-100 text-neutral-600 ring-neutral-200",
+    ARCHIVED: "bg-neutral-100 text-zinc-400 ring-neutral-200",
     CANCELLED: "bg-red-500/10 text-red-400 ring-red-500/20",
 };
 const STATUS_LABEL: Record<string, string> = {
@@ -162,8 +162,8 @@ export default function PromoterEventDetailPage() {
     if (loading) return (
         <PageShell title="Evento">
             <div className="max-w-2xl animate-pulse space-y-3">
-                <div className="h-10 bg-neutral-50 rounded-xl border border-neutral-200" />
-                <div className="h-80 bg-neutral-50 rounded-[32px] border border-neutral-200" />
+                <div className="h-10 bg-white/5 rounded-xl border border-white/10" />
+                <div className="h-80 bg-white/5 rounded-[32px] border border-white/10" />
             </div>
         </PageShell>
     );
@@ -182,7 +182,7 @@ export default function PromoterEventDetailPage() {
         <PageShell
             title={event.title || "Evento"}
             subtitle={
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ring-1 ring-inset ${STATUS_COLOR[event.status] ?? "bg-neutral-50 text-neutral-500"}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider ring-1 ring-inset ${STATUS_COLOR[event.status] ?? "bg-white/5 text-zinc-500"}`}>
                     {STATUS_LABEL[event.status] ?? event.status}
                 </span>
             }
@@ -192,7 +192,7 @@ export default function PromoterEventDetailPage() {
                         <Link
                             href={`/events/${event.slug}/artistas`}
                             target="_blank"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 transition-all"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-[#00a0e3]/30 bg-[#00a0e3]/10 text-[#00a0e3] hover:bg-[#00a0e3]/20 transition-all"
                         >
                             <Mic2 className="h-4 w-4" />
                             Ver página de artistas
@@ -201,26 +201,26 @@ export default function PromoterEventDetailPage() {
                     )}
                     <Link
                         href={`/promotor/events/${id}/bilhetes?tab=artists`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-violet-500/30 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-[#00a0e3]/30 bg-[#00a0e3]/10 text-[#00a0e3] hover:bg-[#00a0e3]/20 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         <Mic2 className="h-4 w-4" />
                         Artistas
                     </Link>
                     <Link
                         href={`/promotor/events/${id}/bilhetes`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         Gestão de Bilhetes & Lotação
                     </Link>
                     <Link
                         href={`/promotor/events/${id}/branding`}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-300 bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-300 bg-neutral-100 text-white hover:bg-neutral-200 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
                     >
                         Personalização
                     </Link>
                     <Link
                         href={orgId ? `/promotor/events?orgId=${orgId}` : "/promotor/events"}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Voltar
@@ -291,7 +291,7 @@ export default function PromoterEventDetailPage() {
                             <button
                                 onClick={handleUnpublish}
                                 disabled={publishing}
-                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-40 transition-all"
+                                className="text-[13px] font-bold px-5 py-2.5 text-center w-full sm:w-auto rounded-xl border border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 disabled:opacity-40 transition-all"
                             >
                                 {publishing ? "Aguarde…" : "Meter em Rascunho"}
                             </button>
@@ -300,7 +300,7 @@ export default function PromoterEventDetailPage() {
                 )}
 
                 {/* Edit form */}
-                <div className="rounded-3xl border border-neutral-200 bg-white shadow-md overflow-hidden divide-y divide-neutral-200 relative">
+                <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-md overflow-hidden divide-y divide-neutral-200 relative">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
                     <div className="px-6 py-5">
                         <label htmlFor="title" className={labelCls}>Título *</label>
@@ -367,7 +367,7 @@ export default function PromoterEventDetailPage() {
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
-                        <p className="mt-2 text-xs text-neutral-500">Aparece nos filtros públicos quando o evento estiver publicado.</p>
+                        <p className="mt-2 text-xs text-zinc-500">Aparece nos filtros públicos quando o evento estiver publicado.</p>
                     </div>
 
                     <div className="px-6 py-5">
@@ -392,7 +392,7 @@ export default function PromoterEventDetailPage() {
                             placeholder="https://maps.google.com/... — link Partilhar do local"
                             className={inputCls}
                         />
-                        <p className="mt-2 text-xs text-neutral-500">Usado no mapa da página pública. Se vazio, o mapa usa o nome do local + cidade.</p>
+                        <p className="mt-2 text-xs text-zinc-500">Usado no mapa da página pública. Se vazio, o mapa usa o nome do local + cidade.</p>
                     </div>
 
                     <div className="px-6 py-5">
@@ -401,18 +401,18 @@ export default function PromoterEventDetailPage() {
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("STANDARD")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "STANDARD" ? "border-[#00a0e3] bg-[#00a0e3]/10 ring-1 ring-[#00a0e3]/30" : "border-white/10 bg-white/5 hover:bg-white/10"}`}
                             >
-                                <p className="font-bold text-neutral-900 text-[14px]">Evento clássico</p>
-                                <p className="text-xs text-neutral-500 mt-1">Uma página com todos os bilhetes.</p>
+                                <p className="font-bold text-white text-[14px]">Evento clássico</p>
+                                <p className="text-xs text-zinc-500 mt-1">Uma página com todos os bilhetes.</p>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setLayoutMode("ARTISTS")}
-                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-violet-600 bg-violet-50 ring-1 ring-violet-200" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100"}`}
+                                className={`p-4 rounded-2xl border text-left transition-all ${layoutMode === "ARTISTS" ? "border-[#00a0e3] bg-[#00a0e3]/10 ring-1 ring-[#00a0e3]/30" : "border-white/10 bg-white/5 hover:bg-white/10"}`}
                             >
-                                <p className="font-bold text-neutral-900 text-[14px]">Bilhetes por artista</p>
-                                <p className="text-xs text-neutral-500 mt-1">Grelha de artistas com página individual.</p>
+                                <p className="font-bold text-white text-[14px]">Bilhetes por artista</p>
+                                <p className="text-xs text-zinc-500 mt-1">Grelha de artistas com página individual.</p>
                             </button>
                         </div>
                     </div>
@@ -429,14 +429,14 @@ export default function PromoterEventDetailPage() {
                         />
                     </div>
 
-                    <div className="px-6 py-6 bg-neutral-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <p className="text-[12px] text-neutral-500 font-medium">
-                            URL: <span className="font-mono text-neutral-600">/events/{event.slug}</span>
+                    <div className="px-6 py-6 bg-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <p className="text-[12px] text-zinc-500 font-medium">
+                            URL: <span className="font-mono text-zinc-400">/events/{event.slug}</span>
                         </p>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-[14px] font-bold bg-[#00a0e3] text-white hover:bg-[#0090cc] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
                         >
                             <Save className="h-4 w-4" />
                             {saving ? "A guardar…" : "Guardar alterações"}

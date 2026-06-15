@@ -10,7 +10,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-violet-200 bg-violet-50 text-violet-700",
+          "border-[#00a0e3]/30 bg-[#00a0e3]/10 text-[#5ec8f8]",
         success:
           "border-emerald-200 bg-emerald-50 text-emerald-700",
         danger:

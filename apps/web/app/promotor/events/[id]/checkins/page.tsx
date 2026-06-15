@@ -31,13 +31,13 @@ export default function EventCheckinsPage() {
     <PageShell title="Lista de check-ins" subtitle="Entradas registadas no evento">
       <div className="dash-card overflow-hidden">
         {loading ? (
-          <p className="p-6 text-sm text-neutral-500">A carregar…</p>
+          <p className="p-6 text-sm text-zinc-500">A carregar…</p>
         ) : items.length === 0 ? (
-          <p className="p-6 text-sm text-neutral-500">Ainda sem check-ins.</p>
+          <p className="p-6 text-sm text-zinc-500">Ainda sem check-ins.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
+              <thead className="bg-white/5 border-b border-white/10">
                 <tr>
                   <th className="text-left p-3 font-semibold">Bilhete</th>
                   <th className="text-left p-3 font-semibold">Participante</th>
@@ -46,10 +46,10 @@ export default function EventCheckinsPage() {
               </thead>
               <tbody>
                 {items.map((c) => (
-                  <tr key={c.id} className="border-b border-neutral-100">
+                  <tr key={c.id} className="border-b border-white/10">
                     <td className="p-3 font-mono">{c.ticket?.code}</td>
                     <td className="p-3">{c.ticket?.user?.name || c.ticket?.user?.email}</td>
-                    <td className="p-3 text-neutral-500">
+                    <td className="p-3 text-zinc-500">
                       {format(new Date(c.checkedInAt), "dd MMM yyyy HH:mm", { locale: pt })}
                     </td>
                   </tr>
