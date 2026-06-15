@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { sessionIsStaff, staffPurchaseDeniedResponse } from "@/lib/auth/buyer-access";
 
 const CustomerInfoSchema = z.object({
   buyerName: z.string().min(1, "Nome é obrigatório"),
@@ -18,6 +19,10 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (sessionIsStaff(session)) {
+      return staffPurchaseDeniedResponse();
     }
 
     const { orderId } = await params;

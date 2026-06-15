@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import AccountSidebar from "./account-sidebar";
+import { isBuyerOnlyAccountPath } from "@/lib/auth/buyer-access";
+import { getStaffDashboardPath, isStaffAccount } from "@/lib/auth/public-nav";
 
 export default function AccountLayoutClient({
   children,
@@ -9,6 +13,19 @@ export default function AccountLayoutClient({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session?.user || !pathname || !isBuyerOnlyAccountPath(pathname)) return;
+    const role = (session.user as { role?: string }).role;
+    const hasOrgAccess =
+      (session.user as { hasOrgAccess?: boolean }).hasOrgAccess === true;
+    if (!isStaffAccount(role, hasOrgAccess)) return;
+    const dest = getStaffDashboardPath(role, hasOrgAccess);
+    if (dest) router.replace(dest);
+  }, [session, pathname, router]);
 
   return (
     <div className="min-h-screen dash-shell">

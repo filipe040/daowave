@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { isStripePaymentsEnabled } from "@/lib/payment";
 import { validateCouponForCheckout } from "@/lib/coupons/validate-coupon";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
+import { sessionIsStaff, staffPurchaseDeniedResponse } from "@/lib/auth/buyer-access";
 import { z } from "zod";
 
 const BodySchema = z.object({
@@ -29,6 +30,10 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (sessionIsStaff(session)) {
+      return staffPurchaseDeniedResponse();
     }
 
     const { orderId } = await params;

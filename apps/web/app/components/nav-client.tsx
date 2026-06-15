@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { Ticket, Search, Menu, X, LayoutDashboard } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Ticket, Search, Menu, X, LayoutDashboard, ChevronDown } from "lucide-react";
 import {
+  getActiveStaffDashboardLabel,
+  getStaffDashboardOptions,
   getStaffDashboardPath,
   isStaffAccount,
-  staffDashboardLabel,
 } from "@/lib/auth/public-nav";
 
 function getInitials(name: string | null | undefined, email: string | undefined): string {
@@ -26,8 +28,96 @@ function avatarDisplayUrl(url: string | null): string | null {
   return url;
 }
 
+const staffPillClass =
+  "flex items-center gap-2 rounded-full border border-[#00a0e3]/30 bg-[#00a0e3]/10 pl-1 pr-3 py-1 hover:bg-[#00a0e3]/20 transition-all";
+
+function StaffDashboardPill({
+  role,
+  hasOrgAccess,
+}: {
+  role: string;
+  hasOrgAccess: boolean;
+}) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const options = getStaffDashboardOptions(role, hasOrgAccess);
+  const label = getActiveStaffDashboardLabel(pathname, role, hasOrgAccess);
+  const href = getStaffDashboardPath(role, hasOrgAccess) ?? options[0]?.href ?? "/promotor";
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  const icon = (
+    <div className="h-8 w-8 rounded-full bg-[#00a0e3]/25 flex items-center justify-center shrink-0">
+      <LayoutDashboard className="h-4 w-4 text-[#5ec8f8]" />
+    </div>
+  );
+
+  if (options.length <= 1) {
+    return (
+      <Link href={href} className={staffPillClass}>
+        {icon}
+        <span className="text-sm font-semibold text-white max-w-[120px] truncate hidden xl:block">
+          {label}
+        </span>
+      </Link>
+    );
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={staffPillClass}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        {icon}
+        <span className="text-sm font-semibold text-white max-w-[120px] truncate hidden xl:block">
+          {label}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-[#5ec8f8] shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute right-0 top-full mt-2 min-w-[220px] rounded-xl border border-white/10 bg-[#0c0c12] py-1 shadow-xl shadow-black/40 z-50"
+        >
+          {options.map((opt) => (
+            <Link
+              key={opt.href}
+              href={opt.href}
+              role="option"
+              aria-selected={pathname?.startsWith(opt.href) ?? false}
+              onClick={() => setOpen(false)}
+              className={`block px-4 py-2.5 text-sm font-semibold transition-colors ${
+                pathname?.startsWith(opt.href)
+                  ? "text-[#5ec8f8] bg-[#00a0e3]/10"
+                  : "text-zinc-300 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {opt.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function NavClient() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localName, setLocalName] = useState<string | undefined>(undefined);
   const [localAvatar, setLocalAvatar] = useState<string | undefined>(undefined);
@@ -41,9 +131,8 @@ export default function NavClient() {
 
   const role = (session?.user as { role?: string })?.role ?? "USER";
   const hasOrgAccess = (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
-  const isPlatformAdmin =
-    role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT";
   const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+  const staffDashboardOptions = getStaffDashboardOptions(role, hasOrgAccess);
   const isStaff = isStaffAccount(role, hasOrgAccess);
   const initials = getInitials(localName ?? session?.user?.name ?? null, session?.user?.email ?? undefined);
 
@@ -106,28 +195,8 @@ export default function NavClient() {
             {session ? (
               <>
                 <div className="hidden lg:flex items-center gap-3">
-                  {isPlatformAdmin && (
-                    <Link href="/admin" className={navLink}>
-                      Admin
-                    </Link>
-                  )}
-                  {hasOrgAccess && (
-                    <Link href="/promotor" className={navLink}>
-                      Promotor
-                    </Link>
-                  )}
                   {isStaff && staffPath ? (
-                    <Link
-                      href={staffPath}
-                      className="flex items-center gap-2 rounded-full border border-[#00a0e3]/30 bg-[#00a0e3]/10 pl-1 pr-3 py-1 hover:bg-[#00a0e3]/20 transition-all"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-[#00a0e3]/25 flex items-center justify-center">
-                        <LayoutDashboard className="h-4 w-4 text-[#5ec8f8]" />
-                      </div>
-                      <span className="text-sm font-semibold text-white max-w-[120px] truncate hidden xl:block">
-                        {staffDashboardLabel(role, hasOrgAccess)}
-                      </span>
-                    </Link>
+                    <StaffDashboardPill role={role} hasOrgAccess={hasOrgAccess} />
                   ) : (
                     <Link href="/account" className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-1 pr-3 py-1 hover:bg-white/10 transition-all">
                       <div className="h-8 w-8 rounded-full overflow-hidden bg-[#00a0e3]/20 flex items-center justify-center">
@@ -190,13 +259,28 @@ export default function NavClient() {
             {session ? (
               <>
                 {isStaff && staffPath && (
-                  <Link
-                    href={staffPath}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`block py-3 ${navLink}`}
-                  >
-                    {staffDashboardLabel(role, hasOrgAccess)}
-                  </Link>
+                  staffDashboardOptions.length > 1 ? (
+                    staffDashboardOptions.map((opt) => (
+                      <Link
+                        key={opt.href}
+                        href={opt.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`block py-3 ${navLink} ${
+                          pathname?.startsWith(opt.href) ? "text-[#5ec8f8]" : ""
+                        }`}
+                      >
+                        {opt.label}
+                      </Link>
+                    ))
+                  ) : (
+                    <Link
+                      href={staffPath}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-3 ${navLink}`}
+                    >
+                      {getActiveStaffDashboardLabel(null, role, hasOrgAccess)}
+                    </Link>
+                  )
                 )}
                 {!isStaff && (
                   <Link href="/account" onClick={() => setMobileMenuOpen(false)} className={`block py-3 ${navLink}`}>

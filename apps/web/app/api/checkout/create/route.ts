@@ -11,6 +11,7 @@ import { checkoutCreateSchema } from "@/lib/security/validation";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
 import { InventoryService } from "@/lib/services/inventory.service";
 import { FinancialEngine } from "@/lib/finance/financial-engine";
+import { sessionIsStaff, staffPurchaseDeniedResponse } from "@/lib/auth/buyer-access";
 
 export const dynamic = "force-dynamic";
 
@@ -24,23 +25,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const globalRole = (session.user as any).role;
-    let isPromoterOrAdmin = globalRole === "ADMIN";
-
-    if (!isPromoterOrAdmin) {
-      const membership = await prisma.organizationMember.findFirst({
-        where: { userId: (session.user as any).id, status: "ACTIVE" },
-      });
-      if (membership) {
-        isPromoterOrAdmin = true;
-      }
-    }
-
-    if (isPromoterOrAdmin) {
-      return NextResponse.json(
-        { error: "Administradores e Promotores não podem comprar bilhetes." },
-        { status: 403 }
-      );
+    if (sessionIsStaff(session)) {
+      return staffPurchaseDeniedResponse();
     }
 
     const body = await request.json();

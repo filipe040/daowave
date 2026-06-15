@@ -2,9 +2,10 @@
  * Checkout Page
  */
 
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { staffDashboardRedirectPath } from '@/lib/auth/public-nav';
 import { prisma } from '@/lib/prisma';
 import { formatCurrency } from '@/lib/utils';
 import { CheckoutForm } from './checkout-form';
@@ -69,6 +70,9 @@ export default async function CheckoutPage({
       </div>
     );
   }
+
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
 
   const { orderId } = await params;
   const order = await getOrder(orderId);

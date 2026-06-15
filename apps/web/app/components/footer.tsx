@@ -1,8 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Ticket } from "lucide-react";
+import { isStaffAccount } from "@/lib/auth/public-nav";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string })?.role;
+  const hasOrgAccess =
+    (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  const isStaff = isStaffAccount(role, hasOrgAccess);
 
   return (
     <footer className="mt-auto border-t border-white/[0.08] bg-[#08080e]">
@@ -36,7 +45,9 @@ export default function Footer() {
               <h4 className="text-sm font-bold text-white mb-4">Compradores</h4>
               <ul className="space-y-2.5 text-sm">
                 <li><Link href="/events" className="text-zinc-400 hover:text-[#5ec8f8] transition">Explorar eventos</Link></li>
-                <li><Link href="/my-tickets" className="text-zinc-400 hover:text-[#5ec8f8] transition">Meus bilhetes</Link></li>
+                {!isStaff && (
+                  <li><Link href="/my-tickets" className="text-zinc-400 hover:text-[#5ec8f8] transition">Meus bilhetes</Link></li>
+                )}
                 <li><Link href="/politica-reembolsos" className="text-zinc-400 hover:text-[#5ec8f8] transition">Reembolsos</Link></li>
                 <li><Link href="/help" className="text-zinc-400 hover:text-[#5ec8f8] transition">Ajuda</Link></li>
               </ul>

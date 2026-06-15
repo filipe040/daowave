@@ -40,13 +40,25 @@ export default function PromoterLoginPage() {
         const sessionRes = await fetch("/api/auth/session");
         const sessionData = await sessionRes.json();
         const userRole = sessionData?.user?.role;
+        const hasOrgAccess = sessionData?.user?.hasOrgAccess === true;
 
-        if (userRole === "ADMIN" || sessionData?.user?.hasOrgAccess) {
+        if (hasOrgAccess) {
           router.push("/promotor");
-        } else {
-          setError("Acesso restrito a promotores");
-          setLoading(false);
+          return;
         }
+
+        if (
+          userRole === "ADMIN" ||
+          userRole === "FINANCE_MANAGER" ||
+          userRole === "SUPPORT_AGENT"
+        ) {
+          setError("Use o painel de administração em /admin");
+          setLoading(false);
+          return;
+        }
+
+        setError("Acesso restrito a promotores");
+        setLoading(false);
       } catch {
         router.push("/promotor");
       }

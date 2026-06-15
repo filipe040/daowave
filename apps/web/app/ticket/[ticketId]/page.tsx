@@ -2,10 +2,11 @@
  * Ticket Detail Page with QR Code (token-based theme + high contrast)
  */
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { staffDashboardRedirectPath } from "@/lib/auth/public-nav";
 import { formatDate } from "@/lib/utils";
 import { generateQRCode } from "@/lib/qr/generate";
 import Image from "next/image";
@@ -72,6 +73,9 @@ export default async function TicketPage({
       </div>
     );
   }
+
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
 
   const { ticketId } = await params;
   const ticket = await getTicket(ticketId);

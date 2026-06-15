@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventFavoriteService } from "@/lib/services/event-favorite.service";
+import { sessionIsStaff } from "@/lib/auth/buyer-access";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,10 @@ export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (sessionIsStaff(session)) {
+      return NextResponse.json({ ids: [] });
     }
 
     const { searchParams } = new URL(req.url);
@@ -37,6 +42,13 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (sessionIsStaff(session)) {
+      return NextResponse.json(
+        { error: "Contas de staff não podem usar favoritos." },
+        { status: 403 }
+      );
     }
 
     const body = toggleSchema.parse(await req.json());

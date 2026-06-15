@@ -4,10 +4,17 @@ import { useState, useEffect } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Loader2, Ticket } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Loader2, Ticket, LayoutDashboard } from 'lucide-react';
+import Link from 'next/link';
 import { TicketPresave } from './ticket-presave';
 import { isLotAlmostSoldOut } from '@/lib/events/lot-availability';
 import { BuyerFeeBreakdownLine } from '@/components/checkout/BuyerFeeBreakdownLine';
+import {
+  getStaffDashboardPath,
+  isStaffAccount,
+  staffDashboardLabel,
+} from '@/lib/auth/public-nav';
 
 interface TicketType {
   id: string;
@@ -55,6 +62,13 @@ export function TicketSelector({
   userName,
 }: TicketSelectorProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string })?.role;
+  const hasOrgAccess =
+    (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  const isStaff = session ? isStaffAccount(role, hasOrgAccess) : false;
+  const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+
   const [types, setTypes] = useState<TicketType[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -346,6 +360,30 @@ export function TicketSelector({
         </div>
       )}
 
+      {isStaff && staffPath ? (
+        <div
+          className={`rounded-2xl border p-5 text-center ${
+            isLight
+              ? "border-neutral-200 bg-neutral-50 text-neutral-600"
+              : "border-white/10 bg-white/5 text-zinc-400"
+          }`}
+        >
+          <LayoutDashboard className={`h-8 w-8 mx-auto mb-3 ${isLight ? "text-neutral-400" : "text-[#5ec8f8]"}`} />
+          <p className="text-sm font-medium mb-4">
+            Contas de promotor e administração não podem comprar bilhetes nesta plataforma.
+          </p>
+          <Link
+            href={staffPath}
+            className={`inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold transition-colors ${
+              isLight
+                ? "bg-[#00a0e3] text-white hover:bg-[#0090cc]"
+                : "bg-white text-black hover:bg-white/90"
+            }`}
+          >
+            Ir para {staffDashboardLabel(role, hasOrgAccess)}
+          </Link>
+        </div>
+      ) : (
       <Button
         type="button"
         data-testid="btn-continue-checkout"
@@ -356,6 +394,7 @@ export function TicketSelector({
       >
         {loadingCheckout ? 'A processar...' : 'Continuar para Pagamento'}
       </Button>
+      )}
     </div>
   );
 }

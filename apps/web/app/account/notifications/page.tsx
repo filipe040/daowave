@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { staffDashboardRedirectPath } from "@/lib/auth/public-nav";
 import AccountNotifications from "../components/account-notifications";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,10 @@ async function getNotificationPrefs(userId: string) {
 export default async function AccountNotificationsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return null;
+
+  const staffRedirect = staffDashboardRedirectPath(session);
+  if (staffRedirect) redirect(staffRedirect);
+
   const prefs = await getNotificationPrefs(session.user.id);
   return <AccountNotifications initialPrefs={prefs} />;
 }

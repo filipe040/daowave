@@ -2,7 +2,9 @@
 
 import { Heart } from "lucide-react";
 import { useFavorites } from "./favorites-provider";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { isStaffAccount } from "@/lib/auth/public-nav";
 
 interface FavoriteButtonProps {
   eventId: string;
@@ -17,8 +19,17 @@ export function FavoriteButton({
   size = "md",
   label = false,
 }: FavoriteButtonProps) {
+  const { data: session } = useSession();
   const { isFavorite, toggleFavorite, loading } = useFavorites();
   const [busy, setBusy] = useState(false);
+
+  const role = (session?.user as { role?: string })?.role;
+  const hasOrgAccess =
+    (session?.user as { hasOrgAccess?: boolean })?.hasOrgAccess === true;
+  if (session && isStaffAccount(role, hasOrgAccess)) {
+    return null;
+  }
+
   const favorited = isFavorite(eventId);
 
   const iconSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";

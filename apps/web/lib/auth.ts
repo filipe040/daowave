@@ -326,8 +326,7 @@ export const authOptions: NextAuthOptions = {
             token.role = dbUser.role as Role;
             token.email = dbUser.email;
             token.name = dbUser.name;
-            token.hasOrgAccess =
-              dbUser.role === "ADMIN" || dbUser._count.organizations > 0;
+            token.hasOrgAccess = dbUser._count.organizations > 0;
           }
         } catch (err) {
           console.error("[auth] JWT DB fetch error:", err);

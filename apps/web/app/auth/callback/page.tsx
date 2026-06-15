@@ -8,6 +8,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { getStaffDashboardPath } from "@/lib/auth/public-nav";
 import { redirect } from "next/navigation";
 
 export default async function AuthCallbackPage({
@@ -22,17 +23,23 @@ export default async function AuthCallbackPage({
         redirect("/auth/signin");
     }
 
-    const role = (session.user as any).role as string | undefined;
-    const requiresEmailUpdate = (session.user as any).requiresEmailUpdate === true;
+    const role = (session.user as { role?: string }).role;
+    const hasOrgAccess =
+      (session.user as { hasOrgAccess?: boolean }).hasOrgAccess === true;
+    const requiresEmailUpdate =
+      (session.user as { requiresEmailUpdate?: boolean }).requiresEmailUpdate === true;
 
     // Apple "Hide My Email" users → prompt them to update email first
     if (requiresEmailUpdate) {
+        const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+        if (staffPath) {
+          redirect("/account/security?setup=email");
+        }
         redirect("/account/profile?setup=email");
     }
 
-    // Role-based redirect
-    if (role === "ADMIN" || role === "FINANCE_MANAGER" || role === "SUPPORT_AGENT") redirect("/admin");
-    if ((session.user as { hasOrgAccess?: boolean }).hasOrgAccess) redirect("/promotor");
+    const staffPath = getStaffDashboardPath(role, hasOrgAccess);
+    if (staffPath) redirect(staffPath);
 
     const safeFrom = safeRedirectPath(from, "/");
     if (safeFrom !== "/") {

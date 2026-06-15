@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { z } from "zod";
+import { sessionIsStaff, staffPurchaseDeniedResponse } from "@/lib/auth/buyer-access";
 
 const CheckoutSchema = z.object({
   eventId: z.string().uuid(),
@@ -20,6 +21,10 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (sessionIsStaff(session)) {
+      return staffPurchaseDeniedResponse();
     }
 
     const body = await req.json();
