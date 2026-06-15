@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canViewSales } from "@/lib/auth/member-permissions";
 import { OrderStatus } from "@prisma/client";
 
 export async function GET(req: Request) {
     try {
-        const { orgId } = await requirePromoter();
+        const { orgId, role, session } = await requirePromoter();
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
+        if (!isGlobalAdmin && !canViewSales(role)) {
+            return NextResponse.json({ error: "Sem permissão para ver vendas." }, { status: 403 });
+        }
+
         if (!orgId) return NextResponse.json({ data: [], total: 0 });
 
         const { searchParams } = new URL(req.url);

@@ -29,7 +29,7 @@ function canRemoveMember(
     return true;
 }
 
-const INVITE_ROLES = [
+const DEFAULT_INVITE_ROLES = [
     { id: "PROMOTER_MANAGER", label: "Gestor", desc: "Gere eventos, vendas e equipa." },
     { id: "PROMOTER_FINANCE", label: "Financeiro", desc: "Acesso a finanças e relatórios." },
     { id: "PROMOTER_CASHIER", label: "Caixa (POS)", desc: "Vendas manuais e check-in." },
@@ -76,6 +76,21 @@ export default function PromoterTeamPage() {
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("PROMOTER_CHECKIN");
     const [inviting, setInviting] = useState(false);
+    const [canInviteMembersFlag, setCanInviteMembersFlag] = useState(false);
+    const [inviteRoles, setInviteRoles] = useState(DEFAULT_INVITE_ROLES);
+
+    const buildInviteRoles = (
+        roles: string[] | undefined,
+        labels?: Record<string, string>,
+        descriptions?: Record<string, string>
+    ) => {
+        if (!roles?.length) return DEFAULT_INVITE_ROLES;
+        return roles.map((id) => ({
+            id,
+            label: labels?.[id] ?? ROLE_LABELS[id] ?? id,
+            desc: descriptions?.[id] ?? "",
+        }));
+    };
 
     const load = useCallback(async () => {
         setLoading(true); setError(null);
@@ -84,12 +99,30 @@ export default function PromoterTeamPage() {
             if (!res.ok) throw new Error(`Erro ${res.status}`);
             const json: {
                 data: OrgMember[];
-                meta?: { currentUserId?: string; canRemoveMembers?: boolean; isGlobalAdmin?: boolean };
+                meta?: {
+                    currentUserId?: string;
+                    canRemoveMembers?: boolean;
+                    isGlobalAdmin?: boolean;
+                    canInviteMembers?: boolean;
+                    invitableRoles?: string[];
+                    roleLabels?: Record<string, string>;
+                    roleDescriptions?: Record<string, string>;
+                };
             } = await res.json();
             setMembers(json.data);
             setCurrentUserId(json.meta?.currentUserId ?? null);
             setCanRemoveMembers(json.meta?.canRemoveMembers ?? false);
             setIsGlobalAdmin(json.meta?.isGlobalAdmin ?? false);
+            setCanInviteMembersFlag(json.meta?.canInviteMembers ?? false);
+            const roles = buildInviteRoles(
+                json.meta?.invitableRoles,
+                json.meta?.roleLabels,
+                json.meta?.roleDescriptions
+            );
+            setInviteRoles(roles);
+            if (roles.length && !roles.some((r) => r.id === inviteRole)) {
+                setInviteRole(roles[0].id);
+            }
         } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro"); }
         finally { setLoading(false); }
     }, []);
@@ -144,6 +177,7 @@ export default function PromoterTeamPage() {
             title="Equipa"
             subtitle={members.length > 0 ? `${members.length} membro${members.length !== 1 ? "s" : ""}` : "Membros das suas organizações"}
             actions={
+                canInviteMembersFlag ? (
                 <button
                     onClick={() => setShowInviteModal(true)}
                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00a0e3] text-white font-bold uppercase tracking-widest text-[10px] rounded-xl hover:bg-[#0090cc] transition-all shadow-md"
@@ -151,6 +185,7 @@ export default function PromoterTeamPage() {
                     <UserPlus className="w-3.5 h-3.5" />
                     Convidar Membro
                 </button>
+                ) : undefined
             }
         >
             {loading && (
@@ -317,7 +352,7 @@ export default function PromoterTeamPage() {
                             <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-2.5 ml-1">Função na Equipa</label>
                                 <div className="grid grid-cols-1 gap-3">
-                                    {INVITE_ROLES.map(role => (
+                                    {inviteRoles.map(role => (
                                         <button
                                             key={role.id}
                                             type="button"

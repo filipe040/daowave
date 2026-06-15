@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canAccessOrgFinance, canRequestWithdrawal } from "@/lib/auth/member-permissions";
 import {
   FinanceReportService,
   FinancialSettingsService,
@@ -17,7 +18,13 @@ export async function GET(req: Request) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const { orgId } = await requirePromoter();
+    const { orgId, role, session } = await requirePromoter();
+    const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
+    if (!isGlobalAdmin && !canAccessOrgFinance(role)) {
+      return NextResponse.json({ error: "Sem permissão para aceder a finanças." }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const view = searchParams.get("view") ?? "dashboard";
 
@@ -98,9 +105,18 @@ export async function POST(req: Request) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const { orgId, session } = await requirePromoter();
+    const { orgId, session, role } = await requirePromoter();
+    const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
     if (!orgId) {
       return NextResponse.json({ error: "Organização não encontrada" }, { status: 400 });
+    }
+
+    if (!isGlobalAdmin && !canRequestWithdrawal(role)) {
+      return NextResponse.json(
+        { error: "Apenas proprietários ou financeiros podem pedir levantamentos." },
+        { status: 403 }
+      );
     }
 
     const body = withdrawalSchema.parse(await req.json());

@@ -1,12 +1,10 @@
 /**
  * POST /api/promotor/events/[id]/badge-design/generate
- * Generate badges with custom template
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { canManageBrandingSettings } from "@/lib/auth/member-permissions";
+import { requirePromoterEventApi } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
@@ -15,26 +13,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const { id: eventId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
+    const access = await requirePromoterEventApi(eventId, {
+      requirePermission: canManageBrandingSettings,
     });
+    if (access instanceof NextResponse) return access;
 
-    if (!promoter) {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    // Badge design fields not yet in schema
     const body = await request.json().catch(() => ({}));
     const quantity = typeof body.quantity === "number" ? body.quantity : 10;
     const prefix = (body.prefix || "BADGE").trim();

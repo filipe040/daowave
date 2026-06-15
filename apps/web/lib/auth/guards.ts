@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { can, type PermissionScope } from "./scopes";
 import { prisma } from "../prisma";
 import { MemberRole } from "@prisma/client";
 import type { Session } from "next-auth";
@@ -10,6 +9,7 @@ import {
   canInviteMembers,
   canRemoveMembers,
 } from "@/lib/auth/member-permissions";
+import { hasOrgPermission, Permission } from "../rbac";
 
 /**
  * requireAuth: Basic guard to ensure user is logged in.
@@ -40,7 +40,7 @@ export async function requirePromoter() {
 
     // 2. Find specific organization membership
     let membership = await prisma.organizationMember.findFirst({
-        where: { userId },
+        where: { userId, status: "ACTIVE" },
         include: { organization: true },
     });
 
@@ -125,16 +125,19 @@ export async function getPromoterContext() {
 /**
  * requirePermission: Specific scope check.
  */
-export async function requirePermission(scope: PermissionScope) {
-    const { session, ...context } = await requirePromoter();
+export async function requirePermission(permission: Permission) {
+    const { session, role, ...context } = await requirePromoter();
+    const globalRole = (session.user as { role?: string }).role;
 
-    const userRole = (session.user as any).role;
-    if (!can(userRole, scope)) {
-        // Audit log if possible?
-        redirect("/promotor/unauthorized");
+    if (globalRole === "ADMIN") {
+        return { session, role, ...context };
     }
 
-    return { session, ...context };
+    if (role && hasOrgPermission(role, permission)) {
+        return { session, role, ...context };
+    }
+
+    redirect("/promotor/unauthorized");
 }
 
 /**
@@ -146,14 +149,14 @@ export async function getOrgContext() {
 
     const userId = (session.user as any).id;
     const membership = await prisma.organizationMember.findFirst({
-        where: { userId },
+        where: { userId, status: "ACTIVE" },
         select: { organizationId: true, role: true },
     });
 
     return membership;
 }
 
-/** Apenas owner da organização ou administrador global podem gerir cupões. */
+/** Proprietário, gestor ou administrador global podem gerir cupões. */
 export function canManageOrganizationCoupon(
     session: Session,
     memberRole: MemberRole | null | undefined
@@ -161,7 +164,10 @@ export function canManageOrganizationCoupon(
     const globalRole = (session.user as { role?: string })?.role;
     if (globalRole === "ADMIN") return true;
     if (!memberRole) return false;
-    return memberRole === MemberRole.PROMOTER_OWNER || canManageOrgSettings(memberRole);
+    return (
+        memberRole === MemberRole.PROMOTER_OWNER ||
+        memberRole === MemberRole.PROMOTER_MANAGER
+    );
 }
 
 export { canInviteMembers, canRemoveMembers };

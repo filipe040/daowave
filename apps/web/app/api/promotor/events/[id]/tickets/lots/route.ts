@@ -1,13 +1,14 @@
 /**
- * POST /api/promotor/events/[id]/tickets/lots — Create ticket lot (canonical).
+ * POST /api/promotor/events/[id]/tickets/lots — Create ticket lot (legacy path).
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { createAuditLog, getRequestMetadata, safeLog } from "@/lib/security";
+import { canManageTicketContent } from "@/lib/auth/member-permissions";
+import { assertPromoterEventAccess, TicketManagementAccessError } from "@/lib/auth/ticket-management";
+import { requirePromoterApiContext, isPromoterApiContext, apiForbidden } from "@/lib/auth/promoter-api";
 
 const TicketLotSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -15,9 +16,7 @@ const TicketLotSchema = z.object({
   startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
   endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Formato de data inválido"),
   stockTotal: z.number().int().positive("Quantidade deve ser positiva"),
-}).refine((data) => {
-  return new Date(data.endsAt) > new Date(data.startsAt);
-}, {
+}).refine((data) => new Date(data.endsAt) > new Date(data.startsAt), {
   message: "Data de fim deve ser posterior à data de início",
   path: ["endsAt"],
 });
@@ -28,41 +27,17 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
+  const ctx = await requirePromoterApiContext();
+  if (!isPromoterApiContext(ctx)) return ctx;
 
-  if (!session || ((session.user as { role?: string }).role !== "PROMOTER" && (session.user as { role?: string }).role !== "ADMIN")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canManageTicketContent(ctx.role) && ctx.globalRole !== "ADMIN") {
+    return apiForbidden("Sem permissão para gerir bilhetes.");
   }
 
   const { id } = await params;
 
   try {
-    let organizerProfile: { id: string } | null = null;
-    if ((session.user as { role?: string }).role === "PROMOTER") {
-      const profile = await prisma.promoterProfile.findUnique({
-        where: { userId: session.user.id },
-      });
-
-      if (!profile || profile.status !== "APPROVED") {
-        return NextResponse.json(
-          { error: "Promoter not approved" },
-          { status: 403 }
-        );
-      }
-      organizerProfile = profile;
-    }
-
-    const event = await prisma.event.findUnique({
-      where: { id },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
-
-    if ((session.user as { role?: string }).role !== "ADMIN" && organizerProfile && event.promoterId !== organizerProfile.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    await assertPromoterEventAccess(id, ctx.orgId, ctx.globalRole ?? "", ctx.userId);
 
     const body = await req.json();
     const data = TicketLotSchema.parse(body);
@@ -81,7 +56,7 @@ export async function POST(
 
     const metadata = getRequestMetadata(req);
     await createAuditLog({
-      userId: session.user.id,
+      userId: ctx.userId,
       action: "TICKET_LOT_CREATED",
       entityType: "ticketLot",
       entityId: ticketLot.id,
@@ -98,17 +73,14 @@ export async function POST(
 
     return NextResponse.json({ ticketLot }, { status: 201 });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
     }
 
     safeLog.error("Error creating ticket lot", error);
-    return NextResponse.json(
-      { error: "Failed to create ticket lot" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create ticket lot" }, { status: 500 });
   }
 }

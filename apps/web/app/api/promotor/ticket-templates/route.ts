@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canManageBrandingSettings } from "@/lib/auth/member-permissions";
 import { TicketTemplateService } from "@/lib/ticket-templates/ticket-template.service";
 import { safeLog } from "@/lib/security";
 
@@ -11,7 +12,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
     try {
-        const { orgId } = await requirePromoter();
+        const { orgId, role, session } = await requirePromoter();
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
         if (!orgId) {
             return NextResponse.json({ error: "No organization context" }, { status: 403 });
         }
@@ -31,9 +34,15 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
-        const { orgId } = await requirePromoter();
+        const { orgId, role, session } = await requirePromoter();
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
         if (!orgId) {
             return NextResponse.json({ error: "No organization context" }, { status: 403 });
+        }
+
+        if (!isGlobalAdmin && !canManageBrandingSettings(role)) {
+            return NextResponse.json({ error: "Sem permissão para editar templates." }, { status: 403 });
         }
 
         const body = await req.json();

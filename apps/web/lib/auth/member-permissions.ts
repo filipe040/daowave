@@ -16,6 +16,10 @@ export function normalizeMemberRole(role: MemberRole | string | null | undefined
   return null;
 }
 
+export function isValidMemberRole(role: unknown): role is MemberRole {
+  return normalizeMemberRole(role as string) !== null;
+}
+
 export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.PROMOTER_OWNER]: "Proprietário",
   [MemberRole.PROMOTER_MANAGER]: "Gestor",
@@ -25,6 +29,16 @@ export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.READ_ONLY]: "Leitor",
 };
 
+export const MEMBER_ROLE_DESCRIPTIONS: Record<MemberRole, string> = {
+  [MemberRole.PROMOTER_OWNER]: "Acesso total à organização, equipa e definições.",
+  [MemberRole.PROMOTER_MANAGER]: "Gere eventos, vendas, bilhetes e convida equipa.",
+  [MemberRole.PROMOTER_FINANCE]: "Finanças, analytics e relatórios de vendas.",
+  [MemberRole.PROMOTER_CASHIER]: "Vendas manuais (POS) e check-in no local.",
+  [MemberRole.PROMOTER_CHECKIN]: "Apenas validação de bilhetes na entrada.",
+  [MemberRole.READ_ONLY]: "Visualização de dashboard, vendas e analytics.",
+};
+
+/** Cargos que gestor pode convidar (sem proprietário). */
 export const INVITABLE_MEMBER_ROLES: MemberRole[] = [
   MemberRole.PROMOTER_MANAGER,
   MemberRole.PROMOTER_FINANCE,
@@ -33,6 +47,7 @@ export const INVITABLE_MEMBER_ROLES: MemberRole[] = [
   MemberRole.READ_ONLY,
 ];
 
+/** Cargos que proprietário pode atribuir (inclui transferência de propriedade). */
 export const INVITABLE_MEMBER_ROLES_WITH_OWNER: MemberRole[] = [
   MemberRole.PROMOTER_OWNER,
   ...INVITABLE_MEMBER_ROLES,
@@ -65,12 +80,37 @@ export function canRemoveMembers(role: MemberRole | string | null | undefined): 
   return isOrgOwner(role);
 }
 
+/** Gestor pode convidar equipa; só proprietário pode atribuir cargo de proprietário. */
+export function canAssignMemberRole(
+  actorRole: MemberRole | string | null | undefined,
+  targetRole: MemberRole | string
+): boolean {
+  const actor = normalizeMemberRole(actorRole);
+  const target = normalizeMemberRole(targetRole);
+  if (!actor || !target) return false;
+
+  if (target === MemberRole.PROMOTER_OWNER) {
+    return actor === MemberRole.PROMOTER_OWNER;
+  }
+
+  if (!canInviteMembers(actor)) return false;
+  return INVITABLE_MEMBER_ROLES.includes(target);
+}
+
 export function canManageEvents(role: MemberRole | string | null | undefined): boolean {
   const r = normalizeMemberRole(role);
   return r === MemberRole.PROMOTER_OWNER || r === MemberRole.PROMOTER_MANAGER;
 }
 
 export function canManageTicketContent(role: MemberRole | string | null | undefined): boolean {
+  return canManageEvents(role);
+}
+
+export function canManageBrandingSettings(role: MemberRole | string | null | undefined): boolean {
+  return canManageEvents(role);
+}
+
+export function canManageCoupons(role: MemberRole | string | null | undefined): boolean {
   return canManageEvents(role);
 }
 
@@ -81,7 +121,13 @@ export function canEditTicketInventory(role: MemberRole | string | null | undefi
 export function canViewSales(role: MemberRole | string | null | undefined): boolean {
   const r = normalizeMemberRole(role);
   if (!r) return false;
-  return r !== MemberRole.PROMOTER_CHECKIN;
+  return (
+    r === MemberRole.PROMOTER_OWNER ||
+    r === MemberRole.PROMOTER_MANAGER ||
+    r === MemberRole.PROMOTER_FINANCE ||
+    r === MemberRole.PROMOTER_CASHIER ||
+    r === MemberRole.READ_ONLY
+  );
 }
 
 export function canAccessOrgFinance(role: MemberRole | string | null | undefined): boolean {
@@ -91,6 +137,11 @@ export function canAccessOrgFinance(role: MemberRole | string | null | undefined
     r === MemberRole.PROMOTER_MANAGER ||
     r === MemberRole.PROMOTER_FINANCE
   );
+}
+
+export function canRequestWithdrawal(role: MemberRole | string | null | undefined): boolean {
+  const r = normalizeMemberRole(role);
+  return r === MemberRole.PROMOTER_OWNER || r === MemberRole.PROMOTER_FINANCE;
 }
 
 export function canCreateManualSale(role: MemberRole | string | null | undefined): boolean {
@@ -143,8 +194,12 @@ export function promoterNavAllowed(
   if (href.startsWith("/promotor/checkin")) return canCheckIn(r);
   if (href.startsWith("/promotor/analytics")) return canAccessPromoterAnalytics(r);
   if (href.startsWith("/promotor/finance")) return canAccessOrgFinance(r);
-  if (href.startsWith("/promotor/settings")) return canManageOrgSettings(r) || href.includes("/tickets");
   if (href.startsWith("/promotor/team")) return canManageOrgMembers(r);
+  if (href.startsWith("/promotor/settings")) {
+    if (href.includes("/coupon")) return canManageCoupons(r);
+    if (href.includes("/tickets") || href.includes("/invoices")) return canManageBrandingSettings(r);
+    return canManageOrgSettings(r);
+  }
 
   return canManageEvents(r);
 }

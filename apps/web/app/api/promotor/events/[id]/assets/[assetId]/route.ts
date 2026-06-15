@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { unlink } from "fs/promises";
 import { join } from "path";
+import { canManageEvents } from "@/lib/auth/member-permissions";
+import { requirePromoterEventApi } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
@@ -12,35 +12,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; assetId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const { id: eventId, assetId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!promoter && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
+    const access = await requirePromoterEventApi(eventId, { requirePermission: canManageEvents });
+    if (access instanceof NextResponse) return access;
 
     const asset = await prisma.eventAsset.findFirst({
       where: { id: assetId, eventId },
@@ -50,7 +24,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Asset not found" }, { status: 404 });
     }
 
-    // Delete file from disk (url is e.g. /uploads/events/eventId/filename)
     const filePath = join(process.cwd(), "public", asset.url);
     try {
       await unlink(filePath);
@@ -61,16 +34,11 @@ export async function DELETE(
       }
     }
 
-    await prisma.eventAsset.delete({
-      where: { id: assetId },
-    });
+    await prisma.eventAsset.delete({ where: { id: assetId } });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[assets-delete] DELETE error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

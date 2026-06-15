@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { canManageEvents } from "@/lib/auth/member-permissions";
+import { requirePromoterEventApi } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
@@ -15,36 +15,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const { id: eventId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!promoter && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    // Verify event ownership (admins can upload to any event)
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
+    const access = await requirePromoterEventApi(eventId, { requirePermission: canManageEvents });
+    if (access instanceof NextResponse) return access;
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

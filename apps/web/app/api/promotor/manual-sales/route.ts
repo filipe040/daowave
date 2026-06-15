@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canViewSales, canCreateManualSale } from "@/lib/auth/member-permissions";
 import { manualSaleSchema } from "@/lib/security/validation";
 import { ManualSaleService } from "@/lib/services/manual-sale.service";
 import { prisma } from "@/lib/prisma";
@@ -13,7 +14,13 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
     try {
-        const { orgId } = await requirePromoter();
+        const { session, orgId, role } = await requirePromoter();
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
+        if (!isGlobalAdmin && !canViewSales(role) && !canCreateManualSale(role)) {
+            return NextResponse.json({ error: "Sem permissão." }, { status: 403 });
+        }
+
         if (!orgId) return NextResponse.json({ error: "Organization required" }, { status: 400 });
 
         const searchParams = req.nextUrl.searchParams;

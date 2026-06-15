@@ -1,13 +1,13 @@
 /**
  * PATCH /api/promotor/events/[id]/teams/[memberId]
- * Update team member
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EventTeamPermission } from "@prisma/client";
+import { canManageEvents } from "@/lib/auth/member-permissions";
+import { assertPromoterEventAccess, TicketManagementAccessError } from "@/lib/auth/ticket-management";
+import { requirePromoterApiContext, isPromoterApiContext, apiForbidden } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
@@ -24,85 +24,56 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const ctx = await requirePromoterApiContext();
+    if (!isPromoterApiContext(ctx)) return ctx;
 
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!canManageEvents(ctx.role) && ctx.globalRole !== "ADMIN") {
+      return apiForbidden("Sem permissão para gerir equipa do evento.");
     }
 
     const { id: eventId, memberId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!promoter) {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        promoterId: promoter.id,
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
+    await assertPromoterEventAccess(eventId, ctx.orgId, ctx.globalRole ?? "", ctx.userId);
 
     const member = await prisma.eventTeamMember.findFirst({
-      where: {
-        id: memberId,
-        eventId,
-      },
+      where: { id: memberId, eventId },
     });
 
     if (!member) {
-      return NextResponse.json({ error: "Team member not found" }, { status: 404 });
+      return NextResponse.json({ error: "Membro não encontrado" }, { status: 404 });
     }
 
     const body = await request.json().catch(() => ({}));
     const { role, isActive, isVolunteer, notes, permissions } = body;
 
-    // Update member
-    await prisma.eventTeamMember.update({
+    const updated = await prisma.eventTeamMember.update({
       where: { id: memberId },
       data: {
-        role: role !== undefined ? role : member.role,
-        isActive: isActive !== undefined ? isActive : member.isActive,
-        isVolunteer: isVolunteer !== undefined ? isVolunteer : member.isVolunteer,
-        notes: notes !== undefined ? (notes || null) : member.notes,
+        ...(role !== undefined ? { role } : {}),
+        ...(isActive !== undefined ? { isActive } : {}),
+        ...(isVolunteer !== undefined ? { isVolunteer } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+        ...(Array.isArray(permissions)
+          ? {
+              permissions: {
+                deleteMany: {},
+                create: permissions
+                  .filter((perm: string) => VALID_PERMISSIONS.includes(perm as EventTeamPermission))
+                  .map((perm: string) => ({ permission: perm as EventTeamPermission })),
+              },
+            }
+          : {}),
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        permissions: true,
       },
     });
 
-    // Update permissions if provided
-    if (permissions && Array.isArray(permissions)) {
-      // Delete existing permissions
-      await prisma.eventTeamMemberPermission.deleteMany({
-        where: { memberId },
-      });
-
-      // Create new permissions (validate and filter invalid ones)
-      const validPermissions = permissions
-        .filter((perm: string) => VALID_PERMISSIONS.includes(perm as EventTeamPermission))
-        .map((perm: string) => ({
-          memberId,
-          permission: perm as EventTeamPermission,
-        }));
-
-      if (validPermissions.length > 0) {
-        await prisma.eventTeamMemberPermission.createMany({
-          data: validPermissions,
-        });
-      }
-    }
-
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, member: updated });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[teams] PATCH error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

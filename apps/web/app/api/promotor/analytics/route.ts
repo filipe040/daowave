@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePromoter } from "@/lib/auth/guards";
+import { canAccessPromoterAnalytics } from "@/lib/auth/member-permissions";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    const { orgId } = await requirePromoter();
+    const { orgId, role, session } = await requirePromoter();
+    const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+
+    if (!isGlobalAdmin && !canAccessPromoterAnalytics(role)) {
+      return NextResponse.json({ error: "Sem permissão para analytics." }, { status: 403 });
+    }
+
     if (!orgId) return NextResponse.json({ data: [] });
 
     const { searchParams } = new URL(req.url);

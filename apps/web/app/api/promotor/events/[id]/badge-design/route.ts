@@ -1,57 +1,26 @@
 /**
  * GET /api/promotor/events/[id]/badge-design
  * PATCH /api/promotor/events/[id]/badge-design
- * Get/Update badge design for event
  */
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { canManageBrandingSettings } from "@/lib/auth/member-permissions";
+import { requirePromoterEventApi } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const { id: eventId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!promoter) {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    // Fields not in schema yet
-    /*
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        promoterId: promoter.id,
-      },
-      select: {
-        badgeTemplateImageUrl: true,
-        badgePrefix: true,
-      },
-    });
-    */
+    const access = await requirePromoterEventApi(eventId);
+    if (access instanceof NextResponse) return access;
 
     return NextResponse.json({
-      templateImageUrl: null, // event?.badgeTemplateImageUrl,
-      prefix: null, // event?.badgePrefix,
+      templateImageUrl: null,
+      prefix: null,
     });
   } catch (error) {
     console.error("[badge-design] GET error:", error);
@@ -60,18 +29,15 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // ... auth checks ...
-
-    return NextResponse.json({ ok: true }); // Mock success
+    const { id: eventId } = await params;
+    const access = await requirePromoterEventApi(eventId, {
+      requirePermission: canManageBrandingSettings,
+    });
+    if (access instanceof NextResponse) return access;
 
     return NextResponse.json({ ok: true });
   } catch (error) {

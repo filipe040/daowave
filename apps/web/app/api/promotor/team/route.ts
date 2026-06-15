@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit, RATE_LIMITS, safeLog } from "@/lib/security";
 import { requirePromoter } from "@/lib/auth/guards";
-import { canInviteMembers, canRemoveMembers } from "@/lib/auth/member-permissions";
+import { canInviteMembers, canRemoveMembers, canAssignMemberRole, isValidMemberRole, INVITABLE_MEMBER_ROLES, INVITABLE_MEMBER_ROLES_WITH_OWNER, isOrgOwner, MEMBER_ROLE_LABELS, MEMBER_ROLE_DESCRIPTIONS } from "@/lib/auth/member-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,17 @@ export async function GET(req: Request) {
         return NextResponse.json({
             data: members,
             total: members.length,
-            meta: { currentUserId: userId, canRemoveMembers: canRemoveMembersFlag, isGlobalAdmin },
+            meta: {
+                currentUserId: userId,
+                canRemoveMembers: canRemoveMembersFlag,
+                isGlobalAdmin,
+                canInviteMembers: isGlobalAdmin || canInviteMembers(actorRole),
+                invitableRoles: (isGlobalAdmin || isOrgOwner(actorRole))
+                    ? INVITABLE_MEMBER_ROLES_WITH_OWNER
+                    : INVITABLE_MEMBER_ROLES,
+                roleLabels: MEMBER_ROLE_LABELS,
+                roleDescriptions: MEMBER_ROLE_DESCRIPTIONS,
+            },
         });
     } catch (error) {
         safeLog.error("Promotor team error", error);
@@ -62,7 +72,7 @@ export async function POST(req: Request) {
         if (!orgId) {
             return NextResponse.json({ error: "Contexto de organização não encontrado." }, { status: 400 });
         }
-        if (!canInviteMembers(actorRole)) {
+        if (!canInviteMembers(actorRole) && (session.user as { role?: string }).role !== "ADMIN") {
             return NextResponse.json({ error: "Permissões insuficientes para convidar membros." }, { status: 403 });
         }
 
@@ -70,6 +80,15 @@ export async function POST(req: Request) {
 
         if (!email || !role) {
             return NextResponse.json({ error: "Email e role são obrigatórios." }, { status: 400 });
+        }
+
+        if (!isValidMemberRole(role)) {
+            return NextResponse.json({ error: "Cargo inválido." }, { status: 400 });
+        }
+
+        const isGlobalAdmin = (session.user as { role?: string }).role === "ADMIN";
+        if (!canAssignMemberRole(actorRole, role) && !isGlobalAdmin) {
+            return NextResponse.json({ error: "Sem permissão para atribuir este cargo." }, { status: 403 });
         }
 
         // Check if user is already a member

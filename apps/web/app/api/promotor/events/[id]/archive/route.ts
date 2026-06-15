@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { canManageEvents } from "@/lib/auth/member-permissions";
+import { assertPromoterEventAccess, TicketManagementAccessError } from "@/lib/auth/ticket-management";
+import { apiForbidden, isPromoterApiContext, requirePromoterApiContext } from "@/lib/auth/promoter-api";
 
 export const dynamic = "force-dynamic";
 
@@ -10,35 +11,15 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const ctx = await requirePromoterApiContext();
+    if (!isPromoterApiContext(ctx)) return ctx;
 
-    const userRole = (session.user as { role?: string })?.role;
-    if (userRole !== "PROMOTER" && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!canManageEvents(ctx.role) && ctx.globalRole !== "ADMIN") {
+      return apiForbidden("Sem permissão para arquivar eventos.");
     }
 
     const { id: eventId } = await params;
-    const promoter = await prisma.promoterProfile.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!promoter && userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Promoter profile not found" }, { status: 404 });
-    }
-
-    const event = await prisma.event.findFirst({
-      where: {
-        id: eventId,
-        ...(userRole !== "ADMIN" ? { promoterId: promoter!.id } : {}),
-      },
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
+    await assertPromoterEventAccess(eventId, ctx.orgId, ctx.globalRole ?? "", ctx.userId);
 
     const body = await request.json().catch(() => ({}));
     const archive = body.archive === true;
@@ -52,10 +33,10 @@ export async function POST(
       archivedAt: archive ? new Date().toISOString() : null,
     });
   } catch (error) {
+    if (error instanceof TicketManagementAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[archive] POST error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
