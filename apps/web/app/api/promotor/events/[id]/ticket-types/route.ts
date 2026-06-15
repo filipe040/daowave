@@ -8,10 +8,10 @@ import { safeLog } from "@/lib/security";
 
 const createSchema = z.object({
     name: z.string().min(2),
-    description: z.string().optional(),
+    description: z.string().nullable().optional(),
     requiresSeat: z.boolean().default(false),
-    perUserLimit: z.number().int().positive().optional(),
-    status: z.enum(["ACTIVE", "PAUSED"]).default("ACTIVE")
+    perUserLimit: z.number().int().positive().nullable().optional(),
+    status: z.enum(["ACTIVE", "PAUSED"]).default("ACTIVE"),
 });
 
 export async function GET(
@@ -55,7 +55,13 @@ export async function POST(
         const body = await req.json();
         const parsed = createSchema.parse(body);
 
-        const newType = await TicketTypeService.create(eventId, parsed);
+        const newType = await TicketTypeService.create(eventId, {
+            name: parsed.name,
+            description: parsed.description ?? undefined,
+            requiresSeat: parsed.requiresSeat,
+            perUserLimit: parsed.perUserLimit ?? undefined,
+            status: parsed.status,
+        });
 
 
 
