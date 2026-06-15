@@ -9,6 +9,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { EVENT_CATEGORIES } from "@/lib/events/event-categories";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 interface EventDetail {
     id: string;
@@ -229,6 +230,7 @@ export default function PromoterEventDetailPage() {
             }
         >
             <div className="max-w-2xl space-y-4">
+                <EventStudioNav eventId={id} />
                 {/* Publish banner */}
                 {isDraft && (
                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">

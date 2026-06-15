@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Building2, Plus, Users, Calendar, ArrowRight, X, Loader2, AlertCircle } from "lucide-react";
@@ -263,6 +264,7 @@ function CreateOrgModal({ open, onClose, onCreated }: CreateOrgModalProps) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function AdminOrganizationsPage() {
+    const searchParams = useSearchParams();
     const [data, setData] = useState<Organization[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
@@ -271,6 +273,13 @@ export default function AdminOrganizationsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCreate, setShowCreate] = useState(false);
+
+    useEffect(() => {
+        const qStatus = searchParams.get("status");
+        if (qStatus && ["PENDING", "ACTIVE", "SUSPENDED"].includes(qStatus)) {
+            setStatus(qStatus);
+        }
+    }, [searchParams]);
 
     const load = useCallback(async () => {
         setLoading(true);

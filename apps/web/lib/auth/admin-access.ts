@@ -50,7 +50,8 @@ export function adminNavAllowed(path: string, role: string | undefined | null): 
       path === "/admin" ||
       path.startsWith("/admin/users") ||
       path.startsWith("/admin/events") ||
-      path.startsWith("/admin/organizations")
+      path.startsWith("/admin/organizations") ||
+      path.startsWith("/admin/contact")
     );
   }
 

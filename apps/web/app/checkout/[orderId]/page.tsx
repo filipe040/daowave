@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { isStripePaymentsEnabled, isMockPaymentsEnabled } from '@/lib/payment';
+import { getPaymentMethodsInfo } from '@/lib/payment/methods';
 
 export const dynamic = "force-dynamic";
 
@@ -103,6 +103,7 @@ export default async function CheckoutPage({
   const serviceFeeCents = order.serviceFeeCents ?? 0;
   const feePaidBy = order.feePaidBy ?? "BUYER";
   const displayTotalCents = order.totalCents;
+  const paymentInfo = getPaymentMethodsInfo();
 
   return (
     <div data-testid="page-checkout" className="public-shell min-h-screen pt-24 pb-16 relative overflow-hidden">
@@ -218,8 +219,9 @@ export default async function CheckoutPage({
                 feePaidBy={feePaidBy}
                 ticketCount={ticketCount}
                 eventId={order.event.id}
-                stripePaymentsEnabled={isStripePaymentsEnabled()}
-                mockPaymentsEnabled={isMockPaymentsEnabled()}
+                stripePaymentsEnabled={paymentInfo.stripeEnabled}
+                mockPaymentsEnabled={paymentInfo.mockEnabled}
+                availablePaymentMethods={paymentInfo.available}
               />
             </div>
           </div>

@@ -32,13 +32,13 @@ export default function Footer() {
                 Bilhetes para os melhores eventos em Portugal. Compra segura, QR instantâneo e check-in em tempo real.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {["Cartão", "MB Way*", "Multibanco*", "Apple Pay"].map((t) => (
+                {["Cartão", "Visa", "Mastercard"].map((t) => (
                   <span key={t} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-zinc-400">
                     {t}
                   </span>
                 ))}
               </div>
-              <p className="mt-2 text-[10px] text-zinc-600">* Conforme disponibilidade no checkout</p>
+              <p className="mt-2 text-[10px] text-zinc-600">Pagamento seguro processado pela Stripe</p>
             </div>
 
             <div>
@@ -50,6 +50,7 @@ export default function Footer() {
                 )}
                 <li><Link href="/politica-reembolsos" className="text-zinc-400 hover:text-[#5ec8f8] transition">Reembolsos</Link></li>
                 <li><Link href="/help" className="text-zinc-400 hover:text-[#5ec8f8] transition">Ajuda</Link></li>
+                <li><Link href="/faq" className="text-zinc-400 hover:text-[#5ec8f8] transition">FAQ</Link></li>
               </ul>
             </div>
 

@@ -6,6 +6,7 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { api } from "@/lib/api-client";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 type Checkin = {
   id: string;
@@ -29,6 +30,8 @@ export default function EventCheckinsPage() {
 
   return (
     <PageShell title="Lista de check-ins" subtitle="Entradas registadas no evento">
+      <div className="max-w-4xl space-y-6">
+        <EventStudioNav eventId={eventId} />
       <div className="dash-card overflow-hidden">
         {loading ? (
           <p className="p-6 text-sm text-zinc-500">A carregar…</p>
@@ -58,6 +61,7 @@ export default function EventCheckinsPage() {
             </table>
           </div>
         )}
+      </div>
       </div>
     </PageShell>
   );

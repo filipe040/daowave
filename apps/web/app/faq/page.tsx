@@ -11,7 +11,7 @@ const FAQS = [
         items: [
             {
                 q: "Como compro um bilhete?",
-                a: "Escolhe o evento, seleciona o tipo de bilhete e quantidade, e procede ao pagamento. Aceitamos cartão Visa, Mastercard e MB Way. Recebes a confirmação por email com o QR code.",
+                a: "Escolhe o evento, seleciona o tipo de bilhete e quantidade, e procede ao pagamento com cartão (Visa, Mastercard, Amex). Recebes a confirmação por email com o QR code. MB Way e Multibanco serão disponibilizados em breve.",
             },
             {
                 q: "Posso comprar bilhetes para outra pessoa?",

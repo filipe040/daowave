@@ -11,7 +11,6 @@ import {
   Wallet,
   Users,
   Brush,
-  Images,
   Settings,
   Bell,
   Plug,
@@ -117,7 +116,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               { label: "Vendas", href: `/promotor/sales?eventId=${eventId}`, icon: CreditCard, activeMatch: (p: string) => p.includes("/sales") },
               {
                 label: "Acesso",
-                href: `/promotor/checkin/${eventId}`,
+                href: `/promotor/checkin?eventId=${eventId}`,
                 icon: ShieldCheck,
                 activeMatch: (p: string) => p.includes("/checkin") && !p.includes("/checkins"),
               },
@@ -141,12 +140,6 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
               activeMatch: (p) => p.includes("/branding"),
             },
             {
-              label: "Biblioteca de assets",
-              href: `${baseEvent}/assets`,
-              icon: Images,
-              activeMatch: (p) => p.includes("/assets"),
-            },
-            {
               label: "Design de faturas",
               href: `${baseEvent}/invoices`,
               icon: FileText,
@@ -154,9 +147,9 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
             },
             {
               label: "Definições do evento",
-              href: `${baseEvent}/settings`,
+              href: baseEvent,
               icon: Settings,
-              activeMatch: (p) => p.includes("/settings"),
+              activeMatch: (p) => p === baseEvent,
             },
           ]
         : [{ label: "Branding & equipas", icon: Users, disabled: true }],

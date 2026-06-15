@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { api } from "@/lib/api-client";
 import { Copy, Plus } from "lucide-react";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 type Link = { id: string; code: string; label: string | null; clicks: number; conversions: number };
 
@@ -41,6 +42,8 @@ export default function TrackingLinksPage() {
 
   return (
     <PageShell title="Tracking links" subtitle="Links de campanha com rastreio de cliques">
+      <div className="max-w-3xl space-y-6">
+        <EventStudioNav eventId={eventId} />
       <div className="dash-card p-6 space-y-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -89,6 +92,7 @@ export default function TrackingLinksPage() {
             })}
           </ul>
         )}
+      </div>
       </div>
     </PageShell>
   );

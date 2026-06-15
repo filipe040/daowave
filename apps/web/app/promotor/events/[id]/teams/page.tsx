@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { api } from "@/lib/api-client";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 type Member = {
   id: string;
@@ -37,6 +38,8 @@ export default function EventTeamsPage() {
 
   return (
     <PageShell title="Equipa do evento" subtitle="Membros com acesso a check-in e operações">
+      <div className="max-w-3xl space-y-6">
+        <EventStudioNav eventId={eventId} />
       <div className="dash-card p-6 space-y-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -65,6 +68,7 @@ export default function EventTeamsPage() {
             ))}
           </ul>
         )}
+      </div>
       </div>
     </PageShell>
   );

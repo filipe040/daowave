@@ -7,6 +7,7 @@ import { PageShell } from "@/components/dashboard/PageShell";
 import { InvoiceThemeEditor } from "@/components/promoter/InvoiceThemeEditor";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { ArrowLeft } from "lucide-react";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 export default function EventInvoicesPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +36,10 @@ export default function EventInvoicesPage() {
         </Link>
       }
     >
-      <InvoiceThemeEditor scope="event" eventId={id} eventTitle={eventTitle} />
+      <div className="max-w-3xl space-y-6">
+        <EventStudioNav eventId={id} />
+        <InvoiceThemeEditor scope="event" eventId={id} eventTitle={eventTitle} />
+      </div>
     </PageShell>
   );
 }

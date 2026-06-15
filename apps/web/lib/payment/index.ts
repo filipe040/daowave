@@ -18,4 +18,7 @@ export function isMockPaymentsEnabled(): boolean {
   return config.features.mockPayments && !isStripePaymentsEnabled();
 }
 
+export { getPaymentMethodsInfo, getPublicPaymentLabels } from "./methods";
+export type { PaymentMethodId } from "./methods";
+
 export { stripePaymentProvider };

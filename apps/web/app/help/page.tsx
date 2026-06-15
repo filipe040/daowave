@@ -13,7 +13,7 @@ export default function HelpPage() {
           <ol className="list-decimal list-inside text-zinc-400 space-y-2 text-sm sm:text-base">
             <li>Explora eventos na página principal ou em /events</li>
             <li>Seleciona o evento e escolhe o lote</li>
-            <li>Preenche os dados e conclui o pagamento</li>
+            <li>Preenche os dados e paga com cartão (Visa, Mastercard)</li>
             <li>Recebe o bilhete digital com QR code</li>
           </ol>
         </PublicCard>
@@ -58,6 +58,19 @@ export default function HelpPage() {
               </p>
             </div>
           </div>
+        </PublicCard>
+
+        <PublicCard>
+          <h2 className="text-lg font-bold text-white mb-4">Mais respostas</h2>
+          <p className="text-zinc-400 text-sm mb-4">
+            Consulta as perguntas frequentes sobre pagamentos, reembolsos e bilhetes digitais.
+          </p>
+          <Link
+            href="/faq"
+            className="inline-flex text-sm font-bold text-[#00a0e3] hover:text-[#5ec8f8] transition-colors"
+          >
+            Ver FAQ completo →
+          </Link>
         </PublicCard>
 
         <div className="rounded-2xl border border-[#00a0e3]/30 bg-gradient-to-br from-[#0066aa]/30 to-[#14141f] p-6 sm:p-8 text-center">

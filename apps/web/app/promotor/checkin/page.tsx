@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/dashboard/PageShell";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
@@ -28,6 +29,8 @@ const inputCls = "public-input backdrop-blur-xl";
 const labelCls = "public-label font-bold mb-2";
 
 export default function PromoterCheckinPage() {
+    const searchParams = useSearchParams();
+    const presetEventId = searchParams.get("eventId");
     const [orgs, setOrgs] = useState<Org[]>([]);
     const [orgId, setOrgId] = useState("");
     const [events, setEvents] = useState<Event[]>([]);
@@ -72,6 +75,16 @@ export default function PromoterCheckinPage() {
 
     useEffect(() => { loadOrgs(); }, [loadOrgs]);
     useEffect(() => { if (orgId) loadEvents(); }, [orgId, loadEvents]);
+
+    useEffect(() => {
+        if (presetEventId) setEventId(presetEventId);
+    }, [presetEventId]);
+
+    useEffect(() => {
+        if (presetEventId && events.some((e) => e.id === presetEventId)) {
+            setEventId(presetEventId);
+        }
+    }, [presetEventId, events]);
 
     const executeCheckin = useCallback(async (codeToVerify: string) => {
         if (!eventId || !codeToVerify.trim()) return;

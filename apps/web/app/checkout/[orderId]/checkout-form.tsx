@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { PaymentMethodSelector, type PaymentMethod } from '@/components/checkout/PaymentMethodSelector';
+import type { PaymentMethodId } from '@/lib/payment/methods';
 import { PaymentProcessingOverlay } from '@/components/checkout/PaymentProcessingOverlay';
 import { OrderStripeCheckout } from '@/components/checkout/OrderStripeCheckout';
 import { BuyerFeeBreakdownLine } from '@/components/checkout/BuyerFeeBreakdownLine';
@@ -31,6 +32,7 @@ interface CheckoutFormProps {
   eventId: string;
   stripePaymentsEnabled?: boolean;
   mockPaymentsEnabled?: boolean;
+  availablePaymentMethods: PaymentMethodId[];
 }
 
 interface AppliedCoupon {
@@ -51,12 +53,6 @@ function formatCardNumber(value: string) {
   return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
 }
 
-function generateMultibancoRef() {
-  const entity = '12345';
-  const reference = String(Math.floor(100000000 + Math.random() * 900000000));
-  return { entity, reference };
-}
-
 export function CheckoutForm({
   orderId,
   subtotalCents,
@@ -67,11 +63,14 @@ export function CheckoutForm({
   eventId,
   stripePaymentsEnabled = false,
   mockPaymentsEnabled = true,
+  availablePaymentMethods,
 }: CheckoutFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    availablePaymentMethods[0] ?? 'card'
+  );
   const [formData, setFormData] = useState({
     buyerName: '',
     buyerEmail: '',
@@ -82,7 +81,12 @@ export function CheckoutForm({
     mbwayPhone: '',
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [multibancoRef] = useState(generateMultibancoRef);
+
+  useEffect(() => {
+    if (!availablePaymentMethods.includes(paymentMethod)) {
+      setPaymentMethod(availablePaymentMethods[0] ?? 'card');
+    }
+  }, [availablePaymentMethods, paymentMethod]);
 
   const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
@@ -318,7 +322,11 @@ export function CheckoutForm({
           <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-5">
             2. Método de pagamento
           </h2>
-          <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
+          <PaymentMethodSelector
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            availableMethods={availablePaymentMethods}
+          />
 
           <div className="mt-5 rounded-2xl border border-white/10 bg-[#0c0c12] p-5">
             {paymentMethod === 'card' && useStripeCard && (
@@ -395,12 +403,10 @@ export function CheckoutForm({
               </div>
             )}
 
-            {paymentMethod === 'mbway' && (
+            {paymentMethod === 'mbway' && availablePaymentMethods.includes('mbway') && (
               <div className="space-y-3">
                 <p className="text-sm text-zinc-400">
-                  {stripePaymentsEnabled && !mockPaymentsEnabled
-                    ? 'MB Way estará disponível em breve. Utilize cartão por agora.'
-                    : 'Receberá uma notificação no telemóvel para autorizar o pagamento.'}
+                  Receberá uma notificação no telemóvel para autorizar o pagamento.
                 </p>
                 <div className="space-y-2">
                   <Label className="text-zinc-400 text-xs ml-1">Número MB WAY *</Label>
@@ -415,30 +421,15 @@ export function CheckoutForm({
               </div>
             )}
 
-            {paymentMethod === 'multibanco' && (
+            {paymentMethod === 'multibanco' && availablePaymentMethods.includes('multibanco') && (
               <div className="space-y-4">
                 <p className="text-sm text-zinc-400">
-                  Utilize os dados abaixo no multibanco ou homebanking. O pagamento será confirmado automaticamente.
+                  Após confirmar, receberá a entidade e referência Multibanco por email. O bilhete é emitido após confirmação do pagamento.
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Entidade</p>
-                    <p className="text-2xl font-mono font-bold text-white">{multibancoRef.entity}</p>
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Referência</p>
-                    <p className="text-2xl font-mono font-bold text-white">{multibancoRef.reference}</p>
-                  </div>
-                </div>
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
-                  <p className="text-sm text-emerald-300">
-                    Montante: <strong className="text-white">{formatEuro(effectiveTotal)}</strong>
-                  </p>
-                </div>
               </div>
             )}
 
-            {paymentMethod === 'paypal' && (
+            {paymentMethod === 'paypal' && availablePaymentMethods.includes('paypal') && (
               <div className="text-center py-4">
                 <p className="text-sm text-zinc-400 mb-4">
                   Será redirecionado para o PayPal para concluir o pagamento em segurança.

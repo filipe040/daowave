@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Palette, Image as ImageIcon, Type, LayoutTemplate, Tic
 import Link from "next/link";
 import { toast } from "sonner";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 interface EventBranding {
     id: string;
@@ -166,6 +167,7 @@ export default function PromoterEventBrandingPage() {
             }
         >
             <div className="max-w-3xl space-y-4">
+                <EventStudioNav eventId={id} />
                 <div className="rounded-3xl border border-white/10 bg-[#14141f] shadow-md overflow-hidden divide-y divide-neutral-200 relative">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
                     

@@ -10,6 +10,7 @@ import TicketTypesTab from "./TicketTypesTab";
 import TicketLotsTab from "./TicketLotsTab";
 import SeatMapsTab from "./SeatMapsTab";
 import ArtistsTab from "./ArtistsTab";
+import { EventStudioNav } from "@/components/promoter/EventStudioNav";
 
 const TABS = [
     { id: "artists", label: "Artistas", icon: Mic2 },
@@ -62,6 +63,7 @@ export default function BilhetesPage() {
             }
         >
             <div className="max-w-5xl space-y-6">
+                <EventStudioNav eventId={id} />
                 <div className="p-1.5 bg-white/5 border border-white/10 rounded-2xl inline-flex w-full sm:w-auto overflow-x-auto no-scrollbar shadow-inner">
                     {TABS.map((tab) => {
                         const Icon = tab.icon;

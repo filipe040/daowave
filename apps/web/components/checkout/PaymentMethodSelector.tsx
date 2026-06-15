@@ -1,10 +1,11 @@
 "use client";
 
 import { CreditCard, Smartphone, Building2 } from "lucide-react";
+import type { PaymentMethodId } from "@/lib/payment/methods";
 
-export type PaymentMethod = "card" | "mbway" | "multibanco" | "paypal";
+export type PaymentMethod = PaymentMethodId;
 
-const METHODS: {
+const ALL_METHODS: {
   id: PaymentMethod;
   label: string;
   description: string;
@@ -43,12 +44,33 @@ const METHODS: {
 interface PaymentMethodSelectorProps {
   value: PaymentMethod;
   onChange: (method: PaymentMethod) => void;
+  availableMethods: PaymentMethod[];
 }
 
-export function PaymentMethodSelector({ value, onChange }: PaymentMethodSelectorProps) {
+export function PaymentMethodSelector({
+  value,
+  onChange,
+  availableMethods,
+}: PaymentMethodSelectorProps) {
+  const methods = ALL_METHODS.filter((m) => availableMethods.includes(m.id));
+
+  if (methods.length <= 1) {
+    const only = methods[0];
+    if (!only) return null;
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-[#00a0e3]/30 bg-[#00a0e3]/10 p-4">
+        <span className="text-[#5ec8f8]">{only.icon}</span>
+        <div>
+          <p className="text-sm font-bold text-white">{only.label}</p>
+          <p className="text-xs text-zinc-400">{only.description}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Método de pagamento">
-      {METHODS.map((method) => {
+      {methods.map((method) => {
         const selected = value === method.id;
         return (
           <button

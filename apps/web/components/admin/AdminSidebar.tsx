@@ -15,6 +15,7 @@ import {
     Mail,
     Home,
     Banknote,
+    MessageSquare,
 } from "lucide-react";
 import { adminNavAllowed } from "@/lib/auth/admin-access";
 import { signOut } from "next-auth/react";
@@ -25,6 +26,7 @@ const routes = [
     { label: "Eventos", icon: Calendar, href: "/admin/events" },
     { label: "Utilizadores", icon: Users, href: "/admin/users" },
     { label: "Marketing", icon: Mail, href: "/admin/marketing" },
+    { label: "Contactos", icon: MessageSquare, href: "/admin/contact" },
     { label: "Finanças", icon: Banknote, href: "/admin/finance" },
     { label: "Anti-Fraude", icon: ShieldAlert, href: "/admin/fraud" },
     { label: "Sistema", icon: Monitor, href: "/admin/system" },
