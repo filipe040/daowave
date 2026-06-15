@@ -77,7 +77,23 @@ export function canInviteMembers(role: MemberRole | string | null | undefined): 
 }
 
 export function canRemoveMembers(role: MemberRole | string | null | undefined): boolean {
-  return isOrgOwner(role);
+  const r = normalizeMemberRole(role);
+  return r === MemberRole.PROMOTER_OWNER || r === MemberRole.PROMOTER_MANAGER;
+}
+
+/** Proprietário remove qualquer um; gestor remove todos exceto proprietários. */
+export function canRemoveTargetMember(
+  actorRole: MemberRole | string | null | undefined,
+  targetRole: MemberRole | string | null | undefined
+): boolean {
+  const actor = normalizeMemberRole(actorRole);
+  const target = normalizeMemberRole(targetRole);
+  if (!actor || !target) return false;
+  if (actor === MemberRole.PROMOTER_OWNER) return true;
+  if (actor === MemberRole.PROMOTER_MANAGER) {
+    return target !== MemberRole.PROMOTER_OWNER;
+  }
+  return false;
 }
 
 /** Gestor pode convidar equipa; só proprietário pode atribuir cargo de proprietário. */

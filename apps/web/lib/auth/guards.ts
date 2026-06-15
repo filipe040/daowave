@@ -10,6 +10,7 @@ import {
   canRemoveMembers,
 } from "@/lib/auth/member-permissions";
 import { hasOrgPermission, Permission } from "../rbac";
+import { resolvePromoterOrgContext } from "./org-context";
 
 /**
  * requireAuth: Basic guard to ensure user is logged in.
@@ -38,40 +39,27 @@ export async function requirePromoter() {
     // 1. Check if user is an ADMIN (can bypass org checks)
     const isGlobalAdmin = (session.user as any)?.role === "ADMIN";
 
-    // 2. Find specific organization membership
-    let membership = await prisma.organizationMember.findFirst({
-        where: { userId, status: "ACTIVE" },
-        include: { organization: true },
+    const resolved = await resolvePromoterOrgContext(userId, {
+      globalRole: isGlobalAdmin ? "ADMIN" : (session.user as any)?.role,
     });
 
-    // 3. Admin Fallback: If admin has no membership, pick first available organization
-    if (!membership && isGlobalAdmin) {
-        const firstOrg = await prisma.organization.findFirst({
-            where: { status: "ACTIVE" },
-            orderBy: { createdAt: "asc" }
-        });
-
-        if (firstOrg) {
-            return {
-                session,
-                userId,
-                orgId: firstOrg.id,
-                organization: firstOrg,
-                role: MemberRole.PROMOTER_OWNER,
-            };
-        }
-    }
-
-    if (!membership && !isGlobalAdmin) {
+    if (!resolved) {
         redirect("/auth/signin?error=PromoterAccessDenied");
     }
+
+    const membership = resolved.membershipId
+        ? await prisma.organizationMember.findUnique({
+            where: { id: resolved.membershipId },
+            include: { organization: true },
+          })
+        : null;
 
     return {
         session,
         userId,
-        orgId: membership?.organizationId || null,
-        organization: membership?.organization,
-        role: membership?.role || (isGlobalAdmin ? MemberRole.PROMOTER_OWNER : null),
+        orgId: resolved.orgId,
+        organization: membership?.organization ?? (await prisma.organization.findUnique({ where: { id: resolved.orgId } })),
+        role: resolved.role,
     };
 }
 
@@ -80,44 +68,28 @@ export type PromoterContext = Awaited<ReturnType<typeof getPromoterContext>>;
 /**
  * Versão para API routes — retorna null em vez de redirect.
  */
-export async function getPromoterContext() {
+export async function getPromoterContext(organizationId?: string | null) {
     const session = await getServerSession(authOptions);
     const userId = (session?.user as { id?: string })?.id;
     if (!session?.user || !userId) return null;
 
     const globalRole = (session.user as { role?: string }).role;
-    const isGlobalAdmin = globalRole === "ADMIN";
-
-    let membership = await prisma.organizationMember.findFirst({
-        where: { userId, status: "ACTIVE" },
-        include: { organization: true },
+    const resolved = await resolvePromoterOrgContext(userId, {
+      organizationId,
+      globalRole,
     });
+    if (!resolved) return null;
 
-    if (!membership && isGlobalAdmin) {
-        const firstOrg = await prisma.organization.findFirst({
-            where: { status: "ACTIVE" },
-            orderBy: { createdAt: "asc" },
-        });
-        if (firstOrg) {
-            return {
-                session,
-                userId,
-                orgId: firstOrg.id,
-                organization: firstOrg,
-                role: MemberRole.PROMOTER_OWNER,
-                globalRole,
-            };
-        }
-    }
-
-    if (!membership && !isGlobalAdmin) return null;
+    const organization =
+      (await prisma.organization.findUnique({ where: { id: resolved.orgId } })) ??
+      resolved.organization;
 
     return {
         session,
         userId,
-        orgId: membership?.organizationId ?? null,
-        organization: membership?.organization,
-        role: membership?.role ?? (isGlobalAdmin ? MemberRole.PROMOTER_OWNER : null),
+        orgId: resolved.orgId,
+        organization,
+        role: resolved.role,
         globalRole,
     };
 }

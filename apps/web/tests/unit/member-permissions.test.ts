@@ -1,6 +1,8 @@
 import { MemberRole } from "@prisma/client";
 import {
   canAssignMemberRole,
+  canRemoveMembers,
+  canRemoveTargetMember,
   canCheckIn,
   canViewSales,
   canAccessOrgFinance,
@@ -9,6 +11,24 @@ import {
 } from "@/lib/auth/member-permissions";
 
 describe("member-permissions", () => {
+  describe("canRemoveMembers", () => {
+    it("proprietário e gestor podem remover membros", () => {
+      expect(canRemoveMembers(MemberRole.PROMOTER_OWNER)).toBe(true);
+      expect(canRemoveMembers(MemberRole.PROMOTER_MANAGER)).toBe(true);
+      expect(canRemoveMembers(MemberRole.PROMOTER_FINANCE)).toBe(false);
+    });
+  });
+
+  describe("canRemoveTargetMember", () => {
+    it("gestor não remove proprietário", () => {
+      expect(
+        canRemoveTargetMember(MemberRole.PROMOTER_MANAGER, MemberRole.PROMOTER_OWNER)
+      ).toBe(false);
+      expect(
+        canRemoveTargetMember(MemberRole.PROMOTER_MANAGER, MemberRole.PROMOTER_CHECKIN)
+      ).toBe(true);
+    });
+  });
   describe("canAssignMemberRole", () => {
     it("owner pode atribuir qualquer cargo", () => {
       expect(canAssignMemberRole(MemberRole.PROMOTER_OWNER, MemberRole.PROMOTER_OWNER)).toBe(true);

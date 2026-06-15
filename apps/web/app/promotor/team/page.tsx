@@ -21,12 +21,23 @@ function canRemoveMember(
     member: OrgMember,
     currentUserId: string | null,
     canRemoveMembers: boolean,
-    isGlobalAdmin: boolean
+    isGlobalAdmin: boolean,
+    canRemoveTarget?: Record<string, boolean>
 ): boolean {
     if (!canRemoveMembers || !currentUserId) return false;
     if (member.user.id === currentUserId) return false;
     if (member.user.role === "ADMIN" && !isGlobalAdmin) return false;
+    if (canRemoveTarget && member.id in canRemoveTarget) {
+        return canRemoveTarget[member.id];
+    }
     return true;
+}
+
+interface OrgOption {
+    id: string;
+    name: string;
+    slug: string;
+    role: string;
 }
 
 const DEFAULT_INVITE_ROLES = [
@@ -78,6 +89,9 @@ export default function PromoterTeamPage() {
     const [inviting, setInviting] = useState(false);
     const [canInviteMembersFlag, setCanInviteMembersFlag] = useState(false);
     const [inviteRoles, setInviteRoles] = useState(DEFAULT_INVITE_ROLES);
+    const [organizations, setOrganizations] = useState<OrgOption[]>([]);
+    const [selectedOrgId, setSelectedOrgId] = useState<string>("");
+    const [canRemoveTarget, setCanRemoveTarget] = useState<Record<string, boolean>>({});
 
     const buildInviteRoles = (
         roles: string[] | undefined,
@@ -92,10 +106,11 @@ export default function PromoterTeamPage() {
         }));
     };
 
-    const load = useCallback(async () => {
+    const load = useCallback(async (orgId?: string) => {
         setLoading(true); setError(null);
         try {
-            const res = await fetchWithTimeout("/api/promotor/team");
+            const qs = orgId ? `?organizationId=${encodeURIComponent(orgId)}` : "";
+            const res = await fetchWithTimeout(`/api/promotor/team${qs}`);
             if (!res.ok) throw new Error(`Erro ${res.status}`);
             const json: {
                 data: OrgMember[];
@@ -107,6 +122,9 @@ export default function PromoterTeamPage() {
                     invitableRoles?: string[];
                     roleLabels?: Record<string, string>;
                     roleDescriptions?: Record<string, string>;
+                    organizationId?: string;
+                    organizations?: OrgOption[];
+                    canRemoveTarget?: Record<string, boolean>;
                 };
             } = await res.json();
             setMembers(json.data);
@@ -114,6 +132,13 @@ export default function PromoterTeamPage() {
             setCanRemoveMembers(json.meta?.canRemoveMembers ?? false);
             setIsGlobalAdmin(json.meta?.isGlobalAdmin ?? false);
             setCanInviteMembersFlag(json.meta?.canInviteMembers ?? false);
+            setCanRemoveTarget(json.meta?.canRemoveTarget ?? {});
+            if (json.meta?.organizations?.length) {
+                setOrganizations(json.meta.organizations);
+            }
+            if (json.meta?.organizationId) {
+                setSelectedOrgId(json.meta.organizationId);
+            }
             const roles = buildInviteRoles(
                 json.meta?.invitableRoles,
                 json.meta?.roleLabels,
@@ -129,6 +154,11 @@ export default function PromoterTeamPage() {
 
     useEffect(() => { load(); }, [load]);
 
+    const handleOrgChange = (orgId: string) => {
+        setSelectedOrgId(orgId);
+        load(orgId);
+    };
+
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
         setInviting(true);
@@ -136,7 +166,7 @@ export default function PromoterTeamPage() {
             const res = await fetchWithTimeout("/api/promotor/team", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+                body: JSON.stringify({ email: inviteEmail, role: inviteRole, organizationId: selectedOrgId }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Erro ao enviar convite");
@@ -144,7 +174,7 @@ export default function PromoterTeamPage() {
             toast.success("Convite enviado com sucesso!");
             setShowInviteModal(false);
             setInviteEmail("");
-            load();
+            load(selectedOrgId || undefined);
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -156,7 +186,8 @@ export default function PromoterTeamPage() {
         if (!memberToRemove) return;
         setRemoving(true);
         try {
-            const res = await fetchWithTimeout(`/api/promotor/team/${memberToRemove.id}`, {
+            const qs = selectedOrgId ? `?organizationId=${encodeURIComponent(selectedOrgId)}` : "";
+            const res = await fetchWithTimeout(`/api/promotor/team/${memberToRemove.id}${qs}`, {
                 method: "DELETE",
             });
             const data = await res.json();
@@ -164,7 +195,7 @@ export default function PromoterTeamPage() {
 
             toast.success(`${memberToRemove.user.name ?? memberToRemove.user.email} foi removido da equipa.`);
             setMemberToRemove(null);
-            load();
+            load(selectedOrgId || undefined);
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : "Erro ao remover membro");
         } finally {
@@ -202,6 +233,25 @@ export default function PromoterTeamPage() {
                 <EmptyState icon={Users} title="Sem membros" description="Ainda não existem membros nas suas organizações." />
             )}
             {!loading && !error && members.length > 0 && (
+                <div className="space-y-4">
+                    {organizations.length > 1 && (
+                        <div className="flex items-center gap-3 px-1">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                Organização
+                            </label>
+                            <select
+                                value={selectedOrgId}
+                                onChange={(e) => handleOrgChange(e.target.value)}
+                                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white"
+                            >
+                                {organizations.map((org) => (
+                                    <option key={org.id} value={org.id}>
+                                        {org.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 <div className="bg-[#14141f] rounded-2xl border border-white/10 shadow-md overflow-hidden">
                     <table className="w-full text-sm">
                         <thead>
@@ -246,7 +296,7 @@ export default function PromoterTeamPage() {
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                                                     Protegido
                                                 </span>
-                                            ) : canRemoveMember(m, currentUserId, canRemoveMembers, isGlobalAdmin) ? (
+                                            ) : canRemoveMember(m, currentUserId, canRemoveMembers, isGlobalAdmin, canRemoveTarget) ? (
                                                 <button
                                                     type="button"
                                                     onClick={() => setMemberToRemove(m)}
@@ -263,6 +313,7 @@ export default function PromoterTeamPage() {
                             ))}
                         </tbody>
                     </table>
+                </div>
                 </div>
             )}
 
