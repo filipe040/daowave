@@ -113,17 +113,16 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
         },
         ...(eventId
           ? ([
-              { label: "Bilhética", href: `${baseEvent}/tickets`, icon: Ticket },
-              { label: "Vendas", href: `${baseEvent}/sales`, icon: CreditCard, activeMatch: (p) => p.includes("/sales") },
+              { label: "Bilhética", href: `${baseEvent}/bilhetes`, icon: Ticket, activeMatch: (p: string) => p.includes("/bilhetes") },
+              { label: "Vendas", href: `/promotor/sales?eventId=${eventId}`, icon: CreditCard, activeMatch: (p: string) => p.includes("/sales") },
               {
                 label: "Acesso",
                 href: `/promotor/checkin/${eventId}`,
                 icon: ShieldCheck,
-                activeMatch: (p) => p.includes("/checkin") && !p.endsWith("/checkins"),
+                activeMatch: (p: string) => p.includes("/checkin") && !p.includes("/checkins"),
               },
-              { label: "Lista check-ins", href: `${baseEvent}/checkins`, icon: FileCheck, activeMatch: (p) => p.includes("/checkins") },
-              { label: "Tracking links", href: `${baseEvent}/tracking-links`, icon: BarChart3, activeMatch: (p) => p.includes("/tracking-links") },
-              { label: "Carteiras", href: `${baseEvent}/carteiras`, icon: Wallet },
+              { label: "Lista check-ins", href: `${baseEvent}/checkins`, icon: FileCheck, activeMatch: (p: string) => p.includes("/checkins") },
+              { label: "Tracking links", href: `${baseEvent}/tracking-links`, icon: BarChart3, activeMatch: (p: string) => p.includes("/tracking-links") },
             ] as NavItem[])
           : ([] as NavItem[])),
         { label: "POS", icon: Database, disabled: true },
@@ -176,7 +175,7 @@ export default function PromoterSidebar({ eventId, currentSection }: PromoterSid
       title: "ANÁLISE",
       items: [
         { label: "Relatórios", href: "/promotor/analytics", icon: BarChart3, rightIcon: ChevronRight, activeMatch: (p) => p === "/promotor/analytics" },
-        { label: "Financeiro", href: "/promotor/finance", icon: CreditCard, activeMatch: (p) => p === "/promotor/finance" },
+        { label: "Financeiro", href: "/promotor/finance", icon: Wallet, activeMatch: (p: string) => p === "/promotor/finance" },
         { label: "Auditoria", icon: Database, rightIcon: ChevronRight, disabled: true },
       ],
     };

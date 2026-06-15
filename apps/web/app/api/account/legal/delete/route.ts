@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +32,34 @@ export async function POST(request: Request) {
     );
   }
 
+  const userId = session.user.id;
+
   try {
-    await prisma.user.delete({
-      where: { id: session.user.id },
+    await prisma.$transaction(async (tx) => {
+      const anonEmail = `deleted+${crypto.randomUUID()}@anon.livepass.local`;
+      const anonName = "Utilizador eliminado";
+
+      await tx.ticket.updateMany({
+        where: { userId },
+        data: { status: "CANCELLED", qrPayload: "voided" },
+      });
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          email: anonEmail,
+          name: anonName,
+          passwordHash: null,
+          avatarUrl: null,
+          phone: null,
+          marketingOptIn: false,
+        },
+      });
     });
-    return NextResponse.json({ success: true });
+
+    return NextResponse.json({ success: true, message: "Conta anonimizada com sucesso" });
   } catch (e) {
     console.error("[account-legal-delete] POST error:", e);
-    return NextResponse.json({ error: "Erro ao apagar conta" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao apagar conta. Contacta o suporte." }, { status: 500 });
   }
 }

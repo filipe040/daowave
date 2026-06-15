@@ -36,4 +36,11 @@ npm run build
 echo "🔄 Restarting Application..."
 pm2 restart ecosystem.production.config.js || pm2 start ecosystem.production.config.js
 
+# 7. Cron runner (VPS — não Vercel)
+chmod +x ../../scripts/cron-runner.sh 2>/dev/null || true
+
 echo "✅ Deployment Complete!"
+echo ""
+echo "📌 Crons: este projeto NÃO usa Vercel Cron."
+echo "   Configura crontab no servidor — ver infra/crontab.example"
+echo "   Teste: CRON_SECRET=... APP_BASE_URL=http://127.0.0.1:3000 ../../scripts/cron-runner.sh release-holds"

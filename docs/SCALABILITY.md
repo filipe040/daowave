@@ -180,7 +180,40 @@ Pontos-chave:
 
 Todos requerem header: `Authorization: Bearer $CRON_SECRET`
 
-Exemplo crontab:
+### VPS / PM2 (recomendado — sem Vercel)
+
+O projeto **não usa Vercel Cron**. Os jobs são endpoints HTTP que deves chamar com **crontab do sistema** ou o script incluído:
+
+```bash
+# No servidor, após deploy:
+chmod +x scripts/cron-runner.sh
+
+# Teste manual
+export CRON_SECRET="o-mesmo-do-.env"
+export APP_BASE_URL="http://127.0.0.1:3000"
+./scripts/cron-runner.sh release-holds
+```
+
+Instalar crontab de exemplo (ajusta caminhos em `infra/crontab.example`):
+
+```bash
+# Edita LIVEPASS_ROOT e APP_BASE_URL em infra/crontab.example
+crontab -e   # cola o conteúdo relevante
+# ou
+sudo touch /var/log/livepass-cron.log && sudo chown $USER:$USER /var/log/livepass-cron.log
+```
+
+| Script / job | Comando |
+|--------------|---------|
+| Holds | `./scripts/cron-runner.sh release-holds` |
+| Alertas | `./scripts/cron-runner.sh ticket-alerts` |
+| Emails | `./scripts/cron-runner.sh email-schedulers` |
+| Saldos | `./scripts/cron-runner.sh release-balances` |
+| Liquidações | `./scripts/cron-runner.sh auto-settlements` |
+
+`APP_BASE_URL` pode ser `http://127.0.0.1:3000` (directo ao PM2) ou o domínio público.
+
+### Exemplo crontab mínimo (curl)
 
 ```cron
 */2 * * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://livepass.pt/api/cron/release-holds

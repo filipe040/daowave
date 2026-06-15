@@ -11,8 +11,45 @@ import Image from 'next/image';
 import { MapPin, Calendar } from 'lucide-react';
 import { TicketSelector } from './ticket-selector';
 import { EventDetailFavorite } from './event-detail-favorite';
+import type { Metadata } from "next";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+const BASE_URL = process.env.NEXTAUTH_URL || process.env.APP_URL || "https://tickets.daowave.pt";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await prisma.event.findUnique({
+    where: { slug },
+    select: { title: true, description: true, city: true, coverImage: true, bannerUrl: true, status: true },
+  });
+  if (!event || event.status !== "PUBLISHED") {
+    return { title: "Evento | LivePass" };
+  }
+  const image = event.bannerUrl || event.coverImage;
+  const desc = event.description?.slice(0, 160) ?? `Bilhetes para ${event.title} em ${event.city}`;
+  return {
+    title: `${event.title} — Bilhetes | LivePass`,
+    description: desc,
+    openGraph: {
+      title: event.title,
+      description: desc,
+      url: `${BASE_URL}/events/${slug}`,
+      type: "website",
+      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: event.title }] } : {}),
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title: event.title,
+      description: desc,
+      ...(image ? { images: [image] } : {}),
+    },
+  };
+}
 
 async function getEvent(slug: string) {
   return await prisma.event.findUnique({

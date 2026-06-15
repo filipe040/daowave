@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils";
 import { generateQRCode } from "@/lib/qr/generate";
 import Image from "next/image";
 import { Lock, CheckCircle } from "lucide-react";
+import { TicketActions } from "@/components/ticket/ticket-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -87,9 +88,9 @@ export default async function TicketPage({
   const isUsed = Boolean(ticket.checkedInAt);
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-10 sm:py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <div className="public-shell min-h-screen py-10 sm:py-12">
+      <div className="mx-auto px-4 max-w-4xl">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#14141f] shadow-2xl">
           {/* Cover */}
           {ticket.event.coverImage ? (
             <div className="relative h-56 sm:h-64 w-full">
@@ -233,13 +234,16 @@ export default async function TicketPage({
                   </p>
                 </div>
 
-                {/* Action */}
+                {/* Actions */}
+                <TicketActions
+                  ticketId={ticket.id}
+                  canTransfer={!isUsed && ticket.status === "VALID"}
+                />
+
                 <div className="mt-4 w-full">
                   <a
                     href={`/events/${ticket.event.slug}`}
-                    className="inline-flex w-full items-center justify-center rounded-xl bg-secondary px-6 py-3 text-sm font-semibold text-secondary-foreground border border-border
-                           transition-colors hover:bg-secondary/80
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="inline-flex w-full items-center justify-center rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                   >
                     Ver página do evento
                   </a>

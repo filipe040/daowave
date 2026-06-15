@@ -6,7 +6,15 @@ const nextConfig = {
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV || "development",
   },
   images: {
-    domains: [],
+    remotePatterns: [
+      { protocol: "https", hostname: "**.amazonaws.com" },
+      { protocol: "https", hostname: "**.cloudinary.com" },
+      { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "**.vercel-storage.com" },
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "**" },
+    ],
   },
 
   // Mark bullmq and ioredis as external packages to prevent bundling during build

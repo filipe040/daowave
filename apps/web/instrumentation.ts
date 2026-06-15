@@ -30,21 +30,11 @@ export async function register() {
   // Only run in Node.js runtime (not Edge) and NOT during build
   if (process.env.NEXT_RUNTIME === "nodejs") {
     try {
-      // Initialize Sentry on server (only at runtime, lightweight)
-      // CRITICAL: Sentry temporarily disabled to fix build issues
-      // TODO: Re-enable when Sentry configuration is fixed
-      console.log("Sentry initialization skipped during build fix");
-
-      // if (process.env.SENTRY_DSN) {
-      //   const { initSentry } = await import("./lib/sentry");
-      //   await initSentry(); // Now async
-      // }
-
-      // CRITICAL: Do NOT call init() here - it would trigger Redis connection
-      // init() should be called on-demand in API routes that need it
-      // This prevents Redis connection attempts during build/SSG
+      if (process.env.SENTRY_DSN) {
+        const { initSentry } = await import("./lib/sentry");
+        await initSentry();
+      }
     } catch (error) {
-      // Log error but don't crash - instrumentation should be resilient
       console.error("⚠️  Instrumentation initialization failed:", error instanceof Error ? error.message : "unknown");
     }
   }

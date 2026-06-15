@@ -72,40 +72,44 @@ export async function POST(
       });
     }
 
-    // Create new ticket for recipient
-    const code = generateTicketCode();
-    const qrPayload = getQRPayload({ ticketId: '', code }); // Will be updated after creation
+    const newTicket = await prisma.$transaction(async (tx) => {
+      await tx.ticket.update({
+        where: { id: ticket.id },
+        data: {
+          status: "CANCELLED",
+          qrPayload: `voided:${ticket.id}:${Date.now()}`,
+        },
+      });
 
-    const newTicket = await prisma.ticket.create({
-      data: {
-        eventId: ticket.eventId,
-        orderId: ticket.orderId,
-        ticketLotId: ticket.ticketLotId,
-        userId: toUser.id,
-        code,
-        qrPayload,
-      },
-    });
+      const code = generateTicketCode();
+      const created = await tx.ticket.create({
+        data: {
+          eventId: ticket.eventId,
+          orderId: ticket.orderId,
+          ticketLotId: ticket.ticketLotId,
+          userId: toUser!.id,
+          code,
+          qrPayload: "",
+        },
+      });
 
-    // Update QR payload with ticket ID
-    const finalQRPayload = getQRPayload({ ticketId: newTicket.id, code });
-    await prisma.ticket.update({
-      where: { id: newTicket.id },
-      data: { qrPayload: finalQRPayload },
-    });
+      const finalQRPayload = getQRPayload({ ticketId: created.id, code });
+      await tx.ticket.update({
+        where: { id: created.id },
+        data: { qrPayload: finalQRPayload },
+      });
 
-    // Note: Old ticket remains valid, transfer creates a new ticket
-    // The TransferLog tracks the relationship
+      await tx.transferLog.create({
+        data: {
+          fromTicketId: ticket.id,
+          toTicketId: created.id,
+          fromUserId: session.user.id,
+          toUserId: toUser!.id,
+          toEmail,
+        },
+      });
 
-    // Create transfer log
-    await prisma.transferLog.create({
-      data: {
-        fromTicketId: ticket.id,
-        toTicketId: newTicket.id,
-        fromUserId: session.user.id,
-        toUserId: toUser.id,
-        toEmail,
-      },
+      return created;
     });
 
     return NextResponse.json({

@@ -94,9 +94,24 @@ export async function POST(req: Request) {
             role
         });
 
-        // In a real app, we would send the email here.
-        // For now, we'll return the success and log the token (simulating email send).
-        console.log(`[INVITE] Token for ${email}: ${rawToken}`);
+        const org = await prisma.organization.findUnique({ where: { id: orgId }, select: { name: true } });
+        const inviteLink = `${process.env.APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/invites/accept?token=${rawToken}`;
+
+        try {
+            const { EmailService } = await import("@/lib/email-service");
+            await EmailService.sendTemplate({
+                to: email.toLowerCase().trim(),
+                templateId: "invite-organization",
+                variables: {
+                    organizationName: org?.name ?? "LivePass",
+                    acceptUrl: inviteLink,
+                    expiresIn: "48 horas",
+                },
+                idempotencyKey: `invite-promotor-${orgId}-${email}-${invite.id}`,
+            });
+        } catch (emailError) {
+            safeLog.error("Failed to send invite email", emailError);
+        }
 
         return NextResponse.json({ success: true, inviteId: invite.id });
     } catch (error: any) {

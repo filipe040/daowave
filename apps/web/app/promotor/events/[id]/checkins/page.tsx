@@ -1,0 +1,64 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { PageShell } from "@/components/dashboard/PageShell";
+import { api } from "@/lib/api-client";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
+
+type Checkin = {
+  id: string;
+  checkedInAt: string;
+  ticket: { code: string; user: { name: string | null; email: string } };
+};
+
+export default function EventCheckinsPage() {
+  const params = useParams();
+  const eventId = params.id as string;
+  const [items, setItems] = useState<Checkin[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get<{ data: Checkin[] }>(`/api/promotor/events/${eventId}/checkins`);
+      setItems(data?.data ?? []);
+      setLoading(false);
+    })();
+  }, [eventId]);
+
+  return (
+    <PageShell title="Lista de check-ins" subtitle="Entradas registadas no evento">
+      <div className="dash-card overflow-hidden">
+        {loading ? (
+          <p className="p-6 text-sm text-neutral-500">A carregar…</p>
+        ) : items.length === 0 ? (
+          <p className="p-6 text-sm text-neutral-500">Ainda sem check-ins.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-neutral-50 border-b border-neutral-200">
+                <tr>
+                  <th className="text-left p-3 font-semibold">Bilhete</th>
+                  <th className="text-left p-3 font-semibold">Participante</th>
+                  <th className="text-left p-3 font-semibold">Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((c) => (
+                  <tr key={c.id} className="border-b border-neutral-100">
+                    <td className="p-3 font-mono">{c.ticket?.code}</td>
+                    <td className="p-3">{c.ticket?.user?.name || c.ticket?.user?.email}</td>
+                    <td className="p-3 text-neutral-500">
+                      {format(new Date(c.checkedInAt), "dd MMM yyyy HH:mm", { locale: pt })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </PageShell>
+  );
+}

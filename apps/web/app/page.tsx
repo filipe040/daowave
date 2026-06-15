@@ -13,6 +13,7 @@ import { EventCard } from "@/components/public/event-card";
 import { toEventCardData } from "@/components/public/event-mappers";
 import { SectionHeader } from "@/components/public/section-header";
 import { PromoterCta } from "@/components/public/promoter-cta";
+import { NewsletterSection } from "@/components/public/newsletter-section";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -108,6 +109,7 @@ export default async function Home() {
       </section>
 
       <PromoterCta />
+      <NewsletterSection />
     </div>
   );
 }

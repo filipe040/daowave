@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { LedgerService } from "./ledger.service";
 import { FinancialAuditService } from "./audit.service";
 import { WalletService } from "./wallet.service";
+import { stripePaymentProvider } from "@/lib/payment/stripe-provider";
 
 export class RefundService {
   static async createRefund(params: {
@@ -12,7 +13,7 @@ export class RefundService {
     idempotencyKey?: string;
     fullRefund?: boolean;
   }) {
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { id: params.orderId },
         include: {
@@ -27,9 +28,7 @@ export class RefundService {
       }
       if (order.status === "REFUNDED") throw new Error("Encomenda já reembolsada");
 
-      const amountCents = params.fullRefund !== false
-        ? order.financialBreakdown.totalCents
-        : order.financialBreakdown.totalCents;
+      const amountCents = order.financialBreakdown.totalCents;
 
       const refund = await tx.refund.create({
         data: {
@@ -91,8 +90,21 @@ export class RefundService {
         tx
       );
 
-      return { refund, reversal };
+      return { refund, reversal, order, amountCents };
     }, { isolationLevel: "Serializable" });
+
+    if (
+      result.order.paymentRef?.startsWith("pi_") &&
+      ["stripe", "STRIPE"].includes(result.order.paymentProvider ?? "")
+    ) {
+      try {
+        await stripePaymentProvider.refundPayment(result.order.paymentRef, result.amountCents);
+      } catch (stripeErr) {
+        console.error("[RefundService] Stripe refund failed:", stripeErr);
+      }
+    }
+
+    return { refund: result.refund, reversal: result.reversal };
   }
 
   static async list(filters: { page?: number; limit?: number; status?: string }) {

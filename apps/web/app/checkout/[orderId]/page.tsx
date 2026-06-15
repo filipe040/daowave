@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, MapPin, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { isStripePaymentsEnabled, isMockPaymentsEnabled } from '@/lib/payment';
 
 export const dynamic = "force-dynamic";
 
@@ -218,6 +219,8 @@ export default async function CheckoutPage({
                 totalCents={displayTotalCents}
                 feePaidBy={feePaidBy}
                 eventId={order.event.id}
+                stripePaymentsEnabled={isStripePaymentsEnabled()}
+                mockPaymentsEnabled={isMockPaymentsEnabled()}
               />
             </div>
           </div>

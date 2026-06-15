@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PaymentMethodSelector, type PaymentMethod } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentProcessingOverlay } from '@/components/checkout/PaymentProcessingOverlay';
+import { OrderStripeCheckout } from '@/components/checkout/OrderStripeCheckout';
 
 interface CheckoutFormProps {
   orderId: string;
@@ -26,6 +27,8 @@ interface CheckoutFormProps {
   totalCents: number;
   feePaidBy: "BUYER" | "ORGANIZER";
   eventId: string;
+  stripePaymentsEnabled?: boolean;
+  mockPaymentsEnabled?: boolean;
 }
 
 interface AppliedCoupon {
@@ -59,6 +62,8 @@ export function CheckoutForm({
   totalCents,
   feePaidBy,
   eventId,
+  stripePaymentsEnabled = false,
+  mockPaymentsEnabled = true,
 }: CheckoutFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -83,6 +88,8 @@ export function CheckoutForm({
 
   const couponDiscount = appliedCoupon?.discountCents ?? 0;
   const effectiveTotal = totalCents - couponDiscount;
+  const useStripeCard = stripePaymentsEnabled && paymentMethod === 'card';
+  const canMockPay = mockPaymentsEnabled && !useStripeCard;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -154,6 +161,11 @@ export function CheckoutForm({
     const paymentError = validatePaymentFields();
     if (paymentError) {
       setSubmitError(paymentError);
+      return;
+    }
+
+    if (!canMockPay && !useStripeCard) {
+      setSubmitError('Este método de pagamento estará disponível em breve. Use cartão.');
       return;
     }
 
@@ -306,7 +318,21 @@ export function CheckoutForm({
           <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
 
           <div className="mt-5 rounded-2xl border border-white/10 bg-[#0c0c12] p-5">
-            {paymentMethod === 'card' && (
+            {paymentMethod === 'card' && useStripeCard && (
+              <OrderStripeCheckout
+                orderId={orderId}
+                buyerName={formData.buyerName}
+                buyerEmail={formData.buyerEmail}
+                buyerPhone={formData.buyerPhone || formData.mbwayPhone}
+                couponId={appliedCoupon?.id}
+                discountCents={couponDiscount}
+                acceptedTerms={acceptedTerms}
+                onError={setSubmitError}
+                onSuccess={() => router.push(`/orders/${orderId}/success`)}
+              />
+            )}
+
+            {paymentMethod === 'card' && !useStripeCard && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-zinc-400 text-xs ml-1">Número do cartão</Label>
@@ -369,7 +395,9 @@ export function CheckoutForm({
             {paymentMethod === 'mbway' && (
               <div className="space-y-3">
                 <p className="text-sm text-zinc-400">
-                  Receberá uma notificação no telemóvel para autorizar o pagamento.
+                  {stripePaymentsEnabled && !mockPaymentsEnabled
+                    ? 'MB Way estará disponível em breve. Utilize cartão por agora.'
+                    : 'Receberá uma notificação no telemóvel para autorizar o pagamento.'}
                 </p>
                 <div className="space-y-2">
                   <Label className="text-zinc-400 text-xs ml-1">Número MB WAY *</Label>
@@ -492,10 +520,11 @@ export function CheckoutForm({
           </span>
         </div>
 
+        {!useStripeCard && (
         <Button
           type="submit"
           data-testid="btn-confirm-payment"
-          disabled={loading || !acceptedTerms}
+          disabled={loading || !acceptedTerms || (!canMockPay && !useStripeCard)}
           className="w-full h-14 rounded-2xl bg-[#00a0e3] text-white font-bold text-[15px] hover:bg-[#0090cc] shadow-lg shadow-[#00a0e3]/25 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:hover:translate-y-0"
           size="lg"
           aria-busy={loading}
@@ -515,6 +544,7 @@ export function CheckoutForm({
             `Pagar ${formatEuro(effectiveTotal)}`
           )}
         </Button>
+        )}
 
         <p className="text-center text-[11px] text-zinc-500 leading-relaxed">
           Os seus dados de pagamento são encriptados e nunca são armazenados nos nossos servidores.

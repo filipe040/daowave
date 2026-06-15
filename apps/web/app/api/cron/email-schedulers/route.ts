@@ -3,18 +3,16 @@ import { prisma } from "../../../../lib/prisma";
 import { enqueueTemplate } from "../../../../lib/email-service";
 import { TicketAlertService } from "../../../../lib/services/ticket-alert.service";
 import { safeLog } from "../../../../lib/security";
+import { verifyCronRequest } from "@/lib/cron-auth";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // 5 min for Vercel Hobby/Pro
+export const maxDuration = 300;
 
 export async function GET(request: Request) {
-    try {
-        const authHeader = request.headers.get("authorization");
-        if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-            safeLog.warn("Unauthorized cron access attempt", { ip: request.headers.get("x-forwarded-for") });
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
+    const authError = verifyCronRequest(request);
+    if (authError) return authError;
 
+    try {
         const results = {
             reminders: 0,
             thankYous: 0,
