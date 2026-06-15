@@ -84,7 +84,17 @@ function VerifyEmailContent() {
   };
 
   const handleResend = async () => {
-    setMessage("Funcionalidade de reenvio em breve...");
+    try {
+      const res = await fetch("/api/auth/resend-verification", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setMessage("Email de verificação reenviado. Verifica a tua caixa de entrada.");
+      } else {
+        setMessage(data.error || "Erro ao reenviar. Inicia sessão e tenta novamente.");
+      }
+    } catch {
+      setMessage("Erro de ligação. Tenta novamente.");
+    }
   };
 
   return (

@@ -1,13 +1,23 @@
 import type { MetadataRoute } from "next";
+import { getAppBaseUrl } from "@/lib/company";
 
-const BASE = process.env.NEXTAUTH_URL || process.env.APP_URL || "https://tickets.daowave.pt";
+const BASE = getAppBaseUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/promotor/", "/api/", "/checkout/", "/account/", "/auth/"],
+      disallow: [
+        "/admin/",
+        "/promotor/",
+        "/organizer/",
+        "/api/",
+        "/checkout/",
+        "/account/",
+        "/auth/",
+        "/validator/",
+      ],
     },
     sitemap: `${BASE}/sitemap.xml`,
   };

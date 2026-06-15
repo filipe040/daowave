@@ -10,6 +10,18 @@ import {
 import { EventCard } from "@/components/public/event-card";
 import { toEventCardData } from "@/components/public/event-mappers";
 import { SectionHeader } from "@/components/public/section-header";
+import type { Metadata } from "next";
+import { getAppBaseUrl } from "@/lib/company";
+
+export const metadata: Metadata = {
+  title: "Eventos",
+  description: "Descobre e compra bilhetes para os melhores eventos em Portugal",
+  openGraph: {
+    title: "Eventos | LivePass",
+    description: "Descobre e compra bilhetes para os melhores eventos em Portugal",
+    url: `${getAppBaseUrl()}/events`,
+  },
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

@@ -101,6 +101,13 @@ const envSchema = z.object({
   // Application
   APP_NAME: z.string().default("LivePass"),
   SUPPORT_EMAIL: z.string().email().optional(),
+  COMPANY_NAME: z.string().optional(),
+  COMPANY_NIF: z.string().optional(),
+  COMPANY_ADDRESS: z.string().optional(),
+
+  // Cron / Redis (obrigatórios em produção)
+  CRON_SECRET: z.string().min(16).optional(),
+  REDIS_URL: z.string().url().optional(),
 });
 
 /**
@@ -177,6 +184,22 @@ export const env = (() => {
         });
 
         return buildEnvSchema.parse(process.env);
+      }
+
+      // Produção: validar variáveis operacionais críticas
+      if (process.env.NODE_ENV === "production") {
+        const missing: string[] = [];
+        if (!process.env.CRON_SECRET || process.env.CRON_SECRET.length < 16) {
+          missing.push("CRON_SECRET (mín. 16 caracteres)");
+        }
+        if (!process.env.REDIS_URL) {
+          missing.push("REDIS_URL (filas de email e rate limit)");
+        }
+        if (missing.length > 0) {
+          console.error("❌ Variáveis obrigatórias em produção em falta:");
+          missing.forEach((m) => console.error(`   - ${m}`));
+          throw new Error(`Missing production env: ${missing.join(", ")}`);
+        }
       }
 
       // Normal validation for runtime

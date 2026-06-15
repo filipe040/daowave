@@ -13,7 +13,6 @@ const nextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "**.vercel-storage.com" },
       { protocol: "http", hostname: "localhost" },
-      { protocol: "https", hostname: "**" },
     ],
   },
 

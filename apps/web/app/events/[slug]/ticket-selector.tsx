@@ -108,32 +108,12 @@ export function TicketSelector({
 
     setLoadingCheckout(true);
     try {
-      // 1. Hold the tickets
-      const holdRes = await fetch('/api/checkout/hold', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId: event.id,
-          items,
-        }),
-      });
-
-      const body = await holdRes.json().catch(() => ({}));
-      if (!holdRes.ok) {
-        setCheckoutError(body.error || `Erro ${holdRes.status} ao reservar bilhetes`);
-        return;
-      }
-
-      const holds = body.holds;
-      // In a real implementation this would proceed to capturing payment information.
-      // For MVP without full stripe integration, we will automatically finalize checkout create
-
       const orderRes = await fetch('/api/checkout/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           eventId: event.id,
-          items: items.map(i => ({ ticketLotId: i.ticketLotId, quantity: i.qty })) // Legacy order compatibility
+          items: items.map(i => ({ ticketLotId: i.ticketLotId, quantity: i.qty }))
         })
       });
 

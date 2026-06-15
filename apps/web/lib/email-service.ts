@@ -55,6 +55,7 @@ export interface SendHtmlOptions {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string;
   idempotencyKey?: string;
   attachments?: Array<{
     filename: string;
@@ -611,7 +612,7 @@ export async function sendHtml(options: SendHtmlOptions): Promise<SendEmailResul
     const result = await client.emails.send({
       from: config.from,
       to: options.to,
-      replyTo: config.replyTo,
+      replyTo: options.replyTo ?? config.replyTo,
       subject: options.subject,
       html: options.html,
       text: options.text,

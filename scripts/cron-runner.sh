@@ -82,18 +82,27 @@ job_auto_settlements() {
   run_job "auto-settlements" GET "/api/cron/finance/auto-settlements"
 }
 
+job_expire_orders() {
+  run_job "expire-orders" GET "/api/cron/expire-orders"
+}
+
 case "${1:-all}" in
   release-holds)      job_release_holds ;;
   ticket-alerts)      job_ticket_alerts ;;
   email-schedulers)   job_email_schedulers ;;
   release-balances)   job_release_balances ;;
   auto-settlements)   job_auto_settlements ;;
+  expire-orders)      job_expire_orders ;;
   all)
     job_release_holds
     job_ticket_alerts
+    job_email_schedulers
+    job_release_balances
+    job_auto_settlements
+    job_expire_orders
   ;;
   *)
-    echo "Jobs: release-holds | ticket-alerts | email-schedulers | release-balances | auto-settlements | all"
+    echo "Jobs: release-holds | ticket-alerts | email-schedulers | release-balances | auto-settlements | expire-orders | all"
     exit 1
     ;;
 esac

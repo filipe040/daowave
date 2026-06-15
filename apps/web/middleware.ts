@@ -55,6 +55,15 @@ export async function middleware(request: NextRequest) {
   // Log entry point for diagnosis (minimal, no secrets)
   console.log("[middleware] entry", { path: pathname });
 
+  // Bloquear checkout mock em produção (salvo ENABLE_MOCK_PAYMENTS=true)
+  if (
+    pathname.startsWith("/checkout/mock") &&
+    process.env.NODE_ENV === "production" &&
+    process.env.ENABLE_MOCK_PAYMENTS !== "true"
+  ) {
+    return NextResponse.redirect(redirectUrl(request, "/"));
+  }
+
   // Early return for static files and NextAuth routes
   if (
     pathname.startsWith("/api/auth/") ||

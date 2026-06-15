@@ -14,11 +14,34 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+import { getAppBaseUrl } from "@/lib/company";
+
+const appUrl = getAppBaseUrl();
+
 export const metadata: Metadata = {
-  title: "LivePass - Marketplace de Bilhética",
+  title: {
+    default: "LivePass — Bilhetes para Eventos",
+    template: "%s | LivePass",
+  },
   description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
-  metadataBase: new URL("https://tickets.daowave.pt"),
+  metadataBase: new URL(appUrl),
   applicationName: "LivePass",
+  openGraph: {
+    type: "website",
+    locale: "pt_PT",
+    siteName: "LivePass",
+    title: "LivePass — Bilhetes para Eventos",
+    description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
+    url: appUrl,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LivePass — Bilhetes para Eventos",
+    description: "Compre bilhetes digitais seguros para os melhores eventos em Portugal",
+  },
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export function generateViewport() {

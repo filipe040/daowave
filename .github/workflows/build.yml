@@ -19,5 +19,17 @@ jobs:
       - name: Install (root)
         run: npm ci
 
+      - name: Generate Prisma client
+        working-directory: apps/web
+        run: npx prisma generate
+
+      - name: TypeScript check
+        working-directory: apps/web
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        working-directory: apps/web
+        run: npm test -- tests/unit
+
       - name: Build
         run: npm run build

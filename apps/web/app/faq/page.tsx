@@ -32,7 +32,7 @@ const FAQS = [
             },
             {
                 q: "Preciso de imprimir o bilhete?",
-                a: "Não. O QR code no telemóvel é suficiente. Podes até usar o teu bilhete na Apple Wallet ou Google Wallet.",
+                a: "Não. O QR code no telemóvel ou o PDF no email são suficientes para entrar no evento.",
             },
         ],
     },

@@ -29,5 +29,8 @@ APP_BASE_URL=http://127.0.0.1:3000
 # Libertar saldos financeiros (PENDING → AVAILABLE) — diário às 02:00
 0 2 * * * cd $LIVEPASS_ROOT && APP_BASE_URL=$APP_BASE_URL ./scripts/cron-runner.sh release-balances >> /var/log/livepass-cron.log 2>&1
 
-# Liquidações automáticas promotores — segunda-feira às 03:00
-0 3 * * 1 cd $LIVEPASS_ROOT && APP_BASE_URL=$APP_BASE_URL ./scripts/cron-runner.sh auto-settlements >> /var/log/livepass-cron.log 2>&1
+# Liquidações automáticas promotores — diário às 03:00
+0 3 * * * cd $LIVEPASS_ROOT && APP_BASE_URL=$APP_BASE_URL ./scripts/cron-runner.sh auto-settlements >> /var/log/livepass-cron.log 2>&1
+
+# Cancelar encomendas PENDING abandonadas — cada 15 minutos
+*/15 * * * * cd $LIVEPASS_ROOT && APP_BASE_URL=$APP_BASE_URL ./scripts/cron-runner.sh expire-orders >> /var/log/livepass-cron.log 2>&1

@@ -23,12 +23,13 @@ export default function Footer() {
                 Bilhetes para os melhores eventos em Portugal. Compra segura, QR instantâneo e check-in em tempo real.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {["MB Way", "Multibanco", "Visa", "Mastercard"].map((t) => (
+                {["Cartão", "MB Way*", "Multibanco*", "Apple Pay"].map((t) => (
                   <span key={t} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-zinc-400">
                     {t}
                   </span>
                 ))}
               </div>
+              <p className="mt-2 text-[10px] text-zinc-600">* Conforme disponibilidade no checkout</p>
             </div>
 
             <div>

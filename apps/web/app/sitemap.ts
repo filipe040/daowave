@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import type { MetadataRoute } from "next";
+import { getAppBaseUrl } from "@/lib/company";
 
-const BASE = process.env.NEXTAUTH_URL || process.env.APP_URL || "https://tickets.daowave.pt";
+const BASE = getAppBaseUrl();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = await prisma.event
@@ -21,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/politica-reembolsos`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
     { url: `${BASE}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE}/cookies`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE}/ral`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const eventPages: MetadataRoute.Sitemap = events.map((e) => ({

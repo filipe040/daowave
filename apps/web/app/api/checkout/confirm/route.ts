@@ -18,6 +18,13 @@ const confirmSchema = z.object({
 });
 
 export async function POST(req: Request) {
+    if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+            { error: "Endpoint descontinuado. Use /api/checkout/create e /api/checkout/[orderId]/confirm" },
+            { status: 410 }
+        );
+    }
+
     const rateLimitRes = await applyRateLimit(req, RATE_LIMITS.checkout);
     if (rateLimitRes) return rateLimitRes;
 

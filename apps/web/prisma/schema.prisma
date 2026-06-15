@@ -1579,3 +1579,23 @@ model PaymentProviderConfig {
   updatedAt     DateTime            @updatedAt
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  source    String?  @default("homepage") @db.VarChar(64)
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(120)
+  email     String   @db.VarChar(255)
+  subject   String   @db.VarChar(200)
+  message   String   @db.Text
+  status    String   @default("NEW") @db.VarChar(32)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+}
+

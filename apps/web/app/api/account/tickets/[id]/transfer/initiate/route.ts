@@ -104,6 +104,11 @@ export async function POST(
       },
     });
 
+    await prisma.ticket.update({
+      where: { id: ticket.id },
+      data: { status: "CANCELLED" },
+    });
+
     return NextResponse.json({
       success: true,
       newTicketId: newTicket.id,

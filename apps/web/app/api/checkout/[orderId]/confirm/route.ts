@@ -1,23 +1,17 @@
 /**
  * POST /api/checkout/[orderId]/confirm
- * Step 2: Validate buyer (buyerName, buyerEmail required), then confirm payment and issue tickets.
- * Body: { buyerName, buyerEmail, buyerPhone?, paymentMock?: boolean, paymentIntentId?: string }
+ * Validate buyer info, confirm payment, issue tickets (idempotent).
  */
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPaymentProvider } from "@/lib/payment";
-import { generateTicketCode } from "@/lib/utils";
-import { getQRPayload } from "@/lib/qr/generate";
+import { getPaymentProvider, isMockPaymentsEnabled } from "@/lib/payment";
 import { checkoutConfirmSchema } from "@/lib/security/validation";
 import { sendTicketsEmail } from "@/lib/email-service";
-import { recordCouponCommission } from "@/lib/coupons/coupon-commission";
-import { validateCouponForCheckout } from "@/lib/coupons/validate-coupon";
-import { OrderFinanceService } from "@/lib/finance";
+import { fulfillPaidOrder } from "@/lib/checkout/fulfill-order.service";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security";
-import type { PaymentProviderKind } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -55,10 +49,6 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        items: { include: { ticketLot: true } },
-        event: true,
-      },
     });
 
     if (!order) {
@@ -67,6 +57,7 @@ export async function POST(
     if (order.userId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
     if (order.status === "PAID") {
       sendTicketsEmail(order.id, {
         idempotencyKey: `ticket-delivery-resend-${order.id}-${Date.now()}`,
@@ -82,6 +73,13 @@ export async function POST(
 
     const paymentMock = validated.paymentMock === true;
     const paymentIntentId = b.paymentIntentId as string | undefined;
+
+    if (paymentMock && !isMockPaymentsEnabled()) {
+      return NextResponse.json(
+        { error: "Pagamentos simulados não estão disponíveis" },
+        { status: 403 }
+      );
+    }
 
     let paymentRef: string;
     let paymentProviderName: string;
@@ -99,7 +97,7 @@ export async function POST(
         );
       }
       paymentRef = result.paymentRef;
-      paymentProviderName = "stripe"; // or from provider
+      paymentProviderName = "stripe";
     } else {
       return NextResponse.json(
         { error: "Provide paymentMock: true or paymentIntentId" },
@@ -107,128 +105,27 @@ export async function POST(
       );
     }
 
-    // Validate coupon server-side (if provided)
     const couponId = typeof b.couponId === "string" ? b.couponId : undefined;
-    let verifiedDiscount = 0;
-    let couponApplied = false;
+    const bodyMethod =
+      typeof b.paymentMethodCode === "string" ? b.paymentMethodCode : undefined;
 
-    const baseTotal = order.items.reduce(
-      (sum, item) => sum + item.quantity * item.unitPriceCents,
-      0
-    );
-
-    if (couponId) {
-      const couponResult = await validateCouponForCheckout({
-        couponId,
-        eventId: order.eventId,
-        totalCents: baseTotal,
-      });
-
-      if (couponResult.ok) {
-        couponApplied = true;
-        verifiedDiscount = couponResult.discountCents;
-      }
-    }
-
-    const finalTotal = Math.max(0, baseTotal - verifiedDiscount);
-
-    await prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          buyerName: validated.buyerName,
-          buyerEmail: validated.buyerEmail,
-          buyerPhone: validated.buyerPhone ?? null,
-          status: "PAID",
-          paymentProvider: paymentProviderName,
-          paymentRef,
-          totalCents: finalTotal,
-        },
-      });
-
-      // Increment coupon usage + register affiliate commission
-      if (couponId && couponApplied) {
-        await tx.coupon.update({
-          where: { id: couponId },
-          data: { usedCount: { increment: 1 } },
-        });
-        await recordCouponCommission(tx, couponId, order.id);
-      }
-
-      for (const item of order.items) {
-        for (let i = 0; i < item.quantity; i++) {
-          const code = generateTicketCode();
-          const ticket = await tx.ticket.create({
-            data: {
-              orderId: order.id,
-              eventId: order.eventId,
-              userId: order.userId,
-              ticketLotId: item.ticketLotId,
-              code,
-              qrPayload: "",
-            },
-          });
-          const finalQRPayload = getQRPayload({ ticketId: ticket.id, code });
-          await tx.ticket.update({
-            where: { id: ticket.id },
-            data: { qrPayload: finalQRPayload },
-          });
-          await tx.ticketLot.update({
-            where: { id: item.ticketLotId },
-            data: { quantitySold: { increment: 1 } },
-          });
-        }
-      }
+    const result = await fulfillPaidOrder(orderId, {
+      paymentRef,
+      paymentProviderName,
+      buyerName: validated.buyerName,
+      buyerEmail: validated.buyerEmail,
+      buyerPhone: validated.buyerPhone ?? null,
+      couponId,
+      paymentMethodCode: bodyMethod,
     });
-
-    try {
-      const providerMap: Record<string, PaymentProviderKind> = {
-        stripe: "STRIPE",
-        STRIPE: "STRIPE",
-        eupago: "EUPAGO",
-        EUPAGO: "EUPAGO",
-        mbway: "MBWAY",
-        MBWAY: "MBWAY",
-        multibanco: "MULTIBANCO",
-        MULTIBANCO: "MULTIBANCO",
-        paypal: "PAYPAL",
-        PAYPAL: "PAYPAL",
-        manual: "MANUAL",
-        MOCK: "MANUAL",
-      };
-      const methodCodeMap: Record<string, string> = {
-        mock: "MBWAY",
-        mbway: "MBWAY",
-        MBWAY: "MBWAY",
-        multibanco: "MULTIBANCO",
-        MULTIBANCO: "MULTIBANCO",
-        stripe: "VISA",
-        eupago: "MBWAY",
-        EUPAGO: "MBWAY",
-        paypal: "VISA",
-        PAYPAL: "VISA",
-      };
-      const bodyMethod =
-        typeof b.paymentMethodCode === "string" ? b.paymentMethodCode.toUpperCase() : undefined;
-      await OrderFinanceService.processOrderPayment(order.id, {
-        paymentProvider: providerMap[paymentProviderName] ?? "MANUAL",
-        paymentMethodCode: bodyMethod ?? methodCodeMap[paymentProviderName] ?? "MBWAY",
-        idempotencyKey: `order-payment:${order.id}`,
-      });
-    } catch (financeErr) {
-      console.error("[checkout/confirm] Finance ledger error:", financeErr);
-    }
-
-    try {
-      await sendTicketsEmail(order.id);
-    } catch (emailErr) {
-      console.error("[checkout/confirm] Error sending ticket email:", emailErr);
-    }
 
     return NextResponse.json({
       success: true,
-      orderId: order.id,
-      message: "Payment confirmed and tickets issued",
+      orderId: result.orderId,
+      ticketsIssued: result.ticketsIssued,
+      message: result.alreadyFulfilled
+        ? "Order already paid"
+        : "Payment confirmed and tickets issued",
     });
   } catch (error: unknown) {
     const err = error as { name?: string; errors?: unknown };

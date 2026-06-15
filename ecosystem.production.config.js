@@ -5,9 +5,13 @@
  * e usar nginx upstream (infra/nginx/livepass.conf.example).
  *
  * Com múltiplas instâncias, REDIS_URL é obrigatório para rate limit coerente.
+ *
+ * Arranque:
+ *   pm2 start ecosystem.production.config.js
  */
 
 const instances = Number(process.env.PM2_INSTANCES || 1);
+const appDir = process.env.LIVEPASS_APP_DIR || "/var/www/daowave/daowave/apps/web";
 
 module.exports = {
   apps: [
@@ -15,7 +19,7 @@ module.exports = {
       name: "livepass",
       script: "npm",
       args: "start",
-      cwd: process.env.LIVEPASS_APP_DIR || "/var/www/daowave/daowave/apps/web",
+      cwd: appDir,
       instances,
       exec_mode: instances > 1 ? "cluster" : "fork",
       autorestart: true,
@@ -31,6 +35,23 @@ module.exports = {
       restart_delay: 2000,
       max_restarts: 15,
       min_uptime: "10s",
+      merge_logs: true,
+      time: true,
+    },
+    {
+      name: "livepass-email-worker",
+      script: "npx",
+      args: "tsx scripts/email-worker.ts",
+      cwd: appDir,
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "512M",
+      env: {
+        NODE_ENV: "production",
+        NEXT_TELEMETRY_DISABLED: "1",
+      },
       merge_logs: true,
       time: true,
     },

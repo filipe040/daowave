@@ -14,6 +14,18 @@ import { toEventCardData } from "@/components/public/event-mappers";
 import { SectionHeader } from "@/components/public/section-header";
 import { PromoterCta } from "@/components/public/promoter-cta";
 import { NewsletterSection } from "@/components/public/newsletter-section";
+import type { Metadata } from "next";
+import { getAppBaseUrl } from "@/lib/company";
+
+export const metadata: Metadata = {
+  title: "LivePass — Bilhetes para Eventos em Portugal",
+  description: "Compra bilhetes digitais seguros para concertos, festivais e eventos. QR instantâneo e check-in em tempo real.",
+  openGraph: {
+    title: "LivePass — Bilhetes para Eventos",
+    description: "Compra bilhetes digitais seguros para os melhores eventos em Portugal",
+    url: getAppBaseUrl(),
+  },
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
