@@ -1,11 +1,18 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { DM_Sans } from "next/font/google";
 import { Providers } from "./providers";
 import ConditionalNav from "./components/conditional-nav";
 import { BetaBanner } from "./components/beta-banner";
 import ConditionalFooter from "./components/conditional-footer";
 import { CookieBanner } from "./components/cookie-banner";
 import { Toaster } from "sonner";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "LivePass - Marketplace de Bilhética",
@@ -17,8 +24,8 @@ export const metadata: Metadata = {
 export function generateViewport() {
   return {
     themeColor: [
-      { media: "(prefers-color-scheme: dark)", color: "#7c3aed" },
-      { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+      { media: "(prefers-color-scheme: dark)", color: "#0c0c12" },
+      { media: "(prefers-color-scheme: light)", color: "#0c0c12" },
     ] as const,
   };
 }
@@ -26,7 +33,7 @@ export function generateViewport() {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt" suppressHydrationWarning>
-      <body className="min-h-screen bg-[hsl(var(--background))] text-foreground antialiased">
+      <body className={`${dmSans.variable} min-h-screen font-sans antialiased`}>
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Toaster position="top-center" richColors />

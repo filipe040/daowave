@@ -140,7 +140,7 @@ export default async function EventPage({
 
   return (
     <div
-      className="min-h-screen mesh-gradient text-neutral-900"
+      className="public-shell min-h-screen"
       style={{ fontFamily: 'var(--event-font)' }}
     >
       <script
@@ -173,7 +173,7 @@ export default async function EventPage({
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-20">
-        <div className="bg-white rounded-[32px] border border-neutral-200 overflow-hidden shadow-xl">
+        <div className="bg-[#14141f] rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
           {/* Banner customizado ou cover image */}
           {event.bannerUrl ? (
             <div className="relative h-64 sm:h-96 w-full group">
@@ -199,7 +199,7 @@ export default async function EventPage({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             </div>
           ) : (
-            <div className="h-40 bg-gradient-to-br from-violet-50 to-fuchsia-50" />
+            <div className="h-40 bg-gradient-to-br from-[#1e3a5f] to-[#0c0c12]" />
           )}
 
           <div className="p-6 sm:p-10 md:p-16">
@@ -214,7 +214,7 @@ export default async function EventPage({
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-neutral-900 tracking-tight leading-[1.1]">
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.1]">
                     {event.title}
                   </h1>
                   <EventDetailFavorite eventId={event.id} />
@@ -224,40 +224,40 @@ export default async function EventPage({
                   <section>
                     {event.useCustomLandingPage && event.landingPageContent ? (
                       <div 
-                        className="custom-landing-page prose prose-neutral max-w-none text-neutral-700 leading-[1.7]"
+                        className="custom-landing-page prose prose-invert max-w-none text-zinc-300 leading-[1.7]"
                         dangerouslySetInnerHTML={{ __html: event.landingPageContent }}
                       />
                     ) : (
                       <>
-                        <h2 className="text-[12px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
-                        <p className="text-neutral-700 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
+                        <h2 className="text-[12px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-4">Sobre o Evento</h2>
+                        <p className="text-zinc-300 text-[16px] sm:text-[17px] leading-[1.7] whitespace-pre-line">
                           {event.description}
                         </p>
                       </>
                     )}
                   </section>
 
-                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-neutral-200">
+                  <section className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-white/10">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
-                        <MapPin className="h-5 w-5 text-violet-600" strokeWidth={2} />
+                      <div className="h-12 w-12 rounded-2xl bg-[#00a0e3]/10 border border-[#00a0e3]/20 flex items-center justify-center shrink-0">
+                        <MapPin className="h-5 w-5 text-[#5ec8f8]" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Localização</p>
-                        <p className="text-neutral-900 font-semibold text-[15px]">{event.venue}</p>
-                        <p className="text-[14px] text-neutral-600">{event.city}</p>
+                        <p className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Localização</p>
+                        <p className="text-white font-semibold text-[15px]">{event.venue}</p>
+                        <p className="text-[14px] text-zinc-400">{event.city}</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
-                        <Calendar className="h-5 w-5 text-violet-600" strokeWidth={2} />
+                      <div className="h-12 w-12 rounded-2xl bg-[#00a0e3]/10 border border-[#00a0e3]/20 flex items-center justify-center shrink-0">
+                        <Calendar className="h-5 w-5 text-[#5ec8f8]" strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5">Data e Hora</p>
-                        <p className="text-neutral-900 font-semibold text-[15px]">{formatDate(event.startAt)}</p>
+                        <p className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Data e Hora</p>
+                        <p className="text-white font-semibold text-[15px]">{formatDate(event.startAt)}</p>
                         {event.endAt && (
-                          <p className="text-[14px] text-neutral-600">até {formatDate(event.endAt)}</p>
+                          <p className="text-[14px] text-zinc-400">até {formatDate(event.endAt)}</p>
                         )}
                       </div>
                     </div>
@@ -270,7 +270,7 @@ export default async function EventPage({
                   <TicketSelector
                     event={event}
                     ticketLots={event.ticketLots}
-                    variant="light"
+                    variant="dark"
                     presaveEnabled={event.presaveEnabled}
                     userEmail={session?.user?.email}
                     userName={session?.user?.name}
