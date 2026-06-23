@@ -28,22 +28,24 @@ function FilterSelect({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex-1 min-w-[140px] border-l border-white/10 first:border-l-0 pl-4 first:pl-0">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-3.5 w-3.5 text-[#00a0e3]" />
-        <span className="public-search-label">{label}</span>
+    <div className="flex items-center gap-3 h-full">
+      <div className="h-10 w-10 rounded-xl bg-[#00a0e3]/10 flex items-center justify-center shrink-0">
+        <Icon className="h-5 w-5 text-[#00a0e3]" />
       </div>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent border-0 text-white font-semibold text-sm focus:outline-none appearance-none cursor-pointer pr-6"
-      >
-        {children}
-      </select>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+      <div className="relative flex-1 min-w-0">
+        <span className="public-search-label block mb-1.5">{label}</span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent border-0 text-white font-semibold text-base focus:outline-none appearance-none cursor-pointer pr-5"
+        >
+          {children}
+        </select>
+        <div className="absolute right-0 top-1/2 pointer-events-none text-zinc-500">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
     </div>
   );
@@ -108,19 +110,22 @@ export default function EventsSearch({
 
   const wrapperCls =
     variant === "hero"
-      ? "public-search-bar p-2 sm:p-3"
+      ? "public-search-bar p-2"
       : "rounded-xl border border-white/10 bg-[#14141f] p-3";
 
   return (
     <div className="space-y-3">
       <div className={wrapperCls}>
-        <div className="flex flex-col lg:flex-row lg:items-stretch gap-0 lg:gap-0">
-          <div className="flex-1 flex items-center gap-3 px-4 py-3 lg:py-4 border-b lg:border-b-0 lg:border-r border-white/10">
-            <Search className="h-5 w-5 text-[#00a0e3] shrink-0" />
+        <div className="flex flex-col lg:flex-row lg:items-stretch gap-0">
+          {/* Search field */}
+          <div className="flex-1 flex items-center gap-4 px-6 py-5 lg:py-6 border-b lg:border-b-0 lg:border-r border-white/[0.08]">
+            <div className="h-11 w-11 rounded-xl bg-[#00a0e3]/10 flex items-center justify-center shrink-0">
+              <Search className="h-5 w-5 text-[#00a0e3]" />
+            </div>
             <div className="flex-1 min-w-0">
-              <span className="public-search-label block mb-1">O quê?</span>
+              <span className="public-search-label block mb-1.5">O quê?</span>
               <input
-                type="search"
+                type="text"
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Festival, concerto, nome do evento..."
@@ -130,7 +135,7 @@ export default function EventsSearch({
           </div>
 
           {cityOptions.length > 0 && (
-            <div className="px-4 py-3 lg:py-4 border-b lg:border-b-0 lg:border-r border-white/10 lg:min-w-[200px]">
+            <div className="px-6 py-5 lg:py-6 border-b lg:border-b-0 lg:border-r border-white/[0.08] lg:min-w-[210px]">
               <FilterSelect label="Onde?" icon={MapPin} value={city} onChange={(v) => { setCity(v); pushFilters(search, v, category); }}>
                 <option value="ALL PORTUGAL">Todo Portugal</option>
                 {cityOptions.map((c) => (
@@ -141,7 +146,7 @@ export default function EventsSearch({
           )}
 
           {categoryOptions.length > 0 && (
-            <div className="px-4 py-3 lg:py-4 lg:min-w-[180px]">
+            <div className="px-6 py-5 lg:py-6 lg:min-w-[190px]">
               <FilterSelect label="Género" icon={Music2} value={category} onChange={(v) => { setCategory(v); pushFilters(search, city, v); }}>
                 <option value="ALL">Todos</option>
                 {categoryOptions.map((c) => (
@@ -150,6 +155,7 @@ export default function EventsSearch({
               </FilterSelect>
             </div>
           )}
+
         </div>
       </div>
 

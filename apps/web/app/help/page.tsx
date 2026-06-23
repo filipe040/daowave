@@ -7,7 +7,7 @@ export default function HelpPage() {
       title="Ajuda"
       subtitle="Guia rápido para comprar bilhetes e gerir a tua conta."
     >
-      <div className="space-y-5 sm:space-y-6 max-w-3xl">
+      <div className="space-y-5 sm:space-y-6">
         <PublicCard>
           <h2 className="text-lg font-bold text-white mb-4">Como comprar bilhetes</h2>
           <ol className="list-decimal list-inside text-zinc-400 space-y-2 text-sm sm:text-base">

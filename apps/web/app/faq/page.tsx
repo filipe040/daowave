@@ -71,7 +71,7 @@ export default function FAQPage() {
             subtitle="Não encontras o que procuras? Contacta support@livepass.pt"
             backHref="/"
         >
-            <div className="space-y-8 max-w-3xl">
+            <div className="space-y-8">
                 {FAQS.map((section) => (
                     <div key={section.category}>
                         <h2 className="text-[11px] uppercase tracking-wider text-zinc-500 font-bold mb-3">

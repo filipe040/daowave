@@ -28,7 +28,7 @@ export function PublicPage({
             {backLabel}
           </Link>
         )}
-        <header className="mb-8 sm:mb-10 max-w-3xl">
+        <header className="mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
             {title}
           </h1>

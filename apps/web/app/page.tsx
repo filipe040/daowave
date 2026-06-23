@@ -93,10 +93,10 @@ export default async function Home() {
       )}
 
       {showWeekCarousel && (
-        <section className="py-8 sm:py-12 border-t border-white/[0.06]">
+        <section className="py-10 sm:py-14 border-t border-white/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeader title="Esta semana" subtitle="Próximos 7 dias" href="/events" />
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {weekCards.slice(0, 8).map((event) => (
                 <EventCard key={event.id} event={event} variant="compact" />
               ))}
@@ -105,18 +105,23 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="py-10 sm:py-14 border-t border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-xl sm:text-2xl font-black text-white">Explora todos os eventos</h2>
-          <p className="mt-2 text-sm text-zinc-400 max-w-lg mx-auto">
-            Filtra por cidade, género ou pesquisa pelo nome do evento.
-          </p>
-          <Link
-            href="/events"
-            className="inline-flex items-center gap-2 mt-6 rounded-full bg-[#00a0e3] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#0090cc] transition-colors shadow-lg shadow-[#00a0e3]/20"
-          >
-            Ver todos os eventos <ArrowRight className="h-4 w-4" />
-          </Link>
+      <section className="py-12 sm:py-16 border-t border-white/[0.06]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-r from-[#0d1b2e] to-[#0c0c12] px-8 py-12 sm:py-16 text-center">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-[#00a0e3]/10 blur-[60px] rounded-full pointer-events-none" />
+            <div className="relative">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Explora todos os eventos</h2>
+              <p className="mt-3 text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+                Filtra por cidade, género ou pesquisa pelo nome do evento.
+              </p>
+              <Link
+                href="/events"
+                className="inline-flex items-center gap-2 mt-8 rounded-full bg-[#00a0e3] px-8 py-3.5 text-sm font-bold text-white hover:bg-[#0090cc] transition-all shadow-xl shadow-[#00a0e3]/25 hover:shadow-[#00a0e3]/40 hover:scale-[1.02]"
+              >
+                Ver todos os eventos <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

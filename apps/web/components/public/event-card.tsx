@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, MapPin, ArrowUpRight } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 import { EventFavoriteSlot } from "@/components/favorites/event-favorite-slot";
 
 export type PublicEventCardData = {
@@ -46,15 +46,22 @@ export function EventCard({
 
   return (
     <article
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14141f] transition-all duration-300 hover:border-[#00a0e3]/40 hover:shadow-[0_8px_40px_rgba(0,160,227,0.12)] ${
-        isFeatured ? "min-w-[72vw] sm:min-w-[300px] md:min-w-[320px] max-w-[360px] snap-start shrink-0" : ""
+      className={`group relative flex flex-col overflow-hidden rounded-2xl bg-[#111118] transition-all duration-300 card-shimmer glow-hover border border-white/[0.07] ${
+        isFeatured
+          ? "min-w-[72vw] sm:min-w-[280px] md:min-w-[300px] max-w-[340px] snap-start shrink-0"
+          : ""
       }`}
     >
       <EventFavoriteSlot eventId={event.id} />
       <Link href={`/events/${event.slug}`} className="flex flex-col h-full">
+        {/* Image container */}
         <div
           className={`relative overflow-hidden bg-[#1a1a28] ${
-            isFeatured ? "aspect-[3/4]" : isCompact ? "aspect-[16/10]" : "aspect-[4/5] sm:aspect-[3/4]"
+            isFeatured
+              ? "aspect-[2/3]"
+              : isCompact
+              ? "aspect-[3/2]"
+              : "aspect-[2/3] sm:aspect-[2/3]"
           }`}
         >
           {image ? (
@@ -62,42 +69,44 @@ export function EventCard({
               src={image}
               alt={event.title}
               fill
-              sizes={isFeatured ? "320px" : "(max-width: 640px) 100vw, 33vw"}
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes={isFeatured ? "300px" : "(max-width: 640px) 50vw, 25vw"}
+              className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
               unoptimized
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a5f] to-[#0c0c12] flex items-center justify-center">
-              <span className="text-4xl font-black text-white/20">LP</span>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a5f] via-[#0d1f3c] to-[#0c0c12] flex items-center justify-center">
+              <span className="text-5xl font-black text-white/10 tracking-tighter">LP</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-[#0c0c12]/40 to-transparent" />
+
+          {/* Gradient overlay – stronger at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111118] via-[#111118]/30 to-transparent" />
+
+          {/* Price badge */}
           {event.minPriceCents != null && (
-            <div className="absolute bottom-3 left-3 rounded-lg bg-black/60 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-white border border-white/10">
-              Desde {formatPrice(event.minPriceCents)}
+            <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-[#00a0e3] px-2.5 py-1 text-xs font-black text-white shadow-lg shadow-[#00a0e3]/30">
+              {formatPrice(event.minPriceCents)}
             </div>
           )}
-          <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/10">
-            <ArrowUpRight className="h-4 w-4 text-white" />
-          </div>
         </div>
 
+        {/* Info */}
         <div className={`flex flex-col flex-1 ${isCompact ? "p-3" : "p-4"}`}>
           <h3
-            className={`font-bold text-white leading-snug line-clamp-2 group-hover:text-[#5ec8f8] transition-colors ${
+            className={`font-bold text-white leading-snug line-clamp-2 group-hover:text-[#5ec8f8] transition-colors duration-200 ${
               isCompact ? "text-sm" : "text-[15px] sm:text-base"
             }`}
           >
             {event.title}
           </h3>
-          <div className={`mt-2.5 space-y-1.5 text-zinc-400 ${isCompact ? "text-xs" : "text-[13px]"}`}>
-            <p className="flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 shrink-0 text-[#00a0e3]" />
-              <span className="capitalize">{formatDatePT(event.startAt)}</span>
+          <div className={`mt-2.5 space-y-1 text-zinc-500 ${isCompact ? "text-xs" : "text-[12px]"}`}>
+            <p className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 shrink-0 text-[#00a0e3]" />
+              <span className="capitalize text-zinc-400">{formatDatePT(event.startAt)}</span>
             </p>
-            <p className="flex items-center gap-2">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#00a0e3]" />
-              <span className="line-clamp-1">
+            <p className="flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 shrink-0 text-[#00a0e3]" />
+              <span className="line-clamp-1 text-zinc-400">
                 {event.venue}, {event.city}
               </span>
             </p>

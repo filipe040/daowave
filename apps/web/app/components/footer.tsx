@@ -14,7 +14,7 @@ export default function Footer() {
   const isStaff = isStaffAccount(role, hasOrgAccess);
 
   return (
-    <footer className="mt-auto border-t border-white/[0.08] bg-[#08080e]">
+    <footer className="mt-auto border-t border-white/[0.06] bg-[#08080e]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="py-12 md:py-16">
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
@@ -32,13 +32,12 @@ export default function Footer() {
                 Bilhetes para os melhores eventos em Portugal. Compra segura, QR instantâneo e check-in em tempo real.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {["Cartão", "Visa", "Mastercard"].map((t) => (
-                  <span key={t} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-zinc-400">
+                {["Visa", "Mastercard", "MB Way", "Stripe"].map((t) => (
+                  <span key={t} className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[11px] font-semibold text-zinc-500">
                     {t}
                   </span>
                 ))}
               </div>
-              <p className="mt-2 text-[10px] text-zinc-600">Pagamento seguro processado pela Stripe</p>
             </div>
 
             <div>

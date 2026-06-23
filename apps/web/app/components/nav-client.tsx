@@ -162,34 +162,34 @@ export default function NavClient() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-white/[0.08] bg-[#0c0c12]/90 backdrop-blur-xl shadow-lg shadow-black/20"
+          ? "border-b border-white/[0.08] bg-[#0c0c12]/95 backdrop-blur-xl shadow-xl shadow-black/30"
           : "bg-transparent"
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-[72px]">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#00a0e3] to-[#0066aa] flex items-center justify-center shadow-lg shadow-[#00a0e3]/25 group-hover:shadow-[#00a0e3]/40 transition-shadow">
+        <div className="flex items-center justify-between h-16 md:h-[68px]">
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#00a0e3] to-[#0055aa] flex items-center justify-center shadow-lg shadow-[#00a0e3]/30 group-hover:shadow-[#00a0e3]/50 transition-all group-hover:scale-105">
               <Ticket className="h-4 w-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-white font-black text-xl tracking-tight">LivePass</span>
+            <span className="text-white font-black text-lg tracking-tight">LivePass</span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            <Link href="/events" className={navLink}>Eventos</Link>
+          <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            <Link href="/events" className="rounded-lg px-4 py-2 text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-all">Eventos</Link>
             {session && !isStaff && (
-              <Link href="/my-tickets" className={navLink}>Meus bilhetes</Link>
+              <Link href="/my-tickets" className="rounded-lg px-4 py-2 text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-all">Meus bilhetes</Link>
             )}
-            <Link href="/help" className={navLink}>Ajuda</Link>
+            <Link href="/help" className="rounded-lg px-4 py-2 text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-all">Ajuda</Link>
           </nav>
 
           <div className="flex items-center gap-3">
             <Link
               href="/events"
-              className="hidden md:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+              className="hidden md:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-white/8 hover:text-zinc-200 hover:border-white/15 transition-all"
             >
-              <Search className="h-4 w-4" />
-              Pesquisar
+              <Search className="h-3.5 w-3.5" />
+              <span>Pesquisar eventos…</span>
             </Link>
 
             {session ? (

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { EventCard, type PublicEventCardData } from "./event-card";
 import { SectionHeader } from "./section-header";
+import Link from "next/link";
 
 export function EventCarousel({
   title,
@@ -19,10 +20,27 @@ export function EventCarousel({
   linkLabel?: string;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateScrollState = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 8);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 8);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    updateScrollState();
+    return () => el.removeEventListener("scroll", updateScrollState);
+  }, []);
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
-    const amount = scrollRef.current.clientWidth * 0.85;
+    const amount = scrollRef.current.clientWidth * 0.8;
     scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
   };
 
@@ -31,13 +49,18 @@ export function EventCarousel({
   return (
     <section className="py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between gap-4 mb-6">
-          <SectionHeader title={title} subtitle={subtitle} />
+        <div className="flex items-end justify-between gap-4 mb-8">
+          <SectionHeader title={title} subtitle={subtitle} href={href} linkLabel={linkLabel} />
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="h-10 w-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+              disabled={!canScrollLeft}
+              className={`h-10 w-10 rounded-full border flex items-center justify-center text-white transition-all ${
+                canScrollLeft
+                  ? "border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25"
+                  : "border-white/5 bg-white/[0.02] text-white/20 cursor-default"
+              }`}
               aria-label="Anterior"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -45,7 +68,12 @@ export function EventCarousel({
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="h-10 w-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+              disabled={!canScrollRight}
+              className={`h-10 w-10 rounded-full border flex items-center justify-center text-white transition-all ${
+                canScrollRight
+                  ? "border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25"
+                  : "border-white/5 bg-white/[0.02] text-white/20 cursor-default"
+              }`}
               aria-label="Seguinte"
             >
               <ChevronRight className="h-5 w-5" />
@@ -64,10 +92,10 @@ export function EventCarousel({
         </div>
 
         {href && (
-          <div className="mt-4 sm:hidden">
-            <a href={href} className="text-sm font-semibold text-[#5ec8f8] hover:text-[#00a0e3]">
+          <div className="mt-5 sm:hidden">
+            <Link href={href} className="text-sm font-bold text-[#5ec8f8] hover:text-[#00a0e3] transition-colors">
               {linkLabel} →
-            </a>
+            </Link>
           </div>
         )}
       </div>
